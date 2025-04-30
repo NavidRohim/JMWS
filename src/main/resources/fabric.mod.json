@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "jm_server_test",
+  "version": "${version}",
+  "name": "JM Server Test",
+  "description": "Proof of concept for JM Server (Built-in waypoint cloud)",
+  "authors": [
+    "Navid Rohim"
+  ],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/jm_server_test/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "me.brynview.navidrohim.jm_server_test.client.JMServerTestClient"
+    ],
+    "main": [
+      "me.brynview.navidrohim.jm_server_test.JMServerTest"
+    ],
+    "journeymap": [
+      "me.brynview.navidrohim.jm_server_test.client.plugin.IClientPluginJMTest"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
