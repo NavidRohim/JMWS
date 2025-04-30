@@ -14,7 +14,7 @@ public class DebugItemClass extends Item {
 
     @Override
     public ActionResult use(World world, PlayerEntity player, Hand hand) {
-        JMServerTest.LOGGER.debug("TODO: test and implement waypoint fetching");
+        JMServerTest.LOGGER.info("TODO: test and implement waypoint fetching");
         return ActionResult.SUCCESS;
     }
 }

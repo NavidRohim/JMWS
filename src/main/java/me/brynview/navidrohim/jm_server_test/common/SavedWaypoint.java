@@ -1,8 +1,7 @@
-package me.brynview.navidrohim.jm_server_test.client.plugin;
+package me.brynview.navidrohim.jm_server_test.common;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import me.brynview.navidrohim.jm_server_test.JMServerTest;
+import me.brynview.navidrohim.jm_server_test.client.plugin.WaypointPayload;
 
 import java.util.Map;
 
@@ -17,13 +16,14 @@ public class SavedWaypoint {
     String ix;
     String iy;
     String iz;
+    String dim;
 
-    SavedWaypoint(WaypointPayload payload) {
+    public SavedWaypoint(WaypointPayload payload) {
 
         this.rawPacketData = payload.jsonData();
         this.rawJsonData = payload.getJsonData();
 
-        this.playerUUID = this.rawJsonData.get("player_uuid");
+        this.playerUUID = this.rawJsonData.get("uuid");
         this.name = this.rawJsonData.get("name");
 
         JMServerTest.LOGGER.debug(this.rawPacketData);
@@ -31,6 +31,7 @@ public class SavedWaypoint {
         this.ix = this.rawJsonData.get("x");
         this.iy = this.rawJsonData.get("y");
         this.iz = this.rawJsonData.get("z");
+        this.dim = this.rawJsonData.get("d");
     }
 
     public String getWaypointName() {
@@ -50,6 +51,9 @@ public class SavedWaypoint {
     }
     public Integer getWaypointZ() {
         return Integer.getInteger(this.iz);
+    }
+    public String getDimensionString() {
+        return this.dim;
     }
 
     public Map<String, String> getRawJsonData() {

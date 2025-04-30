@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jm_server_test.client.plugin;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.brynview.navidrohim.jm_server_test.JMServerTest;
+import me.brynview.navidrohim.jm_server_test.common.SavedWaypoint;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
@@ -35,7 +36,6 @@ public record WaypointPayload(String jsonData) implements CustomPayload {
 
         try {
             waypointData = jsonMap.readValue(jsonData, Map.class);
-            waypointData.replace("data", jsonMap.readValue((String) waypointData.get("data"), Map.class).toString());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -46,6 +46,8 @@ public record WaypointPayload(String jsonData) implements CustomPayload {
     public SavedWaypoint getSavedWaypoint() {
         return new SavedWaypoint(this);
     }
+
+
 
 }
 
