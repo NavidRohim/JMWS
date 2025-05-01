@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jm_server_test.client.plugin;
+package me.brynview.navidrohim.jm_server_test.client.payloads;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,19 +12,18 @@ import net.minecraft.util.Identifier;
 import java.util.HashMap;
 import java.util.Map;
 
-public record WaypointPayload(String jsonData) implements CustomPayload {
+public record WaypointPayloadOutbound(String jsonData) implements CustomPayload {
 
     public static final Identifier packetIdentifier = Identifier.of(JMServerTest.MODID, "waypoint_send");
-    public static final CustomPayload.Id<WaypointPayload> ID = new CustomPayload.Id<>(packetIdentifier);
-    public static final PacketCodec<RegistryByteBuf, WaypointPayload> CODEC = PacketCodec.ofStatic(
+    public static final CustomPayload.Id<WaypointPayloadOutbound> ID = new CustomPayload.Id<>(packetIdentifier);
+    public static final PacketCodec<RegistryByteBuf, WaypointPayloadOutbound> CODEC = PacketCodec.ofStatic(
             (buf, waypoint) -> {
                 buf.writeString(waypoint.jsonData);
             },
             buf -> {
-                return new WaypointPayload(buf.readString(32767));
+                return new WaypointPayloadOutbound(buf.readString(32767));
             }
     );
-
     @Override
     public Id<? extends CustomPayload> getId() {
         return ID;
@@ -35,7 +34,7 @@ public record WaypointPayload(String jsonData) implements CustomPayload {
         Map<String, String> waypointData = new HashMap<>();
 
         try {
-            waypointData = jsonMap.readValue(jsonData, Map.class);
+            waypointData = jsonMap.readValue(this.jsonData(), Map.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -46,8 +45,5 @@ public record WaypointPayload(String jsonData) implements CustomPayload {
     public SavedWaypoint getSavedWaypoint() {
         return new SavedWaypoint(this);
     }
-
-
-
 }
 

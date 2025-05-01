@@ -1,8 +1,11 @@
 package me.brynview.navidrohim.jm_server_test.common;
 
+import com.google.gson.JsonObject;
 import me.brynview.navidrohim.jm_server_test.JMServerTest;
-import me.brynview.navidrohim.jm_server_test.client.plugin.WaypointPayload;
+import me.brynview.navidrohim.jm_server_test.client.payloads.WaypointPayloadOutbound;
+import me.brynview.navidrohim.jm_server_test.server.payloads.WaypointSendPayload;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class SavedWaypoint {
@@ -13,12 +16,24 @@ public class SavedWaypoint {
     String name;
     String playerUUID;
 
-    String ix;
-    String iy;
-    String iz;
+    Integer ix;
+    Integer iy;
+    Integer iz;
     String dim;
 
-    public SavedWaypoint(WaypointPayload payload) {
+    public SavedWaypoint(JsonObject payload) {
+
+        this.rawPacketData = payload.toString();
+        this.playerUUID = payload.get("uuid").getAsString();
+        this.name = payload.get("name").getAsString();
+
+        this.ix = payload.get("x").getAsInt();
+        this.iy = payload.get("y").getAsInt();
+        this.iz = payload.get("z").getAsInt();
+        this.dim = payload.get("d").getAsString();
+    }
+
+    public SavedWaypoint(WaypointPayloadOutbound payload) {
 
         this.rawPacketData = payload.jsonData();
         this.rawJsonData = payload.getJsonData();
@@ -26,11 +41,9 @@ public class SavedWaypoint {
         this.playerUUID = this.rawJsonData.get("uuid");
         this.name = this.rawJsonData.get("name");
 
-        JMServerTest.LOGGER.debug(this.rawPacketData);
-
-        this.ix = this.rawJsonData.get("x");
-        this.iy = this.rawJsonData.get("y");
-        this.iz = this.rawJsonData.get("z");
+        this.ix = Integer.getInteger(rawJsonData.get("x"));
+        this.iy = Integer.getInteger(rawJsonData.get("y"));
+        this.iz = Integer.getInteger(rawJsonData.get("z"));
         this.dim = this.rawJsonData.get("d");
     }
 
@@ -44,13 +57,13 @@ public class SavedWaypoint {
 
     // Coordinates
     public Integer getWaypointX() {
-        return Integer.getInteger(this.ix);
+        return this.ix;
     }
     public Integer getWaypointY() {
-        return Integer.getInteger(this.iy);
+        return this.iy;
     }
     public Integer getWaypointZ() {
-        return Integer.getInteger(this.iz);
+        return this.iz;
     }
     public String getDimensionString() {
         return this.dim;

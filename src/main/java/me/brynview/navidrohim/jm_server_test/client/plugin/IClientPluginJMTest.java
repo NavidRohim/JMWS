@@ -2,6 +2,8 @@ package me.brynview.navidrohim.jm_server_test.client.plugin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import journeymap.api.v2.client.IClientPlugin;
 import journeymap.api.v2.client.JourneyMapPlugin;
 import journeymap.api.v2.client.IClientAPI;
@@ -9,16 +11,25 @@ import journeymap.api.v2.common.event.CommonEventRegistry;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
+import journeymap.api.v2.common.waypoint.WaypointFactory;
 import me.brynview.navidrohim.jm_server_test.JMServerTest;
+import me.brynview.navidrohim.jm_server_test.client.payloads.WaypointPayloadOutbound;
+import me.brynview.navidrohim.jm_server_test.common.SavedWaypoint;
+import me.brynview.navidrohim.jm_server_test.common.utils.RandomShit;
+import me.brynview.navidrohim.jm_server_test.server.payloads.WaypointSendPayload;
 import me.brynview.navidrohim.jm_server_test.server.util.WaypointIOInterface;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
+import net.minidev.json.JSONObject;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
 
 @JourneyMapPlugin(apiVersion = "2.0.0")
 public class IClientPluginJMTest implements IClientPlugin
@@ -58,7 +69,7 @@ public class IClientPluginJMTest implements IClientPlugin
                     throw new RuntimeException(e);
                 }
 
-                WaypointPayload payload = new WaypointPayload(json);
+                WaypointPayloadOutbound payload = new WaypointPayloadOutbound(json);
                 ClientPlayNetworking.send(payload);
             }
             case DELETED -> {
@@ -106,4 +117,30 @@ public class IClientPluginJMTest implements IClientPlugin
     {
         return JMServerTest.MODID;
     }
+
+    public static void HandlePacket(WaypointSendPayload waypointPayload, ClientPlayNetworking.Context context) {
+        List<? extends Waypoint> waypoints = INSTANCE.jmAPI.getAllWaypoints();
+        for (Waypoint wp : waypoints) {
+            INSTANCE.jmAPI.removeWaypoint(JMServerTest.MODID, wp);
+        }
+
+        List<SavedWaypoint> savedWaypoints = waypointPayload.getSavedWaypoints();
+        for (SavedWaypoint savedWaypoint : savedWaypoints) {
+            JMServerTest.LOGGER.info(savedWaypoint.getWaypointX());
+            Waypoint waypointObj = WaypointFactory.createClientWaypoint(
+                    JMServerTest.MODID,
+                    BlockPos.ofFloored(savedWaypoint.getWaypointX(),
+                            savedWaypoint.getWaypointY(),
+                            savedWaypoint.getWaypointZ()),
+                    savedWaypoint.getDimensionString(),
+                    true);
+
+            waypointObj.setName(savedWaypoint.getWaypointName());
+            INSTANCE.jmAPI.addWaypoint(JMServerTest.MODID, waypointObj);
+        }
+
+
+
+    }
+
 }
