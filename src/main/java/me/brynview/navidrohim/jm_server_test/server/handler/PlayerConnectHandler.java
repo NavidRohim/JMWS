@@ -6,6 +6,7 @@ import me.brynview.navidrohim.jm_server_test.server.payloads.WaypointSendPayload
 import me.brynview.navidrohim.jm_server_test.server.util.WaypointIOInterface;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minidev.json.JSONObject;
@@ -28,6 +29,7 @@ public class PlayerConnectHandler {
             }
 
             WaypointSendPayload waypointPayloadOutbound = new WaypointSendPayload(jsonWaypointPayloadArray.toJSONString());
+
             ServerPlayNetworking.send(serverPlayNetworkHandler.player, waypointPayloadOutbound);
 
         } catch (IOException ioe) {
