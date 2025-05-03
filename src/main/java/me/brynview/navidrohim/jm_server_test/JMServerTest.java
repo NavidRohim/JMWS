@@ -40,7 +40,7 @@ import java.util.TimerTask;
 public class JMServerTest implements ModInitializer {
 
     public static final String MODID = "jm_server_test";
-    public static final String VERSION = "0.0.4";
+    public static final String VERSION = "0.0.5";
     public static final Logger LOGGER = LogManager.getFormatterLogger(MODID);
 
     @Override
@@ -76,6 +76,8 @@ public class JMServerTest implements ModInitializer {
                 jsonWaypointPayloadArray.put(String.valueOf(i), jsonWaypointFileString);
             }
             WaypointSendPayload waypointPayloadOutbound = new WaypointSendPayload(jsonWaypointPayloadArray.toJSONString());
+
+            JMServerTest.LOGGER.info("Sending data to client");
             ServerPlayNetworking.send(serverPlayNetworkHandler.player, waypointPayloadOutbound);
 
 

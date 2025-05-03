@@ -2,8 +2,6 @@ package me.brynview.navidrohim.jm_server_test.client.plugin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import journeymap.api.v2.client.IClientPlugin;
 import journeymap.api.v2.client.JourneyMapPlugin;
 import journeymap.api.v2.client.IClientAPI;
@@ -15,20 +13,21 @@ import journeymap.api.v2.common.waypoint.WaypointFactory;
 import me.brynview.navidrohim.jm_server_test.JMServerTest;
 import me.brynview.navidrohim.jm_server_test.client.payloads.WaypointPayloadOutbound;
 import me.brynview.navidrohim.jm_server_test.common.SavedWaypoint;
-import me.brynview.navidrohim.jm_server_test.common.utils.RandomShit;
 import me.brynview.navidrohim.jm_server_test.server.payloads.WaypointSendPayload;
 import me.brynview.navidrohim.jm_server_test.server.util.WaypointIOInterface;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minidev.json.JSONObject;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 @JourneyMapPlugin(apiVersion = "2.0.0")
@@ -73,7 +72,6 @@ public class IClientPluginJMTest implements IClientPlugin
                 ClientPlayNetworking.send(payload);
             }
             case DELETED -> {
-                // todo; send delete packet to server
                 boolean deletedWaypoint = WaypointIOInterface.deleteWaypoint(WaypointIOInterface.getWaypointFilename(waypointEvent, player.getUuid()));
 
                 if (deletedWaypoint) {
@@ -121,13 +119,17 @@ public class IClientPluginJMTest implements IClientPlugin
     }
 
     public void HandlePacket(WaypointSendPayload waypointPayload, ClientPlayNetworking.Context context) {
-        JMServerTest.LOGGER.info(waypointPayload);
+
         List<? extends Waypoint> waypoints = INSTANCE.jmAPI.getAllWaypoints();
+        AtomicBoolean justJoined = new AtomicBoolean(true);
+
         for (Waypoint wp : waypoints) {
-            //INSTANCE.jmAPI.removeWaypoint(JMServerTest.MODID, wp);
+            INSTANCE.jmAPI.removeWaypoint(JMServerTest.MODID, wp);
         }
 
         List<SavedWaypoint> savedWaypoints = waypointPayload.getSavedWaypoints();
+        List<Waypoint> waypointArray = new ArrayList<>();
+
         for (SavedWaypoint savedWaypoint : savedWaypoints) {
             JMServerTest.LOGGER.info(savedWaypoint.getWaypointName());
             Waypoint waypointObj = WaypointFactory.createClientWaypoint(
@@ -139,12 +141,18 @@ public class IClientPluginJMTest implements IClientPlugin
                     true);
 
             waypointObj.setName(savedWaypoint.getWaypointName());
+            waypointArray.add(waypointObj);
 
-            INSTANCE.jmAPI.addWaypoint(JMServerTest.MODID, waypointObj);
+
+        ClientTickEvents.END_CLIENT_TICK.register((minecraftClient) -> {
+            if (context.client().world != null && justJoined.get()) {
+                justJoined.set(false);
+                JMServerTest.LOGGER.info("Setting up; " + waypointArray);
+                for (Waypoint wp : waypointArray) {
+                    INSTANCE.jmAPI.addWaypoint(JMServerTest.MODID, wp);
+                }
+            }
+        });
         }
-
-
-
     }
-
 }
