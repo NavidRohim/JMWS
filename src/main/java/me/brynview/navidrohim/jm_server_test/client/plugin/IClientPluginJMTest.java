@@ -73,6 +73,7 @@ public class IClientPluginJMTest implements IClientPlugin
                 ClientPlayNetworking.send(payload);
             }
             case DELETED -> {
+                // todo; send delete packet to server
                 boolean deletedWaypoint = WaypointIOInterface.deleteWaypoint(WaypointIOInterface.getWaypointFilename(waypointEvent, player.getUuid()));
 
                 if (deletedWaypoint) {
@@ -105,6 +106,7 @@ public class IClientPluginJMTest implements IClientPlugin
     {
         this.jmAPI = jmAPI;
         CommonEventRegistry.WAYPOINT_EVENT.subscribe(JMServerTest.MODID, this::WaypointCreationHandler);
+        ClientPlayNetworking.registerGlobalReceiver(WaypointSendPayload.ID, this::HandlePacket);
 
         JMServerTest.LOGGER.info("Initialized " + getClass().getName());
     }
@@ -118,15 +120,16 @@ public class IClientPluginJMTest implements IClientPlugin
         return JMServerTest.MODID;
     }
 
-    public static void HandlePacket(WaypointSendPayload waypointPayload, ClientPlayNetworking.Context context) {
+    public void HandlePacket(WaypointSendPayload waypointPayload, ClientPlayNetworking.Context context) {
+        JMServerTest.LOGGER.info(waypointPayload);
         List<? extends Waypoint> waypoints = INSTANCE.jmAPI.getAllWaypoints();
         for (Waypoint wp : waypoints) {
-            INSTANCE.jmAPI.removeWaypoint(JMServerTest.MODID, wp);
+            //INSTANCE.jmAPI.removeWaypoint(JMServerTest.MODID, wp);
         }
 
         List<SavedWaypoint> savedWaypoints = waypointPayload.getSavedWaypoints();
         for (SavedWaypoint savedWaypoint : savedWaypoints) {
-            JMServerTest.LOGGER.info(savedWaypoint.getWaypointX());
+            JMServerTest.LOGGER.info(savedWaypoint.getWaypointName());
             Waypoint waypointObj = WaypointFactory.createClientWaypoint(
                     JMServerTest.MODID,
                     BlockPos.ofFloored(savedWaypoint.getWaypointX(),
@@ -136,6 +139,7 @@ public class IClientPluginJMTest implements IClientPlugin
                     true);
 
             waypointObj.setName(savedWaypoint.getWaypointName());
+
             INSTANCE.jmAPI.addWaypoint(JMServerTest.MODID, waypointObj);
         }
 

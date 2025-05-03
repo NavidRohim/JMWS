@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import me.brynview.navidrohim.jm_server_test.JMServerTest;
 import me.brynview.navidrohim.jm_server_test.client.payloads.WaypointPayloadOutbound;
 import me.brynview.navidrohim.jm_server_test.common.SavedWaypoint;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
@@ -21,12 +22,17 @@ public record WaypointSendPayload(String waypointJsonPayload) implements CustomP
 
     public static final Identifier packetIdentifier = Identifier.of(JMServerTest.MODID, "waypoint_outbound");
     public static final Id<WaypointSendPayload> ID = new Id<>(packetIdentifier);
-    public static final PacketCodec<RegistryByteBuf, WaypointSendPayload> CODEC = PacketCodec.ofStatic(
-            (buf, waypoint) -> {
-                buf.writeString(waypoint.waypointJsonPayload);
-            },
-            buf -> new WaypointSendPayload(buf.readString(32767))
-    );
+    public static final PacketCodec<RegistryByteBuf, WaypointSendPayload> CODEC = PacketCodec.of(WaypointSendPayload::write, WaypointSendPayload::new);
+
+
+    public WaypointSendPayload(PacketByteBuf buf) {
+        this(buf.readString());
+    }
+
+    public void write(RegistryByteBuf registryByteBuf) {
+        registryByteBuf.writeString(waypointJsonPayload);
+    }
+
     @Override
     public Id<? extends CustomPayload> getId() {
         return ID;
@@ -48,8 +54,6 @@ public record WaypointSendPayload(String waypointJsonPayload) implements CustomP
         List<SavedWaypoint> waypoints = new ArrayList<>();
         for (Map.Entry<String, String> wpEntry : this.getJsonData().entrySet()) {
             JsonObject waypointJson = JsonParser.parseString(getJsonData().get(wpEntry.getKey())).getAsJsonObject();
-
-            JMServerTest.LOGGER.info("LOKKKO > > " + waypointJson.get("x").getAsString());
 
             SavedWaypoint wp = new SavedWaypoint(waypointJson);
             waypoints.add(wp);
