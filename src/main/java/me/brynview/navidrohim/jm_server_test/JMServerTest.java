@@ -40,7 +40,7 @@ import java.util.TimerTask;
 public class JMServerTest implements ModInitializer {
 
     public static final String MODID = "jm_server_test";
-    public static final String VERSION = "0.0.3";
+    public static final String VERSION = "0.0.4";
     public static final Logger LOGGER = LogManager.getFormatterLogger(MODID);
 
     @Override
