@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jm_server_test.client.plugin;
 
+import ca.weblite.objc.Client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import journeymap.api.v2.client.IClientPlugin;
@@ -23,6 +24,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,65 +48,82 @@ public class IClientPluginJMTest implements IClientPlugin
     public static IClientPluginJMTest getInstance() {
         return INSTANCE;
     }
+
+    private void deleteAction(String waypointFilename) {
+        String jsonPacketData = JsonStaticHelper.makeDeleteJson(waypointFilename, false);
+        WaypointActionPayload waypointActionPayload = new WaypointActionPayload(jsonPacketData);
+
+        ClientPlayNetworking.send(waypointActionPayload);
+    }
+
+    private void updateAction()
+    {
+        JMServerTest.LOGGER.info(jmAPI.getAllWaypoints());
+    }
+
+    private void createAction(String waypointName, Vector3d positionVector, String dimension, ClientPlayerEntity player) {
+        Map<String, String> WaypointData = getStringStringMap(waypointName, positionVector, dimension, player);
+        ObjectMapper jsonObjectMapper = new ObjectMapper();
+        String json = null;
+        try {
+            json = jsonObjectMapper.writeValueAsString(WaypointData);
+        } catch (JsonProcessingException e) {
+            JMServerTest.LOGGER.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+        RegisterUserPayload payload = new RegisterUserPayload(json);
+        ClientPlayNetworking.send(payload);
+    }
+
     void WaypointCreationHandler(WaypointEvent waypointEvent) {
 
         // todo: add handing for destruction of waypoints
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        MinecraftClient minecraftClient = MinecraftClient.getInstance();
 
         if (player == null) {
             return;
         }
-        Map<String, String> WaypointData = getStringStringMap(waypointEvent, player);
 
+        String waypointFilename = WaypointIOInterface.getWaypointFilename(waypointEvent, player.getUuid());
         switch (waypointEvent.getContext()) {
 
-            case CREATE -> {
-                ObjectMapper jsonObjectMapper = new ObjectMapper();
-                String json = null;
-                try {
-                    json = jsonObjectMapper.writeValueAsString(WaypointData);
-                } catch (JsonProcessingException e) {
-                    JMServerTest.LOGGER.error(e.getMessage());
-                    throw new RuntimeException(e);
-                }
-
-                RegisterUserPayload payload = new RegisterUserPayload(json);
-                ClientPlayNetworking.send(payload);
+            case CREATE ->
+            {
+                this.createAction(waypointEvent.waypoint.getName(), new Vector3d(
+                        waypointEvent.waypoint.getX(),
+                        waypointEvent.waypoint.getY(),
+                        waypointEvent.waypoint.getZ()
+                ), waypointEvent.waypoint.getPrimaryDimension(), player);
             }
-            case DELETED -> {
-                String waypointFilename = WaypointIOInterface.getWaypointFilename(waypointEvent, player.getUuid());
-                String jsonPacketData = JsonStaticHelper.makeDeleteJson(waypointFilename);
-                WaypointActionPayload waypointActionPayload = new WaypointActionPayload(jsonPacketData);
-
-                ClientPlayNetworking.send(waypointActionPayload);
-                /*
-                if (deletedWaypoint) {
-                    minecraftClient.inGameHud.getChatHud().addMessage(Text.of("Removed waypoint from server."));
-                } else {
-                    minecraftClient.inGameHud.getChatHud().addMessage(Text.of("Waypoint was not deleted server-side. Ignoring."));
-                }*/
-
-            } case UPDATE -> {
-                // todo
+            case DELETED ->
+            {
+                this.deleteAction(waypointFilename);
+            }
+            case UPDATE ->
+            {
+                this.updateAction();
             }
         }
 
     }
 
-    private static @NotNull Map<String, String> getStringStringMap(WaypointEvent waypointEvent, ClientPlayerEntity player) {
+    private static @NotNull Map<String, String> getStringStringMap(String waypointName, Vector3d positionVector, String dimension, ClientPlayerEntity player) {
         Map<String, String> WaypointData = new HashMap<>();
-        Waypoint waypoint = waypointEvent.waypoint;
 
-        WaypointData.put("name", waypoint.getName());
+        WaypointData.put("name", waypointName);
         WaypointData.put("uuid", player.getUuid().toString());
-        WaypointData.put("x", String.valueOf(waypoint.getX()));
-        WaypointData.put("y", String.valueOf(waypoint.getY()));
-        WaypointData.put("z", String.valueOf(waypoint.getZ()));
-        WaypointData.put("d", waypoint.getPrimaryDimension());
+        WaypointData.put("x", String.valueOf(positionVector.x));
+        WaypointData.put("y", String.valueOf(positionVector.y));
+        WaypointData.put("z", String.valueOf(positionVector.z));
+        WaypointData.put("d", dimension);
 
         return WaypointData;
     }
+
+
+
+
 
     @Override
     public void initialize(final IClientAPI jmAPI)
@@ -130,12 +149,21 @@ public class IClientPluginJMTest implements IClientPlugin
         List<? extends Waypoint> waypoints = INSTANCE.jmAPI.getAllWaypoints();
         AtomicBoolean justJoined = new AtomicBoolean(true);
 
-        for (Waypoint wp : waypoints) {
-            INSTANCE.jmAPI.removeWaypoint(JMServerTest.MODID, wp);
-        }
-
         List<SavedWaypoint> savedWaypoints = waypointPayload.getSavedWaypoints();
         List<Waypoint> waypointArray = new ArrayList<>();
+
+        ClientTickEvents.END_CLIENT_TICK.register((minecraftClient) -> {
+            if (context.client().world != null && justJoined.get()) {
+                for (Waypoint wp : waypoints) {
+                    INSTANCE.jmAPI.removeWaypoint(JMServerTest.MODID, wp);
+                }
+                for (Waypoint wp : waypointArray) {
+                    INSTANCE.jmAPI.addWaypoint(JMServerTest.MODID, wp);
+                }
+
+                justJoined.set(false);
+            }
+        });
 
         for (SavedWaypoint savedWaypoint : savedWaypoints) {
             JMServerTest.LOGGER.info(savedWaypoint.getWaypointName());
@@ -150,15 +178,6 @@ public class IClientPluginJMTest implements IClientPlugin
             waypointObj.setName(savedWaypoint.getWaypointName());
             waypointArray.add(waypointObj);
 
-
-        ClientTickEvents.END_CLIENT_TICK.register((minecraftClient) -> {
-            if (context.client().world != null && justJoined.get()) {
-                justJoined.set(false);
-                for (Waypoint wp : waypointArray) {
-                    INSTANCE.jmAPI.addWaypoint(JMServerTest.MODID, wp);
-                }
-            }
-        });
         }
     }
 }

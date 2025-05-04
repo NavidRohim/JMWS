@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import me.brynview.navidrohim.jm_server_test.common.payloads.RegisterUserPayload;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class SavedWaypoint {
 
@@ -48,8 +49,8 @@ public class SavedWaypoint {
         return this.name;
     }
 
-    public String getPlayerUUID() {
-        return this.playerUUID;
+    public UUID getPlayerUUID() {
+        return UUID.fromString(this.playerUUID);
     }
 
     // Coordinates

@@ -4,6 +4,7 @@ import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import me.brynview.navidrohim.jm_server_test.JMServerTest;
 import me.brynview.navidrohim.jm_server_test.common.SavedWaypoint;
+import org.joml.Vector3d;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -18,31 +19,39 @@ import java.util.stream.Stream;
 
 public class WaypointIOInterface {
     public static String getWaypointFilename(SavedWaypoint savedWaypoint) {
-        return "./jmserver/" +
-                savedWaypoint.getRawJsonData().get("x") +
-                "_" +
-                savedWaypoint.getRawJsonData().get("y") +
-                "_" +
-                savedWaypoint.getRawJsonData().get("z") +
-                "_" +
-                savedWaypoint.getWaypointName() +
-                "_" +
-                savedWaypoint.getPlayerUUID() +
-                ".json";
+
+        Vector3d waypointLocationVector = new Vector3d(
+                Double.parseDouble(savedWaypoint.getRawJsonData().get("x")),
+                Double.parseDouble(savedWaypoint.getRawJsonData().get("y")),
+                Double.parseDouble(savedWaypoint.getRawJsonData().get("z"))
+        );
+        return _getWaypointFromRaw(waypointLocationVector, savedWaypoint.getWaypointName(), savedWaypoint.getPlayerUUID());
+
     }
 
     public static String getWaypointFilename(WaypointEvent waypointEvent, UUID uuID) {
         Waypoint wp = waypointEvent.getWaypoint();
+        Vector3d waypointLocationVector = new Vector3d(wp.getX(), wp.getY(), wp.getZ());
+
+        return _getWaypointFromRaw(waypointLocationVector, wp.getName(), uuID);
+    }
+
+    public static String getWaypointFilename(Waypoint waypoint, UUID uuID) {
+        Vector3d waypointLocationVector = new Vector3d(waypoint.getX(), waypoint.getY(), waypoint.getZ());
+        return _getWaypointFromRaw(waypointLocationVector, waypoint.getName(), uuID);
+    }
+
+    private static String _getWaypointFromRaw(Vector3d coordVector, String waypointName, UUID playerUUID) {
         return "./jmserver/" +
-                wp.getX() +
+                coordVector.x +
                 "_" +
-                wp.getY() +
+                coordVector.y +
                 "_" +
-                wp.getZ() +
+                coordVector.z +
                 "_" +
-                wp.getName() +
+                waypointName +
                 "_" +
-                uuID.toString() +
+                playerUUID +
                 ".json";
     }
 

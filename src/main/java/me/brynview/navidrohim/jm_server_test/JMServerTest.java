@@ -58,6 +58,8 @@ public class JMServerTest implements ModInitializer {
         String command = packetJson.asMap().get("command").getAsString();
         List<JsonElement> arguments = packetJson.asMap().get("arguments").getAsJsonArray().asList();
 
+        JMServerTest.LOGGER.info("COMMAND: " + command);
+
         switch (command) {
             case "delete" -> {
                 boolean result = WaypointIOInterface.deleteWaypoint(arguments.getFirst().getAsString());
@@ -66,10 +68,10 @@ public class JMServerTest implements ModInitializer {
                 } else {
                     context.player().sendMessage(Text.of("Could not delete waypoint on server. Ignoring."));
                 }
-                // todo: confirmation?
             }
             case "update" -> {
-                // todo
+                Object filename = arguments;
+                JMServerTest.LOGGER.info("WAYPOINT IDNE; " + filename);
             }
         }
     }
