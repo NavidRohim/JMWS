@@ -1,6 +1,5 @@
 package me.brynview.navidrohim.jm_server_test.client.plugin;
 
-import ca.weblite.objc.Client;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import journeymap.api.v2.client.IClientPlugin;
@@ -38,6 +37,7 @@ public class IClientPluginJMTest implements IClientPlugin
 {
     // API reference
     private IClientAPI jmAPI = null;
+    private List<Waypoint> waypointIndex = new ArrayList<>();
 
     private static IClientPluginJMTest INSTANCE;
 
@@ -86,10 +86,12 @@ public class IClientPluginJMTest implements IClientPlugin
         }
 
         String waypointFilename = WaypointIOInterface.getWaypointFilename(waypointEvent, player.getUuid());
+
         switch (waypointEvent.getContext()) {
 
             case CREATE ->
             {
+                waypointIndex.add(waypointEvent.waypoint);
                 this.createAction(waypointEvent.waypoint.getName(), new Vector3d(
                         waypointEvent.waypoint.getX(),
                         waypointEvent.waypoint.getY(),
@@ -98,11 +100,13 @@ public class IClientPluginJMTest implements IClientPlugin
             }
             case DELETED ->
             {
+                waypointIndex.remove(waypointEvent.waypoint);
                 this.deleteAction(waypointFilename);
             }
             case UPDATE ->
             {
-                this.updateAction();
+
+                //this.updateAction();
             }
         }
 
