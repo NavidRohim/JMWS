@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jm_server_test.client.payloads;
+package me.brynview.navidrohim.jm_server_test.common.payloads;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,16 +12,16 @@ import net.minecraft.util.Identifier;
 import java.util.HashMap;
 import java.util.Map;
 
-public record WaypointPayloadOutbound(String jsonData) implements CustomPayload {
+public record RegisterUserPayload(String jsonData) implements CustomPayload {
 
     public static final Identifier packetIdentifier = Identifier.of(JMServerTest.MODID, "waypoint_send");
-    public static final CustomPayload.Id<WaypointPayloadOutbound> ID = new CustomPayload.Id<>(packetIdentifier);
-    public static final PacketCodec<RegistryByteBuf, WaypointPayloadOutbound> CODEC = PacketCodec.ofStatic(
+    public static final CustomPayload.Id<RegisterUserPayload> ID = new CustomPayload.Id<>(packetIdentifier);
+    public static final PacketCodec<RegistryByteBuf, RegisterUserPayload> CODEC = PacketCodec.ofStatic(
             (buf, waypoint) -> {
                 buf.writeString(waypoint.jsonData);
             },
             buf -> {
-                return new WaypointPayloadOutbound(buf.readString(32767));
+                return new RegisterUserPayload(buf.readString(32767));
             }
     );
     @Override

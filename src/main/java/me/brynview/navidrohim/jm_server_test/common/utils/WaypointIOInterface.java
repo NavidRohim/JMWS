@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jm_server_test.server.util;
+package me.brynview.navidrohim.jm_server_test.common.utils;
 
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;

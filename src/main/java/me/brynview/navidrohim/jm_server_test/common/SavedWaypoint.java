@@ -1,11 +1,8 @@
 package me.brynview.navidrohim.jm_server_test.common;
 
 import com.google.gson.JsonObject;
-import me.brynview.navidrohim.jm_server_test.JMServerTest;
-import me.brynview.navidrohim.jm_server_test.client.payloads.WaypointPayloadOutbound;
-import me.brynview.navidrohim.jm_server_test.server.payloads.WaypointSendPayload;
+import me.brynview.navidrohim.jm_server_test.common.payloads.RegisterUserPayload;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class SavedWaypoint {
@@ -33,7 +30,7 @@ public class SavedWaypoint {
         this.dim = payload.get("d").getAsString();
     }
 
-    public SavedWaypoint(WaypointPayloadOutbound payload) {
+    public SavedWaypoint(RegisterUserPayload payload) {
 
         this.rawPacketData = payload.jsonData();
         this.rawJsonData = payload.getJsonData();

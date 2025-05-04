@@ -2,11 +2,10 @@ package me.brynview.navidrohim.jm_server_test.server.handler;
 
 import me.brynview.navidrohim.jm_server_test.JMServerTest;
 
-import me.brynview.navidrohim.jm_server_test.server.payloads.WaypointSendPayload;
-import me.brynview.navidrohim.jm_server_test.server.util.WaypointIOInterface;
+import me.brynview.navidrohim.jm_server_test.common.payloads.UserWaypointPayload;
+import me.brynview.navidrohim.jm_server_test.common.utils.WaypointIOInterface;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minidev.json.JSONObject;
@@ -28,7 +27,7 @@ public class PlayerConnectHandler {
                 jsonWaypointPayloadArray.put(String.valueOf(i), jsonWaypointFileString);
             }
 
-            WaypointSendPayload waypointPayloadOutbound = new WaypointSendPayload(jsonWaypointPayloadArray.toJSONString());
+            UserWaypointPayload waypointPayloadOutbound = new UserWaypointPayload(jsonWaypointPayloadArray.toJSONString());
 
             ServerPlayNetworking.send(serverPlayNetworkHandler.player, waypointPayloadOutbound);
 

@@ -1,11 +1,10 @@
-package me.brynview.navidrohim.jm_server_test.server.payloads;
+package me.brynview.navidrohim.jm_server_test.common.payloads;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import me.brynview.navidrohim.jm_server_test.JMServerTest;
-import me.brynview.navidrohim.jm_server_test.client.payloads.WaypointPayloadOutbound;
 import me.brynview.navidrohim.jm_server_test.common.SavedWaypoint;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
@@ -14,18 +13,17 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public record WaypointSendPayload(String waypointJsonPayload) implements CustomPayload {
+public record UserWaypointPayload(String waypointJsonPayload) implements CustomPayload {
 
     public static final Identifier packetIdentifier = Identifier.of(JMServerTest.MODID, "waypoint_outbound");
-    public static final Id<WaypointSendPayload> ID = new Id<>(packetIdentifier);
-    public static final PacketCodec<RegistryByteBuf, WaypointSendPayload> CODEC = PacketCodec.of(WaypointSendPayload::write, WaypointSendPayload::new);
+    public static final Id<UserWaypointPayload> ID = new Id<>(packetIdentifier);
+    public static final PacketCodec<RegistryByteBuf, UserWaypointPayload> CODEC = PacketCodec.of(UserWaypointPayload::write, UserWaypointPayload::new);
 
 
-    public WaypointSendPayload(PacketByteBuf buf) {
+    public UserWaypointPayload(PacketByteBuf buf) {
         this(buf.readString());
     }
 

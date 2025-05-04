@@ -11,15 +11,16 @@ import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import me.brynview.navidrohim.jm_server_test.JMServerTest;
-import me.brynview.navidrohim.jm_server_test.client.payloads.WaypointPayloadOutbound;
+import me.brynview.navidrohim.jm_server_test.common.payloads.RegisterUserPayload;
 import me.brynview.navidrohim.jm_server_test.common.SavedWaypoint;
-import me.brynview.navidrohim.jm_server_test.server.payloads.WaypointSendPayload;
-import me.brynview.navidrohim.jm_server_test.server.util.WaypointIOInterface;
+import me.brynview.navidrohim.jm_server_test.common.payloads.UserWaypointPayload;
+import me.brynview.navidrohim.jm_server_test.common.payloads.WaypointActionPayload;
+import me.brynview.navidrohim.jm_server_test.common.utils.JsonStaticHelper;
+import me.brynview.navidrohim.jm_server_test.common.utils.WaypointIOInterface;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
@@ -54,11 +55,11 @@ public class IClientPluginJMTest implements IClientPlugin
         if (player == null) {
             return;
         }
+        Map<String, String> WaypointData = getStringStringMap(waypointEvent, player);
 
         switch (waypointEvent.getContext()) {
-            case CREATE -> {
-                Map<String, String> WaypointData = getStringStringMap(waypointEvent, player);
 
+            case CREATE -> {
                 ObjectMapper jsonObjectMapper = new ObjectMapper();
                 String json = null;
                 try {
@@ -68,18 +69,24 @@ public class IClientPluginJMTest implements IClientPlugin
                     throw new RuntimeException(e);
                 }
 
-                WaypointPayloadOutbound payload = new WaypointPayloadOutbound(json);
+                RegisterUserPayload payload = new RegisterUserPayload(json);
                 ClientPlayNetworking.send(payload);
             }
             case DELETED -> {
-                boolean deletedWaypoint = WaypointIOInterface.deleteWaypoint(WaypointIOInterface.getWaypointFilename(waypointEvent, player.getUuid()));
+                String waypointFilename = WaypointIOInterface.getWaypointFilename(waypointEvent, player.getUuid());
+                String jsonPacketData = JsonStaticHelper.makeDeleteJson(waypointFilename);
+                WaypointActionPayload waypointActionPayload = new WaypointActionPayload(jsonPacketData);
 
+                ClientPlayNetworking.send(waypointActionPayload);
+                /*
                 if (deletedWaypoint) {
                     minecraftClient.inGameHud.getChatHud().addMessage(Text.of("Removed waypoint from server."));
                 } else {
                     minecraftClient.inGameHud.getChatHud().addMessage(Text.of("Waypoint was not deleted server-side. Ignoring."));
-                }
+                }*/
 
+            } case UPDATE -> {
+                // todo
             }
         }
 
@@ -104,7 +111,7 @@ public class IClientPluginJMTest implements IClientPlugin
     {
         this.jmAPI = jmAPI;
         CommonEventRegistry.WAYPOINT_EVENT.subscribe(JMServerTest.MODID, this::WaypointCreationHandler);
-        ClientPlayNetworking.registerGlobalReceiver(WaypointSendPayload.ID, this::HandlePacket);
+        ClientPlayNetworking.registerGlobalReceiver(UserWaypointPayload.ID, this::HandlePacket);
 
         JMServerTest.LOGGER.info("Initialized " + getClass().getName());
     }
@@ -118,7 +125,7 @@ public class IClientPluginJMTest implements IClientPlugin
         return JMServerTest.MODID;
     }
 
-    public void HandlePacket(WaypointSendPayload waypointPayload, ClientPlayNetworking.Context context) {
+    public void HandlePacket(UserWaypointPayload waypointPayload, ClientPlayNetworking.Context context) {
 
         List<? extends Waypoint> waypoints = INSTANCE.jmAPI.getAllWaypoints();
         AtomicBoolean justJoined = new AtomicBoolean(true);
@@ -147,7 +154,6 @@ public class IClientPluginJMTest implements IClientPlugin
         ClientTickEvents.END_CLIENT_TICK.register((minecraftClient) -> {
             if (context.client().world != null && justJoined.get()) {
                 justJoined.set(false);
-                JMServerTest.LOGGER.info("Setting up; " + waypointArray);
                 for (Waypoint wp : waypointArray) {
                     INSTANCE.jmAPI.addWaypoint(JMServerTest.MODID, wp);
                 }
