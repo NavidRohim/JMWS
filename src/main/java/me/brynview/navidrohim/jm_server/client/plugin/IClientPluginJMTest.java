@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jm_server_test.client.plugin;
+package me.brynview.navidrohim.jm_server.client.plugin;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -9,11 +9,11 @@ import journeymap.api.v2.common.event.CommonEventRegistry;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
-import me.brynview.navidrohim.jm_server_test.JMServerTest;
-import me.brynview.navidrohim.jm_server_test.common.SavedWaypoint;
-import me.brynview.navidrohim.jm_server_test.common.payloads.WaypointActionPayload;
-import me.brynview.navidrohim.jm_server_test.common.utils.JsonStaticHelper;
-import me.brynview.navidrohim.jm_server_test.common.utils.WaypointIOInterface;
+import me.brynview.navidrohim.jm_server.JMServerTest;
+import me.brynview.navidrohim.jm_server.common.SavedWaypoint;
+import me.brynview.navidrohim.jm_server.common.payloads.WaypointActionPayload;
+import me.brynview.navidrohim.jm_server.common.utils.JsonStaticHelper;
+import me.brynview.navidrohim.jm_server.common.utils.WaypointIOInterface;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
@@ -109,8 +109,15 @@ public class IClientPluginJMTest implements IClientPlugin
         ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
     }
 
+    public static void updateWaypoints(MinecraftClient minecraftClient) {
+        if (minecraftClient.player != null) {
+            minecraftClient.player.sendMessage(Text.of("Updating waypoint status"), true);
+        }
+        ClientPlayNetworking.send(new WaypointActionPayload(JsonStaticHelper.makeWaypointRequestJson()));
+    }
+
     private void handleTick(MinecraftClient minecraftClient) {
-        if (minecraftClient.world != null && minecraftClient.player != null) {
+        if (minecraftClient.world != null) {
             if (!oldWorld) {
                 tickCounterUpdateThreshold = 40;
                 oldWorld = true;
@@ -118,9 +125,7 @@ public class IClientPluginJMTest implements IClientPlugin
 
                 tickCounter++;
                 if (tickCounter >= tickCounterUpdateThreshold) {
-                    minecraftClient.player.sendMessage(Text.of("Updating waypoint status"), true);
-                    ClientPlayNetworking.send(new WaypointActionPayload(JsonStaticHelper.makeWaypointRequestJson()));
-
+                    updateWaypoints(minecraftClient);
                     tickCounter = 0;
                     tickCounterUpdateThreshold = 1300;
                 }

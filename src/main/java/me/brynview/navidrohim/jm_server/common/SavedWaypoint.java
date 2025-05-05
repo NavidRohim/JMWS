@@ -1,7 +1,7 @@
-package me.brynview.navidrohim.jm_server_test.common;
+package me.brynview.navidrohim.jm_server.common;
 
 import com.google.gson.JsonObject;
-import me.brynview.navidrohim.jm_server_test.common.payloads.RegisterUserPayload;
+import me.brynview.navidrohim.jm_server.common.payloads.RegisterUserPayload;
 
 import java.util.Map;
 import java.util.UUID;

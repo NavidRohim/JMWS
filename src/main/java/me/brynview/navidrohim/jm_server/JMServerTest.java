@@ -1,12 +1,12 @@
-package me.brynview.navidrohim.jm_server_test;
+package me.brynview.navidrohim.jm_server;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import me.brynview.navidrohim.jm_server_test.common.payloads.WaypointActionPayload;
-import me.brynview.navidrohim.jm_server_test.common.utils.JsonStaticHelper;
-import me.brynview.navidrohim.jm_server_test.items.DebugItem;
-import me.brynview.navidrohim.jm_server_test.common.payloads.RegisterUserPayload;
-import me.brynview.navidrohim.jm_server_test.common.utils.WaypointIOInterface;
+import me.brynview.navidrohim.jm_server.common.payloads.WaypointActionPayload;
+import me.brynview.navidrohim.jm_server.common.utils.JsonStaticHelper;
+import me.brynview.navidrohim.jm_server.items.DebugItem;
+import me.brynview.navidrohim.jm_server.common.payloads.RegisterUserPayload;
+import me.brynview.navidrohim.jm_server.common.utils.WaypointIOInterface;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -23,8 +23,8 @@ import java.util.List;
 
 public class JMServerTest implements ModInitializer {
 
-    public static final String MODID = "jm_server_test";
-    public static final String VERSION = "0.0.6";
+    public static final String MODID = "jm_server";
+    public static final String VERSION = "0.0.7";
     public static final Logger LOGGER = LogManager.getFormatterLogger(MODID);
 
     @Override
@@ -54,16 +54,23 @@ public class JMServerTest implements ModInitializer {
             case "delete" -> {
                 boolean result = WaypointIOInterface.deleteWaypoint(arguments.getFirst().getAsString());
                 if (result) {
-                    context.player().sendMessage(Text.of("Deleted successfully."));
+                    context.player().sendMessageToClient(Text.of(Text.translatable("message.jm_server.deletion_success")), true);
                 } else {
-                    context.player().sendMessage(Text.of("Could not delete waypoint on server. Ignoring."));
+                    context.player().sendMessageToClient(Text.translatable("message.jm_server.deletion_failure"), true);
                 }
             }
 
-            case "update" -> {}
             case "create" -> {
                 JsonObject jsonCreationData = arguments.getFirst().getAsJsonObject();
-                WaypointIOInterface.createWaypoint(jsonCreationData, context.player().getUuid());
+                boolean waypointCreationSuccess = WaypointIOInterface.createWaypoint(jsonCreationData, context.player().getUuid());
+
+                if (waypointCreationSuccess) {
+                    context.player().sendMessageToClient(Text.translatable("message.jm_server.creation_success"), true);
+                } else {
+                    context.player().sendMessageToClient(Text.translatable("message.jm_server.creation_failure"), false);
+                }
+
+
             }
             case "request" -> {
                 try {

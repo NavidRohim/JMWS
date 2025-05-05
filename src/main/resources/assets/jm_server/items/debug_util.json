@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jm_server_test:item/debug_util"
+    "model": "jm_server:item/debug_util"
   }
 }

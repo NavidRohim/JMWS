@@ -1,7 +1,7 @@
-package me.brynview.navidrohim.jm_server_test.client;
+package me.brynview.navidrohim.jm_server.client;
 
-import me.brynview.navidrohim.jm_server_test.client.plugin.IClientPluginJMTest;
-import me.brynview.navidrohim.jm_server_test.common.payloads.WaypointActionPayload;
+import me.brynview.navidrohim.jm_server.client.plugin.IClientPluginJMTest;
+import me.brynview.navidrohim.jm_server.common.payloads.WaypointActionPayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 

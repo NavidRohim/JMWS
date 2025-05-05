@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "jm_server_test",
+  "id": "jm_server",
   "version": "${version}",
-  "name": "JM Server Test",
-  "description": "Proof of concept for JM Server (Built-in waypoint cloud)",
+  "name": "JourneyMap Server",
+  "description": "Makes it so JourneyMap Waypoints are stored on the server.",
   "authors": [
     "Navid Rohim"
   ],
@@ -13,13 +13,13 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "me.brynview.navidrohim.jm_server_test.client.JMServerTestClient"
+      "me.brynview.navidrohim.jm_server.client.JMServerTestClient"
     ],
     "main": [
-      "me.brynview.navidrohim.jm_server_test.JMServerTest"
+      "me.brynview.navidrohim.jm_server.JMServerTest"
     ],
     "journeymap": [
-      "me.brynview.navidrohim.jm_server_test.client.plugin.IClientPluginJMTest"
+      "me.brynview.navidrohim.jm_server.client.plugin.IClientPluginJMTest"
     ]
   },
   "depends": {

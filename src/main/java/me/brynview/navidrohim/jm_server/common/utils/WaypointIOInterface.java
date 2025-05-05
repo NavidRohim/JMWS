@@ -1,10 +1,11 @@
-package me.brynview.navidrohim.jm_server_test.common.utils;
+package me.brynview.navidrohim.jm_server.common.utils;
 
 import com.google.gson.JsonObject;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
-import me.brynview.navidrohim.jm_server_test.JMServerTest;
-import me.brynview.navidrohim.jm_server_test.common.SavedWaypoint;
+import me.brynview.navidrohim.jm_server.JMServerTest;
+import me.brynview.navidrohim.jm_server.common.SavedWaypoint;
+import org.apache.commons.io.FileExistsException;
 import org.joml.Vector3d;
 
 import java.io.File;
@@ -19,23 +20,6 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 public class WaypointIOInterface {
-    public static String getWaypointFilename(SavedWaypoint savedWaypoint) {
-
-        Vector3d waypointLocationVector = new Vector3d(
-                Double.parseDouble(savedWaypoint.getRawJsonData().get("x")),
-                Double.parseDouble(savedWaypoint.getRawJsonData().get("y")),
-                Double.parseDouble(savedWaypoint.getRawJsonData().get("z"))
-        );
-        return _getWaypointFromRaw(waypointLocationVector, savedWaypoint.getWaypointName(), savedWaypoint.getPlayerUUID());
-
-    }
-
-    public static String getWaypointFilename(WaypointEvent waypointEvent, UUID uuID) {
-        Waypoint wp = waypointEvent.getWaypoint();
-        Vector3d waypointLocationVector = new Vector3d(wp.getX(), wp.getY(), wp.getZ());
-
-        return _getWaypointFromRaw(waypointLocationVector, wp.getName(), uuID);
-    }
 
     public static String getWaypointFilename(Waypoint waypoint, UUID uuID) {
         Vector3d waypointLocationVector = new Vector3d(waypoint.getX(), waypoint.getY(), waypoint.getZ());
@@ -56,7 +40,7 @@ public class WaypointIOInterface {
                 ".json";
     }
 
-    public static void createWaypoint(JsonObject jsonObject, UUID playerUUID) {
+    public static boolean createWaypoint(JsonObject jsonObject, UUID playerUUID) {
         JsonObject pos = jsonObject.getAsJsonObject().getAsJsonObject("pos");
         String waypointFilePath = WaypointIOInterface._getWaypointFromRaw(new Vector3d(
                 pos.get("x").getAsInt(),
@@ -67,23 +51,19 @@ public class WaypointIOInterface {
                 playerUUID
 
         );
-        Path waypointPathObj = Paths.get(waypointFilePath);
-
         try {
+
+            Path waypointPathObj = Paths.get(waypointFilePath);
 
             Files.createFile(waypointPathObj);
             FileWriter waypointFileWriter = new FileWriter(waypointFilePath);
             waypointFileWriter.write(jsonObject.toString());
             waypointFileWriter.close();
 
-        } catch (IOException e) {
-            JMServerTest.LOGGER.error(e.getMessage());
-            throw new RuntimeException(e);
+            return true;
+        } catch (IOException ioException) {
+            return false;
         }
-    }
-    public static boolean deleteWaypoint(SavedWaypoint savedWaypoint) {
-        File waypointFileObj = new File(WaypointIOInterface.getWaypointFilename(savedWaypoint));
-        return waypointFileObj.delete();
     }
 
     public static boolean deleteWaypoint(String filename) {

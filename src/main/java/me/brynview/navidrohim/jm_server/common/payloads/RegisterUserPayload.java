@@ -1,9 +1,9 @@
-package me.brynview.navidrohim.jm_server_test.common.payloads;
+package me.brynview.navidrohim.jm_server.common.payloads;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.brynview.navidrohim.jm_server_test.JMServerTest;
-import me.brynview.navidrohim.jm_server_test.common.SavedWaypoint;
+import me.brynview.navidrohim.jm_server.JMServerTest;
+import me.brynview.navidrohim.jm_server.common.SavedWaypoint;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;

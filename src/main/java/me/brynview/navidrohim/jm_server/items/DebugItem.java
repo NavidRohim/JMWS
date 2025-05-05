@@ -1,6 +1,6 @@
-package me.brynview.navidrohim.jm_server_test.items;
+package me.brynview.navidrohim.jm_server.items;
 
-import me.brynview.navidrohim.jm_server_test.JMServerTest;
+import me.brynview.navidrohim.jm_server.JMServerTest;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroups;
