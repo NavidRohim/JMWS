@@ -56,8 +56,12 @@ public class IClientPluginJMTest implements IClientPlugin
         ClientPlayNetworking.send(waypointActionPayload);
     }
 
-    private void updateAction(Waypoint waypoint, Waypoint newWaypoint, ClientPlayerEntity player)
+    private void updateAction(Waypoint waypoint, @NotNull Waypoint newWaypoint, ClientPlayerEntity player)
     {
+        JMServerTest.LOGGER.info("Old waypoint from GUID layer -> " + waypoint);
+        JMServerTest.LOGGER.info("GUID layer -> " + updateGUIDtranslator);
+        JMServerTest.LOGGER.info("Using GUID layer -> " + newWaypoint.getGuid());
+        JMServerTest.LOGGER.info("Full new waypoint data -> " + newWaypoint);
         this.deleteAction(WaypointIOInterface.getWaypointFilename(waypoint, UUID.fromString(player.getUuid().toString())));
         updateGUIDtranslator.put(newWaypoint.getGuid(), newWaypoint);
         this.createAction(newWaypoint.getName(),
@@ -86,8 +90,6 @@ public class IClientPluginJMTest implements IClientPlugin
     }
 
     void WaypointCreationHandler(WaypointEvent waypointEvent) {
-
-        // todo: add handing for destruction of waypoints
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
 
         if (player == null) {
@@ -100,9 +102,7 @@ public class IClientPluginJMTest implements IClientPlugin
 
             case CREATE ->
             {
-                JMServerTest.LOGGER.info("update index; " + updateGUIDtranslator.keySet() + "\nadding guid; " + waypointEvent.waypoint.getGuid());
                 updateGUIDtranslator.put(waypointEvent.waypoint.getGuid(), waypointEvent.waypoint);
-                JMServerTest.LOGGER.info("new index; " + updateGUIDtranslator.keySet());
                 this.createAction(waypointEvent.waypoint.getName(), new Vector3d(
                         waypointEvent.waypoint.getX(),
                         waypointEvent.waypoint.getY(),
@@ -115,7 +115,7 @@ public class IClientPluginJMTest implements IClientPlugin
             }
             case UPDATE ->
             {
-                this.updateAction(updateGUIDtranslator.get(waypointEvent.waypoint.getGuid().toString()), waypointEvent.waypoint, player);
+                this.updateAction(updateGUIDtranslator.get(waypointEvent.waypoint.getGuid()), waypointEvent.waypoint, player);
             }
         }
 
@@ -133,10 +133,6 @@ public class IClientPluginJMTest implements IClientPlugin
 
         return WaypointData;
     }
-
-
-
-
 
     @Override
     public void initialize(final IClientAPI jmAPI)
@@ -158,33 +154,13 @@ public class IClientPluginJMTest implements IClientPlugin
     }
 
     public void HandlePacket(UserWaypointPayload waypointPayload, ClientPlayNetworking.Context context) {
-
-        List<? extends Waypoint> waypoints = INSTANCE.jmAPI.getAllWaypoints();
-        AtomicBoolean justJoined = new AtomicBoolean(true);
-
         List<SavedWaypoint> savedWaypoints = waypointPayload.getSavedWaypoints();
-        List<Waypoint> waypointArray = new ArrayList<>();
 
-        ClientTickEvents.END_CLIENT_TICK.register((minecraftClient) -> {
-            if (context.client().world != null && justJoined.get()) {
-                INSTANCE.jmAPI.removeAllWaypoints(JMServerTest.MODID);
-                for (Waypoint wpAdd : waypointArray) {
-                    INSTANCE.jmAPI.addWaypoint(JMServerTest.MODID, wpAdd);
-                }
-
-                List<? extends Waypoint> refreshedWaypoints = INSTANCE.jmAPI.getAllWaypoints();
-                INSTANCE.updateGUIDtranslator.clear();
-
-                for (Waypoint waypoint : refreshedWaypoints) {
-                    JMServerTest.LOGGER.info(waypoint.getName() + " guid-> " + waypoint.getGuid());
-                    INSTANCE.updateGUIDtranslator.put(waypoint.getGuid(), waypoint);
-                }
-                justJoined.set(false);
-            }
-        });
+        INSTANCE.updateGUIDtranslator.clear();
+        INSTANCE.jmAPI.removeAllWaypoints(JMServerTest.MODID);
 
         for (SavedWaypoint savedWaypoint : savedWaypoints) {
-            JMServerTest.LOGGER.info(savedWaypoint.getWaypointName());
+
             Waypoint waypointObj = WaypointFactory.createClientWaypoint(
                     JMServerTest.MODID,
                     BlockPos.ofFloored(savedWaypoint.getWaypointX(),
@@ -194,8 +170,11 @@ public class IClientPluginJMTest implements IClientPlugin
                     true);
 
             waypointObj.setName(savedWaypoint.getWaypointName());
-            waypointArray.add(waypointObj);
 
+            INSTANCE.jmAPI.addWaypoint(JMServerTest.MODID, waypointObj);
+            INSTANCE.updateGUIDtranslator.put(waypointObj.getGuid(), waypointObj);
+
+            JMServerTest.LOGGER.info("Added > " + waypointObj);
         }
     }
 }
