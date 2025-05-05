@@ -25,9 +25,9 @@ public class SavedWaypoint {
         this.playerUUID = payload.get("uuid").getAsString();
         this.name = payload.get("name").getAsString();
 
-        this.ix = payload.get("x").getAsInt();
-        this.iy = payload.get("y").getAsInt();
-        this.iz = payload.get("z").getAsInt();
+        this.ix = (int) payload.get("x").getAsDouble();
+        this.iy = (int) payload.get("y").getAsDouble();
+        this.iz = (int) payload.get("z").getAsDouble();
         this.dim = payload.get("d").getAsString();
     }
 

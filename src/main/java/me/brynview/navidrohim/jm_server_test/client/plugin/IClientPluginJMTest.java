@@ -18,17 +18,17 @@ import me.brynview.navidrohim.jm_server_test.common.payloads.WaypointActionPaylo
 import me.brynview.navidrohim.jm_server_test.common.utils.JsonStaticHelper;
 import me.brynview.navidrohim.jm_server_test.common.utils.WaypointIOInterface;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3d;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -37,8 +37,7 @@ public class IClientPluginJMTest implements IClientPlugin
 {
     // API reference
     private IClientAPI jmAPI = null;
-    private List<Waypoint> waypointIndex = new ArrayList<>();
-
+    private final HashMap<String, Waypoint> updateGUIDtranslator = new HashMap<>();
     private static IClientPluginJMTest INSTANCE;
 
     public IClientPluginJMTest() {
@@ -50,15 +49,25 @@ public class IClientPluginJMTest implements IClientPlugin
     }
 
     private void deleteAction(String waypointFilename) {
+
         String jsonPacketData = JsonStaticHelper.makeDeleteJson(waypointFilename, false);
         WaypointActionPayload waypointActionPayload = new WaypointActionPayload(jsonPacketData);
 
         ClientPlayNetworking.send(waypointActionPayload);
     }
 
-    private void updateAction()
+    private void updateAction(Waypoint waypoint, Waypoint newWaypoint, ClientPlayerEntity player)
     {
-        JMServerTest.LOGGER.info(jmAPI.getAllWaypoints());
+        this.deleteAction(WaypointIOInterface.getWaypointFilename(waypoint, UUID.fromString(player.getUuid().toString())));
+        updateGUIDtranslator.put(newWaypoint.getGuid(), newWaypoint);
+        this.createAction(newWaypoint.getName(),
+                new Vector3d(
+                        newWaypoint.getX(),
+                        newWaypoint.getY(),
+                        newWaypoint.getZ()
+                ),
+                newWaypoint.getPrimaryDimension(),
+                player);
     }
 
     private void createAction(String waypointName, Vector3d positionVector, String dimension, ClientPlayerEntity player) {
@@ -91,7 +100,9 @@ public class IClientPluginJMTest implements IClientPlugin
 
             case CREATE ->
             {
-                waypointIndex.add(waypointEvent.waypoint);
+                JMServerTest.LOGGER.info("update index; " + updateGUIDtranslator.keySet() + "\nadding guid; " + waypointEvent.waypoint.getGuid());
+                updateGUIDtranslator.put(waypointEvent.waypoint.getGuid(), waypointEvent.waypoint);
+                JMServerTest.LOGGER.info("new index; " + updateGUIDtranslator.keySet());
                 this.createAction(waypointEvent.waypoint.getName(), new Vector3d(
                         waypointEvent.waypoint.getX(),
                         waypointEvent.waypoint.getY(),
@@ -100,13 +111,11 @@ public class IClientPluginJMTest implements IClientPlugin
             }
             case DELETED ->
             {
-                waypointIndex.remove(waypointEvent.waypoint);
                 this.deleteAction(waypointFilename);
             }
             case UPDATE ->
             {
-
-                //this.updateAction();
+                this.updateAction(updateGUIDtranslator.get(waypointEvent.waypoint.getGuid().toString()), waypointEvent.waypoint, player);
             }
         }
 
@@ -158,13 +167,18 @@ public class IClientPluginJMTest implements IClientPlugin
 
         ClientTickEvents.END_CLIENT_TICK.register((minecraftClient) -> {
             if (context.client().world != null && justJoined.get()) {
-                for (Waypoint wp : waypoints) {
-                    INSTANCE.jmAPI.removeWaypoint(JMServerTest.MODID, wp);
-                }
-                for (Waypoint wp : waypointArray) {
-                    INSTANCE.jmAPI.addWaypoint(JMServerTest.MODID, wp);
+                INSTANCE.jmAPI.removeAllWaypoints(JMServerTest.MODID);
+                for (Waypoint wpAdd : waypointArray) {
+                    INSTANCE.jmAPI.addWaypoint(JMServerTest.MODID, wpAdd);
                 }
 
+                List<? extends Waypoint> refreshedWaypoints = INSTANCE.jmAPI.getAllWaypoints();
+                INSTANCE.updateGUIDtranslator.clear();
+
+                for (Waypoint waypoint : refreshedWaypoints) {
+                    JMServerTest.LOGGER.info(waypoint.getName() + " guid-> " + waypoint.getGuid());
+                    INSTANCE.updateGUIDtranslator.put(waypoint.getGuid(), waypoint);
+                }
                 justJoined.set(false);
             }
         });
