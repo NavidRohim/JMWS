@@ -1,6 +1,5 @@
 package me.brynview.navidrohim.jm_server_test.items;
 
-import me.brynview.navidrohim.jm_server_test.JMServerTest;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.util.ActionResult;
@@ -14,7 +13,6 @@ public class DebugItemClass extends Item {
 
     @Override
     public ActionResult use(World world, PlayerEntity player, Hand hand) {
-        JMServerTest.LOGGER.info("TODO: test and implement waypoint fetching");
         return ActionResult.SUCCESS;
     }
 }

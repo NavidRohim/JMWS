@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jm_server_test.common.payloads;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.brynview.navidrohim.jm_server_test.JMServerTest;
 import me.brynview.navidrohim.jm_server_test.common.utils.JsonStaticHelper;
@@ -8,6 +9,8 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
+
+import java.util.List;
 
 public record WaypointActionPayload(String jsonAction) implements CustomPayload {
 
@@ -30,5 +33,13 @@ public record WaypointActionPayload(String jsonAction) implements CustomPayload 
 
     public JsonObject getJsonObject() {
         return JsonStaticHelper.getJsonObjectFromJsonString(jsonAction);
+    }
+
+    public String command() {
+        return this.getJsonObject().asMap().get("command").getAsString();
+    }
+
+    public List<JsonElement> arguments() {
+        return this.getJsonObject().asMap().get("arguments").getAsJsonArray().asList();
     }
 }

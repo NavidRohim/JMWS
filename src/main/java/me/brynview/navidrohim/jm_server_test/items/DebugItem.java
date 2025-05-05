@@ -13,7 +13,7 @@ import net.minecraft.util.Identifier;
 
 import java.util.function.Function;
 public class DebugItem {
-    public static final Item SUSPICIOUS_SUBSTANCE = register("debug_dick", DebugItemClass::new, new Item.Settings());
+    public static final Item SUSPICIOUS_SUBSTANCE = register("debug_util", DebugItemClass::new, new Item.Settings());
 
     public static void initialize() {
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS)

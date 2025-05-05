@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jm_server_test.common.utils;
 
+import com.google.gson.JsonObject;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import me.brynview.navidrohim.jm_server_test.JMServerTest;
@@ -55,15 +56,24 @@ public class WaypointIOInterface {
                 ".json";
     }
 
-    public static void createWaypoint(SavedWaypoint savedWaypoint) {
-        String waypointFilePath = WaypointIOInterface.getWaypointFilename(savedWaypoint);
+    public static void createWaypoint(JsonObject jsonObject, UUID playerUUID) {
+        JsonObject pos = jsonObject.getAsJsonObject().getAsJsonObject("pos");
+        String waypointFilePath = WaypointIOInterface._getWaypointFromRaw(new Vector3d(
+                pos.get("x").getAsInt(),
+                pos.get("y").getAsInt(),
+                pos.get("z").getAsInt()
+                ),
+                jsonObject.get("name").getAsString(),
+                playerUUID
+
+        );
         Path waypointPathObj = Paths.get(waypointFilePath);
 
         try {
 
             Files.createFile(waypointPathObj);
             FileWriter waypointFileWriter = new FileWriter(waypointFilePath);
-            waypointFileWriter.write(savedWaypoint.getRawPacketData());
+            waypointFileWriter.write(jsonObject.toString());
             waypointFileWriter.close();
 
         } catch (IOException e) {

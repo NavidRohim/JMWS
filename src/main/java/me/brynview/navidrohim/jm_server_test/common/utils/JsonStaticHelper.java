@@ -3,42 +3,39 @@ package me.brynview.navidrohim.jm_server_test.common.utils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import journeymap.api.v2.common.waypoint.Waypoint;
-import me.brynview.navidrohim.jm_server_test.JMServerTest;
-import net.minidev.json.JSONObject;
 
 import java.util.*;
 
 public class JsonStaticHelper {
 
-    public static String makeDeleteJson(String waypointFilename, boolean removeAll) {
-        if (!removeAll) {
-            return "{\n" +
-                    "  \"command\": \"delete\",\n" +
-                    "  \"arguments\": [\n" +
-                    "  \"" + waypointFilename + "\"]\n" +
-                    "}";
-        } else {
-            return "{\n" +
-                    "  \"command\": \"update\",\n" +
-                    "  \"arguments\": []\n" +
-                    "}";
-        }
-
+    public static String makeDeleteJson(String waypointFilename) {
+        return "{\n" +
+                "  \"command\": \"delete\",\n" +
+                "  \"arguments\": [\n" +
+                "  \"" + waypointFilename + "\"]\n" +
+                "}";
     }
-    public static String makeUpdateJson(String oldName, List<? extends Waypoint> waypointList, UUID uuid) {
 
-        HashMap<String, Object> hashtable = new HashMap<>();
-        List<String> waypointNameList = new ArrayList<>();
+    public static String makeWaypointRequestJson() {
+        return """
+                {
+                  "command": "request",
+                  "arguments": []
+                }""";
+    }
 
-        for (Waypoint waypoint : waypointList) {
-            waypointNameList.add(WaypointIOInterface.getWaypointFilename(waypoint, uuid));
-        }
-        waypointNameList.add(oldName);
+    public static String makeCreationRequestJson(Waypoint waypoint) {
+        return "{\n" +
+                "  \"command\": \"create\",\n" +
+                "  \"arguments\": [" + waypoint + "]\n" +
+                "}";
+    }
 
-        hashtable.put("command", "update");
-        hashtable.put("arguments", waypointNameList);
-        return new JSONObject(hashtable).toString();
-
+    public static String makeCreationRequestResponseJson(HashMap<String, String> jsonArray) {
+        return "{\n" +
+                "  \"command\": \"creation_response\",\n" +
+                "  \"arguments\": [" + jsonArray + "]\n" +
+                "}";
     }
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {
         return JsonParser.parseString(jsonString).getAsJsonObject();

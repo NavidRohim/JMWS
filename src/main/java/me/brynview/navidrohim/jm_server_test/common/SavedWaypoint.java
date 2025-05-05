@@ -19,16 +19,24 @@ public class SavedWaypoint {
     Integer iz;
     String dim;
 
-    public SavedWaypoint(JsonObject payload) {
+    Integer colour;
+    String universalIdentifier;
+
+    public SavedWaypoint(JsonObject payload, UUID playerUUID) {
 
         this.rawPacketData = payload.toString();
-        this.playerUUID = payload.get("uuid").getAsString();
+        this.playerUUID = playerUUID.toString();
         this.name = payload.get("name").getAsString();
 
-        this.ix = (int) payload.get("x").getAsDouble();
-        this.iy = (int) payload.get("y").getAsDouble();
-        this.iz = (int) payload.get("z").getAsDouble();
-        this.dim = payload.get("d").getAsString();
+        JsonObject pos = payload.get("pos").getAsJsonObject();
+
+        this.ix = (int) pos.get("x").getAsDouble();
+        this.iy = (int) pos.get("y").getAsDouble();
+        this.iz = (int) pos.get("z").getAsDouble();
+        this.dim = payload.get("dimensions").getAsJsonArray().get(0).getAsString();
+
+        this.colour = payload.get("color").getAsInt();
+        this.universalIdentifier = payload.get("customData").getAsString();
     }
 
     public SavedWaypoint(RegisterUserPayload payload) {
@@ -66,7 +74,12 @@ public class SavedWaypoint {
     public String getDimensionString() {
         return this.dim;
     }
-
+    public Integer getWaypointColour() {
+        return this.colour;
+    }
+    public String getUniversalIdentifier() {
+        return this.universalIdentifier;
+    }
     public Map<String, String> getRawJsonData() {
         return rawJsonData;
     }

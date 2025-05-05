@@ -1,35 +1,28 @@
 package me.brynview.navidrohim.jm_server_test.client.plugin;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import journeymap.api.v2.client.IClientPlugin;
 import journeymap.api.v2.client.JourneyMapPlugin;
 import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.common.event.CommonEventRegistry;
 import journeymap.api.v2.common.event.common.WaypointEvent;
-
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import me.brynview.navidrohim.jm_server_test.JMServerTest;
-import me.brynview.navidrohim.jm_server_test.common.payloads.RegisterUserPayload;
 import me.brynview.navidrohim.jm_server_test.common.SavedWaypoint;
-import me.brynview.navidrohim.jm_server_test.common.payloads.UserWaypointPayload;
 import me.brynview.navidrohim.jm_server_test.common.payloads.WaypointActionPayload;
 import me.brynview.navidrohim.jm_server_test.common.utils.JsonStaticHelper;
 import me.brynview.navidrohim.jm_server_test.common.utils.WaypointIOInterface;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import org.jetbrains.annotations.NotNull;
-import org.joml.Vector3d;
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 
 @JourneyMapPlugin(apiVersion = "2.0.0")
@@ -37,8 +30,12 @@ public class IClientPluginJMTest implements IClientPlugin
 {
     // API reference
     private IClientAPI jmAPI = null;
-    private final HashMap<String, Waypoint> updateGUIDtranslator = new HashMap<>();
     private static IClientPluginJMTest INSTANCE;
+
+    private final HashMap<String, Waypoint> waypointIdentifierMap = new HashMap<>();
+    private int tickCounterUpdateThreshold = 1300;
+    private int tickCounter = 0;
+    private boolean oldWorld = false;
 
     public IClientPluginJMTest() {
         INSTANCE = this;
@@ -48,45 +45,34 @@ public class IClientPluginJMTest implements IClientPlugin
         return INSTANCE;
     }
 
-    private void deleteAction(String waypointFilename) {
+    private void deleteAction(Waypoint waypoint, ClientPlayerEntity player) {
 
-        String jsonPacketData = JsonStaticHelper.makeDeleteJson(waypointFilename, false);
+        String waypointFilename = WaypointIOInterface.getWaypointFilename(waypoint, player.getUuid());
+
+        waypointIdentifierMap.remove(waypoint.getCustomData());
+        String jsonPacketData = JsonStaticHelper.makeDeleteJson(waypointFilename);
         WaypointActionPayload waypointActionPayload = new WaypointActionPayload(jsonPacketData);
 
         ClientPlayNetworking.send(waypointActionPayload);
     }
 
-    private void updateAction(Waypoint waypoint, @NotNull Waypoint newWaypoint, ClientPlayerEntity player)
+    private void updateAction(Waypoint waypoint, ClientPlayerEntity player)
     {
-        JMServerTest.LOGGER.info("Old waypoint from GUID layer -> " + waypoint);
-        JMServerTest.LOGGER.info("GUID layer -> " + updateGUIDtranslator);
-        JMServerTest.LOGGER.info("Using GUID layer -> " + newWaypoint.getGuid());
-        JMServerTest.LOGGER.info("Full new waypoint data -> " + newWaypoint);
-        this.deleteAction(WaypointIOInterface.getWaypointFilename(waypoint, UUID.fromString(player.getUuid().toString())));
-        updateGUIDtranslator.put(newWaypoint.getGuid(), newWaypoint);
-        this.createAction(newWaypoint.getName(),
-                new Vector3d(
-                        newWaypoint.getX(),
-                        newWaypoint.getY(),
-                        newWaypoint.getZ()
-                ),
-                newWaypoint.getPrimaryDimension(),
-                player);
+        String persistentWaypointID = waypoint.getCustomData();
+        Waypoint oldWaypointReference = waypointIdentifierMap.get(persistentWaypointID);
+
+        this.deleteAction(oldWaypointReference, player);
+        this.createAction(waypoint, player);
     }
 
-    private void createAction(String waypointName, Vector3d positionVector, String dimension, ClientPlayerEntity player) {
-        Map<String, String> WaypointData = getStringStringMap(waypointName, positionVector, dimension, player);
-        ObjectMapper jsonObjectMapper = new ObjectMapper();
-        String json = null;
-        try {
-            json = jsonObjectMapper.writeValueAsString(WaypointData);
-        } catch (JsonProcessingException e) {
-            JMServerTest.LOGGER.error(e.getMessage());
-            throw new RuntimeException(e);
-        }
+    private void createAction(Waypoint waypoint, ClientPlayerEntity player) {
 
-        RegisterUserPayload payload = new RegisterUserPayload(json);
-        ClientPlayNetworking.send(payload);
+        String waypointIdentifier = DigestUtils.sha256Hex(player.getUuid().toString() + waypoint.getGuid() + waypoint.getName());
+
+        waypointIdentifierMap.put(waypointIdentifier, waypoint);
+        waypoint.setCustomData(waypointIdentifier);
+        String creationData = JsonStaticHelper.makeCreationRequestJson(waypoint);
+        ClientPlayNetworking.send(new WaypointActionPayload(creationData));
     }
 
     void WaypointCreationHandler(WaypointEvent waypointEvent) {
@@ -96,52 +82,53 @@ public class IClientPluginJMTest implements IClientPlugin
             return;
         }
 
-        String waypointFilename = WaypointIOInterface.getWaypointFilename(waypointEvent, player.getUuid());
-
         switch (waypointEvent.getContext()) {
 
             case CREATE ->
             {
-                updateGUIDtranslator.put(waypointEvent.waypoint.getGuid(), waypointEvent.waypoint);
-                this.createAction(waypointEvent.waypoint.getName(), new Vector3d(
-                        waypointEvent.waypoint.getX(),
-                        waypointEvent.waypoint.getY(),
-                        waypointEvent.waypoint.getZ()
-                ), waypointEvent.waypoint.getPrimaryDimension(), player);
+                this.createAction(waypointEvent.waypoint, player);
             }
             case DELETED ->
             {
-                this.deleteAction(waypointFilename);
+                this.deleteAction(waypointEvent.waypoint, player);
             }
             case UPDATE ->
             {
-                this.updateAction(updateGUIDtranslator.get(waypointEvent.waypoint.getGuid()), waypointEvent.waypoint, player);
+                this.updateAction(waypointEvent.waypoint, player);
             }
         }
 
-    }
-
-    private static @NotNull Map<String, String> getStringStringMap(String waypointName, Vector3d positionVector, String dimension, ClientPlayerEntity player) {
-        Map<String, String> WaypointData = new HashMap<>();
-
-        WaypointData.put("name", waypointName);
-        WaypointData.put("uuid", player.getUuid().toString());
-        WaypointData.put("x", String.valueOf(positionVector.x));
-        WaypointData.put("y", String.valueOf(positionVector.y));
-        WaypointData.put("z", String.valueOf(positionVector.z));
-        WaypointData.put("d", dimension);
-
-        return WaypointData;
     }
 
     @Override
     public void initialize(final IClientAPI jmAPI)
     {
         this.jmAPI = jmAPI;
-        CommonEventRegistry.WAYPOINT_EVENT.subscribe(JMServerTest.MODID, this::WaypointCreationHandler);
-        ClientPlayNetworking.registerGlobalReceiver(UserWaypointPayload.ID, this::HandlePacket);
 
-        JMServerTest.LOGGER.info("Initialized " + getClass().getName());
+        CommonEventRegistry.WAYPOINT_EVENT.subscribe(JMServerTest.MODID, this::WaypointCreationHandler);
+        ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
+    }
+
+    private void handleTick(MinecraftClient minecraftClient) {
+        if (minecraftClient.world != null && minecraftClient.player != null) {
+            if (!oldWorld) {
+                tickCounterUpdateThreshold = 40;
+                oldWorld = true;
+            } else {
+
+                tickCounter++;
+                if (tickCounter >= tickCounterUpdateThreshold) {
+                    minecraftClient.player.sendMessage(Text.of("Updating waypoint status"), true);
+                    ClientPlayNetworking.send(new WaypointActionPayload(JsonStaticHelper.makeWaypointRequestJson()));
+
+                    tickCounter = 0;
+                    tickCounterUpdateThreshold = 1300;
+                }
+            }
+        } else {
+            tickCounter = 0;
+            oldWorld = false;
+        }
     }
 
     /**
@@ -153,28 +140,38 @@ public class IClientPluginJMTest implements IClientPlugin
         return JMServerTest.MODID;
     }
 
-    public void HandlePacket(UserWaypointPayload waypointPayload, ClientPlayNetworking.Context context) {
-        List<SavedWaypoint> savedWaypoints = waypointPayload.getSavedWaypoints();
+    private static List<SavedWaypoint> getSavedWaypoints(JsonObject jsonData, UUID playerUUID) {
+        List<SavedWaypoint> waypoints = new ArrayList<>();
 
-        INSTANCE.updateGUIDtranslator.clear();
-        INSTANCE.jmAPI.removeAllWaypoints(JMServerTest.MODID);
+        for (Map.Entry<String, JsonElement> wpEntry : jsonData.entrySet()) {
+            waypoints.add(new SavedWaypoint(wpEntry.getValue().getAsJsonObject(), playerUUID));
+        }
+        return waypoints;
+    }
+
+    // Handler for WaypointActionPayload
+    public static void HandlePacket(WaypointActionPayload waypointPayload, ClientPlayNetworking.Context context) {
+
+        JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy();
+        List<SavedWaypoint> savedWaypoints = IClientPluginJMTest.getSavedWaypoints(json, context.player().getUuid());
+        INSTANCE.jmAPI.removeAllWaypoints("journeymap");
 
         for (SavedWaypoint savedWaypoint : savedWaypoints) {
 
             Waypoint waypointObj = WaypointFactory.createClientWaypoint(
-                    JMServerTest.MODID,
+                    "journeymap",
                     BlockPos.ofFloored(savedWaypoint.getWaypointX(),
                             savedWaypoint.getWaypointY(),
                             savedWaypoint.getWaypointZ()),
                     savedWaypoint.getDimensionString(),
                     true);
 
+            waypointObj.setColor(savedWaypoint.getWaypointColour());
             waypointObj.setName(savedWaypoint.getWaypointName());
+            waypointObj.setCustomData(savedWaypoint.getUniversalIdentifier());
 
-            INSTANCE.jmAPI.addWaypoint(JMServerTest.MODID, waypointObj);
-            INSTANCE.updateGUIDtranslator.put(waypointObj.getGuid(), waypointObj);
-
-            JMServerTest.LOGGER.info("Added > " + waypointObj);
+            INSTANCE.waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
+            INSTANCE.jmAPI.addWaypoint("journeymap", waypointObj);
         }
     }
 }
