@@ -1,15 +1,15 @@
 package me.brynview.navidrohim.jm_server.client;
 
-import me.brynview.navidrohim.jm_server.client.plugin.IClientPluginJMTest;
+import me.brynview.navidrohim.jm_server.client.plugin.IClientPluginJM;
 import me.brynview.navidrohim.jm_server.common.payloads.WaypointActionPayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 
-public class JMServerTestClient implements ClientModInitializer {
+public class JMServerClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient()
     {
-        ClientPlayNetworking.registerGlobalReceiver(WaypointActionPayload.ID, IClientPluginJMTest::HandlePacket);
+        ClientPlayNetworking.registerGlobalReceiver(WaypointActionPayload.ID, IClientPluginJM::HandlePacket);
     }
 }

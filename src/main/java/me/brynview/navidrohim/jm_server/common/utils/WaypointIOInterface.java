@@ -1,11 +1,7 @@
 package me.brynview.navidrohim.jm_server.common.utils;
 
 import com.google.gson.JsonObject;
-import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
-import me.brynview.navidrohim.jm_server.JMServerTest;
-import me.brynview.navidrohim.jm_server.common.SavedWaypoint;
-import org.apache.commons.io.FileExistsException;
 import org.joml.Vector3d;
 
 import java.io.File;

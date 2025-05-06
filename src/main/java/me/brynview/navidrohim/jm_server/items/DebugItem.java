@@ -1,6 +1,6 @@
 package me.brynview.navidrohim.jm_server.items;
 
-import me.brynview.navidrohim.jm_server.JMServerTest;
+import me.brynview.navidrohim.jm_server.JMServer;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroups;
@@ -21,7 +21,7 @@ public class DebugItem {
     }
 
     public static Item register(String name, Function<Item.Settings, Item> itemFactory, Item.Settings settings) {
-        RegistryKey<Item> itemKey = RegistryKey.of(RegistryKeys.ITEM, Identifier.of(JMServerTest.MODID, name));
+        RegistryKey<Item> itemKey = RegistryKey.of(RegistryKeys.ITEM, Identifier.of(JMServer.MODID, name));
         // Create the item instance.
         Item item = itemFactory.apply(settings.registryKey(itemKey));
 

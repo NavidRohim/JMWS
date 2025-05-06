@@ -9,9 +9,10 @@ import journeymap.api.v2.common.event.CommonEventRegistry;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
-import me.brynview.navidrohim.jm_server.JMServerTest;
+import me.brynview.navidrohim.jm_server.JMServer;
 import me.brynview.navidrohim.jm_server.common.SavedWaypoint;
 import me.brynview.navidrohim.jm_server.common.payloads.WaypointActionPayload;
+import me.brynview.navidrohim.jm_server.common.utils.JMServerConfig;
 import me.brynview.navidrohim.jm_server.common.utils.JsonStaticHelper;
 import me.brynview.navidrohim.jm_server.common.utils.WaypointIOInterface;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -26,22 +27,26 @@ import java.util.*;
 
 
 @JourneyMapPlugin(apiVersion = "2.0.0")
-public class IClientPluginJMTest implements IClientPlugin
+public class IClientPluginJM implements IClientPlugin
 {
     // API reference
     private IClientAPI jmAPI = null;
-    private static IClientPluginJMTest INSTANCE;
+    private static IClientPluginJM INSTANCE;
 
     private final HashMap<String, Waypoint> waypointIdentifierMap = new HashMap<>();
-    private int tickCounterUpdateThreshold = 1300;
-    private int tickCounter = 0;
     private boolean oldWorld = false;
 
-    public IClientPluginJMTest() {
+    private final int tickCounterUpdateThresholdDefault = JMServer.CONFIG.updateWaypointFrequency();
+    private final boolean showAlert = JMServer.CONFIG.showAlerts();
+
+    private int tickCounterUpdateThreshold = tickCounterUpdateThresholdDefault;
+    private int tickCounter = 0;
+
+    public IClientPluginJM() {
         INSTANCE = this;
     }
 
-    public static IClientPluginJMTest getInstance() {
+    public static IClientPluginJM getInstance() {
         return INSTANCE;
     }
 
@@ -50,7 +55,7 @@ public class IClientPluginJMTest implements IClientPlugin
         String waypointFilename = WaypointIOInterface.getWaypointFilename(waypoint, player.getUuid());
 
         waypointIdentifierMap.remove(waypoint.getCustomData());
-        String jsonPacketData = JsonStaticHelper.makeDeleteJson(waypointFilename);
+        String jsonPacketData = JsonStaticHelper.makeDeleteRequestJson(waypointFilename);
         WaypointActionPayload waypointActionPayload = new WaypointActionPayload(jsonPacketData);
 
         ClientPlayNetworking.send(waypointActionPayload);
@@ -105,13 +110,13 @@ public class IClientPluginJMTest implements IClientPlugin
     {
         this.jmAPI = jmAPI;
 
-        CommonEventRegistry.WAYPOINT_EVENT.subscribe(JMServerTest.MODID, this::WaypointCreationHandler);
+        CommonEventRegistry.WAYPOINT_EVENT.subscribe(JMServer.MODID, this::WaypointCreationHandler);
         ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
     }
 
     public static void updateWaypoints(MinecraftClient minecraftClient) {
-        if (minecraftClient.player != null) {
-            minecraftClient.player.sendMessage(Text.of("Updating waypoint status"), true);
+        if (minecraftClient.player != null && getInstance().showAlert) {
+            minecraftClient.player.sendMessage(Text.translatable("message.jm_server.modified_success"), true);
         }
         ClientPlayNetworking.send(new WaypointActionPayload(JsonStaticHelper.makeWaypointRequestJson()));
     }
@@ -127,7 +132,7 @@ public class IClientPluginJMTest implements IClientPlugin
                 if (tickCounter >= tickCounterUpdateThreshold) {
                     updateWaypoints(minecraftClient);
                     tickCounter = 0;
-                    tickCounterUpdateThreshold = 1300;
+                    tickCounterUpdateThreshold = tickCounterUpdateThresholdDefault;
                 }
             }
         } else {
@@ -142,7 +147,7 @@ public class IClientPluginJMTest implements IClientPlugin
     @Override
     public String getModId()
     {
-        return JMServerTest.MODID;
+        return JMServer.MODID;
     }
 
     private static List<SavedWaypoint> getSavedWaypoints(JsonObject jsonData, UUID playerUUID) {
@@ -156,27 +161,49 @@ public class IClientPluginJMTest implements IClientPlugin
 
     // Handler for WaypointActionPayload
     public static void HandlePacket(WaypointActionPayload waypointPayload, ClientPlayNetworking.Context context) {
+        MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
 
-        JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy();
-        List<SavedWaypoint> savedWaypoints = IClientPluginJMTest.getSavedWaypoints(json, context.player().getUuid());
-        INSTANCE.jmAPI.removeAllWaypoints("journeymap");
+        if (minecraftClientInstance.player == null) {
+            return;
+        }
 
-        for (SavedWaypoint savedWaypoint : savedWaypoints) {
+        switch (waypointPayload.command()) {
+            case "creation_response" -> {
+                JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy();
+                List<SavedWaypoint> savedWaypoints = IClientPluginJM.getSavedWaypoints(json, context.player().getUuid());
+                INSTANCE.jmAPI.removeAllWaypoints("journeymap");
 
-            Waypoint waypointObj = WaypointFactory.createClientWaypoint(
-                    "journeymap",
-                    BlockPos.ofFloored(savedWaypoint.getWaypointX(),
-                            savedWaypoint.getWaypointY(),
-                            savedWaypoint.getWaypointZ()),
-                    savedWaypoint.getDimensionString(),
-                    true);
+                for (SavedWaypoint savedWaypoint : savedWaypoints) {
 
-            waypointObj.setColor(savedWaypoint.getWaypointColour());
-            waypointObj.setName(savedWaypoint.getWaypointName());
-            waypointObj.setCustomData(savedWaypoint.getUniversalIdentifier());
+                    Waypoint waypointObj = WaypointFactory.createClientWaypoint(
+                            "journeymap",
+                            BlockPos.ofFloored(savedWaypoint.getWaypointX(),
+                                    savedWaypoint.getWaypointY(),
+                                    savedWaypoint.getWaypointZ()),
+                            savedWaypoint.getDimensionString(),
+                            true);
 
-            INSTANCE.waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
-            INSTANCE.jmAPI.addWaypoint("journeymap", waypointObj);
+                    waypointObj.setColor(savedWaypoint.getWaypointColour());
+                    waypointObj.setName(savedWaypoint.getWaypointName());
+                    waypointObj.setCustomData(savedWaypoint.getUniversalIdentifier());
+
+                    INSTANCE.waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
+                    INSTANCE.jmAPI.addWaypoint("journeymap", waypointObj);
+                }
+            }
+            case "update" -> {
+                IClientPluginJM.updateWaypoints(MinecraftClient.getInstance());
+            }
+            case "display_interval" -> {
+                if (getInstance().showAlert) {
+                    minecraftClientInstance.player.sendMessage(Text.of("Waypoints updated every " + INSTANCE.tickCounterUpdateThreshold / 20 + " seconds."), true);
+                }
+            }
+            case "alert" -> {
+                if (getInstance().showAlert) {
+                    minecraftClientInstance.player.sendMessage(Text.translatable(waypointPayload.arguments().get(0).getAsString()), waypointPayload.arguments().get(1).getAsBoolean());
+                }
+            }
         }
     }
 }

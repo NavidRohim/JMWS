@@ -1,7 +1,8 @@
 {
-  "item.jm_server.debug_util": "Debug Powder",
-  "message.jm_server.deletion_success": "TestSomali",
-  "message.jm_server.deletion_failure": "Could not delete waypoint on the server",
-  "message.jm_server.creation_success": "Created waypoint",
-  "message.jm_server.creation_failure": "Could not create waypoint on the server.\nIt is recommended to delete the waypoint and try again."
+  "item.jm_server.debug_util": "Debug Budo",
+  "message.jm_server.deletion_success": "Titir waypoint",
+  "message.jm_server.deletion_failure": "Ma Tirtirikaro waypoint",
+  "message.jm_server.creation_success": "Damaad waypoint",
+  "message.jm_server.creation_failure": "Ma Tirtirikaro “waypoint”, Mar kale ku noqo athoo raali ah",
+  "message.jm_server.modified_success": "Cusboonaysiinta waypoint"
 }

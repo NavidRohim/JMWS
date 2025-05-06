@@ -8,7 +8,7 @@ import java.util.*;
 
 public class JsonStaticHelper {
 
-    public static String makeDeleteJson(String waypointFilename) {
+    public static String makeDeleteRequestJson(String waypointFilename) {
         return "{\n" +
                 "  \"command\": \"delete\",\n" +
                 "  \"arguments\": [\n" +
@@ -37,6 +37,27 @@ public class JsonStaticHelper {
                 "  \"arguments\": [" + jsonArray + "]\n" +
                 "}";
     }
+
+    public static String makeServerUpdateRequestJson() {
+        return "{\n" +
+                "  \"command\": \"update\",\n" +
+                "  \"arguments\": []\n" +
+                "}";
+    }
+
+    public static String makeClientAlertRequestJson(String message, boolean overlay) {
+        return "{\n" +
+                "  \"command\": \"alert\",\n" +
+                "  \"arguments\": [" + message + ", " + overlay + "]\n" +
+                "}";
+    }
+    public static String makeEmptyServerCommandRequestJson(String command) {
+        return "{\n" +
+                "  \"command\": \"" + command + "\",\n" +
+                "  \"arguments\": []\n" +
+                "}";
+    }
+
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {
         return JsonParser.parseString(jsonString).getAsJsonObject();
     }

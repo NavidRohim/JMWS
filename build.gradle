@@ -16,6 +16,7 @@ repositories {
         url = 'https://maven.blamejared.com'
     }
     maven { url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" }
+    maven { url = 'https://maven.wispforest.io/releases/' }
 
 // Add repositories to retrieve artifacts from in here.
     // You should only use this when depending on other mods because
@@ -32,6 +33,10 @@ dependencies {
 
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    annotationProcessor modImplementation("io.wispforest:owo-lib:${project.owo_version}")
+    modImplementation "io.wispforest:owo-lib:${project.owo_version}"
+    include "io.wispforest:owo-sentinel:${project.owo_version}"
 
     modCompileOnlyApi group: 'info.journeymap', name: 'journeymap-api-fabric', version: project.journeymap_api_version, changing: true
 }
