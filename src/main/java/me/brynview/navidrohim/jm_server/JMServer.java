@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jm_server;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.wispforest.owo.config.Option;
 import me.brynview.navidrohim.jm_server.common.payloads.WaypointActionPayload;
 import me.brynview.navidrohim.jm_server.common.utils.JMServerConfig;
 import me.brynview.navidrohim.jm_server.common.utils.JMServerConfigModel;
@@ -14,7 +15,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,7 +31,7 @@ import static net.minecraft.server.command.CommandManager.*;
 public class JMServer implements ModInitializer {
 
     public static final String MODID = "jm_server";
-    public static final String VERSION = "0.0.7";
+    public static final String VERSION = "0.0.8";
     public static final Logger LOGGER = LogManager.getFormatterLogger(MODID);
 
     public static final JMServerConfig CONFIG = JMServerConfig.createAndLoad();
@@ -101,7 +102,7 @@ public class JMServer implements ModInitializer {
                 if (waypointCreationSuccess) {
                     alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.creation_success", true));
                 } else {
-                    alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.creation_failure", true));
+                    alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.creation_failure", false));
                 }
 
                 ServerPlayNetworking.send(player, alertMessagePayload);

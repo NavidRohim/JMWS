@@ -3,15 +3,18 @@
   "id": "jm_server",
   "version": "${version}",
   "name": "JourneyMap Server",
-  "description": "Makes it so JourneyMap Waypoints are stored on the server.",
+  "description": "This mod allows you to save waypoints on JourneyMap between multiple devices via the player/account UUID on the server",
   "authors": [
-    "Navid Rohim",
+    "Navid Rohim (Programming)",
     "Kay (Somali translations)",
-    "Malin (German translations)"
+    "Malin (German translations)",
+    "Dempy (Icon, Polish translations)"
   ],
-  "contact": {},
+  "contact": {
+    "email": "samirohim@gmail.com"
+  },
   "license": "All-Rights-Reserved",
-  "icon": "assets/jm_server_test/icon.png",
+  "icon": "assets/jm_server/icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [
@@ -27,6 +30,8 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
-    "minecraft": "${minecraft_version}"
+    "minecraft": "${minecraft_version}",
+    "journeymap": ">=1.21.5-6.0.0",
+    "owo": ">=0.12.15.4+1.21"
   }
 }

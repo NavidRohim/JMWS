@@ -201,6 +201,7 @@ public class IClientPluginJM implements IClientPlugin
             }
             case "alert" -> {
                 if (getInstance().showAlert) {
+                    JMServer.LOGGER.info(waypointPayload.arguments().get(1).getAsBoolean());
                     minecraftClientInstance.player.sendMessage(Text.translatable(waypointPayload.arguments().get(0).getAsString()), waypointPayload.arguments().get(1).getAsBoolean());
                 }
             }

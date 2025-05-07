@@ -1,7 +1,8 @@
 {
-  "item.jm_server.debug_util": "Debug Powder",
-  "message.jm_server.deletion_success": "TestPolish",
-  "message.jm_server.deletion_failure": "Could not delete waypoint on the server",
-  "message.jm_server.creation_success": "Created waypoint",
-  "message.jm_server.creation_failure": "Could not create waypoint on the server.\nIt is recommended to delete the waypoint and try again."
+  "item.jm_server.debug_util": "Proszek debugujący",
+  "message.jm_server.deletion_success": "Usunięty punkt trasy",
+  "message.jm_server.deletion_failure": "Nie można usunąć punktu trasy na serwerze",
+  "message.jm_server.creation_success": "Utworzono punkt orientacyjny",
+  "message.jm_server.creation_failure": "Nie można utworzyć punktu nawigacyjnego na serwerze.\nZaleca się usunięcie punktu nawigacyjnego i ponowną próbę.",
+  "message.jm_server.modified_success": "Zaktualizowany punkt trasy"
 }

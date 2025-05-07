@@ -1,8 +1,14 @@
 {
   "item.jm_server.debug_util": "Debug Powder",
-  "message.jm_server.deletion_success": "Created waypoint",
+  "message.jm_server.deletion_success": "Deleted waypoint",
   "message.jm_server.deletion_failure": "Could not delete waypoint on the server",
   "message.jm_server.creation_success": "Created waypoint",
   "message.jm_server.creation_failure": "Could not create waypoint on the server.\nIt is recommended to delete the waypoint and try again.",
-  "message.jm_server.modified_success": "Updated waypoint"
+  "message.jm_server.modified_success": "Updated waypoint",
+
+  "text.config.jmserver-config.title": "JourneyMap Server Config",
+  "text.config.jmserver-config.option.showAlerts.tooltip": "Whether waypoint creation, deletion or other alerts are shown.",
+  "text.config.jmserver-config.option.updateWaypointFrequency.tooltip": "Frequency of when waypoints are grabbed from the server (in ticks)",
+  "text.config.jmserver-config.option.showAlerts": "Show alerts?",
+  "text.config.jmserver-config.option.updateWaypointFrequency": "Waypoint update frequency"
 }
