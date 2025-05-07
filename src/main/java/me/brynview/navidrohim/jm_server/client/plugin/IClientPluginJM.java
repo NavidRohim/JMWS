@@ -10,18 +10,21 @@ import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import me.brynview.navidrohim.jm_server.JMServer;
+import me.brynview.navidrohim.jm_server.client.JMServerClient;
 import me.brynview.navidrohim.jm_server.common.SavedWaypoint;
 import me.brynview.navidrohim.jm_server.common.payloads.WaypointActionPayload;
 import me.brynview.navidrohim.jm_server.common.utils.JMServerConfig;
 import me.brynview.navidrohim.jm_server.common.utils.JsonStaticHelper;
 import me.brynview.navidrohim.jm_server.common.utils.WaypointIOInterface;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -36,8 +39,8 @@ public class IClientPluginJM implements IClientPlugin
     private final HashMap<String, Waypoint> waypointIdentifierMap = new HashMap<>();
     private boolean oldWorld = false;
 
-    private final int tickCounterUpdateThresholdDefault = JMServer.CONFIG.updateWaypointFrequency();
-    private final boolean showAlert = JMServer.CONFIG.showAlerts();
+    private final int tickCounterUpdateThresholdDefault = JMServerClient.CONFIG.updateWaypointFrequency();
+    private final boolean showAlert = JMServerClient.CONFIG.showAlerts();
 
     private int tickCounterUpdateThreshold = tickCounterUpdateThresholdDefault;
     private int tickCounter = 0;
@@ -106,12 +109,23 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     @Override
-    public void initialize(final IClientAPI jmAPI)
+    public void initialize(final @NotNull IClientAPI jmAPI)
     {
         this.jmAPI = jmAPI;
 
-        CommonEventRegistry.WAYPOINT_EVENT.subscribe(JMServer.MODID, this::WaypointCreationHandler);
-        ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
+        MinecraftClient minecraftClient = MinecraftClient.getInstance();
+        ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
+            if (!minecraftClient.isInSingleplayer()) {
+                ClientPlayNetworking.registerGlobalReceiver(WaypointActionPayload.ID, IClientPluginJM::HandlePacket);
+                CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", JMServer.MODID, this::WaypointCreationHandler);
+                ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
+            }
+        }));
+
+        ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
+            ClientPlayNetworking.unregisterGlobalReceiver(WaypointActionPayload.ID.id());
+            CommonEventRegistry.WAYPOINT_EVENT.unsubscribe("jmapi", JMServer.MODID);
+        }));
     }
 
     public static void updateWaypoints(MinecraftClient minecraftClient) {
@@ -122,7 +136,7 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     private void handleTick(MinecraftClient minecraftClient) {
-        if (minecraftClient.world != null) {
+        if (minecraftClient.world != null && !minecraftClient.isInSingleplayer()) {
             if (!oldWorld) {
                 tickCounterUpdateThreshold = 40;
                 oldWorld = true;
@@ -201,7 +215,6 @@ public class IClientPluginJM implements IClientPlugin
             }
             case "alert" -> {
                 if (getInstance().showAlert) {
-                    JMServer.LOGGER.info(waypointPayload.arguments().get(1).getAsBoolean());
                     minecraftClientInstance.player.sendMessage(Text.translatable(waypointPayload.arguments().get(0).getAsString()), waypointPayload.arguments().get(1).getAsBoolean());
                 }
             }

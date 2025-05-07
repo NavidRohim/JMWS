@@ -62,6 +62,13 @@ public class WaypointIOInterface {
         }
     }
 
+    public static void deleteAllUserWaypoints(UUID playerUUID) {
+        for (String waypointPath : getPlayerWaypointNames(playerUUID)) {
+            deleteWaypoint(waypointPath);
+        }
+
+    }
+
     public static boolean deleteWaypoint(String filename) {
         File waypointFileObj = new File(filename);
         return waypointFileObj.delete();

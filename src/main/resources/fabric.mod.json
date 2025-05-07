@@ -8,7 +8,8 @@
     "Navid Rohim (Programming)",
     "Kay (Somali translations)",
     "Malin (German translations)",
-    "Dempy (Icon, Polish translations)"
+    "Dempy (Icon, Polish translations)",
+    "ThatFallenChild (Filipino translations)"
   ],
   "contact": {
     "email": "samirohim@gmail.com"
@@ -22,6 +23,9 @@
     ],
     "main": [
       "me.brynview.navidrohim.jm_server.JMServer"
+    ],
+    "server": [
+      "me.brynview.navidrohim.jm_server.server.JMServerServerSide"
     ],
     "journeymap": [
       "me.brynview.navidrohim.jm_server.client.plugin.IClientPluginJM"
