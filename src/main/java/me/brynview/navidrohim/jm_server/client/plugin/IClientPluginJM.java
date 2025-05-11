@@ -39,10 +39,8 @@ public class IClientPluginJM implements IClientPlugin
     private final HashMap<String, Waypoint> waypointIdentifierMap = new HashMap<>();
     private boolean oldWorld = false;
 
-    private final int tickCounterUpdateThresholdDefault = JMServerClient.CONFIG.updateWaypointFrequency();
-    private final boolean showAlert = JMServerClient.CONFIG.showAlerts();
-
-    private int tickCounterUpdateThreshold = tickCounterUpdateThresholdDefault;
+    private static final JMServerConfig config = JMServerClient.CONFIG;
+    private int tickCounterUpdateThreshold = config.updateWaypointFrequency();
     private int tickCounter = 0;
 
     public IClientPluginJM() {
@@ -84,7 +82,8 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     void WaypointCreationHandler(WaypointEvent waypointEvent) {
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+        MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
+        ClientPlayerEntity player = minecraftClientInstance.player;
 
         if (player == null) {
             return;
@@ -105,7 +104,6 @@ public class IClientPluginJM implements IClientPlugin
                 this.updateAction(waypointEvent.waypoint, player);
             }
         }
-
     }
 
     @Override
@@ -129,7 +127,7 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     public static void updateWaypoints(MinecraftClient minecraftClient) {
-        if (minecraftClient.player != null && getInstance().showAlert) {
+        if (minecraftClient.player != null && config.showAlerts()) {
             minecraftClient.player.sendMessage(Text.translatable("message.jm_server.modified_success"), true);
         }
         ClientPlayNetworking.send(new WaypointActionPayload(JsonStaticHelper.makeWaypointRequestJson()));
@@ -146,7 +144,7 @@ public class IClientPluginJM implements IClientPlugin
                 if (tickCounter >= tickCounterUpdateThreshold) {
                     updateWaypoints(minecraftClient);
                     tickCounter = 0;
-                    tickCounterUpdateThreshold = tickCounterUpdateThresholdDefault;
+                    tickCounterUpdateThreshold = config.updateWaypointFrequency();
                 }
             }
         } else {
@@ -209,12 +207,12 @@ public class IClientPluginJM implements IClientPlugin
                 IClientPluginJM.updateWaypoints(MinecraftClient.getInstance());
             }
             case "display_interval" -> {
-                if (getInstance().showAlert) {
+                if (config.showAlerts()) {
                     minecraftClientInstance.player.sendMessage(Text.of("Waypoints updated every " + INSTANCE.tickCounterUpdateThreshold / 20 + " seconds."), true);
                 }
             }
             case "alert" -> {
-                if (getInstance().showAlert) {
+                if (config.showAlerts()) {
                     minecraftClientInstance.player.sendMessage(Text.translatable(waypointPayload.arguments().get(0).getAsString()), waypointPayload.arguments().get(1).getAsBoolean());
                 }
             }

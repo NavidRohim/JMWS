@@ -5,9 +5,10 @@ import io.wispforest.owo.config.annotation.Modmenu;
 import me.brynview.navidrohim.jm_server.JMServer;
 
 @Modmenu(modId = JMServer.MODID)
-@Config(name = "jmserver-config", wrapperName = "JMServerConfig")
+@Config(name = "jmserver-config", wrapperName = "JMServerConfig", defaultHook = true)
 public class JMServerConfigModel {
 
     public boolean showAlerts = true;
-    public int updateWaypointFrequency = 1200;
+    public int updateWaypointFrequency = 800;
+
 }

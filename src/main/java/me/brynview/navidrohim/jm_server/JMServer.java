@@ -25,6 +25,7 @@ public class JMServer implements ModInitializer {
     public void onInitialize() {
 
 
+
         DebugItem.initialize();
 
         // Packet registering (client)
