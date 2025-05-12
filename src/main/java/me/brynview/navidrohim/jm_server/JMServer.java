@@ -31,7 +31,7 @@ public class JMServer implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(WaypointActionPayload.ID, WaypointActionPayload.CODEC);
 
         CommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess, environment) ->
-                dispatcher.register(literal("jmserver").then(literal("update").executes(
+                dispatcher.register(literal("jmws").then(literal("update").executes(
                                 context -> {
                                     if (context.getSource().getPlayer() != null) {
                                         String jsonString = JsonStaticHelper.makeServerUpdateRequestJson();

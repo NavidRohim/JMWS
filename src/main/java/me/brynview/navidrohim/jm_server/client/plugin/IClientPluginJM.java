@@ -25,6 +25,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -51,6 +52,16 @@ public class IClientPluginJM implements IClientPlugin
         return INSTANCE;
     }
 
+    public boolean getEnabledStatus() {
+        MinecraftClient minecraftClient = MinecraftClient.getInstance();
+        return (config.enabled() && !minecraftClient.isInSingleplayer());
+    }
+
+    public Waypoint getOldWaypoint(Waypoint newWaypoint) {
+        String persistentWaypointID = newWaypoint.getCustomData();
+        return waypointIdentifierMap.get(persistentWaypointID);
+    }
+
     private void deleteAction(Waypoint waypoint, ClientPlayerEntity player) {
 
         String waypointFilename = WaypointIOInterface.getWaypointFilename(waypoint, player.getUuid());
@@ -62,12 +73,9 @@ public class IClientPluginJM implements IClientPlugin
         ClientPlayNetworking.send(waypointActionPayload);
     }
 
-    private void updateAction(Waypoint waypoint, ClientPlayerEntity player)
+    private void updateAction(Waypoint waypoint, Waypoint oldWaypoint, ClientPlayerEntity player)
     {
-        String persistentWaypointID = waypoint.getCustomData();
-        Waypoint oldWaypointReference = waypointIdentifierMap.get(persistentWaypointID);
-
-        this.deleteAction(oldWaypointReference, player);
+        this.deleteAction(oldWaypoint, player);
         this.createAction(waypoint, player);
     }
 
@@ -82,47 +90,58 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     void WaypointCreationHandler(WaypointEvent waypointEvent) {
-        MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
-        ClientPlayerEntity player = minecraftClientInstance.player;
+        if (this.getEnabledStatus()) {
+            MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
+            ClientPlayerEntity player = minecraftClientInstance.player;
 
-        if (player == null) {
-            return;
-        }
-
-        switch (waypointEvent.getContext()) {
-
-            case CREATE ->
-            {
-                this.createAction(waypointEvent.waypoint, player);
+            if (player == null) {
+                return;
             }
-            case DELETED ->
-            {
-                this.deleteAction(waypointEvent.waypoint, player);
-            }
-            case UPDATE ->
-            {
-                this.updateAction(waypointEvent.waypoint, player);
+
+            Waypoint oldWaypoint = this.getOldWaypoint(waypointEvent.waypoint);
+
+            // If the waypoints are identical, do nothing (i.e; if player just turns on or off the waypoint)
+
+            JMServer.LOGGER.info(waypointEvent.getContext());
+            switch (waypointEvent.getContext()) {
+
+                case CREATE ->
+                {
+                    this.createAction(waypointEvent.waypoint, player);
+                }
+                case DELETED ->
+                {
+                    this.deleteAction(waypointEvent.waypoint, player);
+                }
+                case UPDATE ->
+                {
+                    this.updateAction(waypointEvent.waypoint, oldWaypoint, player);
+                }
             }
         }
     }
 
+    public void registerEvents() {
+        ClientPlayNetworking.registerGlobalReceiver(WaypointActionPayload.ID, IClientPluginJM::HandlePacket);
+        CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", JMServer.MODID, this::WaypointCreationHandler);
+        ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
+    }
+
+    public void unregisterEvents() {
+        ClientPlayNetworking.unregisterGlobalReceiver(WaypointActionPayload.ID.id());
+        CommonEventRegistry.WAYPOINT_EVENT.unsubscribe("jmapi", JMServer.MODID);
+    }
     @Override
     public void initialize(final @NotNull IClientAPI jmAPI)
     {
         this.jmAPI = jmAPI;
 
-        MinecraftClient minecraftClient = MinecraftClient.getInstance();
         ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
-            if (!minecraftClient.isInSingleplayer()) {
-                ClientPlayNetworking.registerGlobalReceiver(WaypointActionPayload.ID, IClientPluginJM::HandlePacket);
-                CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", JMServer.MODID, this::WaypointCreationHandler);
-                ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
-            }
+            this.registerEvents();
         }));
 
         ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
-            ClientPlayNetworking.unregisterGlobalReceiver(WaypointActionPayload.ID.id());
-            CommonEventRegistry.WAYPOINT_EVENT.unsubscribe("jmapi", JMServer.MODID);
+            this.unregisterEvents();
         }));
     }
 
@@ -134,7 +153,7 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     private void handleTick(MinecraftClient minecraftClient) {
-        if (minecraftClient.world != null && !minecraftClient.isInSingleplayer()) {
+        if (minecraftClient.world != null && this.getEnabledStatus()) {
             if (!oldWorld) {
                 tickCounterUpdateThreshold = 40;
                 oldWorld = true;
@@ -173,47 +192,49 @@ public class IClientPluginJM implements IClientPlugin
 
     // Handler for WaypointActionPayload
     public static void HandlePacket(WaypointActionPayload waypointPayload, ClientPlayNetworking.Context context) {
-        MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
+        if (getInstance().getEnabledStatus()) {
+            MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
 
-        if (minecraftClientInstance.player == null) {
-            return;
-        }
+            if (minecraftClientInstance.player == null) {
+                return;
+            }
 
-        switch (waypointPayload.command()) {
-            case "creation_response" -> {
-                JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy();
-                List<SavedWaypoint> savedWaypoints = IClientPluginJM.getSavedWaypoints(json, context.player().getUuid());
-                INSTANCE.jmAPI.removeAllWaypoints("journeymap");
+            switch (waypointPayload.command()) {
+                case "creation_response" -> {
+                    JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy();
+                    List<SavedWaypoint> savedWaypoints = IClientPluginJM.getSavedWaypoints(json, context.player().getUuid());
+                    INSTANCE.jmAPI.removeAllWaypoints("journeymap");
 
-                for (SavedWaypoint savedWaypoint : savedWaypoints) {
+                    for (SavedWaypoint savedWaypoint : savedWaypoints) {
 
-                    Waypoint waypointObj = WaypointFactory.createClientWaypoint(
-                            "journeymap",
-                            BlockPos.ofFloored(savedWaypoint.getWaypointX(),
-                                    savedWaypoint.getWaypointY(),
-                                    savedWaypoint.getWaypointZ()),
-                            savedWaypoint.getDimensionString(),
-                            true);
+                        Waypoint waypointObj = WaypointFactory.createClientWaypoint(
+                                "journeymap",
+                                BlockPos.ofFloored(savedWaypoint.getWaypointX(),
+                                        savedWaypoint.getWaypointY(),
+                                        savedWaypoint.getWaypointZ()),
+                                savedWaypoint.getDimensionString(),
+                                true);
 
-                    waypointObj.setColor(savedWaypoint.getWaypointColour());
-                    waypointObj.setName(savedWaypoint.getWaypointName());
-                    waypointObj.setCustomData(savedWaypoint.getUniversalIdentifier());
+                        waypointObj.setColor(savedWaypoint.getWaypointColour());
+                        waypointObj.setName(savedWaypoint.getWaypointName());
+                        waypointObj.setCustomData(savedWaypoint.getUniversalIdentifier());
 
-                    INSTANCE.waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
-                    INSTANCE.jmAPI.addWaypoint("journeymap", waypointObj);
+                        INSTANCE.waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
+                        INSTANCE.jmAPI.addWaypoint("journeymap", waypointObj);
+                    }
                 }
-            }
-            case "update" -> {
-                IClientPluginJM.updateWaypoints(MinecraftClient.getInstance());
-            }
-            case "display_interval" -> {
-                if (config.showAlerts()) {
-                    minecraftClientInstance.player.sendMessage(Text.of("Waypoints updated every " + INSTANCE.tickCounterUpdateThreshold / 20 + " seconds."), true);
+                case "update" -> {
+                    IClientPluginJM.updateWaypoints(MinecraftClient.getInstance());
                 }
-            }
-            case "alert" -> {
-                if (config.showAlerts()) {
-                    minecraftClientInstance.player.sendMessage(Text.translatable(waypointPayload.arguments().get(0).getAsString()), waypointPayload.arguments().get(1).getAsBoolean());
+                case "display_interval" -> {
+                    if (config.showAlerts()) {
+                        minecraftClientInstance.player.sendMessage(Text.of("Waypoints updated every " + INSTANCE.tickCounterUpdateThreshold / 20 + " seconds."), true);
+                    }
+                }
+                case "alert" -> {
+                    if (config.showAlerts()) {
+                        minecraftClientInstance.player.sendMessage(Text.translatable(waypointPayload.arguments().get(0).getAsString()), waypointPayload.arguments().get(1).getAsBoolean());
+                    }
                 }
             }
         }
