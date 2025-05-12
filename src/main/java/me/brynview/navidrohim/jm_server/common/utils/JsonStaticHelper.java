@@ -31,10 +31,10 @@ public class JsonStaticHelper {
                 "}";
     }
 
-    public static String makeCreationRequestResponseJson(HashMap<String, String> jsonArray) {
+    public static String makeCreationRequestResponseJson(HashMap<String, String> jsonArray, List<String> waypointIDList) {
         return "{\n" +
                 "  \"command\": \"creation_response\",\n" +
-                "  \"arguments\": [" + jsonArray + "]\n" +
+                "  \"arguments\": [" + jsonArray + ", " + waypointIDList + "]\n" +
                 "}";
     }
 

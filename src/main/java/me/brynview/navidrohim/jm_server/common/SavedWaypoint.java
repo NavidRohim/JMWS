@@ -13,6 +13,7 @@ public class SavedWaypoint {
 
     String name;
     String playerUUID;
+    String waypointLocalID;
 
     Integer ix;
     Integer iy;
@@ -36,6 +37,8 @@ public class SavedWaypoint {
         this.dim = payload.get("dimensions").getAsJsonArray().get(0).getAsString();
 
         this.colour = payload.get("color").getAsInt();
+
+        this.waypointLocalID = payload.get("guid").getAsString();
         this.universalIdentifier = payload.get("customData").getAsString();
     }
 
@@ -79,6 +82,9 @@ public class SavedWaypoint {
     }
     public String getUniversalIdentifier() {
         return this.universalIdentifier;
+    }
+    public String getWaypointLocalID() {
+        return this.waypointLocalID;
     }
     public Map<String, String> getRawJsonData() {
         return rawJsonData;

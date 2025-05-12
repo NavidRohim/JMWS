@@ -2,8 +2,11 @@ package me.brynview.navidrohim.jm_server.server;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.wispforest.owo.config.Option;
 import me.brynview.navidrohim.jm_server.JMServer;
+import me.brynview.navidrohim.jm_server.client.plugin.IClientPluginJM;
+import me.brynview.navidrohim.jm_server.common.SavedWaypoint;
 import me.brynview.navidrohim.jm_server.common.payloads.WaypointActionPayload;
 import me.brynview.navidrohim.jm_server.common.utils.JMServerConfig;
 import me.brynview.navidrohim.jm_server.common.utils.JMServerConfigModel;
@@ -27,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -83,6 +87,15 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
             case "request" -> {
                 try {
                     List<String> playerWaypoints = WaypointIOInterface.getPlayerWaypointNames(context.player().getUuid());
+                    List<String> waypointUUIDs = new ArrayList<>();
+                    /*
+
+
+                    for (String savedWaypointString : playerWaypoints) {
+                        SavedWaypoint savedWaypoint = new SavedWaypoint(JsonParser.parseString(savedWaypointString).getAsJsonObject(), context.player().getUuid());
+                        waypointUUIDs.add(savedWaypoint.getUniversalIdentifier());
+                    }
+                    */
                     HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
 
                     for (int i = 0 ; i < playerWaypoints.size() ; i++) {
@@ -91,13 +104,13 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                         jsonWaypointPayloadArray.put(String.valueOf(i), jsonWaypointFileString);
                     }
 
-                    String jsonData = JsonStaticHelper.makeCreationRequestResponseJson(jsonWaypointPayloadArray);
+                    String jsonData = JsonStaticHelper.makeCreationRequestResponseJson(jsonWaypointPayloadArray, waypointUUIDs);
                     WaypointActionPayload waypointPayloadOutbound = new WaypointActionPayload(jsonData);
                     ServerPlayNetworking.send(player, waypointPayloadOutbound);
 
 
                 } catch (IOException ioe) {
-                    me.brynview.navidrohim.jm_server.JMServer.LOGGER.error(ioe.getMessage());
+                    JMServer.LOGGER.error(ioe.getMessage());
                 }
             }
         }

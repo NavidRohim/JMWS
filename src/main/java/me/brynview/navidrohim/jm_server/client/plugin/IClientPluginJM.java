@@ -99,10 +99,6 @@ public class IClientPluginJM implements IClientPlugin
             }
 
             Waypoint oldWaypoint = this.getOldWaypoint(waypointEvent.waypoint);
-
-            // If the waypoints are identical, do nothing (i.e; if player just turns on or off the waypoint)
-
-            JMServer.LOGGER.info(waypointEvent.getContext());
             switch (waypointEvent.getContext()) {
 
                 case CREATE ->
@@ -181,7 +177,7 @@ public class IClientPluginJM implements IClientPlugin
         return JMServer.MODID;
     }
 
-    private static List<SavedWaypoint> getSavedWaypoints(JsonObject jsonData, UUID playerUUID) {
+    public static List<SavedWaypoint> getSavedWaypoints(JsonObject jsonData, UUID playerUUID) {
         List<SavedWaypoint> waypoints = new ArrayList<>();
 
         for (Map.Entry<String, JsonElement> wpEntry : jsonData.entrySet()) {
@@ -202,7 +198,28 @@ public class IClientPluginJM implements IClientPlugin
             switch (waypointPayload.command()) {
                 case "creation_response" -> {
                     JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy();
+
+                    // Handles if the user has made waypoints before (with the mod disabled or when it wasnt installed) and uploads them to the server.
                     List<SavedWaypoint> savedWaypoints = IClientPluginJM.getSavedWaypoints(json, context.player().getUuid());
+                    List<String> remoteWaypointsGuid = new ArrayList<>();
+
+                    for (SavedWaypoint savedWaypoint : savedWaypoints) {
+                        remoteWaypointsGuid.add(savedWaypoint.getWaypointLocalID());
+                    }
+
+                    List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
+
+                    JMServer.LOGGER.info(remoteWaypointsGuid);
+                    for (Waypoint existingWaypoint : existingWaypoints)
+                    {
+                        JMServer.LOGGER.info(existingWaypoint.getGuid());
+                        if (!remoteWaypointsGuid.contains(existingWaypoint.getGuid()))
+                        {
+                            getInstance().createAction(existingWaypoint, context.player()); // todo; add "silent" parameter (doesnt alert user of creation)
+                            JMServer.LOGGER.info("Added -> " + existingWaypoint.getName() + " while mod was disabled / uninstalled.");
+                        }
+                    }
+
                     INSTANCE.jmAPI.removeAllWaypoints("journeymap");
 
                     for (SavedWaypoint savedWaypoint : savedWaypoints) {
