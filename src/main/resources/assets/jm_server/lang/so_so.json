@@ -1,8 +1,0 @@
-{
-  "item.jm_server.debug_util": "Debug Budo",
-  "message.jm_server.deletion_success": "Titir waypoint",
-  "message.jm_server.deletion_failure": "Ma Tirtirikaro waypoint",
-  "message.jm_server.creation_success": "Damaad waypoint",
-  "message.jm_server.creation_failure": "Ma Tirtirikaro “waypoint”, Mar kale ku noqo athoo raali ah",
-  "message.jm_server.modified_success": "Cusboonaysiinta waypoint"
-}

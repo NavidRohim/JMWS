@@ -1,41 +1,22 @@
-package me.brynview.navidrohim.jm_server.server;
+package me.brynview.navidrohim.jmws.server;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.stream.JsonReader;
-import io.wispforest.owo.config.Option;
-import me.brynview.navidrohim.jm_server.JMServer;
-import me.brynview.navidrohim.jm_server.client.plugin.IClientPluginJM;
-import me.brynview.navidrohim.jm_server.common.SavedWaypoint;
-import me.brynview.navidrohim.jm_server.common.payloads.WaypointActionPayload;
-import me.brynview.navidrohim.jm_server.common.utils.JMServerConfig;
-import me.brynview.navidrohim.jm_server.common.utils.JMServerConfigModel;
-import me.brynview.navidrohim.jm_server.common.utils.JsonStaticHelper;
-import me.brynview.navidrohim.jm_server.items.DebugItem;
-import me.brynview.navidrohim.jm_server.common.payloads.RegisterUserPayload;
-import me.brynview.navidrohim.jm_server.common.utils.WaypointIOInterface;
+import me.brynview.navidrohim.jmws.JMServer;
+import me.brynview.navidrohim.jmws.common.payloads.WaypointActionPayload;
+import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
+import me.brynview.navidrohim.jmws.common.utils.WaypointIOInterface;
 import net.fabricmc.api.DedicatedServerModInitializer;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static net.minecraft.server.command.CommandManager.*;
 
 
 public class JMServerServerSide implements DedicatedServerModInitializer {
@@ -44,7 +25,7 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
     public void onInitializeServer() {
 
         // Item
-        File mainDir = new File("./jmserver");
+        File mainDir = new File("./jmws");
         boolean _a = mainDir.mkdir(); // doing this to shutup linter
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
@@ -67,9 +48,9 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
 
                 if (!silent) {
                     if (result) {
-                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.deletion_success", true));
+                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.deletion_success", true));
                     } else {
-                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.deletion_failure", true));
+                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.deletion_failure", true));
                     }
 
                     ServerPlayNetworking.send(player, alertMessagePayload);
@@ -83,9 +64,9 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
 
                 if (!silent) {
                     if (waypointCreationSuccess) {
-                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.creation_success", true));
+                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.creation_success", true));
                     } else {
-                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.creation_failure", false));
+                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.creation_failure", false));
                     }
 
                     ServerPlayNetworking.send(player, alertMessagePayload);
@@ -109,7 +90,6 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                     WaypointActionPayload waypointPayloadOutbound = new WaypointActionPayload(jsonData);
                     ServerPlayNetworking.send(player, waypointPayloadOutbound);
 
-                    // todo; fix arguments being empty when sending waypoints (getting error on client side saying it cannot get first argument)
                 } catch (IOException ioe) {
                     JMServer.LOGGER.error(ioe.getMessage());
                 }

@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jm_server.common.utils;
+package me.brynview.navidrohim.jmws.common.utils;
 
 import com.google.gson.JsonObject;
 import journeymap.api.v2.common.waypoint.Waypoint;
@@ -23,7 +23,7 @@ public class WaypointIOInterface {
     }
 
     private static String _getWaypointFromRaw(Vector3d coordVector, String waypointName, UUID playerUUID) {
-        return "./jmserver/" +
+        return "./jmws/" +
                 coordVector.x +
                 "_" +
                 coordVector.y +
@@ -78,7 +78,7 @@ public class WaypointIOInterface {
         //String content = Files.readString(path); // Java 11+
         List<String> waypointFileList = new ArrayList<>();
 
-        try (Stream<Path> files = Files.list(Path.of("./jmserver"))) {
+        try (Stream<Path> files = Files.list(Path.of("./jmws"))) {
             files.filter(Files::isRegularFile).forEach(path -> {
                 if (path.toString().contains(uuid.toString())) {
                     waypointFileList.add(path.toString());

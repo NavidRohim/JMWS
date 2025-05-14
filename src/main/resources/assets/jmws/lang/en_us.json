@@ -1,0 +1,17 @@
+{
+  "message.jmws.deletion_success": "Deleted waypoint",
+  "message.jmws.deletion_failure": "Could not delete waypoint on the server",
+  "message.jmws.deletion_all_success": "Deleted all waypoints server-side",
+  "message.jmws.creation_success": "Created waypoint",
+  "message.jmws.creation_failure": "Could not create waypoint on the server.\nIt is recommended to delete the waypoint and try again.",
+  "message.jmws.modified_success": "Updated waypoints",
+  "message.jmws.modified_waypoint_success": "Updated waypoint",
+
+  "text.config.jmws-config.title": "JourneyMap Waypoint Syncing (JMWS)",
+  "text.config.jmws-config.option.showAlerts.tooltip": "Whether waypoint creation, deletion or other alerts are shown.",
+  "text.config.jmws-config.option.enabled.tooltip": "If JMWS is enabled.",
+  "text.config.jmws-config.option.updateWaypointFrequency.tooltip": "Frequency of when waypoints are grabbed from the server (in ticks)",
+  "text.config.jmws-config.option.showAlerts": "Show alerts?",
+  "text.config.jmws-config.option.enabled": "Waypoint Syncing Enabled",
+  "text.config.jmws-config.option.updateWaypointFrequency": "Waypoint update frequency"
+}

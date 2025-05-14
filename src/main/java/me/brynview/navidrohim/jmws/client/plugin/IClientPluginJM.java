@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jm_server.client.plugin;
+package me.brynview.navidrohim.jmws.client.plugin;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -9,25 +9,25 @@ import journeymap.api.v2.common.event.CommonEventRegistry;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
-import me.brynview.navidrohim.jm_server.JMServer;
-import me.brynview.navidrohim.jm_server.client.JMServerClient;
-import me.brynview.navidrohim.jm_server.common.SavedWaypoint;
-import me.brynview.navidrohim.jm_server.common.payloads.WaypointActionPayload;
-import me.brynview.navidrohim.jm_server.common.utils.JMServerConfig;
-import me.brynview.navidrohim.jm_server.common.utils.JsonStaticHelper;
-import me.brynview.navidrohim.jm_server.common.utils.WaypointIOInterface;
+import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.JMServer;
+import me.brynview.navidrohim.jmws.client.JMServerClient;
+import me.brynview.navidrohim.jmws.common.SavedWaypoint;
+import me.brynview.navidrohim.jmws.common.payloads.WaypointActionPayload;
+import me.brynview.navidrohim.jmws.common.utils.JMWSConfig;
+import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
+import me.brynview.navidrohim.jmws.common.utils.WaypointIOInterface;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
-import net.minecraft.util.TranslatableOption;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3d;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -35,6 +35,7 @@ import java.util.*;
 @JourneyMapPlugin(apiVersion = "2.0.0")
 public class IClientPluginJM implements IClientPlugin
 {
+    private static final Logger log = LoggerFactory.getLogger(IClientPluginJM.class);
     // API reference
     private IClientAPI jmAPI = null;
     private static IClientPluginJM INSTANCE;
@@ -42,7 +43,7 @@ public class IClientPluginJM implements IClientPlugin
     private final HashMap<String, Waypoint> waypointIdentifierMap = new HashMap<>();
     private boolean oldWorld = false;
 
-    private static final JMServerConfig config = JMServerClient.CONFIG;
+    private static final JMWSConfig config = JMServerClient.CONFIG;
     private int tickCounterUpdateThreshold = config.updateWaypointFrequency();
     private int tickCounter = 0;
 
@@ -87,7 +88,7 @@ public class IClientPluginJM implements IClientPlugin
         this.createAction(waypoint, player, true);
 
         jmAPI.removeWaypoint("journeymap", oldWaypoint);
-        sendUserAlert(Text.translatable("message.jm_server.modified_waypoint_success").getString(), true, false);
+        sendUserAlert(Text.translatable("message.jmws.modified_waypoint_success").getString(), true, false);
     }
 
     private void createAction(Waypoint waypoint, ClientPlayerEntity player, boolean silent) {
@@ -153,7 +154,7 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     public static void updateWaypoints(MinecraftClient minecraftClient) {
-        sendUserAlert(Text.translatable("message.jm_server.modified_success").getString(), true, false);
+        sendUserAlert(Text.translatable("message.jmws.modified_success").getString(), true, false);
         ClientPlayNetworking.send(new WaypointActionPayload(JsonStaticHelper.makeWaypointRequestJson()));
     }
 
@@ -241,24 +242,44 @@ public class IClientPluginJM implements IClientPlugin
                     for (SavedWaypoint savedWaypoint : savedWaypoints) {
 
                         Waypoint waypointObj = WaypointFactory.createClientWaypoint(
-                                "journeymap",
+                                savedWaypoint.getWaypointModId(),
                                 BlockPos.ofFloored(savedWaypoint.getWaypointX(),
                                         savedWaypoint.getWaypointY(),
                                         savedWaypoint.getWaypointZ()),
                                 savedWaypoint.getDimensionString(),
-                                true);
+                                savedWaypoint.getWaypointPersistence());
 
                         waypointObj.setColor(savedWaypoint.getWaypointColour());
                         waypointObj.setName(savedWaypoint.getWaypointName());
                         waypointObj.setCustomData(savedWaypoint.getUniversalIdentifier());
+                        waypointObj.setEnabled(savedWaypoint.getWaypointEnabled());
+                        waypointObj.setShowDeviation(savedWaypoint.getWaypointDeviation());
+
+                        waypointObj.setIconResourceLoctaion(savedWaypoint.getWaypointResourceString());
+                        waypointObj.setIconOpacity(savedWaypoint.getWaypointOpacity());
+                        waypointObj.setIconTextureSize(savedWaypoint.getWaypointTextureWidth(), savedWaypoint.getWaypointTextureHeight());
+                        waypointObj.setIconRotation(savedWaypoint.getWaypointRotation());
+
+                        waypointObj.setDimensions(savedWaypoint.getWaypointDimensions());
 
                         INSTANCE.waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
-                        INSTANCE.jmAPI.addWaypoint("journeymap", waypointObj);
+                        INSTANCE.jmAPI.addWaypoint(savedWaypoint.getWaypointModId(), waypointObj);
+                        JMServer.LOGGER.info(savedWaypoint.getDimensionString());
+                        // todo; in future, store groups as well (also I realsed journeymap uses dat files to store data. Have I wasted all my damn time on this stupid project???)
+                        /*
+                        WaypointGroup waypointGroup = INSTANCE.jmAPI.getWaypointGroup(savedWaypoint.getWaypointGroupId());
+                        if (waypointGroup != null) { // can it not exist?
+                            JMServer.LOGGER.info(waypointGroup.getName());
+                            waypointGroup.addWaypoint(waypointObj);
+                            waypointObj.getG
+                        } else {
+                            INSTANCE.jmAPI.addWaypoint(savedWaypoint.getWaypointModId(), waypointObj);
+                        }*/
 
-                        // todo; in future update, add all waypoint data manually by chaining methods (very stupid, I wish I didnt have to)
-
+                        // ~~todo; in future update, add all waypoint data manually by chaining methods (very stupid, I wish I didnt have to)~~
                     }
                 }
+
                 case "update" -> {
                     IClientPluginJM.updateWaypoints(MinecraftClient.getInstance());
                 }
@@ -276,7 +297,7 @@ public class IClientPluginJM implements IClientPlugin
                     } else {
                         INSTANCE.jmAPI.removeWaypoint("journeymap", INSTANCE.waypointIdentifierMap.get(firstArgument));
                     }
-                    sendUserAlert(Text.translatable("message.jm_server.deletion_all_success").getString(), true, false);
+                    sendUserAlert(Text.translatable("message.jmws.deletion_all_success").getString(), true, false);
                 }
             }
         }

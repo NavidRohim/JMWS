@@ -1,8 +1,0 @@
-{
-  "item.jm_server.debug_util": "Proszek debugujący",
-  "message.jm_server.deletion_success": "Usunięty punkt trasy",
-  "message.jm_server.deletion_failure": "Nie można usunąć punktu trasy na serwerze",
-  "message.jm_server.creation_success": "Utworzono punkt orientacyjny",
-  "message.jm_server.creation_failure": "Nie można utworzyć punktu nawigacyjnego na serwerze.\nZaleca się usunięcie punktu nawigacyjnego i ponowną próbę.",
-  "message.jm_server.modified_success": "Zaktualizowany punkt trasy"
-}

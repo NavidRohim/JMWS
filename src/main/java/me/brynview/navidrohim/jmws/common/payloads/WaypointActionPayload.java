@@ -1,9 +1,9 @@
-package me.brynview.navidrohim.jm_server.common.payloads;
+package me.brynview.navidrohim.jmws.common.payloads;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import me.brynview.navidrohim.jm_server.JMServer;
-import me.brynview.navidrohim.jm_server.common.utils.JsonStaticHelper;
+import me.brynview.navidrohim.jmws.JMServer;
+import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "jm_server",
+  "id": "jmws",
   "version": "${version}",
-  "name": "JourneyMap Server",
+  "name": "JourneyMap Waypoint Sync",
   "description": "This mod allows you to save waypoints on JourneyMap between multiple devices via the player/account UUID on the server",
   "authors": [
     "Navid Rohim (Programming)",
@@ -13,20 +13,20 @@
     "email": "samirohim@gmail.com"
   },
   "license": "All-Rights-Reserved",
-  "icon": "assets/jm_server/icon.png",
+  "icon": "assets/jmws/icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [
-      "me.brynview.navidrohim.jm_server.client.JMServerClient"
+      "me.brynview.navidrohim.jmws.client.JMServerClient"
     ],
     "main": [
-      "me.brynview.navidrohim.jm_server.JMServer"
+      "me.brynview.navidrohim.jmws.JMServer"
     ],
     "server": [
-      "me.brynview.navidrohim.jm_server.server.JMServerServerSide"
+      "me.brynview.navidrohim.jmws.server.JMServerServerSide"
     ],
     "journeymap": [
-      "me.brynview.navidrohim.jm_server.client.plugin.IClientPluginJM"
+      "me.brynview.navidrohim.jmws.client.plugin.IClientPluginJM"
     ]
   },
   "depends": {

@@ -1,9 +1,9 @@
-package me.brynview.navidrohim.jm_server.common.payloads;
+package me.brynview.navidrohim.jmws.common.payloads;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.brynview.navidrohim.jm_server.JMServer;
-import me.brynview.navidrohim.jm_server.common.SavedWaypoint;
+import me.brynview.navidrohim.jmws.JMServer;
+import me.brynview.navidrohim.jmws.common.SavedWaypoint;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
@@ -40,10 +40,6 @@ public record RegisterUserPayload(String jsonData) implements CustomPayload {
         }
 
         return waypointData;
-    }
-
-    public SavedWaypoint getSavedWaypoint() {
-        return new SavedWaypoint(this);
     }
 }
 

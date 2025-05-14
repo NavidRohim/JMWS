@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jm_server.common.utils;
+package me.brynview.navidrohim.jmws.common.utils;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
