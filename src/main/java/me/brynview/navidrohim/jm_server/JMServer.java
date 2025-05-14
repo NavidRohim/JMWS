@@ -52,17 +52,17 @@ public class JMServer implements ModInitializer {
                         .then(literal("clearAll").executes(clearallContext -> {
                             ServerPlayerEntity player = clearallContext.getSource().getPlayer();
                             if (player != null) {
-                                WaypointIOInterface.deleteAllUserWaypoints(player.getUuid());
+                                 WaypointIOInterface.deleteAllUserWaypoints(player.getUuid());
 
-                                 WaypointActionPayload waypointActionPayload = new WaypointActionPayload(
-                                         JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.deletion_all_success", true)
-                                 );
                                  WaypointActionPayload refreshPayload = new WaypointActionPayload(
                                          JsonStaticHelper.makeServerUpdateRequestJson()
                                  );
+                                 WaypointActionPayload deleteAllClientsidePayload = new WaypointActionPayload(
+                                         JsonStaticHelper.makeDeleteClientWaypointRequestJson("*") // * = Delete all
+                                 );
 
-                                 ServerPlayNetworking.send(player, waypointActionPayload);
-                                ServerPlayNetworking.send(player, refreshPayload);
+                                 ServerPlayNetworking.send(player, refreshPayload);
+                                ServerPlayNetworking.send(player, deleteAllClientsidePayload);
                             }
                             return 1;
                         }))

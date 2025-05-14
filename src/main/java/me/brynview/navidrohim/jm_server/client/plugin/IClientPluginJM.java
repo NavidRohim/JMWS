@@ -22,10 +22,12 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.TranslatableOption;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3d;
 
 import java.util.*;
 
@@ -52,6 +54,12 @@ public class IClientPluginJM implements IClientPlugin
         return INSTANCE;
     }
 
+    public static void sendUserAlert(String text, boolean overlayText, boolean ignoreConfig) {
+        MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
+        if ((config.showAlerts() || ignoreConfig) && minecraftClientInstance.player != null) {
+            minecraftClientInstance.player.sendMessage(Text.of(text), overlayText);
+        }
+    }
     public boolean getEnabledStatus() {
         MinecraftClient minecraftClient = MinecraftClient.getInstance();
         return (config.enabled() && !minecraftClient.isInSingleplayer());
@@ -142,9 +150,7 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     public static void updateWaypoints(MinecraftClient minecraftClient) {
-        if (minecraftClient.player != null && config.showAlerts()) {
-            minecraftClient.player.sendMessage(Text.translatable("message.jm_server.modified_success"), true);
-        }
+        sendUserAlert(Text.translatable("message.jm_server.modified_success").getString(), true, false);
         ClientPlayNetworking.send(new WaypointActionPayload(JsonStaticHelper.makeWaypointRequestJson()));
     }
 
@@ -189,9 +195,12 @@ public class IClientPluginJM implements IClientPlugin
     // Handler for WaypointActionPayload
     public static void HandlePacket(WaypointActionPayload waypointPayload, ClientPlayNetworking.Context context) {
         if (getInstance().getEnabledStatus()) {
+            JMServer.LOGGER.info(waypointPayload.arguments());
             MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
+            String firstArgument = waypointPayload.arguments().getFirst().getAsString();
 
-            if (minecraftClientInstance.player == null) {
+            if (minecraftClientInstance.player == null)
+            {
                 return;
             }
 
@@ -199,29 +208,28 @@ public class IClientPluginJM implements IClientPlugin
                 case "creation_response" -> {
                     JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy();
 
-                    // Handles if the user has made waypoints before (with the mod disabled or when it wasnt installed) and uploads them to the server.
                     List<SavedWaypoint> savedWaypoints = IClientPluginJM.getSavedWaypoints(json, context.player().getUuid());
-                    List<String> remoteWaypointsGuid = new ArrayList<>();
+                    List<BlockPos> remoteWaypointsGuid = new ArrayList<>();
 
+                    // Add server waypoint coordinates onto list to check
                     for (SavedWaypoint savedWaypoint : savedWaypoints) {
-                        remoteWaypointsGuid.add(savedWaypoint.getWaypointLocalID());
+                        remoteWaypointsGuid.add(new BlockPos(savedWaypoint.getWaypointX(), savedWaypoint.getWaypointY(), savedWaypoint.getWaypointZ()));
                     }
 
                     List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
-
-                    JMServer.LOGGER.info(remoteWaypointsGuid);
                     for (Waypoint existingWaypoint : existingWaypoints)
                     {
-                        JMServer.LOGGER.info(existingWaypoint.getGuid());
-                        if (!remoteWaypointsGuid.contains(existingWaypoint.getGuid()))
+                        // check if waypoint already exists locally while not being in the server (meaning it was created with the mod off or not installed)
+                        if (!remoteWaypointsGuid.contains(existingWaypoint.getBlockPos())) // this is only checked by using the block position, there will be a bug I can feel it
                         {
                             getInstance().createAction(existingWaypoint, context.player()); // todo; add "silent" parameter (doesnt alert user of creation)
-                            JMServer.LOGGER.info("Added -> " + existingWaypoint.getName() + " while mod was disabled / uninstalled.");
                         }
                     }
 
+                    // remove all to update (if waypoint has been removed)
                     INSTANCE.jmAPI.removeAllWaypoints("journeymap");
 
+                    // Add waypoints registered on the server
                     for (SavedWaypoint savedWaypoint : savedWaypoints) {
 
                         Waypoint waypointObj = WaypointFactory.createClientWaypoint(
@@ -238,20 +246,26 @@ public class IClientPluginJM implements IClientPlugin
 
                         INSTANCE.waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
                         INSTANCE.jmAPI.addWaypoint("journeymap", waypointObj);
+
                     }
                 }
                 case "update" -> {
                     IClientPluginJM.updateWaypoints(MinecraftClient.getInstance());
                 }
                 case "display_interval" -> {
-                    if (config.showAlerts()) {
-                        minecraftClientInstance.player.sendMessage(Text.of("Waypoints updated every " + INSTANCE.tickCounterUpdateThreshold / 20 + " seconds."), true);
-                    }
+                    sendUserAlert("Waypoints updated every " + INSTANCE.tickCounterUpdateThreshold / 20 + " seconds.", true, false);
                 }
                 case "alert" -> {
-                    if (config.showAlerts()) {
-                        minecraftClientInstance.player.sendMessage(Text.translatable(waypointPayload.arguments().get(0).getAsString()), waypointPayload.arguments().get(1).getAsBoolean());
+                    sendUserAlert(Text.translatable(firstArgument).getString(), waypointPayload.arguments().get(1).getAsBoolean(), false);
+                }
+                case "deleteWaypoint" -> {
+
+                    if (Objects.equals(firstArgument, "*")) {
+                        INSTANCE.jmAPI.removeAllWaypoints("journeymap");
+                    } else {
+                        INSTANCE.jmAPI.removeWaypoint("journeymap", INSTANCE.waypointIdentifierMap.get(firstArgument));
                     }
+                    sendUserAlert(Text.translatable("message.jm_server.deletion_all_success").getString(), true, false);
                 }
             }
         }

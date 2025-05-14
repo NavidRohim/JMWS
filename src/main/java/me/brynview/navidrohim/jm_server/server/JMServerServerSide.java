@@ -88,14 +88,12 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                 try {
                     List<String> playerWaypoints = WaypointIOInterface.getPlayerWaypointNames(context.player().getUuid());
                     List<String> waypointUUIDs = new ArrayList<>();
-                    /*
-
 
                     for (String savedWaypointString : playerWaypoints) {
                         SavedWaypoint savedWaypoint = new SavedWaypoint(JsonParser.parseString(savedWaypointString).getAsJsonObject(), context.player().getUuid());
                         waypointUUIDs.add(savedWaypoint.getUniversalIdentifier());
                     }
-                    */
+
                     HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
 
                     for (int i = 0 ; i < playerWaypoints.size() ; i++) {
@@ -108,7 +106,7 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                     WaypointActionPayload waypointPayloadOutbound = new WaypointActionPayload(jsonData);
                     ServerPlayNetworking.send(player, waypointPayloadOutbound);
 
-
+                    // todo; fix arguments being empty when sending waypoints (getting error on client side saying it cannot get first argument)
                 } catch (IOException ioe) {
                     JMServer.LOGGER.error(ioe.getMessage());
                 }

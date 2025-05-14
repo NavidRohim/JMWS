@@ -58,7 +58,15 @@ public class JsonStaticHelper {
                 "}";
     }
 
+    public static String makeDeleteClientWaypointRequestJson(String waypointUUID) {
+        return "{\n" +
+                "  \"command\": \"deleteWaypoint\",\n" +
+                "  \"arguments\": [\"" + waypointUUID + "\"]\n" +
+                "}";
+    }
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {
         return JsonParser.parseString(jsonString).getAsJsonObject();
     }
 }
+
+// this whole class is scuffed. I cannot be hard coding json strings bro. must change.
