@@ -6,6 +6,7 @@
   "message.jm_server.creation_success": "Created waypoint",
   "message.jm_server.creation_failure": "Could not create waypoint on the server.\nIt is recommended to delete the waypoint and try again.",
   "message.jm_server.modified_success": "Updated waypoints",
+  "message.jm_server.modified_waypoint_success": "Updated waypoint",
 
   "text.config.jmserver-config.title": "JourneyMap Waypoint Syncing (JMWS)",
   "text.config.jmserver-config.option.showAlerts.tooltip": "Whether waypoint creation, deletion or other alerts are shown.",

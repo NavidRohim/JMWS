@@ -8,11 +8,11 @@ import java.util.*;
 
 public class JsonStaticHelper {
 
-    public static String makeDeleteRequestJson(String waypointFilename) {
+    public static String makeDeleteRequestJson(String waypointFilename, boolean silent) {
         return "{\n" +
                 "  \"command\": \"delete\",\n" +
                 "  \"arguments\": [\n" +
-                "  \"" + waypointFilename + "\"]\n" +
+                "  \"" + waypointFilename + "\", " + silent + "]\n" +
                 "}";
     }
 
@@ -24,17 +24,17 @@ public class JsonStaticHelper {
                 }""";
     }
 
-    public static String makeCreationRequestJson(Waypoint waypoint) {
+    public static String makeCreationRequestJson(Waypoint waypoint, boolean silent) {
         return "{\n" +
                 "  \"command\": \"create\",\n" +
-                "  \"arguments\": [" + waypoint + "]\n" +
+                "  \"arguments\": [" + waypoint + ", " + silent + "]\n" +
                 "}";
     }
 
-    public static String makeCreationRequestResponseJson(HashMap<String, String> jsonArray, List<String> waypointIDList) {
+    public static String makeCreationRequestResponseJson(HashMap<String, String> jsonArray) {
         return "{\n" +
                 "  \"command\": \"creation_response\",\n" +
-                "  \"arguments\": [" + jsonArray + ", " + waypointIDList + "]\n" +
+                "  \"arguments\": [" + jsonArray + "]\n" +
                 "}";
     }
 

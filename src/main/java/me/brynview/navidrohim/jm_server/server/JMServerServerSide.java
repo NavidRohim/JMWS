@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jm_server.server;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
 import io.wispforest.owo.config.Option;
 import me.brynview.navidrohim.jm_server.JMServer;
 import me.brynview.navidrohim.jm_server.client.plugin.IClientPluginJM;
@@ -36,6 +37,7 @@ import java.util.List;
 
 import static net.minecraft.server.command.CommandManager.*;
 
+
 public class JMServerServerSide implements DedicatedServerModInitializer {
 
     @Override
@@ -61,38 +63,39 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
         switch (command) {
             case "delete" -> {
                 boolean result = WaypointIOInterface.deleteWaypoint(arguments.getFirst().getAsString());
-                if (result) {
-                    alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.deletion_success", true));
-                } else {
-                    alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.deletion_failure", true));
-                }
+                boolean silent = arguments.get(1).getAsBoolean();
 
-                ServerPlayNetworking.send(player, alertMessagePayload);
+                if (!silent) {
+                    if (result) {
+                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.deletion_success", true));
+                    } else {
+                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.deletion_failure", true));
+                    }
+
+                    ServerPlayNetworking.send(player, alertMessagePayload);
+                }
             }
 
             case "create" -> {
                 JsonObject jsonCreationData = arguments.getFirst().getAsJsonObject();
+                boolean silent = arguments.get(1).getAsBoolean();
                 boolean waypointCreationSuccess = WaypointIOInterface.createWaypoint(jsonCreationData, context.player().getUuid());
 
-                if (waypointCreationSuccess) {
-                    alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.creation_success", true));
-                } else {
-                    alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.creation_failure", false));
-                }
+                if (!silent) {
+                    if (waypointCreationSuccess) {
+                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.creation_success", true));
+                    } else {
+                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jm_server.creation_failure", false));
+                    }
 
-                ServerPlayNetworking.send(player, alertMessagePayload);
+                    ServerPlayNetworking.send(player, alertMessagePayload);
+                }
 
 
             }
             case "request" -> {
                 try {
                     List<String> playerWaypoints = WaypointIOInterface.getPlayerWaypointNames(context.player().getUuid());
-                    List<String> waypointUUIDs = new ArrayList<>();
-
-                    for (String savedWaypointString : playerWaypoints) {
-                        SavedWaypoint savedWaypoint = new SavedWaypoint(JsonParser.parseString(savedWaypointString).getAsJsonObject(), context.player().getUuid());
-                        waypointUUIDs.add(savedWaypoint.getUniversalIdentifier());
-                    }
 
                     HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
 
@@ -102,7 +105,7 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                         jsonWaypointPayloadArray.put(String.valueOf(i), jsonWaypointFileString);
                     }
 
-                    String jsonData = JsonStaticHelper.makeCreationRequestResponseJson(jsonWaypointPayloadArray, waypointUUIDs);
+                    String jsonData = JsonStaticHelper.makeCreationRequestResponseJson(jsonWaypointPayloadArray);
                     WaypointActionPayload waypointPayloadOutbound = new WaypointActionPayload(jsonData);
                     ServerPlayNetworking.send(player, waypointPayloadOutbound);
 

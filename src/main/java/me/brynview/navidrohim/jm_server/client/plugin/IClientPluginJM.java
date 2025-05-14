@@ -70,12 +70,12 @@ public class IClientPluginJM implements IClientPlugin
         return waypointIdentifierMap.get(persistentWaypointID);
     }
 
-    private void deleteAction(Waypoint waypoint, ClientPlayerEntity player) {
+    private void deleteAction(Waypoint waypoint, ClientPlayerEntity player, boolean silent) {
 
         String waypointFilename = WaypointIOInterface.getWaypointFilename(waypoint, player.getUuid());
 
         waypointIdentifierMap.remove(waypoint.getCustomData());
-        String jsonPacketData = JsonStaticHelper.makeDeleteRequestJson(waypointFilename);
+        String jsonPacketData = JsonStaticHelper.makeDeleteRequestJson(waypointFilename, silent);
         WaypointActionPayload waypointActionPayload = new WaypointActionPayload(jsonPacketData);
 
         ClientPlayNetworking.send(waypointActionPayload);
@@ -83,17 +83,20 @@ public class IClientPluginJM implements IClientPlugin
 
     private void updateAction(Waypoint waypoint, Waypoint oldWaypoint, ClientPlayerEntity player)
     {
-        this.deleteAction(oldWaypoint, player);
-        this.createAction(waypoint, player);
+        this.deleteAction(oldWaypoint, player, true);
+        this.createAction(waypoint, player, true);
+
+        jmAPI.removeWaypoint("journeymap", oldWaypoint);
+        sendUserAlert(Text.translatable("message.jm_server.modified_waypoint_success").getString(), true, false);
     }
 
-    private void createAction(Waypoint waypoint, ClientPlayerEntity player) {
+    private void createAction(Waypoint waypoint, ClientPlayerEntity player, boolean silent) {
 
         String waypointIdentifier = DigestUtils.sha256Hex(player.getUuid().toString() + waypoint.getGuid() + waypoint.getName());
 
         waypointIdentifierMap.put(waypointIdentifier, waypoint);
         waypoint.setCustomData(waypointIdentifier);
-        String creationData = JsonStaticHelper.makeCreationRequestJson(waypoint);
+        String creationData = JsonStaticHelper.makeCreationRequestJson(waypoint, silent);
         ClientPlayNetworking.send(new WaypointActionPayload(creationData));
     }
 
@@ -111,11 +114,11 @@ public class IClientPluginJM implements IClientPlugin
 
                 case CREATE ->
                 {
-                    this.createAction(waypointEvent.waypoint, player);
+                    this.createAction(waypointEvent.waypoint, player, false);
                 }
                 case DELETED ->
                 {
-                    this.deleteAction(waypointEvent.waypoint, player);
+                    this.deleteAction(waypointEvent.waypoint, player, false);
                 }
                 case UPDATE ->
                 {
@@ -163,9 +166,15 @@ public class IClientPluginJM implements IClientPlugin
 
                 tickCounter++;
                 if (tickCounter >= tickCounterUpdateThreshold) {
+
                     updateWaypoints(minecraftClient);
                     tickCounter = 0;
-                    tickCounterUpdateThreshold = config.updateWaypointFrequency();
+
+                    if (!(tickCounterUpdateThreshold >= config.updateWaypointFrequency())) {
+                        tickCounterUpdateThreshold = tickCounterUpdateThreshold * 2;
+                    } else {
+                        tickCounterUpdateThreshold = config.updateWaypointFrequency();
+                    }
                 }
             }
         } else {
@@ -195,9 +204,7 @@ public class IClientPluginJM implements IClientPlugin
     // Handler for WaypointActionPayload
     public static void HandlePacket(WaypointActionPayload waypointPayload, ClientPlayNetworking.Context context) {
         if (getInstance().getEnabledStatus()) {
-            JMServer.LOGGER.info(waypointPayload.arguments());
             MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
-            String firstArgument = waypointPayload.arguments().getFirst().getAsString();
 
             if (minecraftClientInstance.player == null)
             {
@@ -222,7 +229,8 @@ public class IClientPluginJM implements IClientPlugin
                         // check if waypoint already exists locally while not being in the server (meaning it was created with the mod off or not installed)
                         if (!remoteWaypointsGuid.contains(existingWaypoint.getBlockPos())) // this is only checked by using the block position, there will be a bug I can feel it
                         {
-                            getInstance().createAction(existingWaypoint, context.player()); // todo; add "silent" parameter (doesnt alert user of creation)
+                            getInstance().createAction(existingWaypoint, context.player(), true);
+                            sendUserAlert("Added local waypoint to server.", true, false);
                         }
                     }
 
@@ -247,6 +255,8 @@ public class IClientPluginJM implements IClientPlugin
                         INSTANCE.waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
                         INSTANCE.jmAPI.addWaypoint("journeymap", waypointObj);
 
+                        // todo; in future update, add all waypoint data manually by chaining methods (very stupid, I wish I didnt have to)
+
                     }
                 }
                 case "update" -> {
@@ -256,10 +266,11 @@ public class IClientPluginJM implements IClientPlugin
                     sendUserAlert("Waypoints updated every " + INSTANCE.tickCounterUpdateThreshold / 20 + " seconds.", true, false);
                 }
                 case "alert" -> {
+                    String firstArgument = waypointPayload.arguments().getFirst().getAsString();
                     sendUserAlert(Text.translatable(firstArgument).getString(), waypointPayload.arguments().get(1).getAsBoolean(), false);
                 }
                 case "deleteWaypoint" -> {
-
+                    String firstArgument = waypointPayload.arguments().getFirst().getAsString();
                     if (Objects.equals(firstArgument, "*")) {
                         INSTANCE.jmAPI.removeAllWaypoints("journeymap");
                     } else {
