@@ -94,8 +94,9 @@ public class IClientPluginJM implements IClientPlugin
     private void createAction(Waypoint waypoint, ClientPlayerEntity player, boolean silent) {
 
         String waypointIdentifier = DigestUtils.sha256Hex(player.getUuid().toString() + waypoint.getGuid() + waypoint.getName());
-
         waypointIdentifierMap.put(waypointIdentifier, waypoint);
+
+        waypoint.setPersistent(false);
         waypoint.setCustomData(waypointIdentifier);
         String creationData = JsonStaticHelper.makeCreationRequestJson(waypoint, silent);
         ClientPlayNetworking.send(new WaypointActionPayload(creationData));
@@ -247,8 +248,9 @@ public class IClientPluginJM implements IClientPlugin
                                         savedWaypoint.getWaypointY(),
                                         savedWaypoint.getWaypointZ()),
                                 savedWaypoint.getDimensionString(),
-                                savedWaypoint.getWaypointPersistence());
+                                false);
 
+                        // Reconstruct waypoint
                         waypointObj.setColor(savedWaypoint.getWaypointColour());
                         waypointObj.setName(savedWaypoint.getWaypointName());
                         waypointObj.setCustomData(savedWaypoint.getUniversalIdentifier());
@@ -264,19 +266,13 @@ public class IClientPluginJM implements IClientPlugin
 
                         INSTANCE.waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
                         INSTANCE.jmAPI.addWaypoint(savedWaypoint.getWaypointModId(), waypointObj);
-                        JMServer.LOGGER.info(savedWaypoint.getDimensionString());
-                        // todo; in future, store groups as well (also I realsed journeymap uses dat files to store data. Have I wasted all my damn time on this stupid project???)
-                        /*
+
+                        // Add waypoint to group
                         WaypointGroup waypointGroup = INSTANCE.jmAPI.getWaypointGroup(savedWaypoint.getWaypointGroupId());
                         if (waypointGroup != null) { // can it not exist?
-                            JMServer.LOGGER.info(waypointGroup.getName());
                             waypointGroup.addWaypoint(waypointObj);
-                            waypointObj.getG
-                        } else {
-                            INSTANCE.jmAPI.addWaypoint(savedWaypoint.getWaypointModId(), waypointObj);
-                        }*/
+                        }
 
-                        // ~~todo; in future update, add all waypoint data manually by chaining methods (very stupid, I wish I didnt have to)~~
                     }
                 }
 
