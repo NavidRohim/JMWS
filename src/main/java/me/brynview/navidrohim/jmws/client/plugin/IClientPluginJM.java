@@ -20,6 +20,7 @@ import me.brynview.navidrohim.jmws.common.utils.WaypointIOInterface;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
@@ -112,6 +113,7 @@ public class IClientPluginJM implements IClientPlugin
             }
 
             Waypoint oldWaypoint = this.getOldWaypoint(waypointEvent.waypoint);
+            JMServer.LOGGER.info(waypointEvent.waypoint.getName());
             switch (waypointEvent.getContext()) {
 
                 case CREATE ->
@@ -241,14 +243,14 @@ public class IClientPluginJM implements IClientPlugin
 
                     // Add waypoints registered on the server
                     for (SavedWaypoint savedWaypoint : savedWaypoints) {
-
                         Waypoint waypointObj = WaypointFactory.createClientWaypoint(
-                                savedWaypoint.getWaypointModId(),
+                                "journeymap",
                                 BlockPos.ofFloored(savedWaypoint.getWaypointX(),
                                         savedWaypoint.getWaypointY(),
                                         savedWaypoint.getWaypointZ()),
                                 savedWaypoint.getDimensionString(),
                                 false);
+
 
                         // Reconstruct waypoint
                         waypointObj.setColor(savedWaypoint.getWaypointColour());
@@ -264,14 +266,14 @@ public class IClientPluginJM implements IClientPlugin
 
                         waypointObj.setDimensions(savedWaypoint.getWaypointDimensions());
 
+
+                        //Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData()); Will add later once build is released.
                         INSTANCE.waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
-                        INSTANCE.jmAPI.addWaypoint(savedWaypoint.getWaypointModId(), waypointObj);
+                        INSTANCE.jmAPI.addWaypoint("journeymap", waypointObj);
 
                         // Add waypoint to group
                         WaypointGroup waypointGroup = INSTANCE.jmAPI.getWaypointGroup(savedWaypoint.getWaypointGroupId());
-                        if (waypointGroup != null) { // can it not exist?
-                            waypointGroup.addWaypoint(waypointObj);
-                        }
+                        waypointGroup.addWaypoint(waypointObj);
 
                     }
                 }

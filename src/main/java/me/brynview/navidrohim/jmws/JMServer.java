@@ -1,4 +1,6 @@
 package me.brynview.navidrohim.jmws;
+import journeymap.api.v2.client.JourneyMapPlugin;
+import journeymap.api.v2.client.option.Config;
 import me.brynview.navidrohim.jmws.common.payloads.WaypointActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
 import me.brynview.navidrohim.jmws.common.payloads.RegisterUserPayload;
