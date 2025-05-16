@@ -2,14 +2,23 @@ package me.brynview.navidrohim.jmws.server;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import journeymap.api.v2.common.event.ServerEventRegistry;
+import journeymap.api.v2.common.waypoint.Waypoint;
+import journeymap.api.v2.common.waypoint.WaypointFactory;
 import me.brynview.navidrohim.jmws.JMServer;
 import me.brynview.navidrohim.jmws.common.payloads.WaypointActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
 import me.brynview.navidrohim.jmws.common.utils.WaypointIOInterface;
 import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3i;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,7 +85,7 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
             }
             case "request" -> {
                 try {
-                    List<String> playerWaypoints = WaypointIOInterface.getPlayerWaypointNames(context.player().getUuid());
+                    List<String> playerWaypoints = WaypointIOInterface.getPlayerWaypointNames(player.getUuid());
 
                     HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
 

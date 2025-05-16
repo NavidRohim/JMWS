@@ -89,5 +89,9 @@ public class WaypointIOInterface {
             }
         return waypointFileList;
     };
+
+    public static String getDeathWaypointString() {
+        return "";
+    }
 }
 

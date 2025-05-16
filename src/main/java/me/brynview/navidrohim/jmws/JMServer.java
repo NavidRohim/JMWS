@@ -19,7 +19,7 @@ import static net.minecraft.server.command.CommandManager.*;
 public class JMServer implements ModInitializer {
 
     public static final String MODID = "jmws";
-    public static final String VERSION = "1.0.4-beta2";
+    public static final String VERSION = "1.0.4-rc";
     public static final Logger LOGGER = LogManager.getFormatterLogger(MODID);
 
     @Override
@@ -64,6 +64,13 @@ public class JMServer implements ModInitializer {
 
                                  ServerPlayNetworking.send(player, refreshPayload);
                                 ServerPlayNetworking.send(player, deleteAllClientsidePayload);
+                            }
+                            return 1;
+                        }))
+                        .then(literal("nextUpdate").executes(updateDisplayContext -> {
+                            if (updateDisplayContext.getSource().getPlayer() != null) {
+                                WaypointActionPayload payload = new WaypointActionPayload(JsonStaticHelper.makeEmptyServerCommandRequestJson("display_next_update"));
+                                ServerPlayNetworking.send(updateDisplayContext.getSource().getPlayer(), payload);
                             }
                             return 1;
                         }))

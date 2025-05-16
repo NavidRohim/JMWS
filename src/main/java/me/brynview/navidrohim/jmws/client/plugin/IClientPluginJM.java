@@ -137,13 +137,16 @@ public class IClientPluginJM implements IClientPlugin
     public void registerEvents() {
         ClientPlayNetworking.registerGlobalReceiver(WaypointActionPayload.ID, IClientPluginJM::HandlePacket);
         CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", JMServer.MODID, this::WaypointCreationHandler);
+        //ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe("jmapi", JMServer.MODID, this::DeathWaypointHandler);
         ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
     }
 
     public void unregisterEvents() {
         ClientPlayNetworking.unregisterGlobalReceiver(WaypointActionPayload.ID.id());
         CommonEventRegistry.WAYPOINT_EVENT.unsubscribe("jmapi", JMServer.MODID);
+        //ClientEventRegistry.DEATH_WAYPOINT_EVENT.unsubscribe("jmapi", JMServer.MODID);
     }
+
     @Override
     public void initialize(final @NotNull IClientAPI jmAPI)
     {
@@ -175,12 +178,7 @@ public class IClientPluginJM implements IClientPlugin
 
                     updateWaypoints();
                     tickCounter = 0;
-
-                    if (!(tickCounterUpdateThreshold >= config.updateWaypointFrequency())) {
-                        tickCounterUpdateThreshold = tickCounterUpdateThreshold * 2;
-                    } else {
-                        tickCounterUpdateThreshold = config.updateWaypointFrequency();
-                    }
+                    tickCounterUpdateThreshold = config.updateWaypointFrequency();
                 }
             }
         } else {
@@ -227,71 +225,39 @@ public class IClientPluginJM implements IClientPlugin
 
                     // Add server waypoint coordinates onto list to check
                     for (SavedWaypoint savedWaypoint : savedWaypoints) {
-                        JMServer.LOGGER.info(savedWaypoint.getRawPacketData());
                         remoteWaypointsGuid.add(new BlockPos(savedWaypoint.getWaypointX(), savedWaypoint.getWaypointY(), savedWaypoint.getWaypointZ()));
                     }
 
                     List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
+                    // remove all to update (if waypoint has been removed)
+                    getInstance().jmAPI.removeAllWaypoints("journeymap");
+
+
                     for (Waypoint existingWaypoint : existingWaypoints)
                     {
                         // check if waypoint already exists locally while not being in the server (meaning it was created with the mod off or not installed)
                         if (!remoteWaypointsGuid.contains(existingWaypoint.getBlockPos())) // this is only checked by using the block position, there will be a bug I can feel it
                         {
-                            if (existingWaypoint.getGroupId() == "journeymap_death") { // I have to set death waypoint colour manually because I cannot add waypoint to death group (death group overrides the colour to red by default)
-                                existingWaypoint.setColor(-65536); // red
-                            }
+
                             getInstance().createAction(existingWaypoint, context.player(), true);
-                            sendUserAlert("Added local waypoint to server.", true, false);
                             hasLocalWaypoint = true;
                         }
                     }
 
-                    // remove all to update (if waypoint has been removed)
-                    INSTANCE.jmAPI.removeAllWaypoints("journeymap");
-
                     // Add waypoints registered on the server
                     for (SavedWaypoint savedWaypoint : savedWaypoints) {
-                        Waypoint waypointObj = WaypointFactory.createClientWaypoint(
-                                "journeymap",
-                                BlockPos.ofFloored(savedWaypoint.getWaypointX(),
-                                        savedWaypoint.getWaypointY(),
-                                        savedWaypoint.getWaypointZ()),
-                                savedWaypoint.getDimensionString(),
-                                false);
 
-
-                        // Reconstruct waypoint
-                        waypointObj.setColor(savedWaypoint.getWaypointColour());
-                        waypointObj.setName(savedWaypoint.getWaypointName());
-                        waypointObj.setCustomData(savedWaypoint.getUniversalIdentifier());
-                        waypointObj.setEnabled(savedWaypoint.getWaypointEnabled());
-                        waypointObj.setShowDeviation(savedWaypoint.getWaypointDeviation());
-
-                        waypointObj.setIconResourceLoctaion(savedWaypoint.getWaypointResourceString());
-                        waypointObj.setIconOpacity(savedWaypoint.getWaypointOpacity());
-                        waypointObj.setIconTextureSize(savedWaypoint.getWaypointTextureWidth(), savedWaypoint.getWaypointTextureHeight());
-                        waypointObj.setIconRotation(savedWaypoint.getWaypointRotation());
-
-                        waypointObj.setDimensions(savedWaypoint.getWaypointDimensions());
-
-
-                        //Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData()); Will add later once build is released.
-                        INSTANCE.waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
-                        WaypointGroup waypointGroup = INSTANCE.jmAPI.getWaypointGroup(savedWaypoint.getWaypointGroupId());
-
-                        if (savedWaypoint.getWaypointGroupId() != "journeymap_death") {
-                            INSTANCE.jmAPI.addWaypoint("journeymap", waypointObj);
-                        }
-
-                        // Add waypoint to group
-                        JMServer.LOGGER.info("group -> " + waypointGroup.toString() + " : " + savedWaypoint.getWaypointGroupId());
-                        waypointGroup.addWaypoint(waypointObj);
+                        // This is a method that will only work on a pre-release version of JourneyMap that hasnt been released yet.
+                        Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData());
+                        getInstance().waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
+                        getInstance().jmAPI.addWaypoint("journeymap", waypointObj);
 
                     }
 
                     // this refreshes the client again because of the local waypoints
                     if (hasLocalWaypoint) {
                         updateWaypoints();
+                        sendUserAlert(Text.translatable("message.jmws.local_waypoint_upload").getString(), true, false);
                     }
                 }
 
@@ -313,6 +279,9 @@ public class IClientPluginJM implements IClientPlugin
                         INSTANCE.jmAPI.removeWaypoint("journeymap", INSTANCE.waypointIdentifierMap.get(firstArgument));
                     }
                     sendUserAlert(Text.translatable("message.jmws.deletion_all_success").getString(), true, false);
+                }
+                case "display_next_update" -> {
+                    sendUserAlert("Next waypoint update in " + (INSTANCE.tickCounterUpdateThreshold - INSTANCE.tickCounter) / 20 + " second(s)", true, false);
                 }
             }
         }
