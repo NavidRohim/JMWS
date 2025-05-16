@@ -5,7 +5,10 @@ import com.google.gson.JsonObject;
 import journeymap.api.v2.client.IClientPlugin;
 import journeymap.api.v2.client.JourneyMapPlugin;
 import journeymap.api.v2.client.IClientAPI;
+import journeymap.api.v2.client.event.DeathWaypointEvent;
+import journeymap.api.v2.common.event.ClientEventRegistry;
 import journeymap.api.v2.common.event.CommonEventRegistry;
+import journeymap.api.v2.common.event.ServerEventRegistry;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
@@ -113,7 +116,6 @@ public class IClientPluginJM implements IClientPlugin
             }
 
             Waypoint oldWaypoint = this.getOldWaypoint(waypointEvent.waypoint);
-            JMServer.LOGGER.info(waypointEvent.waypoint.getName());
             switch (waypointEvent.getContext()) {
 
                 case CREATE ->
@@ -156,7 +158,7 @@ public class IClientPluginJM implements IClientPlugin
         }));
     }
 
-    public static void updateWaypoints(MinecraftClient minecraftClient) {
+    public static void updateWaypoints() {
         sendUserAlert(Text.translatable("message.jmws.modified_success").getString(), true, false);
         ClientPlayNetworking.send(new WaypointActionPayload(JsonStaticHelper.makeWaypointRequestJson()));
     }
@@ -171,7 +173,7 @@ public class IClientPluginJM implements IClientPlugin
                 tickCounter++;
                 if (tickCounter >= tickCounterUpdateThreshold) {
 
-                    updateWaypoints(minecraftClient);
+                    updateWaypoints();
                     tickCounter = 0;
 
                     if (!(tickCounterUpdateThreshold >= config.updateWaypointFrequency())) {
@@ -218,12 +220,14 @@ public class IClientPluginJM implements IClientPlugin
             switch (waypointPayload.command()) {
                 case "creation_response" -> {
                     JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy();
+                    Boolean hasLocalWaypoint = false;
 
                     List<SavedWaypoint> savedWaypoints = IClientPluginJM.getSavedWaypoints(json, context.player().getUuid());
                     List<BlockPos> remoteWaypointsGuid = new ArrayList<>();
 
                     // Add server waypoint coordinates onto list to check
                     for (SavedWaypoint savedWaypoint : savedWaypoints) {
+                        JMServer.LOGGER.info(savedWaypoint.getRawPacketData());
                         remoteWaypointsGuid.add(new BlockPos(savedWaypoint.getWaypointX(), savedWaypoint.getWaypointY(), savedWaypoint.getWaypointZ()));
                     }
 
@@ -233,8 +237,12 @@ public class IClientPluginJM implements IClientPlugin
                         // check if waypoint already exists locally while not being in the server (meaning it was created with the mod off or not installed)
                         if (!remoteWaypointsGuid.contains(existingWaypoint.getBlockPos())) // this is only checked by using the block position, there will be a bug I can feel it
                         {
+                            if (existingWaypoint.getGroupId() == "journeymap_death") { // I have to set death waypoint colour manually because I cannot add waypoint to death group (death group overrides the colour to red by default)
+                                existingWaypoint.setColor(-65536); // red
+                            }
                             getInstance().createAction(existingWaypoint, context.player(), true);
                             sendUserAlert("Added local waypoint to server.", true, false);
+                            hasLocalWaypoint = true;
                         }
                     }
 
@@ -269,17 +277,26 @@ public class IClientPluginJM implements IClientPlugin
 
                         //Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData()); Will add later once build is released.
                         INSTANCE.waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
-                        INSTANCE.jmAPI.addWaypoint("journeymap", waypointObj);
+                        WaypointGroup waypointGroup = INSTANCE.jmAPI.getWaypointGroup(savedWaypoint.getWaypointGroupId());
+
+                        if (savedWaypoint.getWaypointGroupId() != "journeymap_death") {
+                            INSTANCE.jmAPI.addWaypoint("journeymap", waypointObj);
+                        }
 
                         // Add waypoint to group
-                        WaypointGroup waypointGroup = INSTANCE.jmAPI.getWaypointGroup(savedWaypoint.getWaypointGroupId());
+                        JMServer.LOGGER.info("group -> " + waypointGroup.toString() + " : " + savedWaypoint.getWaypointGroupId());
                         waypointGroup.addWaypoint(waypointObj);
 
+                    }
+
+                    // this refreshes the client again because of the local waypoints
+                    if (hasLocalWaypoint) {
+                        updateWaypoints();
                     }
                 }
 
                 case "update" -> {
-                    IClientPluginJM.updateWaypoints(MinecraftClient.getInstance());
+                    IClientPluginJM.updateWaypoints();
                 }
                 case "display_interval" -> {
                     sendUserAlert("Waypoints updated every " + INSTANCE.tickCounterUpdateThreshold / 20 + " seconds.", true, false);

@@ -10,9 +10,12 @@
     "Dempy (Icon, Polish translations)"
   ],
   "contact": {
-    "email": "samirohim@gmail.com"
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/journeymap-waypoint-syncing",
+    "sources": "https://github.com/NavidRohim/JMServer",
+    "issues": "https://github.com/NavidRohim/JMServer/issues",
+    "discord": "https://discord.gg/WNXRSaEbPe"
   },
-  "license": "All-Rights-Reserved",
+  "license": "MIT",
   "icon": "assets/jmws/icon.png",
   "environment": "*",
   "entrypoints": {
