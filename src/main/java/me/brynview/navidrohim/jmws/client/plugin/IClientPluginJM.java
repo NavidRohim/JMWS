@@ -65,6 +65,7 @@ public class IClientPluginJM implements IClientPlugin
             minecraftClientInstance.player.sendMessage(Text.of(text), overlayText);
         }
     }
+
     public boolean getEnabledStatus() {
         MinecraftClient minecraftClient = MinecraftClient.getInstance();
         return (config.enabled() && !minecraftClient.isInSingleplayer());
