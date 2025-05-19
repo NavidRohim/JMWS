@@ -19,7 +19,7 @@ import static net.minecraft.server.command.CommandManager.*;
 public class JMServer implements ModInitializer {
 
     public static final String MODID = "jmws";
-    public static final String VERSION = "1.0.5";
+    public static final String VERSION = "1.0.6";
     public static final Logger LOGGER = LogManager.getFormatterLogger(MODID);
 
     @Override

@@ -258,43 +258,9 @@ public class IClientPluginJM implements IClientPlugin
 
                     // Add waypoints registered on the server
                     for (SavedWaypoint savedWaypoint : savedWaypoints) {
-
-                        // This is a method that will only work on a pre-release version of JourneyMap that hasnt been released yet.
-                        Waypoint waypointObj = WaypointFactory.createClientWaypoint(
-                                savedWaypoint.getWaypointModId(),
-                                BlockPos.ofFloored(savedWaypoint.getWaypointX(),
-                                        savedWaypoint.getWaypointY(),
-                                        savedWaypoint.getWaypointZ()),
-                                savedWaypoint.getDimensionString(),
-                                savedWaypoint.getWaypointPersistence());
-
-                        waypointObj.setColor(savedWaypoint.getWaypointColour());
-
-                        // This checks to see if it is a death waypoint and changes the colour to red. I have to do this because the waypoints dont get added to the death group.
-                        // In the future this will be fixed. On another branch and a past commit this is actually fixed but it requires an unreleased version of JourneyMap.
-                        if (Objects.equals(savedWaypoint.getWaypointGroupId(), "journeymap_death")) {
-                            waypointObj.setColor(16711680); // red (255 r, rest are 0)
-                        } else {
-                            waypointObj.setColor(savedWaypoint.getWaypointColour());
-                        }
-
-                        // set waypoint metadata
-                        waypointObj.setName(savedWaypoint.getWaypointName());
-                        waypointObj.setCustomData(savedWaypoint.getUniversalIdentifier());
-                        waypointObj.setEnabled(savedWaypoint.getWaypointEnabled());
-                        waypointObj.setShowDeviation(savedWaypoint.getWaypointDeviation());
-                        waypointObj.setIconResourceLoctaion(savedWaypoint.getWaypointResourceString());
-                        waypointObj.setIconOpacity(savedWaypoint.getWaypointOpacity());
-                        waypointObj.setIconTextureSize(savedWaypoint.getWaypointTextureWidth(), savedWaypoint.getWaypointTextureHeight());
-                        waypointObj.setIconRotation(savedWaypoint.getWaypointRotation());
-                        waypointObj.setDimensions(savedWaypoint.getWaypointDimensions());
-
-                        // Add to group and map
+                        Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData()); // This is a method that will only work on a pre-release version of JourneyMap that hasnt been released yet.
                         getInstance().waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
                         getInstance().jmAPI.addWaypoint("journeymap", waypointObj);
-
-                        WaypointGroup waypointGroup = getInstance().jmAPI.getWaypointGroup(savedWaypoint.getWaypointGroupId());
-                        waypointGroup.addWaypoint(waypointObj);
                     }
 
                     // this refreshes the client again because of the local waypoints
