@@ -11,5 +11,6 @@ public class JMServerConfigModel {
     public boolean showAlerts = true;
     public boolean enabled = true;
     public int updateWaypointFrequency = 800;
+    public int serverHandshakeTimeout = 5;
 
 }

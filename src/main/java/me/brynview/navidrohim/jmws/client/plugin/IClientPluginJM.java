@@ -6,26 +6,21 @@ import com.google.gson.JsonParser;
 import journeymap.api.v2.client.IClientPlugin;
 import journeymap.api.v2.client.JourneyMapPlugin;
 import journeymap.api.v2.client.IClientAPI;
-import journeymap.api.v2.client.event.DeathWaypointEvent;
-import journeymap.api.v2.common.event.ClientEventRegistry;
 import journeymap.api.v2.common.event.CommonEventRegistry;
-import journeymap.api.v2.common.event.ServerEventRegistry;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
-import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.JMServer;
 import me.brynview.navidrohim.jmws.client.JMServerClient;
 import me.brynview.navidrohim.jmws.common.SavedWaypoint;
+import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.WaypointActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.JMWSConfig;
 import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
 import me.brynview.navidrohim.jmws.common.utils.WaypointIOInterface;
-import me.brynview.navidrohim.jmws.common.utils.WaypointPayloadCommand;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
@@ -36,18 +31,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 
 @JourneyMapPlugin(apiVersion = "2.0.0")
 public class IClientPluginJM implements IClientPlugin
 {
     private static final Logger log = LoggerFactory.getLogger(IClientPluginJM.class);
+    private static ScheduledFuture<?> timeoutTask;
+    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
     // API reference
     private IClientAPI jmAPI = null;
     private static IClientPluginJM INSTANCE;
 
     private final HashMap<String, Waypoint> waypointIdentifierMap = new HashMap<>();
     private boolean oldWorld = false;
+    private boolean serverHasMod = false;
 
     private static final JMWSConfig config = JMServerClient.CONFIG;
     private int tickCounterUpdateThreshold = config.updateWaypointFrequency();
@@ -70,7 +73,7 @@ public class IClientPluginJM implements IClientPlugin
 
     public boolean getEnabledStatus() {
         MinecraftClient minecraftClient = MinecraftClient.getInstance();
-        return (config.enabled() && !minecraftClient.isInSingleplayer());
+        return (serverHasMod && config.enabled() && !minecraftClient.isInSingleplayer());
     }
 
     public Waypoint getOldWaypoint(Waypoint newWaypoint) {
@@ -122,33 +125,16 @@ public class IClientPluginJM implements IClientPlugin
             switch (waypointEvent.getContext()) {
 
                 case CREATE ->
-                {
                     // Sends "create" packet | new = "SERVER_CREATE"
-                    this.createAction(waypointEvent.waypoint, player, false);
-                }
+                        this.createAction(waypointEvent.waypoint, player, false);
                 case DELETED ->
-                {
                     // Sends "delete" packet | new = "COMMON_SERVER_DELETE"
-                    this.deleteAction(waypointEvent.waypoint, player, false);
-                }
+                        this.deleteAction(waypointEvent.waypoint, player, false);
                 case UPDATE ->
-                {
                     // Sends both "delete" and "create" packet in respective order and respective enums.
-                    this.updateAction(waypointEvent.waypoint, oldWaypoint, player);
-                }
+                        this.updateAction(waypointEvent.waypoint, oldWaypoint, player);
             }
         }
-    }
-
-    public void registerEvents() {
-        ClientPlayNetworking.registerGlobalReceiver(WaypointActionPayload.ID, IClientPluginJM::HandlePacket);
-        CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", JMServer.MODID, this::WaypointCreationHandler);
-        ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
-    }
-
-    public void unregisterEvents() {
-        ClientPlayNetworking.unregisterGlobalReceiver(WaypointActionPayload.ID.id());
-        CommonEventRegistry.WAYPOINT_EVENT.unsubscribe("jmapi", JMServer.MODID);
     }
 
     @Override
@@ -156,12 +142,26 @@ public class IClientPluginJM implements IClientPlugin
     {
         this.jmAPI = jmAPI;
 
+        ClientPlayNetworking.registerGlobalReceiver(WaypointActionPayload.ID, IClientPluginJM::HandlePacket);
+        ClientPlayNetworking.registerGlobalReceiver(HandshakePayload.ID, IClientPluginJM::HandshakeHandler);
+
+        CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", JMServer.MODID, this::WaypointCreationHandler);
+        ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
         ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
-            this.registerEvents();
+            ClientPlayNetworking.send(new HandshakePayload());
+
+            timeoutTask = scheduler.schedule(() -> {
+                if (!serverHasMod) {
+                    MinecraftClient.getInstance().execute(() -> {
+                        sendUserAlert("§CServer does not have JMWS installed. JMWS will be disabled.", true, true);
+                    });
+                }
+            }, config.serverHandshakeTimeout(), TimeUnit.SECONDS);
         }));
 
         ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
-            this.unregisterEvents();
+            tickCounter = 0;
+            serverHasMod = false;
         }));
     }
 
@@ -177,7 +177,7 @@ public class IClientPluginJM implements IClientPlugin
         // Sends "sync" packet | New = SYNC
         if (minecraftClient.world != null && this.getEnabledStatus()) {
             if (!oldWorld) {
-                tickCounterUpdateThreshold = 40;
+                tickCounterUpdateThreshold = 20 * (config.serverHandshakeTimeout() + 1);
                 oldWorld = true;
             } else {
 
@@ -195,9 +195,6 @@ public class IClientPluginJM implements IClientPlugin
         }
     }
 
-    /**
-     * Used by JourneyMap to associate a modId with this plugin.
-     */
     @Override
     public String getModId()
     {
@@ -212,6 +209,16 @@ public class IClientPluginJM implements IClientPlugin
             waypoints.add(new SavedWaypoint(rawData, playerUUID));
         }
         return waypoints;
+    }
+
+    public static void HandshakeHandler(HandshakePayload handshakePayload, ClientPlayNetworking.Context context) {
+
+        sendUserAlert("§2Server has JMWS!", true, false);
+        getInstance().serverHasMod = true;
+
+        if (timeoutTask != null && !timeoutTask.isDone()) {
+            timeoutTask.cancel(false);
+        }
     }
 
     // Handler for WaypointActionPayload
@@ -230,8 +237,8 @@ public class IClientPluginJM implements IClientPlugin
                 // Sends no outbound data
                 case SYNC -> {
 
-                    JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy(); //.getFirst().getAsJsonObject().deepCopy();
-                    Boolean hasLocalWaypoint = false;
+                    JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy();
+                    boolean hasLocalWaypoint = false;
 
                     List<SavedWaypoint> savedWaypoints = IClientPluginJM.getSavedWaypoints(json, context.player().getUuid());
                     List<BlockPos> remoteWaypointsGuid = new ArrayList<>();

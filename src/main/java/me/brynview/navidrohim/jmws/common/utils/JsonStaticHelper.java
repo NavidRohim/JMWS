@@ -22,6 +22,11 @@ public class JsonStaticHelper {
 
         return json.toJSONString();
     }
+
+    public static String makeHandshakeRequestJson() {
+        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SERVER_HANDSHAKE, null);
+    }
+
     public static String makeDeleteRequestJson(String waypointFilename, boolean silent) {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_WAYPOINT, List.of(waypointFilename, silent));
     }

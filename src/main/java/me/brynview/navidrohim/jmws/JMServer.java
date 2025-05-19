@@ -1,6 +1,5 @@
 package me.brynview.navidrohim.jmws;
-import journeymap.api.v2.client.JourneyMapPlugin;
-import journeymap.api.v2.client.option.Config;
+import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.WaypointActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
 import me.brynview.navidrohim.jmws.common.payloads.RegisterUserPayload;
@@ -19,17 +18,20 @@ import static net.minecraft.server.command.CommandManager.*;
 public class JMServer implements ModInitializer {
 
     public static final String MODID = "jmws";
-    public static final String VERSION = "1.0.6";
+    public static final String VERSION = JMServer.class.getPackage().getImplementationVersion();
     public static final Logger LOGGER = LogManager.getFormatterLogger(MODID);
 
     @Override
     public void onInitialize() {
+
         // Packet registering (client)
         PayloadTypeRegistry.playC2S().register(RegisterUserPayload.ID, RegisterUserPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(WaypointActionPayload.ID, WaypointActionPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(HandshakePayload.ID, HandshakePayload.CODEC);
 
         // Packet registering (server)
         PayloadTypeRegistry.playS2C().register(WaypointActionPayload.ID, WaypointActionPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(HandshakePayload.ID, HandshakePayload.CODEC);
 
         CommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess, environment) ->
                 dispatcher.register(literal("jmws").then(literal("update").executes(

@@ -7,6 +7,7 @@ import journeymap.api.v2.common.event.ServerEventRegistry;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import me.brynview.navidrohim.jmws.JMServer;
+import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.WaypointActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
 import me.brynview.navidrohim.jmws.common.utils.WaypointIOInterface;
@@ -41,8 +42,13 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             if (server.isDedicated()) {
                 ServerPlayNetworking.registerGlobalReceiver(WaypointActionPayload.ID, this::HandleWaypointAction);
+                ServerPlayNetworking.registerGlobalReceiver(HandshakePayload.ID, this::HandshakeHandler);
             }
         });
+    }
+
+    private void HandshakeHandler(HandshakePayload handshakePayload, ServerPlayNetworking.Context context) {
+        ServerPlayNetworking.send(context.player(), handshakePayload);
     }
 
     private void HandleWaypointAction(WaypointActionPayload waypointActionPayload, ServerPlayNetworking.Context context) {
@@ -109,6 +115,8 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                     JMServer.LOGGER.error(ioe.getMessage());
                 }
             }
+
+            default -> JMServer.LOGGER.warn("Unknown packet command -> " + command);
         }
     }
 }

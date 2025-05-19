@@ -41,6 +41,7 @@ dependencies {
     modCompileOnlyApi group: 'info.journeymap', name: 'journeymap-api-fabric', version: project.journeymap_api_version, changing: true
 }
 
+
 processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version
@@ -80,6 +81,14 @@ java {
 jar {
     from("LICENSE") {
         rename { "${it}_${project.archivesBaseName}"}
+    }
+    manifest {
+        attributes(
+                'Implementation-Version': project.version,
+                "Mod-Id": archives_base_name,
+                "Mod-Name": "JourneyMap Waypoint Syncing",
+                "Fabric-Loom-Version": "1.10.5"
+        )
     }
 }
 
