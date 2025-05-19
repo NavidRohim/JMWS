@@ -10,6 +10,7 @@ import me.brynview.navidrohim.jmws.JMServer;
 import me.brynview.navidrohim.jmws.common.payloads.WaypointActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
 import me.brynview.navidrohim.jmws.common.utils.WaypointIOInterface;
+import me.brynview.navidrohim.jmws.common.utils.WaypointPayloadCommand;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -45,13 +46,15 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
     }
 
     private void HandleWaypointAction(WaypointActionPayload waypointActionPayload, ServerPlayNetworking.Context context) {
-        String command = waypointActionPayload.command();
+        WaypointPayloadCommand command = waypointActionPayload.command();
         List<JsonElement> arguments = waypointActionPayload.arguments();
         ServerPlayerEntity player = context.player();
         WaypointActionPayload alertMessagePayload;
 
         switch (command) {
-            case "delete" -> {
+
+            // was "delete"
+            case WaypointPayloadCommand.COMMON_DELETE_WAYPOINT -> {
                 boolean result = WaypointIOInterface.deleteWaypoint(arguments.getFirst().getAsString());
                 boolean silent = arguments.get(1).getAsBoolean();
 
@@ -66,8 +69,9 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                 }
             }
 
-            case "create" -> {
-                JsonObject jsonCreationData = arguments.getFirst().getAsJsonObject();
+            // was "create"
+            case WaypointPayloadCommand.SERVER_CREATE -> {
+                JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
                 boolean silent = arguments.get(1).getAsBoolean();
                 boolean waypointCreationSuccess = WaypointIOInterface.createWaypoint(jsonCreationData, context.player().getUuid());
 
@@ -83,7 +87,9 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
 
 
             }
-            case "request" -> {
+
+            // was "request"
+            case WaypointPayloadCommand.SYNC -> {
                 try {
                     List<String> playerWaypoints = WaypointIOInterface.getPlayerWaypointNames(player.getUuid());
 
@@ -95,7 +101,7 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                         jsonWaypointPayloadArray.put(String.valueOf(i), jsonWaypointFileString);
                     }
 
-                    String jsonData = JsonStaticHelper.makeCreationRequestResponseJson(jsonWaypointPayloadArray);
+                    String jsonData = JsonStaticHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray);
                     WaypointActionPayload waypointPayloadOutbound = new WaypointActionPayload(jsonData);
                     ServerPlayNetworking.send(player, waypointPayloadOutbound);
 

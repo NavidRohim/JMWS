@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.brynview.navidrohim.jmws.JMServer;
 import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
+import me.brynview.navidrohim.jmws.common.utils.WaypointPayloadCommand;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
@@ -35,8 +36,8 @@ public record WaypointActionPayload(String jsonAction) implements CustomPayload 
         return JsonStaticHelper.getJsonObjectFromJsonString(jsonAction);
     }
 
-    public String command() {
-        return this.getJsonObject().asMap().get("command").getAsString();
+    public WaypointPayloadCommand command() {
+        return WaypointPayloadCommand.valueOf(this.getJsonObject().asMap().get("command").getAsString());
     }
 
     public List<JsonElement> arguments() {

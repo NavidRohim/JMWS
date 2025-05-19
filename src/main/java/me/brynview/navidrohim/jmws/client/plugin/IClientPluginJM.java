@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.client.plugin;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import journeymap.api.v2.client.IClientPlugin;
 import journeymap.api.v2.client.JourneyMapPlugin;
 import journeymap.api.v2.client.IClientAPI;
@@ -20,6 +21,7 @@ import me.brynview.navidrohim.jmws.common.payloads.WaypointActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.JMWSConfig;
 import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
 import me.brynview.navidrohim.jmws.common.utils.WaypointIOInterface;
+import me.brynview.navidrohim.jmws.common.utils.WaypointPayloadCommand;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -121,14 +123,17 @@ public class IClientPluginJM implements IClientPlugin
 
                 case CREATE ->
                 {
+                    // Sends "create" packet | new = "SERVER_CREATE"
                     this.createAction(waypointEvent.waypoint, player, false);
                 }
                 case DELETED ->
                 {
+                    // Sends "delete" packet | new = "COMMON_SERVER_DELETE"
                     this.deleteAction(waypointEvent.waypoint, player, false);
                 }
                 case UPDATE ->
                 {
+                    // Sends both "delete" and "create" packet in respective order and respective enums.
                     this.updateAction(waypointEvent.waypoint, oldWaypoint, player);
                 }
             }
@@ -138,14 +143,12 @@ public class IClientPluginJM implements IClientPlugin
     public void registerEvents() {
         ClientPlayNetworking.registerGlobalReceiver(WaypointActionPayload.ID, IClientPluginJM::HandlePacket);
         CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", JMServer.MODID, this::WaypointCreationHandler);
-        //ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe("jmapi", JMServer.MODID, this::DeathWaypointHandler);
         ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
     }
 
     public void unregisterEvents() {
         ClientPlayNetworking.unregisterGlobalReceiver(WaypointActionPayload.ID.id());
         CommonEventRegistry.WAYPOINT_EVENT.unsubscribe("jmapi", JMServer.MODID);
-        //ClientEventRegistry.DEATH_WAYPOINT_EVENT.unsubscribe("jmapi", JMServer.MODID);
     }
 
     @Override
@@ -163,11 +166,15 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     public static void updateWaypoints() {
+
+        // Sends "request" packet | New = "SYNC"
         sendUserAlert(Text.translatable("message.jmws.modified_success").getString(), true, false);
-        ClientPlayNetworking.send(new WaypointActionPayload(JsonStaticHelper.makeWaypointRequestJson()));
+        ClientPlayNetworking.send(new WaypointActionPayload(JsonStaticHelper.makeWaypointSyncRequestJson()));
     }
 
     private void handleTick(MinecraftClient minecraftClient) {
+
+        // Sends "sync" packet | New = SYNC
         if (minecraftClient.world != null && this.getEnabledStatus()) {
             if (!oldWorld) {
                 tickCounterUpdateThreshold = 40;
@@ -201,7 +208,8 @@ public class IClientPluginJM implements IClientPlugin
         List<SavedWaypoint> waypoints = new ArrayList<>();
 
         for (Map.Entry<String, JsonElement> wpEntry : jsonData.entrySet()) {
-            waypoints.add(new SavedWaypoint(wpEntry.getValue().getAsJsonObject(), playerUUID));
+            JsonObject rawData = JsonParser.parseString(wpEntry.getValue().getAsString()).getAsJsonObject();
+            waypoints.add(new SavedWaypoint(rawData, playerUUID));
         }
         return waypoints;
     }
@@ -217,8 +225,12 @@ public class IClientPluginJM implements IClientPlugin
             }
 
             switch (waypointPayload.command()) {
-                case "creation_response" -> {
-                    JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy();
+
+                // Was creation_response
+                // Sends no outbound data
+                case SYNC -> {
+
+                    JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy(); //.getFirst().getAsJsonObject().deepCopy();
                     Boolean hasLocalWaypoint = false;
 
                     List<SavedWaypoint> savedWaypoints = IClientPluginJM.getSavedWaypoints(json, context.player().getUuid());
@@ -239,7 +251,6 @@ public class IClientPluginJM implements IClientPlugin
                         // check if waypoint already exists locally while not being in the server (meaning it was created with the mod off or not installed)
                         if (!remoteWaypointsGuid.contains(existingWaypoint.getBlockPos())) // this is only checked by using the block position, there will be a bug I can feel it
                         {
-
                             getInstance().createAction(existingWaypoint, context.player(), true);
                             hasLocalWaypoint = true;
                         }
@@ -249,10 +260,41 @@ public class IClientPluginJM implements IClientPlugin
                     for (SavedWaypoint savedWaypoint : savedWaypoints) {
 
                         // This is a method that will only work on a pre-release version of JourneyMap that hasnt been released yet.
-                        Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData());
+                        Waypoint waypointObj = WaypointFactory.createClientWaypoint(
+                                savedWaypoint.getWaypointModId(),
+                                BlockPos.ofFloored(savedWaypoint.getWaypointX(),
+                                        savedWaypoint.getWaypointY(),
+                                        savedWaypoint.getWaypointZ()),
+                                savedWaypoint.getDimensionString(),
+                                savedWaypoint.getWaypointPersistence());
+
+                        waypointObj.setColor(savedWaypoint.getWaypointColour());
+
+                        // This checks to see if it is a death waypoint and changes the colour to red. I have to do this because the waypoints dont get added to the death group.
+                        // In the future this will be fixed. On another branch and a past commit this is actually fixed but it requires an unreleased version of JourneyMap.
+                        if (Objects.equals(savedWaypoint.getWaypointGroupId(), "journeymap_death")) {
+                            waypointObj.setColor(16711680); // red (255 r, rest are 0)
+                        } else {
+                            waypointObj.setColor(savedWaypoint.getWaypointColour());
+                        }
+
+                        // set waypoint metadata
+                        waypointObj.setName(savedWaypoint.getWaypointName());
+                        waypointObj.setCustomData(savedWaypoint.getUniversalIdentifier());
+                        waypointObj.setEnabled(savedWaypoint.getWaypointEnabled());
+                        waypointObj.setShowDeviation(savedWaypoint.getWaypointDeviation());
+                        waypointObj.setIconResourceLoctaion(savedWaypoint.getWaypointResourceString());
+                        waypointObj.setIconOpacity(savedWaypoint.getWaypointOpacity());
+                        waypointObj.setIconTextureSize(savedWaypoint.getWaypointTextureWidth(), savedWaypoint.getWaypointTextureHeight());
+                        waypointObj.setIconRotation(savedWaypoint.getWaypointRotation());
+                        waypointObj.setDimensions(savedWaypoint.getWaypointDimensions());
+
+                        // Add to group and map
                         getInstance().waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
                         getInstance().jmAPI.addWaypoint("journeymap", waypointObj);
 
+                        WaypointGroup waypointGroup = getInstance().jmAPI.getWaypointGroup(savedWaypoint.getWaypointGroupId());
+                        waypointGroup.addWaypoint(waypointObj);
                     }
 
                     // this refreshes the client again because of the local waypoints
@@ -260,19 +302,29 @@ public class IClientPluginJM implements IClientPlugin
                         updateWaypoints();
                         sendUserAlert(Text.translatable("message.jmws.local_waypoint_upload").getString(), true, false);
                     }
+
+
                 }
 
-                case "update" -> {
-                    IClientPluginJM.updateWaypoints();
-                }
-                case "display_interval" -> {
-                    sendUserAlert("Waypoints updated every " + INSTANCE.tickCounterUpdateThreshold / 20 + " seconds.", true, false);
-                }
-                case "alert" -> {
+                // was "update"
+                // Sends "request" packet | New = "SYNC"
+                case REQUEST_CLIENT_SYNC -> IClientPluginJM.updateWaypoints();
+
+
+                // was display_interval
+                // No outbound data
+                case COMMON_DISPLAY_INTERVAL -> sendUserAlert("Waypoints updated every " + INSTANCE.tickCounterUpdateThreshold / 20 + " seconds.", true, false);
+
+                // was "alert"
+                // No outbound data
+                case CLIENT_ALERT -> {
                     String firstArgument = waypointPayload.arguments().getFirst().getAsString();
                     sendUserAlert(Text.translatable(firstArgument).getString(), waypointPayload.arguments().get(1).getAsBoolean(), false);
                 }
-                case "deleteWaypoint" -> {
+
+                // was "deleteWaypoint"
+                // No outbound data
+                case COMMON_DELETE_WAYPOINT -> {
                     String firstArgument = waypointPayload.arguments().getFirst().getAsString();
                     if (Objects.equals(firstArgument, "*")) {
                         INSTANCE.jmAPI.removeAllWaypoints("journeymap");
@@ -281,9 +333,12 @@ public class IClientPluginJM implements IClientPlugin
                     }
                     sendUserAlert(Text.translatable("message.jmws.deletion_all_success").getString(), true, false);
                 }
-                case "display_next_update" -> {
-                    sendUserAlert("Next waypoint update in " + (INSTANCE.tickCounterUpdateThreshold - INSTANCE.tickCounter) / 20 + " second(s)", true, false);
-                }
+
+                // was "display_next_update"
+                // No outbound data
+                case COMMON_DISPLAY_NEXT_UPDATE -> sendUserAlert("Next waypoint update in " + (INSTANCE.tickCounterUpdateThreshold - INSTANCE.tickCounter) / 20 + " second(s)", true, false);
+
+                default -> JMServer.LOGGER.warn("Unknown packet command -> " + waypointPayload.command());
             }
         }
     }

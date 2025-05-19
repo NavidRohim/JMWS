@@ -19,7 +19,7 @@ import static net.minecraft.server.command.CommandManager.*;
 public class JMServer implements ModInitializer {
 
     public static final String MODID = "jmws";
-    public static final String VERSION = "1.0.4";
+    public static final String VERSION = "1.0.5";
     public static final Logger LOGGER = LogManager.getFormatterLogger(MODID);
 
     @Override
@@ -35,7 +35,7 @@ public class JMServer implements ModInitializer {
                 dispatcher.register(literal("jmws").then(literal("update").executes(
                                 context -> {
                                     if (context.getSource().getPlayer() != null) {
-                                        String jsonString = JsonStaticHelper.makeServerUpdateRequestJson();
+                                        String jsonString = JsonStaticHelper.makeServerSyncRequestJson();
                                         WaypointActionPayload waypointActionPayload = new WaypointActionPayload(jsonString);
 
                                         ServerPlayNetworking.send(context.getSource().getPlayer(), waypointActionPayload);
@@ -45,7 +45,7 @@ public class JMServer implements ModInitializer {
                                 }))
                         .then(literal("getUpdateInterval").executes(intervalContext -> {
                             if (intervalContext.getSource().getPlayer() != null) {
-                                WaypointActionPayload payload = new WaypointActionPayload(JsonStaticHelper.makeEmptyServerCommandRequestJson("display_interval"));
+                                WaypointActionPayload payload = new WaypointActionPayload(JsonStaticHelper.makeDisplayIntervalRequestJson());
                                 ServerPlayNetworking.send(intervalContext.getSource().getPlayer(), payload);
                             }
                             return 1;
@@ -56,7 +56,7 @@ public class JMServer implements ModInitializer {
                                  WaypointIOInterface.deleteAllUserWaypoints(player.getUuid());
 
                                  WaypointActionPayload refreshPayload = new WaypointActionPayload(
-                                         JsonStaticHelper.makeServerUpdateRequestJson()
+                                         JsonStaticHelper.makeWaypointSyncRequestJson()
                                  );
                                  WaypointActionPayload deleteAllClientsidePayload = new WaypointActionPayload(
                                          JsonStaticHelper.makeDeleteClientWaypointRequestJson("*") // * = Delete all
@@ -69,7 +69,7 @@ public class JMServer implements ModInitializer {
                         }))
                         .then(literal("nextUpdate").executes(updateDisplayContext -> {
                             if (updateDisplayContext.getSource().getPlayer() != null) {
-                                WaypointActionPayload payload = new WaypointActionPayload(JsonStaticHelper.makeEmptyServerCommandRequestJson("display_next_update"));
+                                WaypointActionPayload payload = new WaypointActionPayload(JsonStaticHelper.makeDisplayNextUpdateRequestJson());
                                 ServerPlayNetworking.send(updateDisplayContext.getSource().getPlayer(), payload);
                             }
                             return 1;
