@@ -323,9 +323,6 @@ public class IClientPluginJM implements IClientPlugin
                     boolean hasLocalGroup = false;
                     boolean hasLocalWaypoint = false;
 
-                    JMServer.LOGGER.info("working " + jsonGroups);
-                    JMServer.LOGGER.info("local " + existingGroups);
-
                     List<SavedWaypoint> savedWaypoints = IClientPluginJM.getSavedWaypoints(json, context.player().getUuid());
                     List<SavedGroup> savedGroups = IClientPluginJM.getSavedGroups(jsonGroups);
 
@@ -337,7 +334,7 @@ public class IClientPluginJM implements IClientPlugin
                         remoteWaypointsGuid.add(new BlockPos(savedWaypoint.getWaypointX(), savedWaypoint.getWaypointY(), savedWaypoint.getWaypointZ()));
                     }
                     for (SavedGroup savedGroup : savedGroups) {
-                        remoteGroupsIdentifier.add(savedGroup.getGroupName() + savedGroup.getGroupIdentifier());
+                        remoteGroupsIdentifier.add(savedGroup.getName() + savedGroup.getGroupIdentifier());
                     }
 
                     // remove all to update (if waypoint has been removed)
@@ -364,18 +361,20 @@ public class IClientPluginJM implements IClientPlugin
                     }
 
                     // Add waypoints registered on the server
-                    for (SavedWaypoint savedWaypoint : savedWaypoints) {
+                    for (SavedWaypoint savedWaypoint : savedWaypoints)
+                    {
                         Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData()); // This is a method that will only work on a pre-release version of JourneyMap that hasnt been released yet.
                         getInstance().waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
                         getInstance().jmAPI.addWaypoint("journeymap", waypointObj);
                     }
+
                     for (SavedGroup savedGroup : savedGroups)
                     {
-                        //JMServer.LOGGER.info(savedGroup.getGroupName());
                         WaypointGroup waypointGroupObj = WaypointFactory.fromGroupJsonString(savedGroup.getRawPacketData());
                         getInstance().groupIdentifierMap.put(savedGroup.getUniversalIdentifier(), waypointGroupObj);
                         getInstance().jmAPI.addWaypointGroup(waypointGroupObj);
                     }
+
                     // this refreshes the client again because of the local waypoints
                     if (hasLocalGroup && hasLocalWaypoint) {
                         updateWaypoints();
@@ -413,12 +412,26 @@ public class IClientPluginJM implements IClientPlugin
                 // No outbound data
                 case COMMON_DELETE_WAYPOINT -> {
                     String firstArgument = waypointPayload.arguments().getFirst().getAsString();
-                    if (Objects.equals(firstArgument, "*")) {
-                        INSTANCE.jmAPI.removeAllWaypoints("journeymap");
+                    JMWSIOInterface.FetchType deletionType = JMWSIOInterface.FetchType.valueOf(waypointPayload.arguments().get(1).getAsString());
+                    String deletionMessageConfirmationKey = "message.jmws.deletion_all_success";
+
+                    if (deletionType == JMWSIOInterface.FetchType.WAYPOINT) {
+                        if (Objects.equals(firstArgument, "*")) {
+                            INSTANCE.jmAPI.removeAllWaypoints("journeymap");
+                        } else {
+                            INSTANCE.jmAPI.removeWaypoint("journeymap", INSTANCE.waypointIdentifierMap.get(firstArgument));
+                        }
+
                     } else {
-                        INSTANCE.jmAPI.removeWaypoint("journeymap", INSTANCE.waypointIdentifierMap.get(firstArgument));
+                        deletionMessageConfirmationKey = "message.jmws.deletion_group_all_success";
+                        if (Objects.equals(firstArgument, "*")) {
+                            INSTANCE.jmAPI.removeWaypointGroups("jmapi", false);
+                        } else {
+                            INSTANCE.jmAPI.removeWaypointGroup(getInstance().groupIdentifierMap.get(firstArgument), false);
+                        }
                     }
-                    sendUserAlert(Text.translatable("message.jmws.deletion_all_success").getString(), true, false);
+                    sendUserAlert(Text.translatable(deletionMessageConfirmationKey).getString(), true, false);
+
                 }
 
                 // was "display_next_update"

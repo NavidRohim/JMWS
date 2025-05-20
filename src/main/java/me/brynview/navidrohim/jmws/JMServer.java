@@ -21,6 +21,21 @@ public class JMServer implements ModInitializer {
     public static final String VERSION = JMServer.class.getPackage().getImplementationVersion();
     public static final Logger LOGGER = LogManager.getFormatterLogger(MODID);
 
+    private int _deleteObjectOnClient(ServerPlayerEntity player, JMWSIOInterface.FetchType fetchType)
+    {
+        JMWSActionPayload refreshPayload = new JMWSActionPayload(
+                JsonStaticHelper.makeWaypointSyncRequestJson()
+        );
+        JMWSActionPayload deleteAllClientsidePayload = new JMWSActionPayload(
+                JsonStaticHelper.makeDeleteClientObjectRequestJson("*", fetchType) // * = Delete all
+        );
+
+        ServerPlayNetworking.send(player, deleteAllClientsidePayload);
+        ServerPlayNetworking.send(player, refreshPayload);
+
+        return 1;
+    }
+
     @Override
     public void onInitialize() {
 
@@ -34,7 +49,8 @@ public class JMServer implements ModInitializer {
         PayloadTypeRegistry.playS2C().register(HandshakePayload.ID, HandshakePayload.CODEC);
 
         CommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess, environment) ->
-                dispatcher.register(literal("jmws").then(literal("update").executes(
+                dispatcher.register(literal("jmws")
+                        .then(literal("update").executes(
                                 context -> {
                                     if (context.getSource().getPlayer() != null) {
                                         String jsonString = JsonStaticHelper.makeServerSyncRequestJson();
@@ -52,23 +68,15 @@ public class JMServer implements ModInitializer {
                             }
                             return 1;
                         }))
-                        .then(literal("clearAll").executes(clearallContext -> {
-                            ServerPlayerEntity player = clearallContext.getSource().getPlayer();
-                            if (player != null) {
-                                 JMWSIOInterface.deleteAllUserWaypoints(player.getUuid());
-
-                                 JMWSActionPayload refreshPayload = new JMWSActionPayload(
-                                         JsonStaticHelper.makeWaypointSyncRequestJson()
-                                 );
-                                 JMWSActionPayload deleteAllClientsidePayload = new JMWSActionPayload(
-                                         JsonStaticHelper.makeDeleteClientWaypointRequestJson("*") // * = Delete all
-                                 );
-
-                                 ServerPlayNetworking.send(player, refreshPayload);
-                                ServerPlayNetworking.send(player, deleteAllClientsidePayload);
-                            }
-                            return 1;
-                        }))
+                        .then(literal("clearAll")
+                                .then(literal("groups").executes(groupClearAllCtx -> {
+                                    ServerPlayerEntity player = groupClearAllCtx.getSource().getPlayer();
+                                    return _deleteObjectOnClient(player, JMWSIOInterface.FetchType.GROUP);
+                                }))
+                                .then(literal("waypoints").executes(waypointClearAllCtx -> {
+                                    ServerPlayerEntity player = waypointClearAllCtx.getSource().getPlayer();
+                                    return _deleteObjectOnClient(player, JMWSIOInterface.FetchType.WAYPOINT);
+                                })))
                         .then(literal("nextUpdate").executes(updateDisplayContext -> {
                             if (updateDisplayContext.getSource().getPlayer() != null) {
                                 JMWSActionPayload payload = new JMWSActionPayload(JsonStaticHelper.makeDisplayNextUpdateRequestJson());

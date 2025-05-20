@@ -12,7 +12,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-public class SavedWaypoint {
+public class SavedWaypoint extends SavedObject {
 
     // Packet information
     String rawPacketData;
@@ -71,7 +71,7 @@ public class SavedWaypoint {
 
         // Identifier (used for code)
         this.universalIdentifier = payload.get("customData").getAsString();
-        this.waypointLocalID = payload.get("guid").getAsString();
+        this.groupIdentifier = payload.get("guid").getAsString();
 
         // location data
         this.ix = (int) pos.get("x").getAsDouble();
@@ -99,9 +99,6 @@ public class SavedWaypoint {
 
     // Main defining data
     public Integer getWaypointVersion() { return this.version; }
-    public String getWaypointName() {
-        return this.name;
-    }
     public Integer getWaypointColour() {
         return this.colour;
     }
@@ -111,14 +108,7 @@ public class SavedWaypoint {
     public String getWaypointModId() { return this.modId; }
     public String getWaypointGroupId() { return this.groupId; }
     public String getWaypointOrigin() { return this.origin; }
-
-    // Identifiers for code
-    public String getUniversalIdentifier() {
-        return this.universalIdentifier;
-    }
-    public String getWaypointLocalID() {
-        return this.waypointLocalID;
-    }
+    public String getRawPacketData() { return this.rawPacketData; }
 
     // Locations
     public Integer getWaypointX() {
@@ -150,9 +140,5 @@ public class SavedWaypoint {
     // Other
     public Map<String, String> getRawJsonData() {
         return rawJsonData;
-    }
-
-    public String getRawPacketData() {
-        return rawPacketData;
     }
 }

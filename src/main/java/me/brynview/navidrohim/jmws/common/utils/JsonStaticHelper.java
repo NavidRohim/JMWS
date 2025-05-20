@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.JMServer;
 import net.minidev.json.JSONObject;
 
 import java.util.*;
@@ -63,8 +62,8 @@ public class JsonStaticHelper {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DISPLAY_INTERVAL, null);
     }
 
-    public static String makeDeleteClientWaypointRequestJson(String waypointUUID) {
-        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_WAYPOINT, List.of(waypointUUID));
+    public static String makeDeleteClientObjectRequestJson(String waypointUUID, JMWSIOInterface.FetchType fetchType) {
+        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_WAYPOINT, List.of(waypointUUID, fetchType));
     }
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {
         return JsonParser.parseString(jsonString).getAsJsonObject();
