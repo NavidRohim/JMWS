@@ -14,6 +14,10 @@
   "message.jmws.creation_group_failure": "Could not create group on the server.\nIt is recommended to delete the group and try again.",
   "message.jmws.deletion_group_success": "Deleted group",
   "message.jmws.deletion_group_failure": "Could not delete group on the server",
+  "message.jmws.local_group_upload": "Added local group(s) to the server.",
+
+  "__comment__": "Common language settings",
+  "message.jmws.local_both_upload": "Added local waypoint(s) and group(s) to the server.",
 
   "__comment__": "Config language strings",
   "text.config.jmws-config.title": "JourneyMap Waypoint Syncing (JMWS)",

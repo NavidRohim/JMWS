@@ -43,8 +43,8 @@ public class JsonStaticHelper {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SERVER_CREATE_GROUP, List.of(waypointGroup.toString(), silent));
     }
 
-    public static String makeSyncRequestResponseJson(HashMap<String, String> jsonArray) {
-        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, List.of(jsonArray));
+    public static String makeSyncRequestResponseJson(HashMap<String, String> jsonArray, HashMap<String, String> jsonGroupArray) {
+        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, List.of(jsonArray, jsonGroupArray));
     }
 
     public static String makeServerSyncRequestJson() {

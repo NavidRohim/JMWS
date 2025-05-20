@@ -17,6 +17,11 @@ import java.util.stream.Stream;
 
 public class JMWSIOInterface {
 
+    public enum FetchType {
+        WAYPOINT,
+        GROUP
+    }
+
     public static String getWaypointFilename(Waypoint waypoint, UUID uuID) {
         Vector3d waypointLocationVector = new Vector3d(waypoint.getX(), waypoint.getY(), waypoint.getZ());
         return _getWaypointFromRaw(waypointLocationVector, waypoint.getName(), uuID);
@@ -37,14 +42,14 @@ public class JMWSIOInterface {
     }
 
     public static String getGroupFilename(UUID playerUUID, String universalID) {
-        return "./jmws/" + universalID + "_" + playerUUID + ".json";
+        return "./jmws/groups/" + universalID + "_" + playerUUID + "-group" + ".json";
     }
     public static boolean createGroup(JsonObject jsonObject, UUID playerUUID)
     {
         String universalID = jsonObject.get("customData").getAsString();
         try
         {
-            String pathString = "./jmws/" + universalID + "_" + playerUUID + ".json";
+            String pathString = getGroupFilename(playerUUID, universalID);
             Path groupPathObj = Paths.get(pathString);
             Files.createFile(groupPathObj);
 
@@ -85,7 +90,7 @@ public class JMWSIOInterface {
     }
 
     public static void deleteAllUserWaypoints(UUID playerUUID) {
-        for (String waypointPath : getPlayerWaypointNames(playerUUID)) {
+        for (String waypointPath : getFileObjects(playerUUID, FetchType.WAYPOINT)) {
             deleteFile(waypointPath);
         }
 
@@ -96,11 +101,19 @@ public class JMWSIOInterface {
         return waypointFileObj.delete();
     }
 
-    public static List<String> getPlayerWaypointNames(UUID uuid) {
-        //String content = Files.readString(path); // Java 11+
-        List<String> waypointFileList = new ArrayList<>();
+    public static List<String> getFileObjects(UUID uuid, FetchType fetchType) {
 
-        try (Stream<Path> files = Files.list(Path.of("./jmws"))) {
+        List<String> waypointFileList = new ArrayList<>();
+        String pathSearch;
+
+        if (fetchType == FetchType.GROUP) {
+            pathSearch = "./jmws/groups";
+        } else {
+            pathSearch = "./jmws";
+        }
+
+
+        try (Stream<Path> files = Files.list(Path.of(pathSearch))) {
             files.filter(Files::isRegularFile).forEach(path -> {
                 if (path.toString().contains(uuid.toString())) {
                     waypointFileList.add(path.toString());

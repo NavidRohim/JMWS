@@ -14,6 +14,7 @@ import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.JMServer;
 import me.brynview.navidrohim.jmws.client.JMServerClient;
+import me.brynview.navidrohim.jmws.common.SavedGroup;
 import me.brynview.navidrohim.jmws.common.SavedWaypoint;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
@@ -275,6 +276,18 @@ public class IClientPluginJM implements IClientPlugin
         return waypoints;
     }
 
+    // todo; experiment with making parent
+    public static List<SavedGroup> getSavedGroups(JsonObject jsonData) {
+        List<SavedGroup> waypoints = new ArrayList<>();
+
+        for (Map.Entry<String, JsonElement> wpEntry : jsonData.entrySet()) {
+            JsonObject rawData = JsonParser.parseString(wpEntry.getValue().getAsString()).getAsJsonObject();
+            waypoints.add(new SavedGroup(rawData));
+        }
+        return waypoints;
+    }
+
+
     public static void HandshakeHandler(HandshakePayload handshakePayload, ClientPlayNetworking.Context context) {
 
         sendUserAlert("§2Server has JMWS!", true, false);
@@ -300,22 +313,36 @@ public class IClientPluginJM implements IClientPlugin
                 // Was creation_response
                 // Sends no outbound data
                 case SYNC -> {
-
                     JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy();
+                    JsonObject jsonGroups = waypointPayload.arguments().get(1).getAsJsonObject().deepCopy();
+
+                    List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
+                    List<? extends WaypointGroup> existingGroups = getInstance().jmAPI.getAllWaypointGroups();
+                    List<String> forbiddenGroups = List.of("journeymap_death", "journeymap_all", "journeymap_temp", "journeymap_default");
+
+                    boolean hasLocalGroup = false;
                     boolean hasLocalWaypoint = false;
 
+                    JMServer.LOGGER.info("working " + jsonGroups);
+                    JMServer.LOGGER.info("local " + existingGroups);
+
                     List<SavedWaypoint> savedWaypoints = IClientPluginJM.getSavedWaypoints(json, context.player().getUuid());
+                    List<SavedGroup> savedGroups = IClientPluginJM.getSavedGroups(jsonGroups);
+
                     List<BlockPos> remoteWaypointsGuid = new ArrayList<>();
+                    List<String> remoteGroupsIdentifier = new ArrayList<>();
 
                     // Add server waypoint coordinates onto list to check
                     for (SavedWaypoint savedWaypoint : savedWaypoints) {
                         remoteWaypointsGuid.add(new BlockPos(savedWaypoint.getWaypointX(), savedWaypoint.getWaypointY(), savedWaypoint.getWaypointZ()));
                     }
+                    for (SavedGroup savedGroup : savedGroups) {
+                        remoteGroupsIdentifier.add(savedGroup.getGroupName() + savedGroup.getGroupIdentifier());
+                    }
 
-                    List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
                     // remove all to update (if waypoint has been removed)
                     getInstance().jmAPI.removeAllWaypoints("journeymap");
-
+                    getInstance().jmAPI.removeWaypointGroups("jmapi", false);
 
                     for (Waypoint existingWaypoint : existingWaypoints)
                     {
@@ -327,17 +354,42 @@ public class IClientPluginJM implements IClientPlugin
                         }
                     }
 
+                    for (WaypointGroup existingGroup : existingGroups)
+                    {
+                        if (!remoteGroupsIdentifier.contains(existingGroup.getName() + existingGroup.getGuid()) && !forbiddenGroups.contains(existingGroup.getGuid()))
+                        {
+                            getInstance().groupCreationHandler(existingGroup, context.player(), true);
+                            hasLocalGroup = true;
+                        }
+                    }
+
                     // Add waypoints registered on the server
                     for (SavedWaypoint savedWaypoint : savedWaypoints) {
                         Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData()); // This is a method that will only work on a pre-release version of JourneyMap that hasnt been released yet.
                         getInstance().waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
                         getInstance().jmAPI.addWaypoint("journeymap", waypointObj);
                     }
-
+                    for (SavedGroup savedGroup : savedGroups)
+                    {
+                        //JMServer.LOGGER.info(savedGroup.getGroupName());
+                        WaypointGroup waypointGroupObj = WaypointFactory.fromGroupJsonString(savedGroup.getRawPacketData());
+                        getInstance().groupIdentifierMap.put(savedGroup.getUniversalIdentifier(), waypointGroupObj);
+                        getInstance().jmAPI.addWaypointGroup(waypointGroupObj);
+                    }
                     // this refreshes the client again because of the local waypoints
-                    if (hasLocalWaypoint) {
+                    if (hasLocalGroup && hasLocalWaypoint) {
+                        updateWaypoints();
+                        sendUserAlert(Text.translatable("message.jmws.local_both_upload").getString(), true, false);
+                    }
+
+                    else if (hasLocalWaypoint) {
                         updateWaypoints();
                         sendUserAlert(Text.translatable("message.jmws.local_waypoint_upload").getString(), true, false);
+                    }
+
+                    else if (hasLocalGroup) {
+                        updateWaypoints();
+                        sendUserAlert(Text.translatable("message.jmws.local_group_upload").getString(), true, false);
                     }
                 }
 

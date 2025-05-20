@@ -28,8 +28,8 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
     public void onInitializeServer() {
 
         // Item
-        File mainDir = new File("./jmws");
-        boolean _a = mainDir.mkdir(); // doing this to shutup linter
+        new File("./jmws").mkdir();
+        new File("./jmws/groups").mkdir();
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             if (server.isDedicated()) {
@@ -89,7 +89,8 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
             // was "request"
             case WaypointPayloadCommand.SYNC -> {
                 try {
-                    List<String> playerWaypoints = JMWSIOInterface.getPlayerWaypointNames(player.getUuid());
+                    List<String> playerWaypoints = JMWSIOInterface.getFileObjects(player.getUuid(), JMWSIOInterface.FetchType.WAYPOINT);
+                    List<String> playerGroups = JMWSIOInterface.getFileObjects(player.getUuid(), JMWSIOInterface.FetchType.GROUP);
 
                     HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
                     HashMap<String, String> jsonGroupPayloadArray = new HashMap<>();
@@ -100,7 +101,13 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                         jsonWaypointPayloadArray.put(String.valueOf(i), jsonWaypointFileString);
                     }
 
-                    String jsonData = JsonStaticHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray);
+                    for (int ix = 0 ; ix < playerGroups.size() ; ix++) {
+                        String groupFilename = playerGroups.get(ix);
+                        String jsonGroupFileString = Files.readString(Paths.get(groupFilename));
+                        jsonGroupPayloadArray.put(String.valueOf(ix), jsonGroupFileString);
+                    }
+
+                    String jsonData = JsonStaticHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray);
                     JMWSActionPayload waypointPayloadOutbound = new JMWSActionPayload(jsonData);
                     ServerPlayNetworking.send(player, waypointPayloadOutbound);
 
