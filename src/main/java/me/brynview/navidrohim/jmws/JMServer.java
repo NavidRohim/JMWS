@@ -71,10 +71,12 @@ public class JMServer implements ModInitializer {
                         .then(literal("clearAll")
                                 .then(literal("groups").executes(groupClearAllCtx -> {
                                     ServerPlayerEntity player = groupClearAllCtx.getSource().getPlayer();
+                                    JMWSIOInterface.deleteAllUserObjects(player.getUuid(), JMWSIOInterface.FetchType.GROUP);
                                     return _deleteObjectOnClient(player, JMWSIOInterface.FetchType.GROUP);
                                 }))
                                 .then(literal("waypoints").executes(waypointClearAllCtx -> {
                                     ServerPlayerEntity player = waypointClearAllCtx.getSource().getPlayer();
+                                    JMWSIOInterface.deleteAllUserObjects(player.getUuid(), JMWSIOInterface.FetchType.WAYPOINT);
                                     return _deleteObjectOnClient(player, JMWSIOInterface.FetchType.WAYPOINT);
                                 })))
                         .then(literal("nextUpdate").executes(updateDisplayContext -> {

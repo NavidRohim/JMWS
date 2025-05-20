@@ -53,6 +53,7 @@ public class IClientPluginJM implements IClientPlugin
 
     private final HashMap<String, Waypoint> waypointIdentifierMap = new HashMap<>();
     private final HashMap<String, WaypointGroup> groupIdentifierMap = new HashMap<>();
+    private final List<String> forbiddenGroups = List.of("journeymap_death", "journeymap_all", "journeymap_temp", "journeymap_default");
 
     private boolean oldWorld = false;
     private boolean serverHasMod = false;
@@ -78,7 +79,7 @@ public class IClientPluginJM implements IClientPlugin
 
     public boolean getEnabledStatus() {
         MinecraftClient minecraftClient = MinecraftClient.getInstance();
-        return (serverHasMod && config.enabled() && !minecraftClient.isInSingleplayer());
+        return serverHasMod && config.enabled() && (config.uploadGroups() || config.uploadWaypoints()) && !minecraftClient.isInSingleplayer();
     }
 
     public Waypoint getOldWaypoint(Waypoint newWaypoint) {
@@ -124,7 +125,7 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     void WaypointCreationHandler(WaypointEvent waypointEvent) {
-        if (this.getEnabledStatus()) {
+        if (this.getEnabledStatus() && config.uploadWaypoints()) {
             MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
             ClientPlayerEntity player = minecraftClientInstance.player;
 
@@ -178,7 +179,7 @@ public class IClientPluginJM implements IClientPlugin
 
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
     {
-        if (this.getEnabledStatus()) {
+        if (this.getEnabledStatus() && config.uploadGroups()) {
             MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
             ClientPlayerEntity player = minecraftClientInstance.player;
             WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
@@ -189,8 +190,8 @@ public class IClientPluginJM implements IClientPlugin
             WaypointGroup oldWaypointGroup = this.getOldGroup(waypointGroup);
 
             switch (waypointGroupEvent.getContext()) {
-                case CREATE ->
-                        this.groupCreationHandler(waypointGroup, player, false); // MAKE SURE you use beta 47 or higher
+                case CREATE -> this.groupCreationHandler(waypointGroup, player, false); // MAKE SURE you use beta 47 or higher
+
                 case DELETED ->
                         this.groupDeletionHandler(waypointGroup, player, false, waypointGroupEvent.deleteWaypoints());
                 case UPDATE ->
@@ -205,7 +206,7 @@ public class IClientPluginJM implements IClientPlugin
         this.groupCreationHandler(waypointGroup, player, true);
 
         jmAPI.removeWaypointGroup(waypointGroup, false);
-        sendUserAlert(Text.translatable("message.jmws.modified_waypoint_success").getString(), true, false);
+        sendUserAlert(Text.translatable("message.jmws.modified_group_success").getString(), true, false);
     }
 
     private void groupDeletionHandler(WaypointGroup waypointGroup, ClientPlayerEntity player, boolean silent, boolean deleteAllWaypoints)
@@ -225,7 +226,6 @@ public class IClientPluginJM implements IClientPlugin
 
         waypointGroup.setPersistent(false);
         waypointGroup.setCustomData(waypointIdentifier);
-
         String creationData = JsonStaticHelper.makeGroupCreationRequestJson(waypointGroup, silent);
         ClientPlayNetworking.send(new JMWSActionPayload(creationData));
     }
@@ -233,8 +233,17 @@ public class IClientPluginJM implements IClientPlugin
     public static void updateWaypoints() {
 
         // Sends "request" packet | New = "SYNC"
-        sendUserAlert(Text.translatable("message.jmws.modified_success").getString(), true, false);
+
         ClientPlayNetworking.send(new JMWSActionPayload(JsonStaticHelper.makeWaypointSyncRequestJson()));
+        String updateMessageKey = "message.jmws.modified_success";
+
+        if (config.uploadWaypoints() && config.uploadGroups()) {
+            updateMessageKey = "message.jmws.modified_both_success";
+        } else if (config.uploadGroups()) {
+            updateMessageKey = "message.jmws.modified_group_success";
+        }
+
+        sendUserAlert(Text.translatable(updateMessageKey).getString(), true, false);
     }
 
     private void handleTick(MinecraftClient minecraftClient) {
@@ -298,6 +307,15 @@ public class IClientPluginJM implements IClientPlugin
         }
     }
 
+    public static void deleteAllGroups() {
+        // This method is a bodge fix. removeWaypointGroups (which I believe removes all groups) doesnt work because you cannot change the modId of a group.
+
+        for (WaypointGroup waypointGroup : getInstance().jmAPI.getAllWaypointGroups()) {
+            if (!getInstance().forbiddenGroups.contains(waypointGroup.getGuid())) {
+                getInstance().jmAPI.removeWaypointGroup(waypointGroup, false);
+            }
+        }
+    }
     // Handler for WaypointActionPayload
     public static void HandlePacket(JMWSActionPayload waypointPayload, ClientPlayNetworking.Context context) {
         if (getInstance().getEnabledStatus()) {
@@ -313,66 +331,76 @@ public class IClientPluginJM implements IClientPlugin
                 // Was creation_response
                 // Sends no outbound data
                 case SYNC -> {
-                    JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy();
-                    JsonObject jsonGroups = waypointPayload.arguments().get(1).getAsJsonObject().deepCopy();
-
-                    List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
-                    List<? extends WaypointGroup> existingGroups = getInstance().jmAPI.getAllWaypointGroups();
-                    List<String> forbiddenGroups = List.of("journeymap_death", "journeymap_all", "journeymap_temp", "journeymap_default");
 
                     boolean hasLocalGroup = false;
                     boolean hasLocalWaypoint = false;
 
-                    List<SavedWaypoint> savedWaypoints = IClientPluginJM.getSavedWaypoints(json, context.player().getUuid());
-                    List<SavedGroup> savedGroups = IClientPluginJM.getSavedGroups(jsonGroups);
-
-                    List<BlockPos> remoteWaypointsGuid = new ArrayList<>();
-                    List<String> remoteGroupsIdentifier = new ArrayList<>();
-
-                    // Add server waypoint coordinates onto list to check
-                    for (SavedWaypoint savedWaypoint : savedWaypoints) {
-                        remoteWaypointsGuid.add(new BlockPos(savedWaypoint.getWaypointX(), savedWaypoint.getWaypointY(), savedWaypoint.getWaypointZ()));
-                    }
-                    for (SavedGroup savedGroup : savedGroups) {
-                        remoteGroupsIdentifier.add(savedGroup.getName() + savedGroup.getGroupIdentifier());
-                    }
-
-                    // remove all to update (if waypoint has been removed)
-                    getInstance().jmAPI.removeAllWaypoints("journeymap");
-                    getInstance().jmAPI.removeWaypointGroups("jmapi", false);
-
-                    for (Waypoint existingWaypoint : existingWaypoints)
+                    // I really really REALLY hate this. The code is basically executing twice over for waypoints and group. I dont know enough about Java.
+                    // A lot of this code regarding groups is shit. I know it is just by instinct but I do not know how to fix it.
+                    if (config.uploadGroups())
                     {
-                        // check if waypoint already exists locally while not being in the server (meaning it was created with the mod off or not installed)
-                        if (!remoteWaypointsGuid.contains(existingWaypoint.getBlockPos())) // this is only checked by using the block position, there will be a bug I can feel it
+                        JMServer.LOGGER.info(waypointPayload.arguments());
+                        JsonObject jsonGroups = waypointPayload.arguments().get(1).getAsJsonObject().deepCopy();
+
+                        List<? extends WaypointGroup> existingGroups = getInstance().jmAPI.getAllWaypointGroups();
+
+                        List<SavedGroup> savedGroups = IClientPluginJM.getSavedGroups(jsonGroups);
+                        List<String> remoteGroupsIdentifier = new ArrayList<>();
+
+                        for (SavedGroup savedGroup : savedGroups) {
+                            remoteGroupsIdentifier.add(savedGroup.getName() + savedGroup.getGroupIdentifier());
+                        }
+                        IClientPluginJM.deleteAllGroups(); // Delete all existing groups (bodge)
+
+                        for (WaypointGroup existingGroup : existingGroups)
                         {
-                            getInstance().createAction(existingWaypoint, context.player(), true);
-                            hasLocalWaypoint = true;
+                            if (!remoteGroupsIdentifier.contains(existingGroup.getName() + existingGroup.getGuid()) && !getInstance().forbiddenGroups.contains(existingGroup.getGuid()))
+                            {
+                                getInstance().groupCreationHandler(existingGroup, context.player(), true);
+                                hasLocalGroup = true;
+                            }
+                        }
+
+                        for (SavedGroup savedGroup : savedGroups)
+                        {
+                            WaypointGroup waypointGroupObj = WaypointFactory.fromGroupJsonString(savedGroup.getRawPacketData());
+                            getInstance().groupIdentifierMap.put(savedGroup.getUniversalIdentifier(), waypointGroupObj);
+                            getInstance().jmAPI.addWaypointGroup(waypointGroupObj);
                         }
                     }
+                    if (config.uploadWaypoints()) {
+                        JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy();
 
-                    for (WaypointGroup existingGroup : existingGroups)
-                    {
-                        if (!remoteGroupsIdentifier.contains(existingGroup.getName() + existingGroup.getGuid()) && !forbiddenGroups.contains(existingGroup.getGuid()))
-                        {
-                            getInstance().groupCreationHandler(existingGroup, context.player(), true);
-                            hasLocalGroup = true;
+                        List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
+                        List<SavedWaypoint> savedWaypoints = IClientPluginJM.getSavedWaypoints(json, context.player().getUuid());
+                        List<BlockPos> remoteWaypointsGuid = new ArrayList<>();
+
+
+                        // Add server waypoint coordinates onto list to check
+                        for (SavedWaypoint savedWaypoint : savedWaypoints) {
+                            remoteWaypointsGuid.add(new BlockPos(savedWaypoint.getWaypointX(), savedWaypoint.getWaypointY(), savedWaypoint.getWaypointZ()));
                         }
-                    }
 
-                    // Add waypoints registered on the server
-                    for (SavedWaypoint savedWaypoint : savedWaypoints)
-                    {
-                        Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData()); // This is a method that will only work on a pre-release version of JourneyMap that hasnt been released yet.
-                        getInstance().waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
-                        getInstance().jmAPI.addWaypoint("journeymap", waypointObj);
-                    }
+                        // remove all to update (if waypoint has been removed)
+                        getInstance().jmAPI.removeAllWaypoints("journeymap");
 
-                    for (SavedGroup savedGroup : savedGroups)
-                    {
-                        WaypointGroup waypointGroupObj = WaypointFactory.fromGroupJsonString(savedGroup.getRawPacketData());
-                        getInstance().groupIdentifierMap.put(savedGroup.getUniversalIdentifier(), waypointGroupObj);
-                        getInstance().jmAPI.addWaypointGroup(waypointGroupObj);
+                        for (Waypoint existingWaypoint : existingWaypoints)
+                        {
+                            // check if waypoint already exists locally while not being in the server (meaning it was created with the mod off or not installed)
+                            if (!remoteWaypointsGuid.contains(existingWaypoint.getBlockPos())) // this is only checked by using the block position, there will be a bug I can feel it
+                            {
+                                getInstance().createAction(existingWaypoint, context.player(), true);
+                                hasLocalWaypoint = true;
+                            }
+                        }
+
+                        // Add waypoints registered on the server
+                        for (SavedWaypoint savedWaypoint : savedWaypoints)
+                        {
+                            Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData()); // This is a method that will only work on a pre-release version of JourneyMap that hasnt been released yet.
+                            getInstance().waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
+                            getInstance().jmAPI.addWaypoint("journeymap", waypointObj);
+                        }
                     }
 
                     // this refreshes the client again because of the local waypoints
@@ -425,7 +453,7 @@ public class IClientPluginJM implements IClientPlugin
                     } else {
                         deletionMessageConfirmationKey = "message.jmws.deletion_group_all_success";
                         if (Objects.equals(firstArgument, "*")) {
-                            INSTANCE.jmAPI.removeWaypointGroups("jmapi", false);
+                            IClientPluginJM.deleteAllGroups();
                         } else {
                             INSTANCE.jmAPI.removeWaypointGroup(getInstance().groupIdentifierMap.get(firstArgument), false);
                         }

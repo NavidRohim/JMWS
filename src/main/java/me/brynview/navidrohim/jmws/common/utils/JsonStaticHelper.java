@@ -31,7 +31,7 @@ public class JsonStaticHelper {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_GROUP, List.of(groupFilename, silent));
     }
     public static String makeWaypointSyncRequestJson() {
-        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, null);
+        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, List.of(Map.of(), Map.of()));
     }
 
     public static String makeCreationRequestJson(Waypoint waypoint, boolean silent) {

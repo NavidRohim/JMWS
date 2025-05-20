@@ -89,8 +89,8 @@ public class JMWSIOInterface {
         }
     }
 
-    public static void deleteAllUserWaypoints(UUID playerUUID) {
-        for (String waypointPath : getFileObjects(playerUUID, FetchType.WAYPOINT)) {
+    public static void deleteAllUserObjects(UUID playerUUID, FetchType fetchType) {
+        for (String waypointPath : getFileObjects(playerUUID, fetchType)) {
             deleteFile(waypointPath);
         }
 
