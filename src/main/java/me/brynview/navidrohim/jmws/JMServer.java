@@ -1,9 +1,9 @@
 package me.brynview.navidrohim.jmws;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
-import me.brynview.navidrohim.jmws.common.payloads.WaypointActionPayload;
+import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
 import me.brynview.navidrohim.jmws.common.payloads.RegisterUserPayload;
-import me.brynview.navidrohim.jmws.common.utils.WaypointIOInterface;
+import me.brynview.navidrohim.jmws.common.utils.JMWSIOInterface;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -26,11 +26,11 @@ public class JMServer implements ModInitializer {
 
         // Packet registering (client)
         PayloadTypeRegistry.playC2S().register(RegisterUserPayload.ID, RegisterUserPayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(WaypointActionPayload.ID, WaypointActionPayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(JMWSActionPayload.ID, JMWSActionPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(HandshakePayload.ID, HandshakePayload.CODEC);
 
         // Packet registering (server)
-        PayloadTypeRegistry.playS2C().register(WaypointActionPayload.ID, WaypointActionPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(JMWSActionPayload.ID, JMWSActionPayload.CODEC);
         PayloadTypeRegistry.playS2C().register(HandshakePayload.ID, HandshakePayload.CODEC);
 
         CommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess, environment) ->
@@ -38,7 +38,7 @@ public class JMServer implements ModInitializer {
                                 context -> {
                                     if (context.getSource().getPlayer() != null) {
                                         String jsonString = JsonStaticHelper.makeServerSyncRequestJson();
-                                        WaypointActionPayload waypointActionPayload = new WaypointActionPayload(jsonString);
+                                        JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonString);
 
                                         ServerPlayNetworking.send(context.getSource().getPlayer(), waypointActionPayload);
                                     }
@@ -47,7 +47,7 @@ public class JMServer implements ModInitializer {
                                 }))
                         .then(literal("getUpdateInterval").executes(intervalContext -> {
                             if (intervalContext.getSource().getPlayer() != null) {
-                                WaypointActionPayload payload = new WaypointActionPayload(JsonStaticHelper.makeDisplayIntervalRequestJson());
+                                JMWSActionPayload payload = new JMWSActionPayload(JsonStaticHelper.makeDisplayIntervalRequestJson());
                                 ServerPlayNetworking.send(intervalContext.getSource().getPlayer(), payload);
                             }
                             return 1;
@@ -55,12 +55,12 @@ public class JMServer implements ModInitializer {
                         .then(literal("clearAll").executes(clearallContext -> {
                             ServerPlayerEntity player = clearallContext.getSource().getPlayer();
                             if (player != null) {
-                                 WaypointIOInterface.deleteAllUserWaypoints(player.getUuid());
+                                 JMWSIOInterface.deleteAllUserWaypoints(player.getUuid());
 
-                                 WaypointActionPayload refreshPayload = new WaypointActionPayload(
+                                 JMWSActionPayload refreshPayload = new JMWSActionPayload(
                                          JsonStaticHelper.makeWaypointSyncRequestJson()
                                  );
-                                 WaypointActionPayload deleteAllClientsidePayload = new WaypointActionPayload(
+                                 JMWSActionPayload deleteAllClientsidePayload = new JMWSActionPayload(
                                          JsonStaticHelper.makeDeleteClientWaypointRequestJson("*") // * = Delete all
                                  );
 
@@ -71,7 +71,7 @@ public class JMServer implements ModInitializer {
                         }))
                         .then(literal("nextUpdate").executes(updateDisplayContext -> {
                             if (updateDisplayContext.getSource().getPlayer() != null) {
-                                WaypointActionPayload payload = new WaypointActionPayload(JsonStaticHelper.makeDisplayNextUpdateRequestJson());
+                                JMWSActionPayload payload = new JMWSActionPayload(JsonStaticHelper.makeDisplayNextUpdateRequestJson());
                                 ServerPlayNetworking.send(updateDisplayContext.getSource().getPlayer(), payload);
                             }
                             return 1;

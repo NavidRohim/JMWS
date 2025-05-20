@@ -13,13 +13,13 @@ import net.minecraft.util.Identifier;
 
 import java.util.List;
 
-public record WaypointActionPayload(String jsonAction) implements CustomPayload {
+public record JMWSActionPayload(String jsonAction) implements CustomPayload {
 
     public static final Identifier packetIdentifier = Identifier.of(JMServer.MODID, "waypoint_action");
-    public static final Id<WaypointActionPayload> ID = new Id<>(packetIdentifier);
-    public static final PacketCodec<RegistryByteBuf, WaypointActionPayload> CODEC = PacketCodec.of(WaypointActionPayload::write, WaypointActionPayload::new);
+    public static final Id<JMWSActionPayload> ID = new Id<>(packetIdentifier);
+    public static final PacketCodec<RegistryByteBuf, JMWSActionPayload> CODEC = PacketCodec.of(JMWSActionPayload::write, JMWSActionPayload::new);
 
-    public WaypointActionPayload(PacketByteBuf buf) {
+    public JMWSActionPayload(PacketByteBuf buf) {
         this(buf.readString());
     }
 

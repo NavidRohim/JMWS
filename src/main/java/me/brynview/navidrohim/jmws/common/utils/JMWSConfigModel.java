@@ -6,7 +6,7 @@ import me.brynview.navidrohim.jmws.JMServer;
 
 @Modmenu(modId = JMServer.MODID)
 @Config(name = "jmws-config", wrapperName = "JMWSConfig", defaultHook = true)
-public class JMServerConfigModel {
+public class JMWSConfigModel {
 
     public boolean showAlerts = true;
     public boolean enabled = true;

@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-public class WaypointIOInterface {
+public class JMWSIOInterface {
 
     public static String getWaypointFilename(Waypoint waypoint, UUID uuID) {
         Vector3d waypointLocationVector = new Vector3d(waypoint.getX(), waypoint.getY(), waypoint.getZ());
@@ -36,9 +36,31 @@ public class WaypointIOInterface {
                 ".json";
     }
 
+    public static String getGroupFilename(UUID playerUUID, String universalID) {
+        return "./jmws/" + universalID + "_" + playerUUID + ".json";
+    }
+    public static boolean createGroup(JsonObject jsonObject, UUID playerUUID)
+    {
+        String universalID = jsonObject.get("customData").getAsString();
+        try
+        {
+            String pathString = "./jmws/" + universalID + "_" + playerUUID + ".json";
+            Path groupPathObj = Paths.get(pathString);
+            Files.createFile(groupPathObj);
+
+            FileWriter waypointFileWriter = new FileWriter(pathString);
+            waypointFileWriter.write(jsonObject.toString());
+            waypointFileWriter.close();
+
+            return true;
+        } catch (IOException ioe) {
+            return false;
+        }
+    }
+
     public static boolean createWaypoint(JsonObject jsonObject, UUID playerUUID) {
         JsonObject pos = jsonObject.getAsJsonObject().getAsJsonObject("pos");
-        String waypointFilePath = WaypointIOInterface._getWaypointFromRaw(new Vector3d(
+        String waypointFilePath = JMWSIOInterface._getWaypointFromRaw(new Vector3d(
                 pos.get("x").getAsInt(),
                 pos.get("y").getAsInt(),
                 pos.get("z").getAsInt()
@@ -64,12 +86,12 @@ public class WaypointIOInterface {
 
     public static void deleteAllUserWaypoints(UUID playerUUID) {
         for (String waypointPath : getPlayerWaypointNames(playerUUID)) {
-            deleteWaypoint(waypointPath);
+            deleteFile(waypointPath);
         }
 
     }
 
-    public static boolean deleteWaypoint(String filename) {
+    public static boolean deleteFile(String filename) {
         File waypointFileObj = new File(filename);
         return waypointFileObj.delete();
     }
@@ -89,9 +111,5 @@ public class WaypointIOInterface {
             }
         return waypointFileList;
     };
-
-    public static String getDeathWaypointString() {
-        return "";
-    }
 }
 

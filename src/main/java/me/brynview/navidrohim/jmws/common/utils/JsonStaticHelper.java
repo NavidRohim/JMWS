@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.common.utils;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import journeymap.api.v2.common.waypoint.Waypoint;
+import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.JMServer;
 import net.minidev.json.JSONObject;
 
@@ -23,20 +24,23 @@ public class JsonStaticHelper {
         return json.toJSONString();
     }
 
-    public static String makeHandshakeRequestJson() {
-        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SERVER_HANDSHAKE, null);
-    }
-
     public static String makeDeleteRequestJson(String waypointFilename, boolean silent) {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_WAYPOINT, List.of(waypointFilename, silent));
     }
 
+    public static String makeDeleteGroupRequestJson(String groupFilename, boolean silent) {
+        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_GROUP, List.of(groupFilename, silent));
+    }
     public static String makeWaypointSyncRequestJson() {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, null);
     }
 
     public static String makeCreationRequestJson(Waypoint waypoint, boolean silent) {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SERVER_CREATE, List.of(waypoint.toString(), silent));
+    }
+
+    public static String makeGroupCreationRequestJson(WaypointGroup waypointGroup, boolean silent) {
+        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SERVER_CREATE_GROUP, List.of(waypointGroup.toString(), silent));
     }
 
     public static String makeSyncRequestResponseJson(HashMap<String, String> jsonArray) {

@@ -3,24 +3,16 @@ package me.brynview.navidrohim.jmws.server;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import journeymap.api.v2.common.event.ServerEventRegistry;
-import journeymap.api.v2.common.waypoint.Waypoint;
-import journeymap.api.v2.common.waypoint.WaypointFactory;
 import me.brynview.navidrohim.jmws.JMServer;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
-import me.brynview.navidrohim.jmws.common.payloads.WaypointActionPayload;
+import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
-import me.brynview.navidrohim.jmws.common.utils.WaypointIOInterface;
+import me.brynview.navidrohim.jmws.common.utils.JMWSIOInterface;
 import me.brynview.navidrohim.jmws.common.utils.WaypointPayloadCommand;
 import net.fabricmc.api.DedicatedServerModInitializer;
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +33,7 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             if (server.isDedicated()) {
-                ServerPlayNetworking.registerGlobalReceiver(WaypointActionPayload.ID, this::HandleWaypointAction);
+                ServerPlayNetworking.registerGlobalReceiver(JMWSActionPayload.ID, this::HandleWaypointAction);
                 ServerPlayNetworking.registerGlobalReceiver(HandshakePayload.ID, this::HandshakeHandler);
             }
         });
@@ -51,24 +43,24 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
         ServerPlayNetworking.send(context.player(), handshakePayload);
     }
 
-    private void HandleWaypointAction(WaypointActionPayload waypointActionPayload, ServerPlayNetworking.Context context) {
+    private void HandleWaypointAction(JMWSActionPayload waypointActionPayload, ServerPlayNetworking.Context context) {
         WaypointPayloadCommand command = waypointActionPayload.command();
         List<JsonElement> arguments = waypointActionPayload.arguments();
         ServerPlayerEntity player = context.player();
-        WaypointActionPayload alertMessagePayload;
+        JMWSActionPayload alertMessagePayload;
 
         switch (command) {
 
             // was "delete"
             case WaypointPayloadCommand.COMMON_DELETE_WAYPOINT -> {
-                boolean result = WaypointIOInterface.deleteWaypoint(arguments.getFirst().getAsString());
+                boolean result = JMWSIOInterface.deleteFile(arguments.getFirst().getAsString());
                 boolean silent = arguments.get(1).getAsBoolean();
 
                 if (!silent) {
                     if (result) {
-                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.deletion_success", true));
+                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.deletion_success", true));
                     } else {
-                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.deletion_failure", true));
+                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.deletion_failure", true));
                     }
 
                     ServerPlayNetworking.send(player, alertMessagePayload);
@@ -79,13 +71,13 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
             case WaypointPayloadCommand.SERVER_CREATE -> {
                 JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
                 boolean silent = arguments.get(1).getAsBoolean();
-                boolean waypointCreationSuccess = WaypointIOInterface.createWaypoint(jsonCreationData, context.player().getUuid());
+                boolean waypointCreationSuccess = JMWSIOInterface.createWaypoint(jsonCreationData, context.player().getUuid());
 
                 if (!silent) {
                     if (waypointCreationSuccess) {
-                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.creation_success", true));
+                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.creation_success", true));
                     } else {
-                        alertMessagePayload = new WaypointActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.creation_failure", false));
+                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.creation_failure", false));
                     }
 
                     ServerPlayNetworking.send(player, alertMessagePayload);
@@ -97,9 +89,10 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
             // was "request"
             case WaypointPayloadCommand.SYNC -> {
                 try {
-                    List<String> playerWaypoints = WaypointIOInterface.getPlayerWaypointNames(player.getUuid());
+                    List<String> playerWaypoints = JMWSIOInterface.getPlayerWaypointNames(player.getUuid());
 
                     HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
+                    HashMap<String, String> jsonGroupPayloadArray = new HashMap<>();
 
                     for (int i = 0 ; i < playerWaypoints.size() ; i++) {
                         String waypointFilename = playerWaypoints.get(i);
@@ -108,11 +101,42 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                     }
 
                     String jsonData = JsonStaticHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray);
-                    WaypointActionPayload waypointPayloadOutbound = new WaypointActionPayload(jsonData);
+                    JMWSActionPayload waypointPayloadOutbound = new JMWSActionPayload(jsonData);
                     ServerPlayNetworking.send(player, waypointPayloadOutbound);
 
                 } catch (IOException ioe) {
                     JMServer.LOGGER.error(ioe.getMessage());
+                }
+            }
+
+            case WaypointPayloadCommand.SERVER_CREATE_GROUP -> {
+                JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
+                boolean silent = arguments.get(1).getAsBoolean();
+                boolean waypointCreationSuccess = JMWSIOInterface.createGroup(jsonCreationData, context.player().getUuid());
+
+                if (!silent) {
+                    if (waypointCreationSuccess) {
+                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.creation_group_success", true));
+                    } else {
+                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.creation_group_failure", false));
+                    }
+
+                    ServerPlayNetworking.send(player, alertMessagePayload);
+                }
+            }
+
+            case WaypointPayloadCommand.COMMON_DELETE_GROUP -> {
+                boolean result = JMWSIOInterface.deleteFile(arguments.getFirst().getAsString());
+                boolean silent = arguments.get(1).getAsBoolean();
+
+                if (!silent) {
+                    if (result) {
+                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.deletion_group_success", true));
+                    } else {
+                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.deletion_group_failure", true));
+                    }
+
+                    ServerPlayNetworking.send(player, alertMessagePayload);
                 }
             }
 
