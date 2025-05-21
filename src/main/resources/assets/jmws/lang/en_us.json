@@ -31,7 +31,7 @@
   "text.config.jmws-config.option.enabled.tooltip": "If JMWS is enabled",
   "text.config.jmws-config.option.updateWaypointFrequency.tooltip": "Frequency of when waypoints are grabbed from the server (in ticks)",
   "text.config.jmws-config.option.uploadWaypoints.tooltip": "Enables / disables waypoint syncing",
-  "text.config.jmws-config.option.uploadGroups.tooltip": "Enables / disables waypoint syncing",
+  "text.config.jmws-config.option.uploadGroups.tooltip": "Enables / disables group syncing",
   "text.config.jmws-config.option.serverHandshakeTimeout.tooltip": "How long until the mod determines that the server doesn't have JMWS installed",
 
   "text.config.jmws-config.option.showAlerts": "Show alerts?",
