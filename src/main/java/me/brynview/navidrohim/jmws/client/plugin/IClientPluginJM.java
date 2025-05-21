@@ -235,12 +235,12 @@ public class IClientPluginJM implements IClientPlugin
         // Sends "request" packet | New = "SYNC"
 
         ClientPlayNetworking.send(new JMWSActionPayload(JsonStaticHelper.makeWaypointSyncRequestJson()));
-        String updateMessageKey = "message.jmws.modified_success";
+        String updateMessageKey = "message.jmws.synced_success";
 
         if (config.uploadWaypoints() && config.uploadGroups()) {
-            updateMessageKey = "message.jmws.modified_both_success";
+            updateMessageKey = "message.jmws.synced_both_success";
         } else if (config.uploadGroups()) {
-            updateMessageKey = "message.jmws.modified_group_success";
+            updateMessageKey = "message.jmws.synced_group_success";
         }
 
         sendUserAlert(Text.translatable(updateMessageKey).getString(), true, false);
