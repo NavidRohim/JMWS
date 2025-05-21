@@ -162,8 +162,7 @@ public class IClientPluginJM implements IClientPlugin
 
         // JourneyMap Events
         CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", JMServer.MODID, this::WaypointCreationHandler);
-        CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe("jmapi2", JMServer.MODID, this::transferWaypointToGroup);
-        CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi1", JMServer.MODID, this::groupEventListener);
+        CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", JMServer.MODID, this::groupEventListener);
 
         // Vanilla Events
         ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
@@ -184,14 +183,9 @@ public class IClientPluginJM implements IClientPlugin
         }));
     }
 
-    private void transferWaypointToGroup(WaypointGroupTransferEvent waypointGroupTransferEvent) {
-        JMServer.LOGGER.info("wip.");
-        //waypointGroupTransferEvent.cancel();
-    }
-
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
     {
-        if (this.getEnabledStatus() && config.uploadGroups()) {
+        if (this.getEnabledStatus() && config.uploadGroups() && !forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) {
             MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
             ClientPlayerEntity player = minecraftClientInstance.player;
             WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
@@ -203,11 +197,8 @@ public class IClientPluginJM implements IClientPlugin
 
             switch (waypointGroupEvent.getContext()) {
                 case CREATE -> this.groupCreationHandler(waypointGroup, player, false); // MAKE SURE you use beta 47 or higher
-
-                case DELETED ->
-                        this.groupDeletionHandler(waypointGroup, player, false, waypointGroupEvent.deleteWaypoints());
-                case UPDATE ->
-                        this.groupUpdateHandler(waypointGroup, oldWaypointGroup, player);
+                case DELETED -> this.groupDeletionHandler(waypointGroup, player, false, waypointGroupEvent.deleteWaypoints());
+                case UPDATE -> this.groupUpdateHandler(waypointGroup, oldWaypointGroup, player);
             }
         }
     }
