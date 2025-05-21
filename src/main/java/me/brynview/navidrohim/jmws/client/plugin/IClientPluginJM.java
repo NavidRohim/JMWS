@@ -9,6 +9,7 @@ import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.common.event.CommonEventRegistry;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.event.common.WaypointGroupEvent;
+import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
@@ -134,6 +135,7 @@ public class IClientPluginJM implements IClientPlugin
             }
 
             Waypoint oldWaypoint = this.getOldWaypoint(waypointEvent.waypoint);
+
             switch (waypointEvent.getContext()) {
 
                 case CREATE ->
@@ -154,11 +156,16 @@ public class IClientPluginJM implements IClientPlugin
     {
         this.jmAPI = jmAPI;
 
+        // Payloads
         ClientPlayNetworking.registerGlobalReceiver(JMWSActionPayload.ID, IClientPluginJM::HandlePacket);
         ClientPlayNetworking.registerGlobalReceiver(HandshakePayload.ID, IClientPluginJM::HandshakeHandler);
 
+        // JourneyMap Events
         CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", JMServer.MODID, this::WaypointCreationHandler);
-        CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", JMServer.MODID, this::groupEventListener);
+        CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe("jmapi2", JMServer.MODID, this::transferWaypointToGroup);
+        CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi1", JMServer.MODID, this::groupEventListener);
+
+        // Vanilla Events
         ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
         ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
             ClientPlayNetworking.send(new HandshakePayload());
@@ -175,6 +182,11 @@ public class IClientPluginJM implements IClientPlugin
             tickCounter = 0;
             serverHasMod = false;
         }));
+    }
+
+    private void transferWaypointToGroup(WaypointGroupTransferEvent waypointGroupTransferEvent) {
+        JMServer.LOGGER.info("wip.");
+        //waypointGroupTransferEvent.cancel();
     }
 
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
@@ -339,7 +351,6 @@ public class IClientPluginJM implements IClientPlugin
                     // A lot of this code regarding groups is shit. I know it is just by instinct but I do not know how to fix it.
                     if (config.uploadGroups())
                     {
-                        JMServer.LOGGER.info(waypointPayload.arguments());
                         JsonObject jsonGroups = waypointPayload.arguments().get(1).getAsJsonObject().deepCopy();
 
                         List<? extends WaypointGroup> existingGroups = getInstance().jmAPI.getAllWaypointGroups();

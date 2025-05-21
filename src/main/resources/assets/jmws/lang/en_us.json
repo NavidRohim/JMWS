@@ -16,7 +16,7 @@
   "message.jmws.deletion_group_failure": "Could not delete group on the server",
   "message.jmws.deletion_group_all_success": "Deleted all groups server-side",
   "message.jmws.modified_group_success": "Synced updated group",
-  "message.jmws.synced_group_success": "Synced waypoints",
+  "message.jmws.synced_group_success": "Synced groups",
 
   "message.jmws.local_group_upload": "Added local group(s) to the server.",
 

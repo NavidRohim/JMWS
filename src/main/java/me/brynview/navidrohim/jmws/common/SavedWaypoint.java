@@ -105,6 +105,7 @@ public class SavedWaypoint extends SavedObject {
     public UUID getPlayerUUID() {
         return UUID.fromString(this.playerUUID);
     }
+    public String getUniversalIdentifier() { return this.universalIdentifier; }
     public String getWaypointModId() { return this.modId; }
     public String getWaypointGroupId() { return this.groupId; }
     public String getWaypointOrigin() { return this.origin; }
