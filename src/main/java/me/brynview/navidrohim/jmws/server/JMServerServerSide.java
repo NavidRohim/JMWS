@@ -110,7 +110,6 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                     String jsonData = JsonStaticHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray);
                     JMWSActionPayload waypointPayloadOutbound = new JMWSActionPayload(jsonData);
                     ServerPlayNetworking.send(player, waypointPayloadOutbound);
-
                 } catch (IOException ioe) {
                     JMServer.LOGGER.error(ioe.getMessage());
                 }

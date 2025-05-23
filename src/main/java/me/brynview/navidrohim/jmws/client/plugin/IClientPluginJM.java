@@ -9,7 +9,6 @@ import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.common.event.CommonEventRegistry;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.event.common.WaypointGroupEvent;
-import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
@@ -28,6 +27,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
@@ -56,7 +56,7 @@ public class IClientPluginJM implements IClientPlugin
     private final HashMap<String, WaypointGroup> groupIdentifierMap = new HashMap<>();
     private final List<String> forbiddenGroups = List.of("journeymap_death", "journeymap_all", "journeymap_temp", "journeymap_default");
 
-    private boolean oldWorld = false;
+    private ClientWorld oldWorld = null;
     private boolean serverHasMod = false;
 
     private static final JMWSConfig config = JMServerClient.CONFIG;
@@ -165,6 +165,7 @@ public class IClientPluginJM implements IClientPlugin
         CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", JMServer.MODID, this::groupEventListener);
 
         // Vanilla Events
+
         ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
         ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
             ClientPlayNetworking.send(new HandshakePayload());
@@ -208,7 +209,6 @@ public class IClientPluginJM implements IClientPlugin
         this.groupDeletionHandler(oldWaypointGroup, player, true);
         this.groupCreationHandler(waypointGroup, player, true);
 
-        //jmAPI.removeWaypointGroup(waypointGroup, false);
         sendUserAlert(Text.translatable("message.jmws.modified_group_success").getString(), true, false);
     }
 
@@ -250,10 +250,16 @@ public class IClientPluginJM implements IClientPlugin
     private void handleTick(MinecraftClient minecraftClient) {
 
         // Sends "sync" packet | New = SYNC
-        if (minecraftClient.world != null && this.getEnabledStatus()) {
-            if (!oldWorld) {
-                tickCounterUpdateThreshold = 20 * (config.serverHandshakeTimeout() + 1);
-                oldWorld = true;
+        ClientWorld world = minecraftClient.world;
+
+        if (world != null && this.getEnabledStatus()) {
+            if (world != oldWorld) {
+                if (oldWorld == null) {
+                    tickCounterUpdateThreshold = 20 * (config.serverHandshakeTimeout() + 1); // Add 1 second buffer to not interupt message
+                } else {
+                    tickCounterUpdateThreshold = 40; // 2-second delay when switching dimension
+                }
+                tickCounter = 0;
             } else {
 
                 tickCounter++;
@@ -264,9 +270,10 @@ public class IClientPluginJM implements IClientPlugin
                     tickCounterUpdateThreshold = config.updateWaypointFrequency();
                 }
             }
+            oldWorld = minecraftClient.world;
         } else {
             tickCounter = 0;
-            oldWorld = false;
+            oldWorld = null;
         }
     }
 
@@ -320,6 +327,7 @@ public class IClientPluginJM implements IClientPlugin
 
     // Handler for WaypointActionPayload
     public static void HandlePacket(JMWSActionPayload waypointPayload, ClientPlayNetworking.Context context) {
+
         if (getInstance().getEnabledStatus()) {
             MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
 
@@ -399,7 +407,6 @@ public class IClientPluginJM implements IClientPlugin
                         for (SavedWaypoint savedWaypoint : savedWaypoints)
                         {
                             Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData()); // This is a method that will only work on a pre-release version of JourneyMap that hasnt been released yet.
-                            JMServer.LOGGER.info("\nDebug Waypoint > " + waypointObj.toString() + " \n");
                             getInstance().waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
                             getInstance().jmAPI.addWaypoint("journeymap", waypointObj);
                         }
