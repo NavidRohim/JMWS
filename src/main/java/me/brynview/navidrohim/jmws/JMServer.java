@@ -2,7 +2,6 @@ package me.brynview.navidrohim.jmws;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
-import me.brynview.navidrohim.jmws.common.payloads.RegisterUserPayload;
 import me.brynview.navidrohim.jmws.common.utils.JMWSIOInterface;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -40,7 +39,6 @@ public class JMServer implements ModInitializer {
     public void onInitialize() {
 
         // Packet registering (client)
-        PayloadTypeRegistry.playC2S().register(RegisterUserPayload.ID, RegisterUserPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(JMWSActionPayload.ID, JMWSActionPayload.CODEC);
         PayloadTypeRegistry.playC2S().register(HandshakePayload.ID, HandshakePayload.CODEC);
 

@@ -44,5 +44,15 @@
   "__comment__": "Section Header language strings",
 
   "text.config.jmws-config.section.upload": "Upload Configuration",
-  "text.config.jmws-config.section.generalConfig": "General Configuration"
+  "text.config.jmws-config.section.generalConfig": "General Configuration",
+
+  "__comment__": "Error language strings",
+
+  "message.jmws.error_packet_size": "You have too many waypoints and groups. Please delete some to continue making waypoints and syncing.",
+
+  "__comment__": "JourneyMap Buttons",
+  "button.jmws.update_button": "Sync waypoints",
+  "button.jmws.tooltip.update_button": "Synchronizes waypoints from the server",
+  "button.jmws.enable_button": "On / Off JMWS",
+  "button.jmws.tooltip.enable_button": "Turn on / off waypoint syncing"
 }

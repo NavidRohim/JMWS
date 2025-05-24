@@ -6,7 +6,10 @@ import com.google.gson.JsonParser;
 import journeymap.api.v2.client.IClientPlugin;
 import journeymap.api.v2.client.JourneyMapPlugin;
 import journeymap.api.v2.client.IClientAPI;
+import journeymap.api.v2.client.event.FullscreenDisplayEvent;
+import journeymap.api.v2.client.fullscreen.IThemeButton;
 import journeymap.api.v2.common.event.CommonEventRegistry;
+import journeymap.api.v2.common.event.FullscreenEventRegistry;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.event.common.WaypointGroupEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
@@ -18,10 +21,8 @@ import me.brynview.navidrohim.jmws.common.SavedGroup;
 import me.brynview.navidrohim.jmws.common.SavedWaypoint;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.common.utils.CommonHelper;
+import me.brynview.navidrohim.jmws.common.utils.*;
 import me.brynview.navidrohim.jmws.common.utils.JMWSConfig;
-import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
-import me.brynview.navidrohim.jmws.common.utils.JMWSIOInterface;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -121,6 +122,7 @@ public class IClientPluginJM implements IClientPlugin
 
         waypoint.setPersistent(false);
         waypoint.setCustomData(waypointIdentifier);
+
         String creationData = JsonStaticHelper.makeCreationRequestJson(waypoint, silent);
         ClientPlayNetworking.send(new JMWSActionPayload(creationData));
     }
@@ -163,6 +165,7 @@ public class IClientPluginJM implements IClientPlugin
         // JourneyMap Events
         CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", JMServer.MODID, this::WaypointCreationHandler);
         CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", JMServer.MODID, this::groupEventListener);
+        FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(JMServer.MODID, this::addJMButtons);
 
         // Vanilla Events
 
@@ -182,6 +185,45 @@ public class IClientPluginJM implements IClientPlugin
             tickCounter = 0;
             serverHasMod = false;
         }));
+    }
+
+    private void addJMButtons(FullscreenDisplayEvent.AddonButtonDisplayEvent addonButtonDisplayEvent) {
+        IThemeButton buttonEnabled = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
+                "button.jmws.enable_button",
+                AssetHelper.onOffButtonAsset,
+                getEnabledStatus(),
+                this::enableMod);
+
+        IThemeButton buttonSync = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
+                "button.jmws.update_button",
+                AssetHelper.enableButtonAsset,
+                true,
+                this::updateFromButton);
+
+        buttonSync.setEnabled(getEnabledStatus());
+        buttonSync.setTooltip(Text.translatable("button.jmws.tooltip.update_button").getString());
+
+        buttonEnabled.setTooltip(Text.translatable("button.jmws.tooltip.enable_button").getString());
+    }
+
+    private void enableMod(IThemeButton iThemeButton) {
+        iThemeButton.setLabels(
+                Text.translatable("addServer.resourcePack.enabled").getString(),
+                Text.translatable("addServer.resourcePack.disabled").getString()
+        );
+        if (getEnabledStatus()) {
+            config.enabled(false);
+            iThemeButton.setToggled(false);
+        } else {
+            config.enabled(true);
+            iThemeButton.setToggled(true);
+        }
+    }
+
+    private void updateFromButton(IThemeButton iThemeButton) {
+        if (getEnabledStatus()) {
+            updateWaypoints();
+        }
     }
 
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)

@@ -43,11 +43,15 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
         ServerPlayNetworking.send(context.player(), handshakePayload);
     }
 
+    private void sendUserMessage(ServerPlayerEntity player, String messageKey, Boolean overlay) {
+        JMWSActionPayload messagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson(messageKey, overlay));
+        ServerPlayNetworking.send(player, messagePayload);
+    }
+
     private void HandleWaypointAction(JMWSActionPayload waypointActionPayload, ServerPlayNetworking.Context context) {
         WaypointPayloadCommand command = waypointActionPayload.command();
         List<JsonElement> arguments = waypointActionPayload.arguments();
         ServerPlayerEntity player = context.player();
-        JMWSActionPayload alertMessagePayload;
 
         switch (command) {
 
@@ -58,12 +62,10 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
 
                 if (!silent) {
                     if (result) {
-                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.deletion_success", true));
+                        sendUserMessage(player, "message.jmws.deletion_success", true);
                     } else {
-                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.deletion_failure", true));
+                        sendUserMessage(player, "message.jmws.deletion_failure", true);
                     }
-
-                    ServerPlayNetworking.send(player, alertMessagePayload);
                 }
             }
 
@@ -75,15 +77,11 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
 
                 if (!silent) {
                     if (waypointCreationSuccess) {
-                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.creation_success", true));
+                        sendUserMessage(player, "message.jmws.creation_success", true);
                     } else {
-                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.creation_failure", false));
+                        sendUserMessage(player, "message.jmws.creation_failure", false);
                     }
-
-                    ServerPlayNetworking.send(player, alertMessagePayload);
                 }
-
-
             }
 
             // was "request"
@@ -106,10 +104,14 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                         String jsonGroupFileString = Files.readString(Paths.get(groupFilename));
                         jsonGroupPayloadArray.put(String.valueOf(ix), jsonGroupFileString);
                     }
-
                     String jsonData = JsonStaticHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray);
-                    JMWSActionPayload waypointPayloadOutbound = new JMWSActionPayload(jsonData);
-                    ServerPlayNetworking.send(player, waypointPayloadOutbound);
+
+                    if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit but I got nowhere near.
+                        sendUserMessage(player, "message.jmws.error_packet_size", false);
+                    } else {
+                        JMWSActionPayload waypointPayloadOutbound = new JMWSActionPayload(jsonData);
+                        ServerPlayNetworking.send(player, waypointPayloadOutbound);
+                    }
                 } catch (IOException ioe) {
                     JMServer.LOGGER.error(ioe.getMessage());
                 }
@@ -122,12 +124,11 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
 
                 if (!silent) {
                     if (waypointCreationSuccess) {
-                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.creation_group_success", true));
+                        sendUserMessage(player, "message.jmws.creation_group_success", true);
                     } else {
-                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.creation_group_failure", false));
-                    }
+                        sendUserMessage(player, "message.jmws.creation_group_failure", false);
 
-                    ServerPlayNetworking.send(player, alertMessagePayload);
+                    }
                 }
             }
 
@@ -137,12 +138,10 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
 
                 if (!silent) {
                     if (result) {
-                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.deletion_group_success", true));
+                        sendUserMessage(player, "message.jmws.deletion_group_success", true);
                     } else {
-                        alertMessagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson("message.jmws.deletion_group_failure", true));
+                        sendUserMessage(player, "message.jmws.deletion_group_failure", true);
                     }
-
-                    ServerPlayNetworking.send(player, alertMessagePayload);
                 }
             }
 
