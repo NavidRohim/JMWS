@@ -1,9 +1,11 @@
-package me.brynview.navidrohim.jmws.common.utils;
+package me.brynview.navidrohim.jmws.common.helpers;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.common.io.JMWSIOInterface;
+import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
 import net.minidev.json.JSONObject;
 
 import java.util.*;

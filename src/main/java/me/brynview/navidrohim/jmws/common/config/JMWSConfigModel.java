@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.common.utils;
+package me.brynview.navidrohim.jmws.common.config;
 
 import io.wispforest.owo.config.annotation.Config;
 import io.wispforest.owo.config.annotation.Modmenu;

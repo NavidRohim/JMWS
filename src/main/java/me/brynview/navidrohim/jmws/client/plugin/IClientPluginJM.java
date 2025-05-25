@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.client.plugin;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import journeymap.api.v2.client.IClientPlugin;
 import journeymap.api.v2.client.JourneyMapPlugin;
 import journeymap.api.v2.client.IClientAPI;
@@ -19,9 +20,12 @@ import me.brynview.navidrohim.jmws.JMServer;
 import me.brynview.navidrohim.jmws.client.JMServerClient;
 import me.brynview.navidrohim.jmws.common.SavedGroup;
 import me.brynview.navidrohim.jmws.common.SavedWaypoint;
+import me.brynview.navidrohim.jmws.common.helpers.AssetHelper;
+import me.brynview.navidrohim.jmws.common.helpers.CommonHelper;
+import me.brynview.navidrohim.jmws.common.helpers.JsonStaticHelper;
+import me.brynview.navidrohim.jmws.common.io.JMWSIOInterface;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.common.utils.*;
 import me.brynview.navidrohim.jmws.common.utils.JMWSConfig;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -40,6 +44,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 
 @JourneyMapPlugin(apiVersion = "2.0.0")
@@ -325,28 +330,6 @@ public class IClientPluginJM implements IClientPlugin
         return JMServer.MODID;
     }
 
-    public static List<SavedWaypoint> getSavedWaypoints(JsonObject jsonData, UUID playerUUID) {
-        List<SavedWaypoint> waypoints = new ArrayList<>();
-
-        for (Map.Entry<String, JsonElement> wpEntry : jsonData.entrySet()) {
-            JsonObject rawData = JsonParser.parseString(wpEntry.getValue().getAsString()).getAsJsonObject();
-            waypoints.add(new SavedWaypoint(rawData, playerUUID));
-        }
-        return waypoints;
-    }
-
-    // todo; experiment with making parent
-    public static List<SavedGroup> getSavedGroups(JsonObject jsonData) {
-        List<SavedGroup> waypoints = new ArrayList<>();
-
-        for (Map.Entry<String, JsonElement> wpEntry : jsonData.entrySet()) {
-            JsonObject rawData = JsonParser.parseString(wpEntry.getValue().getAsString()).getAsJsonObject();
-            waypoints.add(new SavedGroup(rawData));
-        }
-        return waypoints;
-    }
-
-
     public static void HandshakeHandler(HandshakePayload handshakePayload, ClientPlayNetworking.Context context) {
 
         sendUserAlert("§2Server has JMWS!", true, false);
@@ -367,7 +350,99 @@ public class IClientPluginJM implements IClientPlugin
         }
     }
 
-    // Handler for WaypointActionPayload
+    // Helper for handleUploadWaypoints
+    private static Set<SavedWaypoint> getSavedWaypoints(JsonObject jsonData, UUID playerUUID) throws JsonSyntaxException, IllegalStateException {
+        Set<SavedWaypoint> waypoints = new HashSet<>();
+
+        for (Map.Entry<String, JsonElement> entry : jsonData.entrySet()) {
+            JsonObject json = JsonParser.parseString(entry.getValue().getAsString()).getAsJsonObject();
+            waypoints.add(new SavedWaypoint(json, playerUUID));
+        }
+
+        return waypoints;
+
+    }
+
+    // Helper for handleUploadGroups
+    private static Set<SavedGroup> getSavedGroups(JsonObject jsonData) throws JsonSyntaxException, IllegalStateException {
+        Set<SavedGroup> groups = new HashSet<>();
+
+        for (Map.Entry<String, JsonElement> entry : jsonData.entrySet()) {
+            JsonObject json = JsonParser.parseString(entry.getValue().getAsString()).getAsJsonObject();
+            groups.add(new SavedGroup(json));
+        }
+
+        return groups;
+
+    }
+
+    // Helper for sync, handleUploadWaypoints is basically the same but different type annotations. I should've used generics
+    private boolean handleUploadGroups(JsonObject jsonGroupsRaw, ClientPlayNetworking.Context context) {
+        boolean hasLocalGroup = false;
+
+        // Get existing groups (local) and get group objects saved on server
+        List<? extends WaypointGroup> existingGroups = getInstance().jmAPI.getAllWaypointGroups();
+        Set<SavedGroup> savedGroups = IClientPluginJM.getSavedGroups(jsonGroupsRaw.deepCopy());
+
+        // Get an identifier of every group, used to detect if the group already exists
+        Set<String> remoteGroupKeys = savedGroups.stream()
+                .map(g -> g.getName() + g.getGroupIdentifier())
+                .collect(Collectors.toSet());
+
+        // Test if any existing groups (persistent) have already been added to the server, if not, add them
+        for (WaypointGroup existingGroup : existingGroups) {
+            String key = existingGroup.getName() + existingGroup.getGuid();
+            if (!remoteGroupKeys.contains(key) && !getInstance().forbiddenGroups.contains(existingGroup.getGuid())) {
+                getInstance().groupCreationHandler(existingGroup, context.player(), true);
+                hasLocalGroup = true;
+            }
+        }
+
+        // Add server groups to the client
+        for (SavedGroup savedGroup : savedGroups) {
+            WaypointGroup group = WaypointFactory.fromGroupJsonString(savedGroup.getRawPacketData());
+            getInstance().groupIdentifierMap.put(savedGroup.getUniversalIdentifier(), group);
+            getInstance().jmAPI.addWaypointGroup(group);
+        }
+
+        // return this because need to give an alert
+        return hasLocalGroup;
+    }
+
+    // Helper for sync but for waypoints
+    private boolean handleUploadWaypoints(JsonObject jsonWaypoints, ClientPlayNetworking.Context context) throws JsonSyntaxException, IllegalStateException {
+        boolean hasLocalWaypoint = false;
+
+        // Get existing waypoints (local) and get waypoint objects saved on server
+        List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
+        Set<SavedWaypoint> savedWaypoints = IClientPluginJM.getSavedWaypoints(jsonWaypoints.deepCopy(), context.player().getUuid());
+
+        // Get an identifier of every waypoint (BlockPos, location), used to detect if the waypoint already exists
+        Set<BlockPos> remoteWaypointPositions = savedWaypoints.stream()
+                .map(w -> new BlockPos(w.getWaypointX(), w.getWaypointY(), w.getWaypointZ()))
+                .collect(Collectors.toSet());
+
+        getInstance().jmAPI.removeAllWaypoints("journeymap");
+
+        // Test if any existing waypoints (persistent, usually death waypoints) have already been added to the server, if not, add them
+        for (Waypoint existing : existingWaypoints) {
+            if (!remoteWaypointPositions.contains(existing.getBlockPos())) {
+                getInstance().createAction(existing, context.player(), true);
+                hasLocalWaypoint = true;
+            }
+        }
+
+        // Add server waypoints to the client
+        for (SavedWaypoint savedWaypoint : savedWaypoints) {
+            Waypoint wp = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData());
+            getInstance().waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), wp);
+            getInstance().jmAPI.addWaypoint("journeymap", wp);
+        }
+
+        return hasLocalWaypoint;
+    }
+
+    // Handler for JMWSActionPayload
     public static void HandlePacket(JMWSActionPayload waypointPayload, ClientPlayNetworking.Context context) {
 
         if (getInstance().getEnabledStatus()) {
@@ -383,91 +458,26 @@ public class IClientPluginJM implements IClientPlugin
                 // Was creation_response
                 // Sends no outbound data
                 case SYNC -> {
-
                     boolean hasLocalGroup = false;
                     boolean hasLocalWaypoint = false;
 
-                    // I really really REALLY hate this. The code is basically executing twice over for waypoints and group. I dont know enough about Java.
-                    // A lot of this code regarding groups is shit. I know it is just by instinct but I do not know how to fix it.
-
-                    List<? extends WaypointGroup> existingGroups = getInstance().jmAPI.getAllWaypointGroups();
-                    List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
-
-                    if (config.uploadGroups())
-                    {
-                        JsonObject jsonGroups = waypointPayload.arguments().get(1).getAsJsonObject().deepCopy();
-
-                        List<SavedGroup> savedGroups = IClientPluginJM.getSavedGroups(jsonGroups);
-                        List<String> remoteGroupsIdentifier = new ArrayList<>();
-
-                        for (SavedGroup savedGroup : savedGroups) {
-                            remoteGroupsIdentifier.add(savedGroup.getName() + savedGroup.getGroupIdentifier());
-                        }
-
-                        for (WaypointGroup existingGroup : existingGroups)
-                        {
-                            if (!remoteGroupsIdentifier.contains(existingGroup.getName() + existingGroup.getGuid()) && !getInstance().forbiddenGroups.contains(existingGroup.getGuid()))
-                            {
-                                getInstance().groupCreationHandler(existingGroup, context.player(), true);
-                                hasLocalGroup = true;
-                            }
-                        }
-
-                        for (SavedGroup savedGroup : savedGroups)
-                        {
-
-                            WaypointGroup waypointGroupObj = WaypointFactory.fromGroupJsonString(savedGroup.getRawPacketData());
-                            getInstance().groupIdentifierMap.put(savedGroup.getUniversalIdentifier(), waypointGroupObj);
-                            getInstance().jmAPI.addWaypointGroup(waypointGroupObj);
-                        }
+                    if (config.uploadGroups()) {
+                        hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), context);
                     }
+
                     if (config.uploadWaypoints()) {
-                        JsonObject json = waypointPayload.arguments().getFirst().getAsJsonObject().deepCopy();
-                        List<SavedWaypoint> savedWaypoints = IClientPluginJM.getSavedWaypoints(json, context.player().getUuid());
-                        List<BlockPos> remoteWaypointsGuid = new ArrayList<>();
-
-
-                        // Add server waypoint coordinates onto list to check
-                        for (SavedWaypoint savedWaypoint : savedWaypoints) {
-                            remoteWaypointsGuid.add(new BlockPos(savedWaypoint.getWaypointX(), savedWaypoint.getWaypointY(), savedWaypoint.getWaypointZ()));
-                        }
-
-                        // remove all to update (if waypoint has been removed)
-                        getInstance().jmAPI.removeAllWaypoints("journeymap");
-
-                        for (Waypoint existingWaypoint : existingWaypoints)
-                        {
-                            // check if waypoint already exists locally while not being in the server (meaning it was created with the mod off or not installed)
-                            if (!remoteWaypointsGuid.contains(existingWaypoint.getBlockPos())) // this is only checked by using the block position, there will be a bug I can feel it
-                            {
-                                getInstance().createAction(existingWaypoint, context.player(), true);
-                                hasLocalWaypoint = true;
-                            }
-                        }
-
-                        // Add waypoints registered on the server
-                        for (SavedWaypoint savedWaypoint : savedWaypoints)
-                        {
-                            Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData()); // This is a method that will only work on a pre-release version of JourneyMap that hasnt been released yet.
-                            getInstance().waypointIdentifierMap.put(savedWaypoint.getUniversalIdentifier(), waypointObj);
-                            getInstance().jmAPI.addWaypoint("journeymap", waypointObj);
-                        }
+                        hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), context);
                     }
 
-                    // this refreshes the client again because of the local waypoints
-                    if (hasLocalGroup && hasLocalWaypoint) {
+                    if (hasLocalGroup || hasLocalWaypoint) {
                         updateWaypoints();
-                        sendUserAlert(Text.translatable("message.jmws.local_both_upload").getString(), true, false);
-                    }
-
-                    else if (hasLocalWaypoint) {
-                        updateWaypoints();
-                        sendUserAlert(Text.translatable("message.jmws.local_waypoint_upload").getString(), true, false);
-                    }
-
-                    else if (hasLocalGroup) {
-                        updateWaypoints();
-                        sendUserAlert(Text.translatable("message.jmws.local_group_upload").getString(), true, false);
+                        if (hasLocalGroup && hasLocalWaypoint) {
+                            sendUserAlert(Text.translatable("message.jmws.local_both_upload").getString(), true, false);
+                        } else if (hasLocalGroup) {
+                            sendUserAlert(Text.translatable("message.jmws.local_group_upload").getString(), true, false);
+                        } else {
+                            sendUserAlert(Text.translatable("message.jmws.local_waypoint_upload").getString(), true, false);
+                        }
                     }
 
                 }

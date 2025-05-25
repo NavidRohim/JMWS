@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.common.utils;
+package me.brynview.navidrohim.jmws.common.helpers;
 
 import org.apache.commons.codec.digest.DigestUtils;
 

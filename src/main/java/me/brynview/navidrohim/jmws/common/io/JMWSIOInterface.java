@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.common.utils;
+package me.brynview.navidrohim.jmws.common.io;
 
 import com.google.gson.JsonObject;
 import journeymap.api.v2.common.waypoint.Waypoint;

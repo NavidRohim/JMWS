@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.common.utils;
+package me.brynview.navidrohim.jmws.common.helpers;
 
 import me.brynview.navidrohim.jmws.JMServer;
 import net.minecraft.util.Identifier;

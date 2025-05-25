@@ -1,8 +1,8 @@
 package me.brynview.navidrohim.jmws;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.common.utils.JsonStaticHelper;
-import me.brynview.navidrohim.jmws.common.utils.JMWSIOInterface;
+import me.brynview.navidrohim.jmws.common.helpers.JsonStaticHelper;
+import me.brynview.navidrohim.jmws.common.io.JMWSIOInterface;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;

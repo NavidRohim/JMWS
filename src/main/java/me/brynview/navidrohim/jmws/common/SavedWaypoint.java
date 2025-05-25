@@ -2,8 +2,6 @@ package me.brynview.navidrohim.jmws.common;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import me.brynview.navidrohim.jmws.JMServer;
-import me.brynview.navidrohim.jmws.common.utils.JMWSIOInterface;
 import net.minecraft.util.Identifier;
 
 import java.util.List;
