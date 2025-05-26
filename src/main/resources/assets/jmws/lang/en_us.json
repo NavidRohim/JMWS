@@ -28,6 +28,7 @@
   "text.config.jmws-config.title": "JourneyMap Waypoint Syncing (JMWS)",
 
   "text.config.jmws-config.option.showAlerts.tooltip": "Whether waypoint creation, deletion or other alerts are shown",
+  "text.config.jmws-config.option.playEffects.tooltip": "Whether sound effects (usually from alerts) will play.",
   "text.config.jmws-config.option.enabled.tooltip": "If JMWS is enabled",
   "text.config.jmws-config.option.updateWaypointFrequency.tooltip": "Frequency of when waypoints are grabbed from the server (in ticks)",
   "text.config.jmws-config.option.uploadWaypoints.tooltip": "Enables / disables waypoint syncing",
@@ -35,6 +36,7 @@
   "text.config.jmws-config.option.serverHandshakeTimeout.tooltip": "How long until the mod determines that the server doesn't have JMWS installed",
 
   "text.config.jmws-config.option.showAlerts": "Show alerts?",
+  "text.config.jmws-config.option.playEffects": "Sound alerts?",
   "text.config.jmws-config.option.enabled": "Waypoint Syncing Enabled",
   "text.config.jmws-config.option.updateWaypointFrequency": "Waypoint update frequency",
   "text.config.jmws-config.option.serverHandshakeTimeout": "Server Handshake Timeout",
@@ -48,11 +50,16 @@
 
   "__comment__": "Error language strings",
 
-  "message.jmws.error_packet_size": "You have too many waypoints and groups. Please delete some to continue making waypoints and syncing.",
+  "error.jmws.error_packet_size": "You have too many waypoints and groups. Please delete some to continue making waypoints and syncing.",
+  "error.jmws.error_corrupted_waypoint": "One or more waypoints are corrupted. Contact administration for details.",
 
   "__comment__": "JourneyMap Buttons",
   "button.jmws.update_button": "Sync waypoints",
   "button.jmws.tooltip.update_button": "Synchronizes waypoints from the server",
   "button.jmws.enable_button": "On / Off JMWS",
-  "button.jmws.tooltip.enable_button": "Turn on / off waypoint syncing"
+  "button.jmws.tooltip.enable_button": "Turn on / off waypoint syncing",
+
+  "__comment__": "Subtitles for sounds",
+  "subtitle.jmws.waypoint_sync": "Waypoint sync",
+  "subtitle.jmws.generic_error": "Error"
 }

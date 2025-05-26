@@ -1,5 +1,5 @@
 package me.brynview.navidrohim.jmws.client;
-import me.brynview.navidrohim.jmws.common.utils.JMWSConfig;
+import me.brynview.navidrohim.jmws.common.config.JMWSConfig;
 import net.fabricmc.api.ClientModInitializer;
 
 public class JMServerClient implements ClientModInitializer {

@@ -52,8 +52,8 @@ public class JsonStaticHelper {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.REQUEST_CLIENT_SYNC, null);
     }
 
-    public static String makeClientAlertRequestJson(String message, boolean overlay) {
-        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.CLIENT_ALERT, List.of(message, overlay));
+    public static String makeClientAlertRequestJson(String message, boolean overlay, boolean isError) {
+        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.CLIENT_ALERT, List.of(message, overlay, isError));
     }
 
     public static String makeDisplayNextUpdateRequestJson() {

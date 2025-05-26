@@ -20,19 +20,22 @@ import me.brynview.navidrohim.jmws.JMServer;
 import me.brynview.navidrohim.jmws.client.JMServerClient;
 import me.brynview.navidrohim.jmws.common.SavedGroup;
 import me.brynview.navidrohim.jmws.common.SavedWaypoint;
+import me.brynview.navidrohim.jmws.common.config.JMWSConfig;
 import me.brynview.navidrohim.jmws.common.helpers.AssetHelper;
 import me.brynview.navidrohim.jmws.common.helpers.CommonHelper;
+import me.brynview.navidrohim.jmws.common.helpers.JMWSSounds;
 import me.brynview.navidrohim.jmws.common.helpers.JsonStaticHelper;
 import me.brynview.navidrohim.jmws.common.io.JMWSIOInterface;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.common.utils.JMWSConfig;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
@@ -81,6 +84,13 @@ public class IClientPluginJM implements IClientPlugin
         MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
         if ((config.showAlerts() || ignoreConfig) && minecraftClientInstance.player != null) {
             minecraftClientInstance.player.sendMessage(Text.of(text), overlayText);
+        }
+    }
+
+    public static void sendUserSoundAlert(SoundEvent sound) {
+        MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
+        if (config.playEffects() && minecraftClientInstance.player != null) {
+            minecraftClientInstance.player.playSound(sound, 0.09f, 1f);
         }
     }
 
@@ -377,7 +387,7 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     // Helper for sync, handleUploadWaypoints is basically the same but different type annotations. I should've used generics
-    private boolean handleUploadGroups(JsonObject jsonGroupsRaw, ClientPlayNetworking.Context context) {
+    private boolean handleUploadGroups(JsonObject jsonGroupsRaw, ClientPlayNetworking.Context context) throws JsonSyntaxException, IllegalStateException {
         boolean hasLocalGroup = false;
 
         // Get existing groups (local) and get group objects saved on server
@@ -461,25 +471,30 @@ public class IClientPluginJM implements IClientPlugin
                     boolean hasLocalGroup = false;
                     boolean hasLocalWaypoint = false;
 
-                    if (config.uploadGroups()) {
-                        hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), context);
-                    }
-
-                    if (config.uploadWaypoints()) {
-                        hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), context);
-                    }
-
-                    if (hasLocalGroup || hasLocalWaypoint) {
-                        updateWaypoints();
-                        if (hasLocalGroup && hasLocalWaypoint) {
-                            sendUserAlert(Text.translatable("message.jmws.local_both_upload").getString(), true, false);
-                        } else if (hasLocalGroup) {
-                            sendUserAlert(Text.translatable("message.jmws.local_group_upload").getString(), true, false);
-                        } else {
-                            sendUserAlert(Text.translatable("message.jmws.local_waypoint_upload").getString(), true, false);
+                    try {
+                        if (config.uploadGroups()) {
+                            hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), context);
                         }
-                    }
 
+                        if (config.uploadWaypoints()) {
+                            hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), context);
+                        }
+
+
+                        if (hasLocalGroup || hasLocalWaypoint) {
+                            updateWaypoints();
+                            if (hasLocalGroup && hasLocalWaypoint) {
+                                sendUserAlert(Text.translatable("message.jmws.local_both_upload").getString(), true, false);
+                            } else if (hasLocalGroup) {
+                                sendUserAlert(Text.translatable("message.jmws.local_group_upload").getString(), true, false);
+                            } else {
+                                sendUserAlert(Text.translatable("message.jmws.local_waypoint_upload").getString(), true, false);
+                            }
+                        }
+                        sendUserSoundAlert(JMWSSounds.ACTION_SUCCEED);
+                    } catch (IllegalStateException | JsonSyntaxException exception) {
+                        sendUserAlert(Text.translatable("error.jmws.error_corrupted_waypoint").getString(), true, false);
+                    }
                 }
 
                 // was "update"
@@ -495,7 +510,11 @@ public class IClientPluginJM implements IClientPlugin
                 // No outbound data
                 case CLIENT_ALERT -> {
                     String firstArgument = waypointPayload.arguments().getFirst().getAsString();
+                    Boolean isError = waypointPayload.arguments().getLast().getAsBoolean();
                     sendUserAlert(Text.translatable(firstArgument).getString(), waypointPayload.arguments().get(1).getAsBoolean(), false);
+                    if (isError) {
+                        sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
+                    }
                 }
 
                 // was "deleteWaypoint"

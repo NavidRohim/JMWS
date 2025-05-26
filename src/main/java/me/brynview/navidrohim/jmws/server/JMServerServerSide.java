@@ -43,8 +43,8 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
         ServerPlayNetworking.send(context.player(), handshakePayload);
     }
 
-    private void sendUserMessage(ServerPlayerEntity player, String messageKey, Boolean overlay) {
-        JMWSActionPayload messagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson(messageKey, overlay));
+    private void sendUserMessage(ServerPlayerEntity player, String messageKey, Boolean overlay, boolean isError) {
+        JMWSActionPayload messagePayload = new JMWSActionPayload(JsonStaticHelper.makeClientAlertRequestJson(messageKey, overlay, isError));
         ServerPlayNetworking.send(player, messagePayload);
     }
 
@@ -62,9 +62,9 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
 
                 if (!silent) {
                     if (result) {
-                        sendUserMessage(player, "message.jmws.deletion_success", true);
+                        sendUserMessage(player, "message.jmws.deletion_success", true, false);
                     } else {
-                        sendUserMessage(player, "message.jmws.deletion_failure", true);
+                        sendUserMessage(player, "message.jmws.deletion_failure", true, true);
                     }
                 }
             }
@@ -77,9 +77,9 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
 
                 if (!silent) {
                     if (waypointCreationSuccess) {
-                        sendUserMessage(player, "message.jmws.creation_success", true);
+                        sendUserMessage(player, "message.jmws.creation_success", true, false);
                     } else {
-                        sendUserMessage(player, "message.jmws.creation_failure", false);
+                        sendUserMessage(player, "message.jmws.creation_failure", false, true);
                     }
                 }
             }
@@ -107,7 +107,7 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                     String jsonData = JsonStaticHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray);
 
                     if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit but I got nowhere near.
-                        sendUserMessage(player, "message.jmws.error_packet_size", false);
+                        sendUserMessage(player, "error.jmws.error_packet_size", false, true);
                     } else {
                         JMWSActionPayload waypointPayloadOutbound = new JMWSActionPayload(jsonData);
                         ServerPlayNetworking.send(player, waypointPayloadOutbound);
@@ -124,9 +124,9 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
 
                 if (!silent) {
                     if (waypointCreationSuccess) {
-                        sendUserMessage(player, "message.jmws.creation_group_success", true);
+                        sendUserMessage(player, "message.jmws.creation_group_success", true, false);
                     } else {
-                        sendUserMessage(player, "message.jmws.creation_group_failure", false);
+                        sendUserMessage(player, "message.jmws.creation_group_failure", false, true);
 
                     }
                 }
@@ -138,9 +138,9 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
 
                 if (!silent) {
                     if (result) {
-                        sendUserMessage(player, "message.jmws.deletion_group_success", true);
+                        sendUserMessage(player, "message.jmws.deletion_group_success", true, false);
                     } else {
-                        sendUserMessage(player, "message.jmws.deletion_group_failure", true);
+                        sendUserMessage(player, "message.jmws.deletion_group_failure", true, true);
                     }
                 }
             }

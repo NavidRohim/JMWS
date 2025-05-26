@@ -11,6 +11,7 @@ public class JMWSConfigModel {
 
     @SectionHeader("generalConfig")
     public boolean showAlerts = true;
+    public boolean playEffects = false;
     public int updateWaypointFrequency = 800;
     public int serverHandshakeTimeout = 5;
 
