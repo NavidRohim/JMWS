@@ -9,15 +9,17 @@ import me.brynview.navidrohim.jmws.JMServer;
 @Config(name = "jmws-config", wrapperName = "JMWSConfig", defaultHook = true)
 public class JMWSConfigModel {
 
-    @SectionHeader("generalConfig")
-    public boolean showAlerts = true;
-    public boolean playEffects = false;
-    public int updateWaypointFrequency = 800;
-    public int serverHandshakeTimeout = 5;
-
     @SectionHeader("upload")
     public boolean enabled = true;
     public boolean uploadWaypoints = true;
     public boolean uploadGroups = true;
 
+    @SectionHeader("personalisation")
+    public boolean showAlerts = true;
+    public boolean playEffects = false;
+    public boolean colouredText = true;
+
+    @SectionHeader("generalConfig")
+    public int updateWaypointFrequency = 800;
+    public int serverHandshakeTimeout = 5;
 }

@@ -23,7 +23,7 @@ public class JMServer implements ModInitializer {
     private int _deleteObjectOnClient(ServerPlayerEntity player, JMWSIOInterface.FetchType fetchType)
     {
         JMWSActionPayload refreshPayload = new JMWSActionPayload(
-                JsonStaticHelper.makeWaypointSyncRequestJson()
+                JsonStaticHelper.makeWaypointSyncRequestJson(false)
         );
         JMWSActionPayload deleteAllClientsidePayload = new JMWSActionPayload(
                 JsonStaticHelper.makeDeleteClientObjectRequestJson("*", fetchType) // * = Delete all
@@ -48,7 +48,7 @@ public class JMServer implements ModInitializer {
 
         CommandRegistrationCallback.EVENT.register(((dispatcher, registryAccess, environment) ->
                 dispatcher.register(literal("jmws")
-                        .then(literal("update").executes(
+                        .then(literal("sync").executes(
                                 context -> {
                                     if (context.getSource().getPlayer() != null) {
                                         String jsonString = JsonStaticHelper.makeServerSyncRequestJson();
@@ -59,7 +59,7 @@ public class JMServer implements ModInitializer {
                                     return 1;
 
                                 }))
-                        .then(literal("getUpdateInterval").executes(intervalContext -> {
+                        .then(literal("getSyncInterval").executes(intervalContext -> {
                             if (intervalContext.getSource().getPlayer() != null) {
                                 JMWSActionPayload payload = new JMWSActionPayload(JsonStaticHelper.makeDisplayIntervalRequestJson());
                                 ServerPlayNetworking.send(intervalContext.getSource().getPlayer(), payload);
@@ -77,7 +77,7 @@ public class JMServer implements ModInitializer {
                                     JMWSIOInterface.deleteAllUserObjects(player.getUuid(), JMWSIOInterface.FetchType.WAYPOINT);
                                     return _deleteObjectOnClient(player, JMWSIOInterface.FetchType.WAYPOINT);
                                 })))
-                        .then(literal("nextUpdate").executes(updateDisplayContext -> {
+                        .then(literal("nextSync").executes(updateDisplayContext -> {
                             if (updateDisplayContext.getSource().getPlayer() != null) {
                                 JMWSActionPayload payload = new JMWSActionPayload(JsonStaticHelper.makeDisplayNextUpdateRequestJson());
                                 ServerPlayNetworking.send(updateDisplayContext.getSource().getPlayer(), payload);

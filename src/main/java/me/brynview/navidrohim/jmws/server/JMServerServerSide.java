@@ -90,6 +90,7 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                     List<String> playerWaypoints = JMWSIOInterface.getFileObjects(player.getUuid(), JMWSIOInterface.FetchType.WAYPOINT);
                     List<String> playerGroups = JMWSIOInterface.getFileObjects(player.getUuid(), JMWSIOInterface.FetchType.GROUP);
 
+                    boolean sendAlert = arguments.getLast().getAsBoolean();
                     HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
                     HashMap<String, String> jsonGroupPayloadArray = new HashMap<>();
 
@@ -104,7 +105,7 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                         String jsonGroupFileString = Files.readString(Paths.get(groupFilename));
                         jsonGroupPayloadArray.put(String.valueOf(ix), jsonGroupFileString);
                     }
-                    String jsonData = JsonStaticHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray);
+                    String jsonData = JsonStaticHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert);
 
                     if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit but I got nowhere near.
                         sendUserMessage(player, "error.jmws.error_packet_size", false, true);

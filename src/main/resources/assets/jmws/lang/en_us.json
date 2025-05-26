@@ -23,12 +23,16 @@
   "__comment__": "Common language strings",
   "message.jmws.local_both_upload": "Added local waypoint(s) and group(s) to the server.",
   "message.jmws.synced_both_success": "Synced waypoints and groups",
+  "message.jmws.sync_frequency": "Sync happens every %s second(s)",
+  "message.jmws.next_sync": "Next sync in %s second(s)",
+  "message.jmws.has_jmws": "Server has JMWS!",
 
   "__comment__": "Config language strings",
   "text.config.jmws-config.title": "JourneyMap Waypoint Syncing (JMWS)",
 
-  "text.config.jmws-config.option.showAlerts.tooltip": "Whether waypoint creation, deletion or other alerts are shown",
-  "text.config.jmws-config.option.playEffects.tooltip": "Whether sound effects (usually from alerts) will play.",
+  "text.config.jmws-config.option.showAlerts.tooltip": "If waypoint creation, deletion or other alerts are shown",
+  "text.config.jmws-config.option.playEffects.tooltip": "If sound effects (usually from alerts) will play.",
+  "text.config.jmws-config.option.colouredText.tooltip": "If text will be coloured (e.g. successful action, failure)",
   "text.config.jmws-config.option.enabled.tooltip": "If JMWS is enabled",
   "text.config.jmws-config.option.updateWaypointFrequency.tooltip": "Frequency of when waypoints are grabbed from the server (in ticks)",
   "text.config.jmws-config.option.uploadWaypoints.tooltip": "Enables / disables waypoint syncing",
@@ -37,6 +41,7 @@
 
   "text.config.jmws-config.option.showAlerts": "Show alerts?",
   "text.config.jmws-config.option.playEffects": "Sound alerts?",
+  "text.config.jmws-config.option.colouredText": "Coloured text?",
   "text.config.jmws-config.option.enabled": "Waypoint Syncing Enabled",
   "text.config.jmws-config.option.updateWaypointFrequency": "Waypoint update frequency",
   "text.config.jmws-config.option.serverHandshakeTimeout": "Server Handshake Timeout",
@@ -45,13 +50,15 @@
 
   "__comment__": "Section Header language strings",
 
-  "text.config.jmws-config.section.upload": "Upload Configuration",
-  "text.config.jmws-config.section.generalConfig": "General Configuration",
+  "text.config.jmws-config.section.upload": "Sync",
+  "text.config.jmws-config.section.personalisation": "Personalisation",
+  "text.config.jmws-config.section.generalConfig": "Technical",
 
   "__comment__": "Error language strings",
 
   "error.jmws.error_packet_size": "You have too many waypoints and groups. Please delete some to continue making waypoints and syncing.",
-  "error.jmws.error_corrupted_waypoint": "One or more waypoints are corrupted. Contact administration for details.",
+  "error.jmws.error_corrupted_waypoint": "One or more waypoints or groups are corrupted. Contact administration for details.",
+  "error.jmws.jmws_not_installed": "Server does not have JMWS installed. JMWS will be disabled.",
 
   "__comment__": "JourneyMap Buttons",
   "button.jmws.update_button": "Sync waypoints",

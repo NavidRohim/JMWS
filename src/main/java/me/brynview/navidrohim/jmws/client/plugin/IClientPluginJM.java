@@ -21,6 +21,7 @@ import me.brynview.navidrohim.jmws.client.JMServerClient;
 import me.brynview.navidrohim.jmws.common.SavedGroup;
 import me.brynview.navidrohim.jmws.common.SavedWaypoint;
 import me.brynview.navidrohim.jmws.common.config.JMWSConfig;
+import me.brynview.navidrohim.jmws.common.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.common.helpers.AssetHelper;
 import me.brynview.navidrohim.jmws.common.helpers.CommonHelper;
 import me.brynview.navidrohim.jmws.common.helpers.JMWSSounds;
@@ -36,6 +37,7 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
@@ -80,10 +82,16 @@ public class IClientPluginJM implements IClientPlugin
         return INSTANCE;
     }
 
-    public static void sendUserAlert(String text, boolean overlayText, boolean ignoreConfig) {
+    public static void sendUserAlert(Text text, boolean overlayText, boolean ignoreConfig, JMWSMessageType messageType) {
+        String finalText = text.getString();
+
+        if (config.colouredText()) {
+            finalText = messageType.toString() + text.getString();
+        }
+
         MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
         if ((config.showAlerts() || ignoreConfig) && minecraftClientInstance.player != null) {
-            minecraftClientInstance.player.sendMessage(Text.of(text), overlayText);
+            minecraftClientInstance.player.sendMessage(Text.of(finalText), overlayText);
         }
     }
 
@@ -127,7 +135,7 @@ public class IClientPluginJM implements IClientPlugin
         this.createAction(waypoint, player, true);
 
         jmAPI.removeWaypoint("journeymap", oldWaypoint);
-        sendUserAlert(Text.translatable("message.jmws.modified_waypoint_success").getString(), true, false);
+        sendUserAlert(Text.translatable("message.jmws.modified_waypoint_success"), true, false, JMWSMessageType.SUCCESS);
     }
 
     private void createAction(Waypoint waypoint, ClientPlayerEntity player, boolean silent) {
@@ -191,7 +199,7 @@ public class IClientPluginJM implements IClientPlugin
             timeoutTask = scheduler.schedule(() -> {
                 if (!serverHasMod) {
                     MinecraftClient.getInstance().execute(() -> {
-                        sendUserAlert("§CServer does not have JMWS installed. JMWS will be disabled.", true, true);
+                        sendUserAlert(Text.translatable("error.jmws.jmws_not_installed"), true, true, JMWSMessageType.FAILURE);
                     });
                 }
             }, config.serverHandshakeTimeout(), TimeUnit.SECONDS);
@@ -237,7 +245,7 @@ public class IClientPluginJM implements IClientPlugin
 
     private void updateFromButton(IThemeButton iThemeButton) {
         if (getEnabledStatus()) {
-            updateWaypoints();
+            updateWaypoints(true);
         }
     }
 
@@ -266,7 +274,7 @@ public class IClientPluginJM implements IClientPlugin
         this.groupDeletionHandler(oldWaypointGroup, player, true);
         this.groupCreationHandler(waypointGroup, player, true);
 
-        sendUserAlert(Text.translatable("message.jmws.modified_group_success").getString(), true, false);
+        sendUserAlert(Text.translatable("message.jmws.modified_group_success"), true, false, JMWSMessageType.NEUTRAL);
     }
 
     private void groupDeletionHandler(WaypointGroup waypointGroup, ClientPlayerEntity player, boolean silent)
@@ -289,19 +297,10 @@ public class IClientPluginJM implements IClientPlugin
         ClientPlayNetworking.send(new JMWSActionPayload(creationData));
     }
 
-    public static void updateWaypoints() {
+    public static void updateWaypoints(boolean sendAlert) {
 
         // Sends "request" packet | New = "SYNC"
-        ClientPlayNetworking.send(new JMWSActionPayload(JsonStaticHelper.makeWaypointSyncRequestJson()));
-        String updateMessageKey = "message.jmws.synced_success";
-
-        if (config.uploadWaypoints() && config.uploadGroups()) {
-            updateMessageKey = "message.jmws.synced_both_success";
-        } else if (config.uploadGroups()) {
-            updateMessageKey = "message.jmws.synced_group_success";
-        }
-
-        sendUserAlert(Text.translatable(updateMessageKey).getString(), true, false);
+        ClientPlayNetworking.send(new JMWSActionPayload(JsonStaticHelper.makeWaypointSyncRequestJson(sendAlert)));
     }
 
     private void handleTick(MinecraftClient minecraftClient) {
@@ -322,7 +321,7 @@ public class IClientPluginJM implements IClientPlugin
                 tickCounter++;
                 if (tickCounter >= tickCounterUpdateThreshold) {
 
-                    updateWaypoints();
+                    updateWaypoints(true);
                     tickCounter = 0;
                     tickCounterUpdateThreshold = config.updateWaypointFrequency();
                 }
@@ -342,7 +341,7 @@ public class IClientPluginJM implements IClientPlugin
 
     public static void HandshakeHandler(HandshakePayload handshakePayload, ClientPlayNetworking.Context context) {
 
-        sendUserAlert("§2Server has JMWS!", true, false);
+        sendUserAlert(Text.translatable("message.jmws.has_jmws"), true, false, JMWSMessageType.SUCCESS);
         getInstance().serverHasMod = true;
 
         if (timeoutTask != null && !timeoutTask.isDone()) {
@@ -452,6 +451,48 @@ public class IClientPluginJM implements IClientPlugin
         return hasLocalWaypoint;
     }
 
+    public static void syncHandler(JMWSActionPayload waypointPayload, ClientPlayNetworking.Context context) {
+        boolean hasLocalGroup = false;
+        boolean hasLocalWaypoint = false;
+        boolean sendAlert = waypointPayload.arguments().getLast().getAsBoolean();
+
+        try {
+
+            if (config.uploadGroups()) {
+                hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), context);
+            }
+
+            if (config.uploadWaypoints()) {
+                hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), context);
+            }
+
+            if (hasLocalGroup || hasLocalWaypoint) {
+                updateWaypoints(false);
+                if (hasLocalGroup && hasLocalWaypoint) {
+                    sendUserAlert(Text.translatable("message.jmws.local_both_upload"), true, false, JMWSMessageType.SUCCESS);
+                } else if (hasLocalGroup) {
+                    sendUserAlert(Text.translatable("message.jmws.local_group_upload"), true, false, JMWSMessageType.SUCCESS);
+                } else {
+                    sendUserAlert(Text.translatable("message.jmws.local_waypoint_upload"), true, false, JMWSMessageType.SUCCESS);
+                }
+            } else if (sendAlert) {
+                String updateMessageKey = "message.jmws.synced_success";
+
+                if (config.uploadWaypoints() && config.uploadGroups()) {
+                    updateMessageKey = "message.jmws.synced_both_success";
+                } else if (config.uploadGroups()) {
+                    updateMessageKey = "message.jmws.synced_group_success";
+                }
+                sendUserAlert(Text.translatable(updateMessageKey), true, false, JMWSMessageType.NEUTRAL);
+            }
+            sendUserSoundAlert(JMWSSounds.ACTION_SUCCEED);
+
+        } catch (IllegalStateException | JsonSyntaxException exception) {
+            sendUserAlert(Text.translatable("error.jmws.error_corrupted_waypoint"), true, false, JMWSMessageType.FAILURE);
+            sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
+        }
+    }
+
     // Handler for JMWSActionPayload
     public static void HandlePacket(JMWSActionPayload waypointPayload, ClientPlayNetworking.Context context) {
 
@@ -467,54 +508,29 @@ public class IClientPluginJM implements IClientPlugin
 
                 // Was creation_response
                 // Sends no outbound data
-                case SYNC -> {
-                    boolean hasLocalGroup = false;
-                    boolean hasLocalWaypoint = false;
-
-                    try {
-                        if (config.uploadGroups()) {
-                            hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), context);
-                        }
-
-                        if (config.uploadWaypoints()) {
-                            hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), context);
-                        }
-
-
-                        if (hasLocalGroup || hasLocalWaypoint) {
-                            updateWaypoints();
-                            if (hasLocalGroup && hasLocalWaypoint) {
-                                sendUserAlert(Text.translatable("message.jmws.local_both_upload").getString(), true, false);
-                            } else if (hasLocalGroup) {
-                                sendUserAlert(Text.translatable("message.jmws.local_group_upload").getString(), true, false);
-                            } else {
-                                sendUserAlert(Text.translatable("message.jmws.local_waypoint_upload").getString(), true, false);
-                            }
-                        }
-                        sendUserSoundAlert(JMWSSounds.ACTION_SUCCEED);
-                    } catch (IllegalStateException | JsonSyntaxException exception) {
-                        sendUserAlert(Text.translatable("error.jmws.error_corrupted_waypoint").getString(), true, false);
-                    }
-                }
+                case SYNC -> { syncHandler(waypointPayload, context); }
 
                 // was "update"
                 // Sends "request" packet | New = "SYNC"
-                case REQUEST_CLIENT_SYNC -> IClientPluginJM.updateWaypoints();
-
+                case REQUEST_CLIENT_SYNC -> IClientPluginJM.updateWaypoints(true);
 
                 // was display_interval
                 // No outbound data
-                case COMMON_DISPLAY_INTERVAL -> sendUserAlert("Waypoints updated every " + INSTANCE.tickCounterUpdateThreshold / 20 + " seconds.", true, false);
+                case COMMON_DISPLAY_INTERVAL -> sendUserAlert(Text.translatable("message.jmws.sync_frequency", INSTANCE.tickCounterUpdateThreshold / 20), true, false, JMWSMessageType.NEUTRAL);
 
                 // was "alert"
                 // No outbound data
                 case CLIENT_ALERT -> {
                     String firstArgument = waypointPayload.arguments().getFirst().getAsString();
                     Boolean isError = waypointPayload.arguments().getLast().getAsBoolean();
-                    sendUserAlert(Text.translatable(firstArgument).getString(), waypointPayload.arguments().get(1).getAsBoolean(), false);
+                    JMWSMessageType messageType = JMWSMessageType.NEUTRAL;
+
                     if (isError) {
+                        messageType = JMWSMessageType.FAILURE;
                         sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
                     }
+
+                    sendUserAlert(Text.translatable(firstArgument), waypointPayload.arguments().get(1).getAsBoolean(), false, messageType);
                 }
 
                 // was "deleteWaypoint"
@@ -539,13 +555,12 @@ public class IClientPluginJM implements IClientPlugin
                             INSTANCE.jmAPI.removeWaypointGroup(getInstance().groupIdentifierMap.get(firstArgument), false);
                         }
                     }
-                    sendUserAlert(Text.translatable(deletionMessageConfirmationKey).getString(), true, false);
-
+                    sendUserAlert(Text.translatable(deletionMessageConfirmationKey), true, false, JMWSMessageType.NEUTRAL);
                 }
 
                 // was "display_next_update"
                 // No outbound data
-                case COMMON_DISPLAY_NEXT_UPDATE -> sendUserAlert("Next waypoint update in " + (INSTANCE.tickCounterUpdateThreshold - INSTANCE.tickCounter) / 20 + " second(s)", true, false);
+                case COMMON_DISPLAY_NEXT_UPDATE -> sendUserAlert(Text.translatable("message.jmws.next_sync", (INSTANCE.tickCounterUpdateThreshold - INSTANCE.tickCounter) / 20), true, false, JMWSMessageType.NEUTRAL);
 
                 default -> JMServer.LOGGER.warn("Unknown packet command -> " + waypointPayload.command());
             }

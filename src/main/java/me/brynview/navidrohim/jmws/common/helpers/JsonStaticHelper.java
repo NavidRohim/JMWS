@@ -32,8 +32,8 @@ public class JsonStaticHelper {
     public static String makeDeleteGroupRequestJson(String groupFilename, boolean silent) {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_GROUP, List.of(groupFilename, silent));
     }
-    public static String makeWaypointSyncRequestJson() {
-        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, List.of(Map.of(), Map.of()));
+    public static String makeWaypointSyncRequestJson(boolean sendAlert) {
+        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, List.of(Map.of(), Map.of(), sendAlert));
     }
 
     public static String makeCreationRequestJson(Waypoint waypoint, boolean silent) {
@@ -44,8 +44,8 @@ public class JsonStaticHelper {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SERVER_CREATE_GROUP, List.of(waypointGroup.toString(), silent));
     }
 
-    public static String makeSyncRequestResponseJson(HashMap<String, String> jsonArray, HashMap<String, String> jsonGroupArray) {
-        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, List.of(jsonArray, jsonGroupArray));
+    public static String makeSyncRequestResponseJson(HashMap<String, String> jsonArray, HashMap<String, String> jsonGroupArray, boolean sendAlert) {
+        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, List.of(jsonArray, jsonGroupArray, sendAlert));
     }
 
     public static String makeServerSyncRequestJson() {
