@@ -3,7 +3,7 @@ package me.brynview.navidrohim.jmws.server;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import me.brynview.navidrohim.jmws.JMServer;
+import me.brynview.navidrohim.jmws.JMWS;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.helpers.JsonStaticHelper;
@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class JMServerServerSide implements DedicatedServerModInitializer {
+public class JMWSServer implements DedicatedServerModInitializer {
 
     @Override
     public void onInitializeServer() {
@@ -114,7 +114,7 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                         ServerPlayNetworking.send(player, waypointPayloadOutbound);
                     }
                 } catch (IOException ioe) {
-                    JMServer.LOGGER.error(ioe.getMessage());
+                    JMWS.LOGGER.error(ioe.getMessage());
                 }
             }
 
@@ -146,7 +146,7 @@ public class JMServerServerSide implements DedicatedServerModInitializer {
                 }
             }
 
-            default -> JMServer.LOGGER.warn("Unknown packet command -> " + command);
+            default -> JMWS.LOGGER.warn("Unknown packet command -> " + command);
         }
     }
 }

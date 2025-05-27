@@ -20,13 +20,13 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "me.brynview.navidrohim.jmws.client.JMServerClient"
+      "me.brynview.navidrohim.jmws.client.JMWSClient"
     ],
     "main": [
-      "me.brynview.navidrohim.jmws.JMServer"
+      "me.brynview.navidrohim.jmws.JMWS"
     ],
     "server": [
-      "me.brynview.navidrohim.jmws.server.JMServerServerSide"
+      "me.brynview.navidrohim.jmws.server.JMWSServer"
     ],
     "journeymap": [
       "me.brynview.navidrohim.jmws.client.plugin.IClientPluginJM"
@@ -36,7 +36,6 @@
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
     "minecraft": "${minecraft_version}",
-    "journeymap": ">=1.21.5-6.0.0-beta.47",
     "owo": ">=0.12.15.4+1.21"
   }
 }

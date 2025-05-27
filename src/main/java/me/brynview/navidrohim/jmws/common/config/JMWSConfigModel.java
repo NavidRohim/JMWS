@@ -3,9 +3,9 @@ package me.brynview.navidrohim.jmws.common.config;
 import io.wispforest.owo.config.annotation.Config;
 import io.wispforest.owo.config.annotation.Modmenu;
 import io.wispforest.owo.config.annotation.SectionHeader;
-import me.brynview.navidrohim.jmws.JMServer;
+import me.brynview.navidrohim.jmws.JMWS;
 
-@Modmenu(modId = JMServer.MODID)
+@Modmenu(modId = JMWS.MODID)
 @Config(name = "jmws-config", wrapperName = "JMWSConfig", defaultHook = true)
 public class JMWSConfigModel {
 

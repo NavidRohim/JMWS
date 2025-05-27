@@ -16,8 +16,8 @@ import journeymap.api.v2.common.event.common.WaypointGroupEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.JMServer;
-import me.brynview.navidrohim.jmws.client.JMServerClient;
+import me.brynview.navidrohim.jmws.JMWS;
+import me.brynview.navidrohim.jmws.client.JMWSClient;
 import me.brynview.navidrohim.jmws.common.SavedGroup;
 import me.brynview.navidrohim.jmws.common.SavedWaypoint;
 import me.brynview.navidrohim.jmws.common.config.JMWSConfig;
@@ -36,8 +36,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
@@ -70,7 +68,7 @@ public class IClientPluginJM implements IClientPlugin
     private ClientWorld oldWorld = null;
     private boolean serverHasMod = false;
 
-    private static final JMWSConfig config = JMServerClient.CONFIG;
+    private static final JMWSConfig config = JMWSClient.CONFIG;
     private int tickCounterUpdateThreshold = config.updateWaypointFrequency();
     private int tickCounter = 0;
 
@@ -186,23 +184,30 @@ public class IClientPluginJM implements IClientPlugin
         ClientPlayNetworking.registerGlobalReceiver(HandshakePayload.ID, IClientPluginJM::HandshakeHandler);
 
         // JourneyMap Events
-        CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", JMServer.MODID, this::WaypointCreationHandler);
-        CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", JMServer.MODID, this::groupEventListener);
-        FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(JMServer.MODID, this::addJMButtons);
+        CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", JMWS.MODID, this::WaypointCreationHandler);
+        CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", JMWS.MODID, this::groupEventListener);
+        FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(JMWS.MODID, this::addJMButtons);
 
         // Vanilla Events
 
         ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
         ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
-            ClientPlayNetworking.send(new HandshakePayload());
 
-            timeoutTask = scheduler.schedule(() -> {
-                if (!serverHasMod) {
-                    MinecraftClient.getInstance().execute(() -> {
-                        sendUserAlert(Text.translatable("error.jmws.jmws_not_installed"), true, true, JMWSMessageType.FAILURE);
-                    });
-                }
-            }, config.serverHandshakeTimeout(), TimeUnit.SECONDS);
+            if (!client.isInSingleplayer()) {
+                ClientPlayNetworking.send(new HandshakePayload());
+
+                timeoutTask = scheduler.schedule(() -> {
+                    if (!serverHasMod) {
+                        MinecraftClient.getInstance().execute(() -> {
+                            sendUserAlert(Text.translatable("error.jmws.jmws_not_installed"), true, true, JMWSMessageType.FAILURE);
+                            sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
+                        });
+                    }
+                }, config.serverHandshakeTimeout(), TimeUnit.SECONDS);
+            } else {
+                sendUserAlert(Text.translatable("message.jmws.world_is_local"), true, false, JMWSMessageType.WARNING);
+                sendUserSoundAlert(JMWSSounds.ACTION_SUCCEED);
+            }
         }));
         ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
             tickCounter = 0;
@@ -211,22 +216,26 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     private void addJMButtons(FullscreenDisplayEvent.AddonButtonDisplayEvent addonButtonDisplayEvent) {
-        IThemeButton buttonEnabled = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
-                "button.jmws.enable_button",
-                AssetHelper.onOffButtonAsset,
-                getEnabledStatus(),
-                this::enableMod);
+        MinecraftClient mcClient = MinecraftClient.getInstance();
 
-        IThemeButton buttonSync = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
-                "button.jmws.update_button",
-                AssetHelper.enableButtonAsset,
-                true,
-                this::updateFromButton);
+        if (!mcClient.isInSingleplayer()) {
+            IThemeButton buttonEnabled = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
+                    "button.jmws.enable_button",
+                    AssetHelper.onOffButtonAsset,
+                    getEnabledStatus(),
+                    this::enableMod);
 
-        buttonSync.setEnabled(getEnabledStatus());
-        buttonSync.setTooltip(Text.translatable("button.jmws.tooltip.update_button").getString());
+            IThemeButton buttonSync = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
+                    "button.jmws.update_button",
+                    AssetHelper.enableButtonAsset,
+                    true,
+                    this::updateFromButton);
 
-        buttonEnabled.setTooltip(Text.translatable("button.jmws.tooltip.enable_button").getString());
+            buttonSync.setEnabled(getEnabledStatus());
+            buttonSync.setTooltip(Text.translatable("button.jmws.tooltip.update_button").getString());
+
+            buttonEnabled.setTooltip(Text.translatable("button.jmws.tooltip.enable_button").getString());
+        }
     }
 
     private void enableMod(IThemeButton iThemeButton) {
@@ -328,6 +337,7 @@ public class IClientPluginJM implements IClientPlugin
             }
             oldWorld = minecraftClient.world;
         } else {
+
             tickCounter = 0;
             oldWorld = null;
         }
@@ -336,7 +346,7 @@ public class IClientPluginJM implements IClientPlugin
     @Override
     public String getModId()
     {
-        return JMServer.MODID;
+        return JMWS.MODID;
     }
 
     public static void HandshakeHandler(HandshakePayload handshakePayload, ClientPlayNetworking.Context context) {
@@ -562,7 +572,7 @@ public class IClientPluginJM implements IClientPlugin
                 // No outbound data
                 case COMMON_DISPLAY_NEXT_UPDATE -> sendUserAlert(Text.translatable("message.jmws.next_sync", (INSTANCE.tickCounterUpdateThreshold - INSTANCE.tickCounter) / 20), true, false, JMWSMessageType.NEUTRAL);
 
-                default -> JMServer.LOGGER.warn("Unknown packet command -> " + waypointPayload.command());
+                default -> JMWS.LOGGER.warn("Unknown packet command -> " + waypointPayload.command());
             }
         }
     }
