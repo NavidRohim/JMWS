@@ -4,10 +4,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import me.brynview.navidrohim.jmws.JMWS;
+import me.brynview.navidrohim.jmws.common.io.CommonIO;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.helpers.JsonStaticHelper;
-import me.brynview.navidrohim.jmws.server.io.JMWSIOInterface;
+import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -63,9 +64,9 @@ public class JMWSServer implements DedicatedServerModInitializer {
                 boolean result;
 
                 if (!deleteAll) {
-                    result = JMWSIOInterface.deleteFile(fileName);
+                    result = CommonIO.deleteFile(fileName);
                 } else {
-                    result = JMWSIOInterface.deleteAllUserObjects(player.getUuid(), JMWSIOInterface.FetchType.GROUP);
+                    result = JMWSServerIO.deleteAllUserObjects(player.getUuid(), JMWSServerIO.FetchType.GROUP);
                 }
 
                 if (!silent) {
@@ -84,9 +85,9 @@ public class JMWSServer implements DedicatedServerModInitializer {
                 boolean result;
 
                 if (!deleteAll) {
-                    result = JMWSIOInterface.deleteFile(fileName);
+                    result = CommonIO.deleteFile(fileName);
                 } else {
-                    result = JMWSIOInterface.deleteAllUserObjects(player.getUuid(), JMWSIOInterface.FetchType.WAYPOINT);
+                    result = JMWSServerIO.deleteAllUserObjects(player.getUuid(), JMWSServerIO.FetchType.WAYPOINT);
                 }
 
                 if (!silent) {
@@ -102,7 +103,7 @@ public class JMWSServer implements DedicatedServerModInitializer {
             case WaypointPayloadCommand.SERVER_CREATE -> {
                 JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
                 boolean silent = arguments.get(1).getAsBoolean();
-                boolean waypointCreationSuccess = JMWSIOInterface.createWaypoint(jsonCreationData, context.player().getUuid());
+                boolean waypointCreationSuccess = JMWSServerIO.createWaypoint(jsonCreationData, context.player().getUuid());
 
                 if (!silent) {
                     if (waypointCreationSuccess) {
@@ -116,7 +117,7 @@ public class JMWSServer implements DedicatedServerModInitializer {
             case WaypointPayloadCommand.SERVER_CREATE_GROUP -> {
                 JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
                 boolean silent = arguments.get(1).getAsBoolean();
-                boolean waypointCreationSuccess = JMWSIOInterface.createGroup(jsonCreationData, context.player().getUuid());
+                boolean waypointCreationSuccess = JMWSServerIO.createGroup(jsonCreationData, context.player().getUuid());
 
                 if (!silent) {
                     if (waypointCreationSuccess) {
@@ -131,8 +132,8 @@ public class JMWSServer implements DedicatedServerModInitializer {
             // was "request"
             case WaypointPayloadCommand.SYNC -> {
                 try {
-                    List<String> playerWaypoints = JMWSIOInterface.getFileObjects(player.getUuid(), JMWSIOInterface.FetchType.WAYPOINT);
-                    List<String> playerGroups = JMWSIOInterface.getFileObjects(player.getUuid(), JMWSIOInterface.FetchType.GROUP);
+                    List<String> playerWaypoints = JMWSServerIO.getFileObjects(player.getUuid(), JMWSServerIO.FetchType.WAYPOINT);
+                    List<String> playerGroups = JMWSServerIO.getFileObjects(player.getUuid(), JMWSServerIO.FetchType.GROUP);
 
                     boolean sendAlert = arguments.getLast().getAsBoolean();
                     HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();

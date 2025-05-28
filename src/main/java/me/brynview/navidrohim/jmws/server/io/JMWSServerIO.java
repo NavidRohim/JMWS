@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.server.io;
 import com.google.gson.JsonObject;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import me.brynview.navidrohim.jmws.JMWS;
+import me.brynview.navidrohim.jmws.common.io.CommonIO;
 import org.joml.Vector3d;
 
 import java.io.File;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-public class JMWSIOInterface {
+public class JMWSServerIO {
 
     public enum FetchType {
         WAYPOINT,
@@ -66,7 +67,7 @@ public class JMWSIOInterface {
 
     public static boolean createWaypoint(JsonObject jsonObject, UUID playerUUID) {
         JsonObject pos = jsonObject.getAsJsonObject().getAsJsonObject("pos");
-        String waypointFilePath = JMWSIOInterface._getWaypointFromRaw(new Vector3d(
+        String waypointFilePath = JMWSServerIO._getWaypointFromRaw(new Vector3d(
                 pos.get("x").getAsInt(),
                 pos.get("y").getAsInt(),
                 pos.get("z").getAsInt()
@@ -94,17 +95,12 @@ public class JMWSIOInterface {
         List<Boolean> deletionStatusList = new ArrayList<>();
 
         for (String waypointPath : getFileObjects(playerUUID, fetchType)) {
-            deletionStatusList.add(deleteFile(waypointPath));
+            deletionStatusList.add(CommonIO.deleteFile(waypointPath));
         }
 
         JMWS.info(deletionStatusList);
         return deletionStatusList.isEmpty() || deletionStatusList.stream().allMatch(deletionStatusList.get(0)::equals);
 
-    }
-
-    public static boolean deleteFile(String filename) {
-        File waypointFileObj = new File(filename);
-        return waypointFileObj.delete();
     }
 
     public static List<String> getFileObjects(UUID uuid, FetchType fetchType) {

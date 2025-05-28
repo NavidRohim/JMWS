@@ -27,7 +27,7 @@ import me.brynview.navidrohim.jmws.common.helpers.AssetHelper;
 import me.brynview.navidrohim.jmws.common.helpers.CommonHelper;
 import me.brynview.navidrohim.jmws.common.helpers.JMWSSounds;
 import me.brynview.navidrohim.jmws.common.helpers.JsonStaticHelper;
-import me.brynview.navidrohim.jmws.server.io.JMWSIOInterface;
+import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -117,7 +117,7 @@ public class IClientPluginJM implements IClientPlugin
 
     private void deleteAction(Waypoint waypoint, ClientPlayerEntity player, boolean silent) {
 
-        String waypointFilename = JMWSIOInterface.getWaypointFilename(waypoint, player.getUuid());
+        String waypointFilename = JMWSServerIO.getWaypointFilename(waypoint, player.getUuid());
 
         waypointIdentifierMap.remove(waypoint.getCustomData());
         String jsonPacketData = JsonStaticHelper.makeDeleteRequestJson(waypointFilename, silent, false);
@@ -129,10 +129,12 @@ public class IClientPluginJM implements IClientPlugin
 
     private void updateAction(Waypoint waypoint, Waypoint oldWaypoint, ClientPlayerEntity player)
     {
-        this.deleteAction(oldWaypoint, player, true);
+        if (oldWaypoint != null) {
+            this.deleteAction(oldWaypoint, player, true);
+            jmAPI.removeWaypoint("journeymap", oldWaypoint);
+        }
         this.createAction(waypoint, player, true);
 
-        jmAPI.removeWaypoint("journeymap", oldWaypoint);
         sendUserAlert(Text.translatable("message.jmws.modified_waypoint_success"), true, false, JMWSMessageType.SUCCESS);
     }
 
@@ -254,7 +256,7 @@ public class IClientPluginJM implements IClientPlugin
 
     private void updateFromButton(IThemeButton iThemeButton) {
         if (getEnabledStatus()) {
-            updateWaypoints(true);
+            updateWaypoints(true, 0);
         }
     }
 
@@ -280,16 +282,18 @@ public class IClientPluginJM implements IClientPlugin
 
     private void groupUpdateHandler(WaypointGroup waypointGroup, WaypointGroup oldWaypointGroup, ClientPlayerEntity player)
     {
-        this.groupDeletionHandler(oldWaypointGroup, player, true);
+        if (oldWaypointGroup != null) {
+            this.groupDeletionHandler(oldWaypointGroup, player, true);
+        }
         this.groupCreationHandler(waypointGroup, player, true);
 
-        sendUserAlert(Text.translatable("message.jmws.modified_group_success"), true, false, JMWSMessageType.NEUTRAL);
+        sendUserAlert(Text.translatable("message.jmws.modified_group_success"), true, false, JMWSMessageType.SUCCESS);
     }
 
     private void groupDeletionHandler(WaypointGroup waypointGroup, ClientPlayerEntity player, boolean silent)
     {
         waypointIdentifierMap.remove(waypointGroup.getCustomData());
-        String jsonPacketData = JsonStaticHelper.makeDeleteGroupRequestJson(JMWSIOInterface.getGroupFilename(player.getUuid(), waypointGroup.getCustomData()), silent, false);
+        String jsonPacketData = JsonStaticHelper.makeDeleteGroupRequestJson(JMWSServerIO.getGroupFilename(player.getUuid(), waypointGroup.getCustomData()), silent, false);
 
         JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
         ClientPlayNetworking.send(waypointActionPayload);
@@ -313,10 +317,13 @@ public class IClientPluginJM implements IClientPlugin
     public static int getCurrentUpdateTick() {
         return getInstance().tickCounter;
     }
-    public static void updateWaypoints(boolean sendAlert) {
+    public static void updateWaypoints(boolean sendAlert, Integer delay) { // Might use delay some day
 
         // Sends "request" packet | New = "SYNC"
-        ClientPlayNetworking.send(new JMWSActionPayload(JsonStaticHelper.makeWaypointSyncRequestJson(sendAlert)));
+        scheduler.schedule(() -> {
+            ClientPlayNetworking.send(new JMWSActionPayload(JsonStaticHelper.makeWaypointSyncRequestJson(sendAlert)));
+        }, delay, TimeUnit.SECONDS);
+
     }
 
     private void handleTick(MinecraftClient minecraftClient) {
@@ -337,7 +344,7 @@ public class IClientPluginJM implements IClientPlugin
                 tickCounter++;
                 if (tickCounter >= tickCounterUpdateThreshold) {
 
-                    updateWaypoints(true);
+                    updateWaypoints(true, 0);
                     tickCounter = 0;
                     tickCounterUpdateThreshold = config.updateWaypointFrequency();
                 }
@@ -418,7 +425,10 @@ public class IClientPluginJM implements IClientPlugin
         // Test if any existing groups (persistent) have already been added to the server, if not, add them
         for (WaypointGroup existingGroup : existingGroups) {
             String key = existingGroup.getName() + existingGroup.getGuid();
-            if (!remoteGroupKeys.contains(key) && JMWSConstants.forbiddenGroups.contains(existingGroup.getGuid()) && !existingGroup.isPersistent()) {
+            JMWS.info(" \n + " + key);
+            JMWS.info(remoteGroupKeys);
+            JMWS.info(existingGroup.isPersistent() + " \n ");
+            if (!remoteGroupKeys.contains(key) && !JMWSConstants.forbiddenGroups.contains(existingGroup.getGuid()) && existingGroup.isPersistent()) {
                 getInstance().groupCreationHandler(existingGroup, context.player(), true);
                 hasLocalGroup = true;
             }
@@ -452,7 +462,7 @@ public class IClientPluginJM implements IClientPlugin
 
         // Test if any existing waypoints (persistent, usually death waypoints) have already been added to the server, if not, add them
         for (Waypoint existing : existingWaypoints) {
-            if (!remoteWaypointPositions.contains(existing.getBlockPos()) && !existing.isPersistent()) {
+            if (!remoteWaypointPositions.contains(existing.getBlockPos()) && existing.isPersistent()) {
                 getInstance().createAction(existing, context.player(), true);
                 hasLocalWaypoint = true;
             }
@@ -484,7 +494,7 @@ public class IClientPluginJM implements IClientPlugin
             }
 
             if (hasLocalGroup || hasLocalWaypoint) {
-                updateWaypoints(false);
+                updateWaypoints(false, 0);
                 if (hasLocalGroup && hasLocalWaypoint) {
                     sendUserAlert(Text.translatable("message.jmws.local_both_upload"), true, false, JMWSMessageType.SUCCESS);
                 } else if (hasLocalGroup) {
@@ -510,6 +520,13 @@ public class IClientPluginJM implements IClientPlugin
         }
     }
 
+    public static void removeAllGroups() {
+        for (WaypointGroup wp : getInstance().jmAPI.getAllWaypointGroups()) {
+            if (!JMWSConstants.forbiddenGroups.contains(wp.getGuid())) {
+                getInstance().jmAPI.removeWaypointGroup(wp, false);
+            }
+        }
+    }
     // Handler for JMWSActionPayload
     public static void HandlePacket(JMWSActionPayload waypointPayload, ClientPlayNetworking.Context context) {
 
@@ -529,7 +546,7 @@ public class IClientPluginJM implements IClientPlugin
 
                 // was "update"
                 // Sends "request" packet | New = "SYNC"
-                case REQUEST_CLIENT_SYNC -> IClientPluginJM.updateWaypoints(true);
+                case REQUEST_CLIENT_SYNC -> IClientPluginJM.updateWaypoints(true, 0);
 
                 // was display_interval
                 // No outbound data
@@ -554,10 +571,10 @@ public class IClientPluginJM implements IClientPlugin
                 // No outbound data
                 case COMMON_DELETE_WAYPOINT -> {
                     String firstArgument = waypointPayload.arguments().getFirst().getAsString();
-                    JMWSIOInterface.FetchType deletionType = JMWSIOInterface.FetchType.valueOf(waypointPayload.arguments().get(1).getAsString());
+                    JMWSServerIO.FetchType deletionType = JMWSServerIO.FetchType.valueOf(waypointPayload.arguments().get(1).getAsString());
                     String deletionMessageConfirmationKey = "message.jmws.deletion_all_success";
 
-                    if (deletionType == JMWSIOInterface.FetchType.WAYPOINT) {
+                    if (deletionType == JMWSServerIO.FetchType.WAYPOINT) {
                         if (Objects.equals(firstArgument, "*")) {
                             INSTANCE.jmAPI.removeAllWaypoints("journeymap");
                         } else {

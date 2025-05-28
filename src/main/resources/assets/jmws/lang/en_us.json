@@ -22,7 +22,7 @@
   "__comment__": "Common language strings",
   "message.jmws.local_both_upload": "Added local waypoint(s) and group(s) to the server.",
   "message.jmws.synced_both_success": "Synced waypoints and groups",
-  "message.jmws.sync_frequency": "Sync happens every %s second(s)",
+  "message.jmws.sync_frequency": "JMWS syncs every %s second(s)",
   "message.jmws.next_sync": "Next sync in %s second(s)",
   "message.jmws.has_jmws": "Server has JMWS!",
   "message.jmws.world_is_local": "Playing in single player. JMWS will be disabled for you and all clients.",

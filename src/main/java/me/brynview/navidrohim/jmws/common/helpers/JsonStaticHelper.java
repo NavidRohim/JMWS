@@ -4,10 +4,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.server.io.JMWSIOInterface;
+import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
 import net.minidev.json.JSONObject;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -49,24 +48,8 @@ public class JsonStaticHelper {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, List.of(jsonArray, jsonGroupArray, sendAlert));
     }
 
-    public static String makeServerSyncRequestJson() {
-        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.REQUEST_CLIENT_SYNC, null);
-    }
-
     public static String makeClientAlertRequestJson(String message, boolean overlay, boolean isError) {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.CLIENT_ALERT, List.of(message, overlay, isError));
-    }
-
-    public static String makeDisplayNextUpdateRequestJson() {
-        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DISPLAY_NEXT_UPDATE, null);
-    }
-
-    public static String makeDisplayIntervalRequestJson() {
-        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DISPLAY_INTERVAL, null);
-    }
-
-    public static String makeDeleteClientObjectRequestJson(String waypointUUID, JMWSIOInterface.FetchType fetchType) {
-        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_WAYPOINT, List.of(waypointUUID, fetchType));
     }
 
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {

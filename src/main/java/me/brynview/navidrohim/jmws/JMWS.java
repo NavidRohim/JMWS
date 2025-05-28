@@ -1,31 +1,21 @@
 package me.brynview.navidrohim.jmws;
-import me.brynview.navidrohim.jmws.client.plugin.IClientPluginJM;
-import me.brynview.navidrohim.jmws.common.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.common.helpers.JsonStaticHelper;
-import me.brynview.navidrohim.jmws.server.io.JMWSIOInterface;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import net.minecraft.server.network.ServerPlayerEntity;
 
-import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Optional;
 
-import static net.minecraft.server.command.CommandManager.*;
-
 public class JMWS implements ModInitializer {
 
     public static final String MODID = "jmws";
-    public static final String VERSION = "1.1.1-1.21.5-beta.3";
+    public static final String VERSION = "1.1.1-1.21.5-beta.6";
     public static final Logger LOGGER = LogManager.getFormatterLogger(MODID);
 
     public static void info(Object message) {

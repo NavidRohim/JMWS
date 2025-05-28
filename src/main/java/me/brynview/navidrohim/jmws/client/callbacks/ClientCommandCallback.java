@@ -2,7 +2,6 @@ package me.brynview.navidrohim.jmws.client.callbacks;
 
 import com.mojang.brigadier.CommandDispatcher;
 
-import me.brynview.navidrohim.jmws.JMWS;
 import me.brynview.navidrohim.jmws.client.plugin.IClientPluginJM;
 import me.brynview.navidrohim.jmws.common.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.common.helpers.JsonStaticHelper;
@@ -17,12 +16,12 @@ import net.minecraft.text.Text;
 
 public interface ClientCommandCallback {
 
-    static void Callback(CommandDispatcher<FabricClientCommandSource> fabricClientCommandSourceCommandDispatcher, CommandRegistryAccess commandRegistryAccess) {
+    static void Callback(CommandDispatcher<FabricClientCommandSource> fabricClientCommandSourceCommandDispatcher, CommandRegistryAccess _commandRegistryAccess) {
 
         fabricClientCommandSourceCommandDispatcher.register(ClientCommandManager.literal("jmws")
             // finished (theoretically)
             .then(ClientCommandManager.literal("sync").executes(context -> {
-                IClientPluginJM.updateWaypoints(true);
+                IClientPluginJM.updateWaypoints(true, 0);
                 return 1;
             }))
 
@@ -37,11 +36,15 @@ public interface ClientCommandCallback {
                     .then(ClientCommandManager.literal("groups").executes(groupClearAllCtx -> {
                         JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(JsonStaticHelper.makeDeleteGroupRequestJson("", false, true)); // * = all
                         ClientPlayNetworking.send(deleteServerObjectPayload);
+                        IClientPluginJM.updateWaypoints(false, 0);
+                        IClientPluginJM.removeAllGroups();
+
                         return 1;
                     }))
                     .then(ClientCommandManager.literal("waypoints").executes(waypointClearAllCtx -> {
                         JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(JsonStaticHelper.makeDeleteRequestJson("", false, true)); // * = all
                         ClientPlayNetworking.send(deleteServerObjectPayload);
+                        IClientPluginJM.updateWaypoints(false, 0);
                         return 1;
                     })))
 
