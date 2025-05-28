@@ -1,7 +1,8 @@
-package me.brynview.navidrohim.jmws.common.io;
+package me.brynview.navidrohim.jmws.server.io;
 
 import com.google.gson.JsonObject;
 import journeymap.api.v2.common.waypoint.Waypoint;
+import me.brynview.navidrohim.jmws.JMWS;
 import org.joml.Vector3d;
 
 import java.io.File;
@@ -89,10 +90,15 @@ public class JMWSIOInterface {
         }
     }
 
-    public static void deleteAllUserObjects(UUID playerUUID, FetchType fetchType) {
+    public static boolean deleteAllUserObjects(UUID playerUUID, FetchType fetchType) {
+        List<Boolean> deletionStatusList = new ArrayList<>();
+
         for (String waypointPath : getFileObjects(playerUUID, fetchType)) {
-            deleteFile(waypointPath);
+            deletionStatusList.add(deleteFile(waypointPath));
         }
+
+        JMWS.info(deletionStatusList);
+        return deletionStatusList.isEmpty() || deletionStatusList.stream().allMatch(deletionStatusList.get(0)::equals);
 
     }
 

@@ -4,9 +4,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.common.io.JMWSIOInterface;
+import me.brynview.navidrohim.jmws.server.io.JMWSIOInterface;
 import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
 import net.minidev.json.JSONObject;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -25,12 +26,12 @@ public class JsonStaticHelper {
         return json.toJSONString();
     }
 
-    public static String makeDeleteRequestJson(String waypointFilename, boolean silent) {
-        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_WAYPOINT, List.of(waypointFilename, silent));
+    public static String makeDeleteRequestJson(String waypointFilename, boolean silent, boolean all) {
+        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_WAYPOINT, List.of(waypointFilename, silent, all));
     }
 
-    public static String makeDeleteGroupRequestJson(String groupFilename, boolean silent) {
-        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_GROUP, List.of(groupFilename, silent));
+    public static String makeDeleteGroupRequestJson(String groupFilename, boolean silent, boolean all) {
+        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_GROUP, List.of(groupFilename, silent, all));
     }
     public static String makeWaypointSyncRequestJson(boolean sendAlert) {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, List.of(Map.of(), Map.of(), sendAlert));
@@ -67,6 +68,7 @@ public class JsonStaticHelper {
     public static String makeDeleteClientObjectRequestJson(String waypointUUID, JMWSIOInterface.FetchType fetchType) {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_WAYPOINT, List.of(waypointUUID, fetchType));
     }
+
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {
         return JsonParser.parseString(jsonString).getAsJsonObject();
     }

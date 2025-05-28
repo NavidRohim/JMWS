@@ -18,6 +18,7 @@ import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.JMWS;
 import me.brynview.navidrohim.jmws.client.JMWSClient;
+import me.brynview.navidrohim.jmws.common.JMWSConstants;
 import me.brynview.navidrohim.jmws.common.SavedGroup;
 import me.brynview.navidrohim.jmws.common.SavedWaypoint;
 import me.brynview.navidrohim.jmws.common.config.JMWSConfig;
@@ -26,7 +27,7 @@ import me.brynview.navidrohim.jmws.common.helpers.AssetHelper;
 import me.brynview.navidrohim.jmws.common.helpers.CommonHelper;
 import me.brynview.navidrohim.jmws.common.helpers.JMWSSounds;
 import me.brynview.navidrohim.jmws.common.helpers.JsonStaticHelper;
-import me.brynview.navidrohim.jmws.common.io.JMWSIOInterface;
+import me.brynview.navidrohim.jmws.server.io.JMWSIOInterface;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -63,7 +64,6 @@ public class IClientPluginJM implements IClientPlugin
 
     private final HashMap<String, Waypoint> waypointIdentifierMap = new HashMap<>();
     private final HashMap<String, WaypointGroup> groupIdentifierMap = new HashMap<>();
-    private final List<String> forbiddenGroups = List.of("journeymap_death", "journeymap_all", "journeymap_temp", "journeymap_default");
 
     private ClientWorld oldWorld = null;
     private boolean serverHasMod = false;
@@ -120,7 +120,7 @@ public class IClientPluginJM implements IClientPlugin
         String waypointFilename = JMWSIOInterface.getWaypointFilename(waypoint, player.getUuid());
 
         waypointIdentifierMap.remove(waypoint.getCustomData());
-        String jsonPacketData = JsonStaticHelper.makeDeleteRequestJson(waypointFilename, silent);
+        String jsonPacketData = JsonStaticHelper.makeDeleteRequestJson(waypointFilename, silent, false);
         JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
 
         jmAPI.removeWaypoint("journeymap", waypoint);
@@ -260,7 +260,7 @@ public class IClientPluginJM implements IClientPlugin
 
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
     {
-        if (this.getEnabledStatus() && config.uploadGroups() && !forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) {
+        if (this.getEnabledStatus() && config.uploadGroups() && !JMWSConstants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) {
             MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
             ClientPlayerEntity player = minecraftClientInstance.player;
             WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
@@ -289,7 +289,7 @@ public class IClientPluginJM implements IClientPlugin
     private void groupDeletionHandler(WaypointGroup waypointGroup, ClientPlayerEntity player, boolean silent)
     {
         waypointIdentifierMap.remove(waypointGroup.getCustomData());
-        String jsonPacketData = JsonStaticHelper.makeDeleteGroupRequestJson(JMWSIOInterface.getGroupFilename(player.getUuid(), waypointGroup.getCustomData()), silent);
+        String jsonPacketData = JsonStaticHelper.makeDeleteGroupRequestJson(JMWSIOInterface.getGroupFilename(player.getUuid(), waypointGroup.getCustomData()), silent, false);
 
         JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
         ClientPlayNetworking.send(waypointActionPayload);
@@ -306,6 +306,13 @@ public class IClientPluginJM implements IClientPlugin
         ClientPlayNetworking.send(new JMWSActionPayload(creationData));
     }
 
+    public static int getTickCounterUpdateThreshold() {
+        return getInstance().tickCounterUpdateThreshold;
+    }
+
+    public static int getCurrentUpdateTick() {
+        return getInstance().tickCounter;
+    }
     public static void updateWaypoints(boolean sendAlert) {
 
         // Sends "request" packet | New = "SYNC"
@@ -363,7 +370,7 @@ public class IClientPluginJM implements IClientPlugin
         // This method is a bodge fix. removeWaypointGroups (which I believe removes all groups) doesnt work because you cannot change the modId of a group.
 
         for (WaypointGroup waypointGroup : getInstance().jmAPI.getAllWaypointGroups()) {
-            if (!getInstance().forbiddenGroups.contains(waypointGroup.getGuid())) {
+            if (JMWSConstants.forbiddenGroups.contains(waypointGroup.getGuid())) {
                 getInstance().jmAPI.removeWaypointGroup(waypointGroup, false);
             }
         }
@@ -411,7 +418,7 @@ public class IClientPluginJM implements IClientPlugin
         // Test if any existing groups (persistent) have already been added to the server, if not, add them
         for (WaypointGroup existingGroup : existingGroups) {
             String key = existingGroup.getName() + existingGroup.getGuid();
-            if (!remoteGroupKeys.contains(key) && !getInstance().forbiddenGroups.contains(existingGroup.getGuid())) {
+            if (!remoteGroupKeys.contains(key) && JMWSConstants.forbiddenGroups.contains(existingGroup.getGuid()) && !existingGroup.isPersistent()) {
                 getInstance().groupCreationHandler(existingGroup, context.player(), true);
                 hasLocalGroup = true;
             }
@@ -445,7 +452,7 @@ public class IClientPluginJM implements IClientPlugin
 
         // Test if any existing waypoints (persistent, usually death waypoints) have already been added to the server, if not, add them
         for (Waypoint existing : existingWaypoints) {
-            if (!remoteWaypointPositions.contains(existing.getBlockPos())) {
+            if (!remoteWaypointPositions.contains(existing.getBlockPos()) && !existing.isPersistent()) {
                 getInstance().createAction(existing, context.player(), true);
                 hasLocalWaypoint = true;
             }

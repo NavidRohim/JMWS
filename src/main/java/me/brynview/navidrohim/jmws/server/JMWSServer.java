@@ -7,7 +7,7 @@ import me.brynview.navidrohim.jmws.JMWS;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.helpers.JsonStaticHelper;
-import me.brynview.navidrohim.jmws.common.io.JMWSIOInterface;
+import me.brynview.navidrohim.jmws.server.io.JMWSIOInterface;
 import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -55,10 +55,39 @@ public class JMWSServer implements DedicatedServerModInitializer {
 
         switch (command) {
 
-            // was "delete"
-            case WaypointPayloadCommand.COMMON_DELETE_WAYPOINT -> {
-                boolean result = JMWSIOInterface.deleteFile(arguments.getFirst().getAsString());
+            // Following two cases are for deleting waypoints and groups
+            case WaypointPayloadCommand.COMMON_DELETE_GROUP -> {
+                String fileName = arguments.getFirst().getAsString().stripTrailing();
                 boolean silent = arguments.get(1).getAsBoolean();
+                boolean deleteAll = arguments.getLast().getAsBoolean();
+                boolean result;
+
+                if (!deleteAll) {
+                    result = JMWSIOInterface.deleteFile(fileName);
+                } else {
+                    result = JMWSIOInterface.deleteAllUserObjects(player.getUuid(), JMWSIOInterface.FetchType.GROUP);
+                }
+
+                if (!silent) {
+                    if (result) {
+                        sendUserMessage(player, "message.jmws.deletion_group_success", true, false);
+                    } else {
+                        sendUserMessage(player, "message.jmws.deletion_group_failure", true, true);
+                    }
+                }
+            }
+
+            case WaypointPayloadCommand.COMMON_DELETE_WAYPOINT -> {
+                String fileName = arguments.getFirst().getAsString().stripTrailing();
+                boolean silent = arguments.get(1).getAsBoolean();
+                boolean deleteAll = arguments.getLast().getAsBoolean();
+                boolean result;
+
+                if (!deleteAll) {
+                    result = JMWSIOInterface.deleteFile(fileName);
+                } else {
+                    result = JMWSIOInterface.deleteAllUserObjects(player.getUuid(), JMWSIOInterface.FetchType.WAYPOINT);
+                }
 
                 if (!silent) {
                     if (result) {
@@ -69,7 +98,7 @@ public class JMWSServer implements DedicatedServerModInitializer {
                 }
             }
 
-            // was "create"
+            // Following two cases regarding creating groups and waypoints
             case WaypointPayloadCommand.SERVER_CREATE -> {
                 JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
                 boolean silent = arguments.get(1).getAsBoolean();
@@ -80,6 +109,21 @@ public class JMWSServer implements DedicatedServerModInitializer {
                         sendUserMessage(player, "message.jmws.creation_success", true, false);
                     } else {
                         sendUserMessage(player, "message.jmws.creation_failure", false, true);
+                    }
+                }
+            }
+
+            case WaypointPayloadCommand.SERVER_CREATE_GROUP -> {
+                JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
+                boolean silent = arguments.get(1).getAsBoolean();
+                boolean waypointCreationSuccess = JMWSIOInterface.createGroup(jsonCreationData, context.player().getUuid());
+
+                if (!silent) {
+                    if (waypointCreationSuccess) {
+                        sendUserMessage(player, "message.jmws.creation_group_success", true, false);
+                    } else {
+                        sendUserMessage(player, "message.jmws.creation_group_failure", false, true);
+
                     }
                 }
             }
@@ -115,34 +159,6 @@ public class JMWSServer implements DedicatedServerModInitializer {
                     }
                 } catch (IOException ioe) {
                     JMWS.LOGGER.error(ioe.getMessage());
-                }
-            }
-
-            case WaypointPayloadCommand.SERVER_CREATE_GROUP -> {
-                JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
-                boolean silent = arguments.get(1).getAsBoolean();
-                boolean waypointCreationSuccess = JMWSIOInterface.createGroup(jsonCreationData, context.player().getUuid());
-
-                if (!silent) {
-                    if (waypointCreationSuccess) {
-                        sendUserMessage(player, "message.jmws.creation_group_success", true, false);
-                    } else {
-                        sendUserMessage(player, "message.jmws.creation_group_failure", false, true);
-
-                    }
-                }
-            }
-
-            case WaypointPayloadCommand.COMMON_DELETE_GROUP -> {
-                boolean result = JMWSIOInterface.deleteFile(arguments.getFirst().getAsString());
-                boolean silent = arguments.get(1).getAsBoolean();
-
-                if (!silent) {
-                    if (result) {
-                        sendUserMessage(player, "message.jmws.deletion_group_success", true, false);
-                    } else {
-                        sendUserMessage(player, "message.jmws.deletion_group_failure", true, true);
-                    }
                 }
             }
 
