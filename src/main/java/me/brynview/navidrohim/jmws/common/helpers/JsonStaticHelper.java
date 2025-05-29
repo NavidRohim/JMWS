@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
 import net.minidev.json.JSONObject;
 
@@ -56,5 +55,3 @@ public class JsonStaticHelper {
         return JsonParser.parseString(jsonString).getAsJsonObject();
     }
 }
-
-// this whole class is scuffed. I cannot be hard coding json strings bro. must change.

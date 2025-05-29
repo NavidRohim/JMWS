@@ -26,6 +26,7 @@
   "message.jmws.next_sync": "Next sync in %s second(s)",
   "message.jmws.has_jmws": "Server has JMWS!",
   "message.jmws.world_is_local": "Playing in single player. JMWS will be disabled for you and all clients.",
+
   "__comment__": "Config language strings",
   "text.config.jmws-config.title": "JourneyMap Waypoint Syncing (JMWS)",
 
@@ -53,12 +54,15 @@
   "text.config.jmws-config.section.personalisation": "Personalisation",
   "text.config.jmws-config.section.generalConfig": "Technical",
 
-  "__comment__": "Error language strings",
+  "__comment__": "Error / Warning language strings",
 
   "error.jmws.error_packet_size": "You have too many waypoints and groups. Please delete some to continue making waypoints and syncing.",
   "error.jmws.error_corrupted_waypoint": "One or more waypoints or groups are corrupted. Contact administration for details.",
   "error.jmws.jmws_not_installed": "Server does not have JMWS installed. JMWS will be disabled.",
   "error.jmws.missing_journeymap": "JourneyMap Version 6.0.0 Beta 47 or higher (1.21.5+) is required on the client-side of JMWS.",
+
+  "warning.jmws.world_is_local": "Playing in single player. JMWS will be disabled for you and all clients.",
+  "warning.jmws.world_is_local_no_commands": "Playing in single player. Some commands will not work.",
 
   "__comment__": "JourneyMap Buttons",
   "button.jmws.update_button": "Sync waypoints",

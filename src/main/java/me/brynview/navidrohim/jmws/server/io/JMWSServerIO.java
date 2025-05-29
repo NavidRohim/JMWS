@@ -6,7 +6,6 @@ import me.brynview.navidrohim.jmws.JMWS;
 import me.brynview.navidrohim.jmws.common.io.CommonIO;
 import org.joml.Vector3d;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -99,7 +98,7 @@ public class JMWSServerIO {
         }
 
         JMWS.info(deletionStatusList);
-        return deletionStatusList.isEmpty() || deletionStatusList.stream().allMatch(deletionStatusList.get(0)::equals);
+        return deletionStatusList.isEmpty() || deletionStatusList.stream().allMatch(deletionStatusList.getFirst()::equals);
 
     }
 
@@ -125,6 +124,6 @@ public class JMWSServerIO {
             return List.of();
             }
         return waypointFileList;
-    };
+    }
 }
 

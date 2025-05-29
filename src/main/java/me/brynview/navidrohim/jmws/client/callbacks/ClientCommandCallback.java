@@ -11,18 +11,32 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 
 public interface ClientCommandCallback {
+
+
+    private static boolean isInSingleplayer() {
+        return IClientPluginJM.minecraftClientInstance.isInSingleplayer();
+    }
+    private static void sendUserSinglePlayerWarning() {
+        IClientPluginJM.sendUserAlert(Text.translatable("warning.jmws.world_is_local_no_commands"), true, false, JMWSMessageType.WARNING);
+    }
 
     static void Callback(CommandDispatcher<FabricClientCommandSource> fabricClientCommandSourceCommandDispatcher, CommandRegistryAccess _commandRegistryAccess) {
 
         fabricClientCommandSourceCommandDispatcher.register(ClientCommandManager.literal("jmws")
             // finished (theoretically)
             .then(ClientCommandManager.literal("sync").executes(context -> {
-                IClientPluginJM.updateWaypoints(true, 0);
+                if (!isInSingleplayer()) {
+                    IClientPluginJM.updateWaypoints(true, 0);
+                } else {
+                    sendUserSinglePlayerWarning();
+                }
                 return 1;
+
             }))
 
             // finished (theoretically)
@@ -34,23 +48,36 @@ public interface ClientCommandCallback {
             // finished transition
             .then(ClientCommandManager.literal("clearAll")
                     .then(ClientCommandManager.literal("groups").executes(groupClearAllCtx -> {
-                        JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(JsonStaticHelper.makeDeleteGroupRequestJson("", false, true)); // * = all
-                        ClientPlayNetworking.send(deleteServerObjectPayload);
-                        IClientPluginJM.updateWaypoints(false, 0);
-                        IClientPluginJM.removeAllGroups();
+
+                        if (!isInSingleplayer()) {
+                            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(JsonStaticHelper.makeDeleteGroupRequestJson("", false, true)); // * = all
+                            ClientPlayNetworking.send(deleteServerObjectPayload);
+                            IClientPluginJM.updateWaypoints(false, 0);
+                            IClientPluginJM.removeAllGroups();
+                        } else {
+                            sendUserSinglePlayerWarning();
+                        }
 
                         return 1;
                     }))
                     .then(ClientCommandManager.literal("waypoints").executes(waypointClearAllCtx -> {
-                        JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(JsonStaticHelper.makeDeleteRequestJson("", false, true)); // * = all
-                        ClientPlayNetworking.send(deleteServerObjectPayload);
-                        IClientPluginJM.updateWaypoints(false, 0);
+                        if (!isInSingleplayer()) {
+                            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(JsonStaticHelper.makeDeleteRequestJson("", false, true)); // * = all
+                            ClientPlayNetworking.send(deleteServerObjectPayload);
+                            IClientPluginJM.updateWaypoints(false, 0);
+                        } else {
+                            sendUserSinglePlayerWarning();
+                        }
                         return 1;
                     })))
 
             // finished (theoretically)
             .then(ClientCommandManager.literal("nextSync").executes(updateDisplayContext -> {
-                IClientPluginJM.sendUserAlert(Text.translatable("message.jmws.next_sync", (IClientPluginJM.getTickCounterUpdateThreshold() - IClientPluginJM.getCurrentUpdateTick()) / 20), true, false, JMWSMessageType.NEUTRAL);
+                if (!isInSingleplayer()) {
+                    IClientPluginJM.sendUserAlert(Text.translatable("message.jmws.next_sync", (IClientPluginJM.getTickCounterUpdateThreshold() - IClientPluginJM.getCurrentUpdateTick()) / 20), true, false, JMWSMessageType.NEUTRAL);
+                } else {
+                    sendUserSinglePlayerWarning();
+                }
                 return 1;
             }))
         );

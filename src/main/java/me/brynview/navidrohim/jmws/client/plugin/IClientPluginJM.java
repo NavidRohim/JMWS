@@ -40,8 +40,6 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -54,7 +52,6 @@ import java.util.stream.Collectors;
 @JourneyMapPlugin(apiVersion = "2.0.0")
 public class IClientPluginJM implements IClientPlugin
 {
-    private static final Logger log = LoggerFactory.getLogger(IClientPluginJM.class);
     private static ScheduledFuture<?> timeoutTask;
     private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
@@ -72,6 +69,7 @@ public class IClientPluginJM implements IClientPlugin
     private int tickCounterUpdateThreshold = config.updateWaypointFrequency();
     private int tickCounter = 0;
 
+    public static final MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
     public IClientPluginJM() {
         INSTANCE = this;
     }
@@ -87,22 +85,19 @@ public class IClientPluginJM implements IClientPlugin
             finalText = messageType.toString() + text.getString();
         }
 
-        MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
         if ((config.showAlerts() || ignoreConfig) && minecraftClientInstance.player != null) {
             minecraftClientInstance.player.sendMessage(Text.of(finalText), overlayText);
         }
     }
 
     public static void sendUserSoundAlert(SoundEvent sound) {
-        MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
         if (config.playEffects() && minecraftClientInstance.player != null) {
             minecraftClientInstance.player.playSound(sound, 0.09f, 1f);
         }
     }
 
     public boolean getEnabledStatus() {
-        MinecraftClient minecraftClient = MinecraftClient.getInstance();
-        return serverHasMod && config.enabled() && (config.uploadGroups() || config.uploadWaypoints()) && !minecraftClient.isInSingleplayer();
+        return serverHasMod && config.enabled() && (config.uploadGroups() || config.uploadWaypoints()) && !minecraftClientInstance.isInSingleplayer();
     }
 
     public Waypoint getOldWaypoint(Waypoint newWaypoint) {
@@ -152,7 +147,6 @@ public class IClientPluginJM implements IClientPlugin
 
     void WaypointCreationHandler(WaypointEvent waypointEvent) {
         if (this.getEnabledStatus() && config.uploadWaypoints()) {
-            MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
             ClientPlayerEntity player = minecraftClientInstance.player;
 
             if (player == null) {
@@ -200,14 +194,14 @@ public class IClientPluginJM implements IClientPlugin
 
                 timeoutTask = scheduler.schedule(() -> {
                     if (!serverHasMod) {
-                        MinecraftClient.getInstance().execute(() -> {
+                        minecraftClientInstance.execute(() -> {
                             sendUserAlert(Text.translatable("error.jmws.jmws_not_installed"), true, true, JMWSMessageType.FAILURE);
                             sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
                         });
                     }
                 }, config.serverHandshakeTimeout(), TimeUnit.SECONDS);
             } else {
-                sendUserAlert(Text.translatable("message.jmws.world_is_local"), true, false, JMWSMessageType.WARNING);
+                sendUserAlert(Text.translatable("warning.jmws.world_is_local"), true, false, JMWSMessageType.WARNING);
                 sendUserSoundAlert(JMWSSounds.ACTION_SUCCEED);
             }
         }));
@@ -218,9 +212,8 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     private void addJMButtons(FullscreenDisplayEvent.AddonButtonDisplayEvent addonButtonDisplayEvent) {
-        MinecraftClient mcClient = MinecraftClient.getInstance();
 
-        if (!mcClient.isInSingleplayer()) {
+        if (!minecraftClientInstance.isInSingleplayer()) {
             IThemeButton buttonEnabled = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
                     "button.jmws.enable_button",
                     AssetHelper.onOffButtonAsset,
@@ -255,15 +248,12 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     private void updateFromButton(IThemeButton iThemeButton) {
-        if (getEnabledStatus()) {
-            updateWaypoints(true, 0);
-        }
+        updateWaypoints(true, 0);
     }
 
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
     {
         if (this.getEnabledStatus() && config.uploadGroups() && !JMWSConstants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) {
-            MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
             ClientPlayerEntity player = minecraftClientInstance.player;
             WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
 
@@ -320,21 +310,21 @@ public class IClientPluginJM implements IClientPlugin
     public static void updateWaypoints(boolean sendAlert, Integer delay) { // Might use delay some day
 
         // Sends "request" packet | New = "SYNC"
-        scheduler.schedule(() -> {
-            ClientPlayNetworking.send(new JMWSActionPayload(JsonStaticHelper.makeWaypointSyncRequestJson(sendAlert)));
-        }, delay, TimeUnit.SECONDS);
+        if (getInstance().getEnabledStatus()) {
+            scheduler.schedule(() -> ClientPlayNetworking.send(new JMWSActionPayload(JsonStaticHelper.makeWaypointSyncRequestJson(sendAlert))), delay, TimeUnit.SECONDS);
+        }
 
     }
 
-    private void handleTick(MinecraftClient minecraftClient) {
+    private void handleTick(MinecraftClient _minecraftClient) {
 
         // Sends "sync" packet | New = SYNC
-        ClientWorld world = minecraftClient.world;
+        ClientWorld world = minecraftClientInstance.world;
 
         if (world != null && this.getEnabledStatus()) {
             if (world != oldWorld) {
                 if (oldWorld == null) {
-                    tickCounterUpdateThreshold = 20 * (config.serverHandshakeTimeout() + 1); // Add 1 second buffer to not interupt message
+                    tickCounterUpdateThreshold = 20 * (config.serverHandshakeTimeout() + 1); // Add 1 second buffer to not interrupt message
                 } else {
                     tickCounterUpdateThreshold = 40; // 2-second delay when switching dimension
                 }
@@ -349,7 +339,7 @@ public class IClientPluginJM implements IClientPlugin
                     tickCounterUpdateThreshold = config.updateWaypointFrequency();
                 }
             }
-            oldWorld = minecraftClient.world;
+            oldWorld = minecraftClientInstance.world;
         } else {
 
             tickCounter = 0;
@@ -374,7 +364,7 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     public static void deleteAllGroups() {
-        // This method is a bodge fix. removeWaypointGroups (which I believe removes all groups) doesnt work because you cannot change the modId of a group.
+        // This method is a bodge fix. removeWaypointGroups (which I believe removes all groups) does not work because you cannot change the modId of a group.
 
         for (WaypointGroup waypointGroup : getInstance().jmAPI.getAllWaypointGroups()) {
             if (JMWSConstants.forbiddenGroups.contains(waypointGroup.getGuid())) {
@@ -425,9 +415,6 @@ public class IClientPluginJM implements IClientPlugin
         // Test if any existing groups (persistent) have already been added to the server, if not, add them
         for (WaypointGroup existingGroup : existingGroups) {
             String key = existingGroup.getName() + existingGroup.getGuid();
-            JMWS.info(" \n + " + key);
-            JMWS.info(remoteGroupKeys);
-            JMWS.info(existingGroup.isPersistent() + " \n ");
             if (!remoteGroupKeys.contains(key) && !JMWSConstants.forbiddenGroups.contains(existingGroup.getGuid()) && existingGroup.isPersistent()) {
                 getInstance().groupCreationHandler(existingGroup, context.player(), true);
                 hasLocalGroup = true;
@@ -531,7 +518,6 @@ public class IClientPluginJM implements IClientPlugin
     public static void HandlePacket(JMWSActionPayload waypointPayload, ClientPlayNetworking.Context context) {
 
         if (getInstance().getEnabledStatus()) {
-            MinecraftClient minecraftClientInstance = MinecraftClient.getInstance();
 
             if (minecraftClientInstance.player == null)
             {
@@ -542,7 +528,7 @@ public class IClientPluginJM implements IClientPlugin
 
                 // Was creation_response
                 // Sends no outbound data
-                case SYNC -> { syncHandler(waypointPayload, context); }
+                case SYNC -> syncHandler(waypointPayload, context);
 
                 // was "update"
                 // Sends "request" packet | New = "SYNC"
@@ -556,7 +542,7 @@ public class IClientPluginJM implements IClientPlugin
                 // No outbound data
                 case CLIENT_ALERT -> {
                     String firstArgument = waypointPayload.arguments().getFirst().getAsString();
-                    Boolean isError = waypointPayload.arguments().getLast().getAsBoolean();
+                    boolean isError = waypointPayload.arguments().getLast().getAsBoolean();
                     JMWSMessageType messageType = JMWSMessageType.NEUTRAL;
 
                     if (isError) {
