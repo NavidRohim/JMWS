@@ -31,7 +31,7 @@ public interface ClientCommandCallback {
             // finished (theoretically)
             .then(ClientCommandManager.literal("sync").executes(context -> {
                 if (!isInSingleplayer()) {
-                    IClientPluginJM.updateWaypoints(true, 0);
+                    IClientPluginJM.updateWaypoints(true);
                 } else {
                     sendUserSinglePlayerWarning();
                 }
@@ -52,7 +52,7 @@ public interface ClientCommandCallback {
                         if (!isInSingleplayer()) {
                             JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(JsonStaticHelper.makeDeleteGroupRequestJson("", false, true)); // * = all
                             ClientPlayNetworking.send(deleteServerObjectPayload);
-                            IClientPluginJM.updateWaypoints(false, 0);
+                            IClientPluginJM.updateWaypoints(false);
                             IClientPluginJM.removeAllGroups();
                         } else {
                             sendUserSinglePlayerWarning();
@@ -64,7 +64,7 @@ public interface ClientCommandCallback {
                         if (!isInSingleplayer()) {
                             JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(JsonStaticHelper.makeDeleteRequestJson("", false, true)); // * = all
                             ClientPlayNetworking.send(deleteServerObjectPayload);
-                            IClientPluginJM.updateWaypoints(false, 0);
+                            IClientPluginJM.updateWaypoints(false);
                         } else {
                             sendUserSinglePlayerWarning();
                         }

@@ -248,7 +248,7 @@ public class IClientPluginJM implements IClientPlugin
     }
 
     private void updateFromButton(IThemeButton iThemeButton) {
-        updateWaypoints(true, 0);
+        updateWaypoints(true);
     }
 
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
@@ -314,11 +314,11 @@ public class IClientPluginJM implements IClientPlugin
     public static int getCurrentUpdateTick() {
         return getInstance().tickCounter;
     }
-    public static void updateWaypoints(boolean sendAlert, Integer delay) { // Might use delay some day
+    public static void updateWaypoints(boolean sendAlert) { // Might use delay some day
 
         // Sends "request" packet | New = "SYNC"
         if (getInstance().getEnabledStatus()) {
-            scheduler.schedule(() -> ClientPlayNetworking.send(new JMWSActionPayload(JsonStaticHelper.makeWaypointSyncRequestJson(sendAlert))), delay, TimeUnit.SECONDS);
+            ClientPlayNetworking.send(new JMWSActionPayload(JsonStaticHelper.makeWaypointSyncRequestJson(sendAlert)));
         }
 
     }
@@ -341,7 +341,7 @@ public class IClientPluginJM implements IClientPlugin
                 tickCounter++;
                 if (tickCounter >= tickCounterUpdateThreshold) {
 
-                    updateWaypoints(true, 0);
+                    updateWaypoints(true);
                     tickCounter = 0;
                     tickCounterUpdateThreshold = config.updateWaypointFrequency();
                 }
@@ -488,7 +488,7 @@ public class IClientPluginJM implements IClientPlugin
             }
 
             if (hasLocalGroup || hasLocalWaypoint) {
-                updateWaypoints(false, 0);
+                updateWaypoints(false);
                 if (hasLocalGroup && hasLocalWaypoint) {
                     sendUserAlert(Text.translatable("message.jmws.local_both_upload"), true, false, JMWSMessageType.SUCCESS);
                 } else if (hasLocalGroup) {
@@ -539,7 +539,7 @@ public class IClientPluginJM implements IClientPlugin
 
                 // was "update"
                 // Sends "request" packet | New = "SYNC"
-                case REQUEST_CLIENT_SYNC -> IClientPluginJM.updateWaypoints(true, 0);
+                case REQUEST_CLIENT_SYNC -> IClientPluginJM.updateWaypoints(true);
 
                 // was display_interval
                 // No outbound data

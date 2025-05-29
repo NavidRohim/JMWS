@@ -11,8 +11,9 @@
 
 ## Bug fixes
 
-- Fixed bug when editing local object; game would crash. Object is now just uploaded.
-
+- When editing local object; game would crash. Object is now just uploaded.
+- When making group in waypoint creation dialogue box; Error would be shown (like a group could not be created, though that wasn't the case) group is now made with no false-positive.
+- 
 ## Persistent bugs
 
 - Same bugs as in v1.0.7 changelog.
