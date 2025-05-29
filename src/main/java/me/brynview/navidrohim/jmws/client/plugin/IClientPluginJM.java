@@ -257,6 +257,7 @@ public class IClientPluginJM implements IClientPlugin
             ClientPlayerEntity player = minecraftClientInstance.player;
             WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
 
+            JMWS.info(waypointGroupEvent.getContext());
             if (player == null) {
                 return;
             }
@@ -292,7 +293,13 @@ public class IClientPluginJM implements IClientPlugin
     private void groupCreationHandler(WaypointGroup waypointGroup, ClientPlayerEntity player, boolean silent)
     {
         String waypointIdentifier = CommonHelper.makeWaypointHash(player.getUuid(), waypointGroup.getGuid(), waypointGroup.getName());
+
+        // this is needed because for some reason, when creating a group in the wp creation dialogue box, the CREATION event fires twice.
+        if (groupIdentifierMap.containsKey(waypointIdentifier)) { return; }
         groupIdentifierMap.put(waypointIdentifier, waypointGroup);
+
+        JMWS.info(waypointIdentifier);
+        JMWS.info(waypointGroup);
 
         waypointGroup.setPersistent(false);
         waypointGroup.setCustomData(waypointIdentifier);
