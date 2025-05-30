@@ -20,7 +20,7 @@ import java.util.Optional;
 public class JMWS implements ModInitializer {
 
     public static final String MODID = "jmws";
-    public static final String VERSION = "1.1.1-1.21.1";
+    public static final String VERSION = "1.1.1-1.21.5+001";
     public static final Logger LOGGER = LogManager.getFormatterLogger(MODID);
 
     public static void info(Object message) {
@@ -29,7 +29,7 @@ public class JMWS implements ModInitializer {
 
     private void _handleMissingMod(@Nullable Exception exc) {
         JMWS.LOGGER.error("Got error checking JM version; %s".formatted(exc));
-        throw new RuntimeException("JourneyMap might be installed, but the version cannot be detected. Need JourneyMap version 1.21.1-6.0.0-beta.47 or higher.");
+        throw new RuntimeException("JourneyMap might be installed, but the version cannot be detected. Need JourneyMap version %s or higher.".formatted(JMWSConstants.JourneyMapVersionString));
     }
 
     @Override
