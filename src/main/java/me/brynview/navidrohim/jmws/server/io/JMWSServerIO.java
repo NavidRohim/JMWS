@@ -97,7 +97,6 @@ public class JMWSServerIO {
             deletionStatusList.add(CommonIO.deleteFile(waypointPath));
         }
 
-        JMWS.info(deletionStatusList);
         return deletionStatusList.isEmpty() || deletionStatusList.stream().allMatch(deletionStatusList.getFirst()::equals);
 
     }
