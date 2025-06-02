@@ -2,7 +2,7 @@
 
 ## New
 
-- Can now configure packet size on server.
+- Important continuity change to match with v1.21.1
 
 ## Bug fixes
 
