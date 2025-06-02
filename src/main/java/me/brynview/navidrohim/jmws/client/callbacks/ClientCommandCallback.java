@@ -3,7 +3,7 @@ package me.brynview.navidrohim.jmws.client.callbacks;
 import com.mojang.brigadier.CommandDispatcher;
 
 import me.brynview.navidrohim.jmws.client.plugin.IClientPluginJM;
-import me.brynview.navidrohim.jmws.common.enums.JMWSMessageType;
+import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.common.helpers.JsonStaticHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 
@@ -11,7 +11,6 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.text.Text;
 

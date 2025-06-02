@@ -8,6 +8,7 @@ import me.brynview.navidrohim.jmws.common.io.CommonIO;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.helpers.JsonStaticHelper;
+import me.brynview.navidrohim.jmws.server.config.JMWSServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
 import net.fabricmc.api.DedicatedServerModInitializer;
@@ -25,6 +26,8 @@ import java.util.List;
 
 public class JMWSServer implements DedicatedServerModInitializer {
 
+    public static JMWSServerConfig SERVER_CONFIG;
+
     @Override
     public void onInitializeServer() {
 
@@ -32,12 +35,17 @@ public class JMWSServer implements DedicatedServerModInitializer {
         new File("./jmws").mkdir();
         new File("./jmws/groups").mkdir();
 
+        SERVER_CONFIG = JMWSServerConfig.createAndLoad();
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             if (server.isDedicated()) {
                 ServerPlayNetworking.registerGlobalReceiver(JMWSActionPayload.ID, this::HandleWaypointAction);
                 ServerPlayNetworking.registerGlobalReceiver(HandshakePayload.ID, this::HandshakeHandler);
             }
         });
+    }
+
+    private boolean serverEnabledJMWS() {
+        return SERVER_CONFIG.serverConfiguration.serverEnabled() && (SERVER_CONFIG.serverConfiguration.serverGroupsEnabled() || SERVER_CONFIG.serverConfiguration.serverWaypointsEnabled());
     }
 
     private void HandshakeHandler(HandshakePayload handshakePayload, ServerPlayNetworking.Context context) {
@@ -101,31 +109,42 @@ public class JMWSServer implements DedicatedServerModInitializer {
 
             // Following two cases regarding creating groups and waypoints
             case WaypointPayloadCommand.SERVER_CREATE -> {
-                JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
-                boolean silent = arguments.get(1).getAsBoolean();
-                boolean waypointCreationSuccess = JMWSServerIO.createWaypoint(jsonCreationData, context.player().getUuid());
+                boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
+                if (serverEnabledJMWS() && (SERVER_CONFIG.serverConfiguration.serverWaypointsEnabled() || isUpdateFromCreation)) {
+                    JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
+                    boolean silent = arguments.get(1).getAsBoolean();
+                    boolean waypointCreationSuccess = JMWSServerIO.createWaypoint(jsonCreationData, context.player().getUuid());
 
-                if (!silent) {
-                    if (waypointCreationSuccess) {
-                        sendUserMessage(player, "message.jmws.creation_success", true, false);
-                    } else {
-                        sendUserMessage(player, "message.jmws.creation_failure", false, true);
+                    if (!silent) {
+                        if (waypointCreationSuccess) {
+                            sendUserMessage(player, "message.jmws.creation_success", true, false);
+                        } else {
+                            
+                            sendUserMessage(player, "message.jmws.creation_failure", false, true);
+                        }
                     }
+                } else {
+                    sendUserMessage(player, "message.jmws.server_disabled_waypoints", true, true);
                 }
             }
 
             case WaypointPayloadCommand.SERVER_CREATE_GROUP -> {
-                JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
-                boolean silent = arguments.get(1).getAsBoolean();
-                boolean waypointCreationSuccess = JMWSServerIO.createGroup(jsonCreationData, context.player().getUuid());
+                boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
+                if (serverEnabledJMWS() && (SERVER_CONFIG.serverConfiguration.serverWaypointsEnabled() || isUpdateFromCreation)) {
+                    JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
+                    boolean silent = arguments.get(1).getAsBoolean();
+                    boolean waypointCreationSuccess = JMWSServerIO.createGroup(jsonCreationData, context.player().getUuid());
 
-                if (!silent) {
-                    if (waypointCreationSuccess) {
-                        sendUserMessage(player, "message.jmws.creation_group_success", true, false);
-                    } else {
-                        sendUserMessage(player, "message.jmws.creation_group_failure", false, true);
+                    if (!silent) {
+                        if (waypointCreationSuccess) {
+                            sendUserMessage(player, "message.jmws.creation_group_success", true, false);
+                        } else {
+                            sendUserMessage(player, "message.jmws.creation_group_failure", false, true);
 
+                        }
                     }
+                } else {
+                    sendUserMessage(player, "message.jmws.server_disabled_groups", true, true);
                 }
             }
 
@@ -152,7 +171,7 @@ public class JMWSServer implements DedicatedServerModInitializer {
                     }
                     String jsonData = JsonStaticHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert);
 
-                    if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit but I got nowhere near.
+                    if (jsonData.getBytes().length >= SERVER_CONFIG.serverConfiguration.serverPacketLimit()) { // packet size limit, I tried to reach this limit but I got nowhere near.
                         sendUserMessage(player, "error.jmws.error_packet_size", false, true);
                     } else {
                         JMWSActionPayload waypointPayloadOutbound = new JMWSActionPayload(jsonData);

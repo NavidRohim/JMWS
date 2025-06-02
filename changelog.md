@@ -1,8 +1,8 @@
-# 1.1.2 Changelog
+# 1.1.3 Changelog
 
 ## New
 
-- Important continuity change to match with v1.21.1
+- Server-side configuration for administration (can disable waypoints / groups for users server-wide)
 
 ## Bug fixes
 

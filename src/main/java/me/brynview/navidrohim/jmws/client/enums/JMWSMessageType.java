@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.common.enums;
+package me.brynview.navidrohim.jmws.client.enums;
 
 public enum JMWSMessageType {
     FAILURE("§C"),
