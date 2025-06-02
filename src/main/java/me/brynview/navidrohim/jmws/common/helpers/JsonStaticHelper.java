@@ -1,27 +1,33 @@
 package me.brynview.navidrohim.jmws.common.helpers;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.JMWS;
 import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
-import net.minidev.json.JSONObject;
 
 import java.util.*;
 
 public class JsonStaticHelper {
 
-    public static String makeBaseJsonRequest(WaypointPayloadCommand command, List<Object> arguments) {
-        JSONObject json = new JSONObject();
-        if (arguments == null)
-        {
-            arguments = List.of();
+    public static class PacketCommand {
+        WaypointPayloadCommand command;
+        List<Object> arguments;
+
+        public PacketCommand(WaypointPayloadCommand command, List<Object> arguments) {
+            this.command = command;
+            this.arguments = arguments;
         }
+    }
 
-        json.put("command", command);
-        json.put("arguments", arguments);
+    public static String makeBaseJsonRequest(WaypointPayloadCommand command, List<Object> arguments) {
+        Gson json = new Gson();
+        PacketCommand pckCommandObj = new PacketCommand(command, arguments);
+        JMWS.LOGGER.debug("Made command -> " + json.toJson(pckCommandObj));
 
-        return json.toJSONString();
+        return json.toJson(pckCommandObj);
     }
 
     public static String makeDeleteRequestJson(String waypointFilename, boolean silent, boolean all) {
