@@ -3,6 +3,7 @@
 ## New
 
 - Server-side configuration for administration (can disable waypoints / groups for users server-wide)
+- Change; added failsafe if "jmws" folder is deleted while server is running.
 
 ## Bug fixes
 

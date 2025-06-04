@@ -9,10 +9,7 @@ import org.joml.Vector3d;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -61,10 +58,16 @@ public class JMWSServerIO {
             waypointFileWriter.close();
 
             return true;
+
         } catch (NoSuchFileException noSuchFileException) {
             JMWSServer._createServerResources();
-            JMWS.LOGGER.warn("`jmws` folder was not found so another was made. All server waypoints and groups have been wiped. (group)");
+            JMWS.LOGGER.warn("`jmws` folder was not found so another was made. All server waypoints and groups have been wiped. (group error)");
             return createGroup(jsonObject, playerUUID);
+
+        } catch (FileSystemException missingPerms) {
+            JMWS.LOGGER.error("JMWS is missing write permissions to \"jmws\" folder. (group error)");
+            return false;
+
         } catch (IOException genericIOError) {
             JMWS.LOGGER.error("Got exception trying to make group -> " + genericIOError);
             return false;
@@ -92,10 +95,16 @@ public class JMWSServerIO {
             waypointFileWriter.close();
 
             return true;
+
         } catch (NoSuchFileException noSuchFileException) {
             JMWSServer._createServerResources();
-            JMWS.LOGGER.warn("`jmws` folder was not found so another was made. All server waypoints and groups have been wiped. (waypoint)");
+            JMWS.LOGGER.warn("`jmws` folder was not found so another was made. All server waypoints and groups have been wiped. (waypoint error)");
             return createWaypoint(jsonObject, playerUUID);
+
+        } catch (FileSystemException missingPerms) {
+            JMWS.LOGGER.error("JMWS is missing write permissions to \"jmws\" folder. (waypoint error)");
+            return false;
+
         } catch (IOException genericIOError) {
             JMWS.LOGGER.error("Got exception trying to make waypoint -> " + genericIOError);
             return false;
