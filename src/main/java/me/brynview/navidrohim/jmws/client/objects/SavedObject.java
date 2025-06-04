@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.common;
+package me.brynview.navidrohim.jmws.client.objects;
 
 public class SavedObject {
     String rawPacketData;

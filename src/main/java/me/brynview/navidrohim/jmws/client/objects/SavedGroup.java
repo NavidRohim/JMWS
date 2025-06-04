@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.common;
+package me.brynview.navidrohim.jmws.client.objects;
 import com.google.gson.JsonObject;
 
 public class SavedGroup extends SavedObject {
