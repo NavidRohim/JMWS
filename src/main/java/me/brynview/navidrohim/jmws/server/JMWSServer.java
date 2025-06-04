@@ -28,12 +28,16 @@ public class JMWSServer implements DedicatedServerModInitializer {
 
     public static JMWSServerConfig SERVER_CONFIG;
 
+    public static void _createServerResources() {
+        new File("./jmws").mkdir();
+        new File("./jmws/groups").mkdir();
+    }
+
     @Override
     public void onInitializeServer() {
 
         // Item
-        new File("./jmws").mkdir();
-        new File("./jmws/groups").mkdir();
+        _createServerResources();
 
         SERVER_CONFIG = JMWSServerConfig.createAndLoad();
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
@@ -130,7 +134,7 @@ public class JMWSServer implements DedicatedServerModInitializer {
 
             case WaypointPayloadCommand.SERVER_CREATE_GROUP -> {
                 boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
-                if (serverEnabledJMWS() && (SERVER_CONFIG.serverConfiguration.serverWaypointsEnabled() || isUpdateFromCreation)) {
+                if (serverEnabledJMWS() && (SERVER_CONFIG.serverConfiguration.serverGroupsEnabled() || isUpdateFromCreation)) {
                     JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
                     boolean silent = arguments.get(1).getAsBoolean();
                     boolean waypointCreationSuccess = JMWSServerIO.createGroup(jsonCreationData, context.player().getUuid());

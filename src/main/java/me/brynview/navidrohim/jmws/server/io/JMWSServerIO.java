@@ -4,11 +4,13 @@ import com.google.gson.JsonObject;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import me.brynview.navidrohim.jmws.JMWS;
 import me.brynview.navidrohim.jmws.common.io.CommonIO;
+import me.brynview.navidrohim.jmws.server.JMWSServer;
 import org.joml.Vector3d;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -59,7 +61,12 @@ public class JMWSServerIO {
             waypointFileWriter.close();
 
             return true;
-        } catch (IOException ioe) {
+        } catch (NoSuchFileException noSuchFileException) {
+            JMWSServer._createServerResources();
+            JMWS.LOGGER.warn("`jmws` folder was not found so another was made. All server waypoints and groups have been wiped. (group)");
+            return createGroup(jsonObject, playerUUID);
+        } catch (IOException genericIOError) {
+            JMWS.LOGGER.error("Got exception trying to make group -> " + genericIOError);
             return false;
         }
     }
@@ -85,7 +92,12 @@ public class JMWSServerIO {
             waypointFileWriter.close();
 
             return true;
-        } catch (IOException ioException) {
+        } catch (NoSuchFileException noSuchFileException) {
+            JMWSServer._createServerResources();
+            JMWS.LOGGER.warn("`jmws` folder was not found so another was made. All server waypoints and groups have been wiped. (waypoint)");
+            return createWaypoint(jsonObject, playerUUID);
+        } catch (IOException genericIOError) {
+            JMWS.LOGGER.error("Got exception trying to make waypoint -> " + genericIOError);
             return false;
         }
     }
