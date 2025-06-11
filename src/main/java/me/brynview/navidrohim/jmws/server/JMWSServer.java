@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 
 public class JMWSServer implements DedicatedServerModInitializer {
@@ -70,12 +71,21 @@ public class JMWSServer implements DedicatedServerModInitializer {
 
             // Following two cases are for deleting waypoints and groups
             case WaypointPayloadCommand.COMMON_DELETE_GROUP -> {
-                String fileName = arguments.getFirst().getAsString().stripTrailing();
-                boolean silent = arguments.get(1).getAsBoolean();
-                boolean deleteAll = arguments.getLast().getAsBoolean();
+
+                String playerUUID = arguments.getFirst().getAsString();
+                String groupUniversalIdentifier = arguments.get(1).getAsString();
+                String groupGUID = arguments.get(2).getAsString();
+                boolean silent = arguments.get(3).getAsBoolean();
+                boolean deleteAllWaypointsInGroup = arguments.get(4).getAsBoolean();
+                boolean deleteAllObjects = arguments.getLast().getAsBoolean();
+
                 boolean result;
 
-                if (!deleteAll) {
+                String fileName = JMWSServerIO.getGroupFilename(UUID.fromString(playerUUID.toString()), groupUniversalIdentifier);
+
+                if (deleteAllWaypointsInGroup) { JMWSServerIO.removeAllWaypointsFromGroup(player.getUuid(), groupGUID);}
+
+                if (!deleteAllObjects) {
                     result = CommonIO.deleteFile(fileName);
                 } else {
                     result = JMWSServerIO.deleteAllUserObjects(player.getUuid(), JMWSServerIO.FetchType.GROUP);

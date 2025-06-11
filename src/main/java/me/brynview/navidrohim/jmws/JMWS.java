@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws;
 import me.brynview.navidrohim.jmws.common.JMWSConstants;
 import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.server.JMWSServer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -20,7 +21,7 @@ import java.util.Optional;
 public class JMWS implements ModInitializer {
 
     public static final String MODID = "jmws";
-    public static final String VERSION = "1.1.3-1.21.5-RC";
+    public static final String VERSION = "1.1.3-1.21.5-beta.3";
     public static final Logger LOGGER = LogManager.getFormatterLogger(MODID);
 
     public static void info(Object message) {
@@ -48,15 +49,16 @@ public class JMWS implements ModInitializer {
                         SemanticVersion minAllowedVersion = SemanticVersion.parse(JMWSConstants.JourneyMapVersionString);
                         SemanticVersion betaVersion = SemanticVersion.parse(versionString);
 
-                        // JM version from jar
+                        // JM version from jar todo; FIX VERSION CHECKING, DOESNT FIND THE BETA VERSION STRING
                         int mcVersionMinor = betaVersion.getVersionComponent(1);
                         int mcVersionPatch = betaVersion.getVersionComponent(2);
-                        int jmVersionBetaPatch = betaVersion.getVersionComponent(6);
+                        int jmVersionBetaPatch = betaVersion.getVersionComponent(3); //temp
 
                         int minMcVersionMinor = minAllowedVersion.getVersionComponent(1);
                         int minMcVersionPatch = minAllowedVersion.getVersionComponent(2);
-                        int minMcVersionBeta = minAllowedVersion.getVersionComponent(6);
+                        int minMcVersionBeta = minAllowedVersion.getVersionComponent(3); //temp
 
+                        JMWS.info("patch jm; " + jmVersionBetaPatch + " us " + minMcVersionBeta);
                         if (!(mcVersionMinor >= minMcVersionMinor && mcVersionPatch == minMcVersionPatch && jmVersionBetaPatch >= minMcVersionBeta)) {
                             throw new RuntimeException("JourneyMap is installed (version %s) but it is the wrong version. Need %s or higher".formatted(versionString, JMWSConstants.JourneyMapVersionString)); // using translatable string because this could be a common error
                         }
