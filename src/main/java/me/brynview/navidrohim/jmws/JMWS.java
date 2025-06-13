@@ -17,6 +17,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JMWS implements ModInitializer {
 
@@ -38,7 +40,7 @@ public class JMWS implements ModInitializer {
         FabricLoader fabricLoader = FabricLoader.getInstance();
         boolean isJMLoaded = fabricLoader.isModLoaded("journeymap");
 
-        // Check if JourneyMap is installed, and what version
+        // Check if JourneyMap is installed, and what version (I hate this solution by the way, will change eventually(
         try {
             if (fabricLoader.getEnvironmentType() == EnvType.CLIENT) {
                 if (isJMLoaded) {
@@ -49,17 +51,22 @@ public class JMWS implements ModInitializer {
                         SemanticVersion minAllowedVersion = SemanticVersion.parse(JMWSConstants.JourneyMapVersionString);
                         SemanticVersion betaVersion = SemanticVersion.parse(versionString);
 
-                        // JM version from jar todo; FIX VERSION CHECKING, DOESNT FIND THE BETA VERSION STRING
                         int mcVersionMinor = betaVersion.getVersionComponent(1);
                         int mcVersionPatch = betaVersion.getVersionComponent(2);
-                        int jmVersionBetaPatch = betaVersion.getVersionComponent(3); //temp
 
                         int minMcVersionMinor = minAllowedVersion.getVersionComponent(1);
                         int minMcVersionPatch = minAllowedVersion.getVersionComponent(2);
-                        int minMcVersionBeta = minAllowedVersion.getVersionComponent(3); //temp
 
-                        JMWS.info("patch jm; " + jmVersionBetaPatch + " us " + minMcVersionBeta);
-                        if (!(mcVersionMinor >= minMcVersionMinor && mcVersionPatch == minMcVersionPatch && jmVersionBetaPatch >= minMcVersionBeta)) {
+                        Matcher regexBetaVersionPatternMinMatcher = Pattern.compile("beta\\.([0-9]+)").matcher(minAllowedVersion.toString());
+                        Matcher regexBetaVersionPatternJarMatcher = Pattern.compile("beta\\.([0-9]+)").matcher(betaVersion.toString());
+
+                        regexBetaVersionPatternMinMatcher.find();
+                        regexBetaVersionPatternJarMatcher.find();
+
+                        Integer jarVersionString = Integer.valueOf(regexBetaVersionPatternJarMatcher.group(1));
+                        Integer minVersionString = Integer.valueOf(regexBetaVersionPatternMinMatcher.group(1));
+
+                        if (!(mcVersionMinor >= minMcVersionMinor && mcVersionPatch == minMcVersionPatch && jarVersionString >= minVersionString)) {
                             throw new RuntimeException("JourneyMap is installed (version %s) but it is the wrong version. Need %s or higher".formatted(versionString, JMWSConstants.JourneyMapVersionString)); // using translatable string because this could be a common error
                         }
                         JMWS.LOGGER.info("Good to go. JMWS Version %s with JourneyMap Version %s on client-side.".formatted(JMWS.VERSION, versionString));
@@ -71,7 +78,7 @@ public class JMWS implements ModInitializer {
                 }
 
             }
-        } catch (NoSuchElementException | VersionParsingException exception) {
+        } catch (NoSuchElementException | VersionParsingException | IllegalStateException exception) {
             _handleMissingMod(exception);
         }
 
