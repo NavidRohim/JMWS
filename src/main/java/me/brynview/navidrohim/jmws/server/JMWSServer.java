@@ -41,6 +41,7 @@ public class JMWSServer implements DedicatedServerModInitializer {
         _createServerResources();
 
         SERVER_CONFIG = JMWSServerConfig.createAndLoad();
+
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             if (server.isDedicated()) {
                 ServerPlayNetworking.registerGlobalReceiver(JMWSActionPayload.ID, this::HandleWaypointAction);
