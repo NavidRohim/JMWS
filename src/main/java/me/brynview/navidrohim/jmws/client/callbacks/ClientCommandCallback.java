@@ -51,9 +51,9 @@ public interface ClientCommandCallback {
                         if (!isInSingleplayer()) {
                             JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(JsonStaticHelper.makeDeleteGroupRequestJson(
                                     IClientPluginJM.minecraftClientInstance.player.getUuid(),
-                                    null,
-                                    null,
-                                    true,
+                                    "",
+                                    "",
+                                    false,
                                     false,
                                     true
                             ));
