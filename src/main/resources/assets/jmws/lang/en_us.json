@@ -76,7 +76,7 @@
   "error.jmws.error_corrupted_waypoint": "One or more waypoints or groups are corrupted. Contact administration for details.",
   "error.jmws.jmws_not_installed": "Server does not have JMWS installed. JMWS will be disabled.",
 
-  "warning.jmws.server_disabled_jmws": "Server has JMWS, but JMWS has been disabled.",
+  "warning.jmws.server_disabled_jmws": "Server has JMWS, but has been disabled on server.",
   "warning.jmws.server_disabled_group": "Server has JMWS, but group syncing has been disabled.",
   "warning.jmws.server_disabled_waypoint": "Server has JMWS, but waypoint syncing has been disabled.",
   "warning.jmws.world_is_local": "Playing in single player. JMWS will be disabled for you and all clients.",
@@ -89,6 +89,6 @@
   "button.jmws.tooltip.enable_button": "Turn on / off waypoint syncing",
 
   "__comment__": "Subtitles for sounds",
-  "subtitle.jmws.waypoint_sync": "Waypoint sync",
-  "subtitle.jmws.generic_error": "Error"
+  "subtitle.jmws.waypoint_sync": "Syncing",
+  "subtitle.jmws.generic_error": "JMWS error"
 }

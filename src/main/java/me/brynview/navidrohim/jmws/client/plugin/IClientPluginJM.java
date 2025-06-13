@@ -13,6 +13,7 @@ import journeymap.api.v2.common.event.CommonEventRegistry;
 import journeymap.api.v2.common.event.FullscreenEventRegistry;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.event.common.WaypointGroupEvent;
+import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
@@ -113,9 +114,9 @@ public class IClientPluginJM implements IClientPlugin
         return groupIdentifierMap.get(newWaypointGroup.getCustomData());
     }
 
-    private void deleteAction(Waypoint waypoint, ClientPlayerEntity player, boolean silent) {
+    private void deleteAction(Waypoint waypoint, boolean silent) {
 
-        String waypointFilename = JMWSServerIO.getWaypointFilename(waypoint, player.getUuid());
+        String waypointFilename = JMWSServerIO.getWaypointFilename(waypoint, minecraftClientInstance.player.getUuid());
 
         waypointIdentifierMap.remove(waypoint.getCustomData());
         String jsonPacketData = JsonStaticHelper.makeDeleteRequestJson(waypointFilename, silent, false);
@@ -125,20 +126,20 @@ public class IClientPluginJM implements IClientPlugin
         ClientPlayNetworking.send(waypointActionPayload);
     }
 
-    private void updateAction(Waypoint waypoint, Waypoint oldWaypoint, ClientPlayerEntity player)
+    private void updateAction(Waypoint waypoint, Waypoint oldWaypoint)
     {
         if (oldWaypoint != null) {
-            this.deleteAction(oldWaypoint, player, true);
+            this.deleteAction(oldWaypoint, true);
             jmAPI.removeWaypoint("journeymap", oldWaypoint);
         }
-        this.createAction(waypoint, player, true, true);
+        this.createAction(waypoint, true, true);
 
         sendUserAlert(Text.translatable("message.jmws.modified_waypoint_success"), true, false, JMWSMessageType.SUCCESS);
     }
 
-    private void createAction(Waypoint waypoint, ClientPlayerEntity player, boolean silent, boolean isUpdate) {
+    private void createAction(Waypoint waypoint, boolean silent, boolean isUpdate) {
 
-        String waypointIdentifier = CommonHelper.makeWaypointHash(player.getUuid(), waypoint.getGuid(), waypoint.getName());
+        String waypointIdentifier = CommonHelper.makeWaypointHash(minecraftClientInstance.player.getUuid(), waypoint.getGuid(), waypoint.getName());
         waypointIdentifierMap.put(waypointIdentifier, waypoint);
 
         waypoint.setPersistent(false);
@@ -150,11 +151,6 @@ public class IClientPluginJM implements IClientPlugin
 
     void WaypointCreationHandler(WaypointEvent waypointEvent) {
         if (this.getEnabledStatus() && config.uploadWaypoints() && config.serverConfiguration.serverWaypointsEnabled()) {
-            ClientPlayerEntity player = minecraftClientInstance.player;
-
-            if (player == null) {
-                return;
-            }
 
             Waypoint oldWaypoint = this.getOldWaypoint(waypointEvent.waypoint);
 
@@ -162,13 +158,13 @@ public class IClientPluginJM implements IClientPlugin
 
                 case CREATE ->
                     // Sends "create" packet | new = "SERVER_CREATE"
-                        this.createAction(waypointEvent.waypoint, player, false, false);
+                        this.createAction(waypointEvent.waypoint, false, false);
                 case DELETED ->
                     // Sends "delete" packet | new = "COMMON_SERVER_DELETE"
-                        this.deleteAction(waypointEvent.waypoint, player, false);
+                        this.deleteAction(waypointEvent.waypoint, false);
                 case UPDATE ->
                     // Sends both "delete" and "create" packet in respective order and respective enums.
-                        this.updateAction(waypointEvent.waypoint, oldWaypoint, player);
+                        this.updateAction(waypointEvent.waypoint, oldWaypoint);
             }
         }
     }
@@ -185,6 +181,7 @@ public class IClientPluginJM implements IClientPlugin
         // JourneyMap Events
         CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", JMWS.MODID, this::WaypointCreationHandler);
         CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", JMWS.MODID, this::groupEventListener);
+        CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe("jmapi", JMWS.MODID, this::waypointDragHandler);
         FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(JMWS.MODID, this::addJMButtons);
 
         // Vanilla Events
@@ -212,6 +209,14 @@ public class IClientPluginJM implements IClientPlugin
             tickCounter = 0;
             serverHasMod = false;
         }));
+    }
+
+    private void waypointDragHandler(WaypointGroupTransferEvent waypointGroupTransferEvent) {
+        Waypoint subjectedChangeWp = waypointGroupTransferEvent.getWaypoint();
+        waypointGroupTransferEvent.getGroupTo().addWaypoint(subjectedChangeWp);
+
+        updateAction(subjectedChangeWp, subjectedChangeWp);
+
     }
 
     private void addJMButtons(FullscreenDisplayEvent.AddonButtonDisplayEvent addonButtonDisplayEvent) {
@@ -286,7 +291,13 @@ public class IClientPluginJM implements IClientPlugin
     private void groupDeletionHandler(WaypointGroup waypointGroup, ClientPlayerEntity player, boolean silent, boolean deleteAllWaypoints)
     {
         waypointIdentifierMap.remove(waypointGroup.getCustomData());
-        String jsonPacketData = JsonStaticHelper.makeDeleteGroupRequestJson(JMWSServerIO.getGroupFilename(player.getUuid(), waypointGroup.getCustomData()), silent, deleteAllWaypoints);
+        String jsonPacketData = JsonStaticHelper.makeDeleteGroupRequestJson(
+                player.getUuid(),
+                waypointGroup.getCustomData(),
+                waypointGroup.getGuid(),
+                silent,
+                deleteAllWaypoints,
+                false);
 
         JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
         ClientPlayNetworking.send(waypointActionPayload);
@@ -465,7 +476,7 @@ public class IClientPluginJM implements IClientPlugin
         // Test if any existing waypoints (persistent, usually death waypoints) have already been added to the server, if not, add them
         for (Waypoint existing : existingWaypoints) {
             if (!remoteWaypointPositions.contains(existing.getBlockPos()) && existing.isPersistent()) {
-                getInstance().createAction(existing, context.player(), true, false);
+                getInstance().createAction(existing, true, false);
                 hasLocalWaypoint = true;
             }
         }

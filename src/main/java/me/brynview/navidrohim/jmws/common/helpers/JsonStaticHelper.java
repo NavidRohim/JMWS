@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -30,9 +31,16 @@ public class JsonStaticHelper {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_WAYPOINT, List.of(waypointFilename, silent, all));
     }
 
-    public static String makeDeleteGroupRequestJson(String groupFilename, boolean silent, boolean all) {
-        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_GROUP, List.of(groupFilename, silent, all));
+    public static String makeDeleteGroupRequestJson(UUID playerUUID, @Nullable String groupUniversalIdentifier, @Nullable String groupGUID, boolean silent, boolean removeAllWaypointsInGroup, boolean deleteAllGroups) {
+        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_GROUP, List.of(
+                playerUUID,
+                groupUniversalIdentifier,
+                groupGUID,
+                silent,
+                removeAllWaypointsInGroup,
+                deleteAllGroups));
     }
+
     public static String makeWaypointSyncRequestJson(boolean sendAlert) {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, List.of(Map.of(), Map.of(), sendAlert));
     }

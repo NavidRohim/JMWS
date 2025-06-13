@@ -1,4 +1,5 @@
-# JourneyMap Server
+# JourneyMap Waypoint Syncing
+
 This mod allows you to save waypoints on JourneyMap between multiple devices via the players account UUID on the server.
 
 Why? This is a personal project. I made it because I played on a server I owned on multiple devices (I played on PC, and before I went to bed I played on steam deck) 
@@ -11,4 +12,4 @@ I have read basic legal things about using the JourneyMap API, but if I am viola
 
 ## How to use?
 
-Drop this mod into the the clients and servers mod folder. There is no extra setup. You will know it is working correctly if when you make a waypoint, a message is generated at the top of the toolbar stating "Created waypoint"
+Drop this mod into the client and servers mod folder. There is no extra setup.

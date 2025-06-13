@@ -49,7 +49,14 @@ public interface ClientCommandCallback {
                     .then(ClientCommandManager.literal("groups").executes(groupClearAllCtx -> {
 
                         if (!isInSingleplayer()) {
-                            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(JsonStaticHelper.makeDeleteGroupRequestJson("", false, true)); // * = all
+                            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(JsonStaticHelper.makeDeleteGroupRequestJson(
+                                    IClientPluginJM.minecraftClientInstance.player.getUuid(),
+                                    "",
+                                    "",
+                                    false,
+                                    false,
+                                    true
+                            ));
                             ClientPlayNetworking.send(deleteServerObjectPayload);
                             IClientPluginJM.updateWaypoints(false);
                             IClientPluginJM.removeAllGroups();

@@ -1,10 +1,15 @@
 package me.brynview.navidrohim.jmws.server.io;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import journeymap.api.v2.common.waypoint.Waypoint;
+import journeymap.api.v2.common.waypoint.WaypointFactory;
+import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.JMWS;
+import me.brynview.navidrohim.jmws.client.objects.SavedWaypoint;
 import me.brynview.navidrohim.jmws.common.io.CommonIO;
 import me.brynview.navidrohim.jmws.server.JMWSServer;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
 import java.io.FileWriter;
@@ -41,6 +46,22 @@ public class JMWSServerIO {
                 ".json";
     }
 
+    @Nullable
+    public static Boolean removeAllWaypointsFromGroup(UUID playerUUID, String groupID) {
+        List<String> objectList = getLocalWaypointsFromGroup(playerUUID, groupID);
+
+        if (objectList == null) {
+            return null;
+        }
+
+        List<Boolean> successArray = new ArrayList<>();
+
+        for (String objPath : objectList) {
+            successArray.add(CommonIO.deleteFile(objPath));
+        }
+        return successArray.isEmpty() || successArray.stream().allMatch(successArray.getFirst()::equals);
+    }
+
     public static String getGroupFilename(UUID playerUUID, String universalID) {
         return "./jmws/groups/" + universalID + "_" + playerUUID + "-group" + ".json";
     }
@@ -73,7 +94,6 @@ public class JMWSServerIO {
             return false;
         }
     }
-
     public static boolean createWaypoint(JsonObject jsonObject, UUID playerUUID) {
         JsonObject pos = jsonObject.getAsJsonObject().getAsJsonObject("pos");
         String waypointFilePath = JMWSServerIO._getWaypointFromRaw(new Vector3d(
@@ -144,6 +164,40 @@ public class JMWSServerIO {
             return List.of();
             }
         return waypointFileList;
+    }
+
+    public static List<String> getLocalWaypointsFromGroup(UUID playerUUID, String groupID) { // note; should switch to database for this shit
+        List<String> userWaypointFilepaths = getFileObjects(playerUUID, FetchType.WAYPOINT);
+        List<String> groupWaypoints = new ArrayList<>();
+
+        for (String waypointPath : userWaypointFilepaths) {
+            SavedWaypoint savedWaypoint = getWaypointFromFile(waypointPath, playerUUID);
+            if (savedWaypoint.getWaypointGroupId().equals(groupID)) {
+                groupWaypoints.add(waypointPath);
+            } else if (savedWaypoint == null) {
+                return null;
+            }
+        }
+        return groupWaypoints;
+    }
+
+    @Nullable
+    public static JsonObject getObjectDataFromDisk(String objPath) {
+        try {
+            return JsonParser.parseString(Files.readString(Path.of(objPath))).getAsJsonObject();
+        } catch (IOException ioException) {
+            JMWS.LOGGER.error("Error retrieving saved object data -> " + ioException);
+        }
+        return null;
+    }
+
+    @Nullable
+    private static SavedWaypoint getWaypointFromFile(String waypointPath, UUID playerUUID) {
+        JsonObject waypointLocalData = getObjectDataFromDisk(waypointPath);
+        if (waypointLocalData != null) {
+            return new SavedWaypoint(waypointLocalData, playerUUID);
+        }
+        return null;
     }
 }
 
