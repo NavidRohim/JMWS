@@ -181,7 +181,7 @@ public class IClientPluginJM implements IClientPlugin
         // JourneyMap Events
         CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", JMWS.MODID, this::WaypointCreationHandler);
         CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", JMWS.MODID, this::groupEventListener);
-        CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe("jmapi", JMWS.MODID, this::waypointDragHandler);
+        CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe("jmapi", JMWS.MODID, this::waypointDragHandler); // Not working with current JourneyMap beta.53, should be fixed with new JM version with no changes on my end
         FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(JMWS.MODID, this::addJMButtons);
 
         // Vanilla Events
@@ -211,7 +211,8 @@ public class IClientPluginJM implements IClientPlugin
         }));
     }
 
-    private void waypointDragHandler(WaypointGroupTransferEvent waypointGroupTransferEvent) {
+    // Not working in beta.53
+    private void  waypointDragHandler(WaypointGroupTransferEvent waypointGroupTransferEvent) {
         Waypoint subjectedChangeWp = waypointGroupTransferEvent.getWaypoint();
         waypointGroupTransferEvent.getGroupTo().addWaypoint(subjectedChangeWp);
 
