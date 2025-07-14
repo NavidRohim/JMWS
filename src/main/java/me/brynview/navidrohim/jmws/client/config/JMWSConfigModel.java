@@ -33,9 +33,9 @@ public class JMWSConfigModel {
 
     @Nest
     @Sync(Option.SyncMode.INFORM_SERVER)
-    public ServerConfiguration serverConfiguration = new ServerConfiguration();
+    public ClientSideServerConfiguration serverConfiguration = new ClientSideServerConfiguration();
 
-    public static class ServerConfiguration {
+    public static class ClientSideServerConfiguration {
         @RangeConstraint(min=0, max=2000000)
         public int serverPacketLimit = 2000000;
 

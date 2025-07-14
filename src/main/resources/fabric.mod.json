@@ -36,6 +36,6 @@
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
     "minecraft": "${minecraft_version}",
-    "owo": ">=0.12.15.4+1.21"
+    "owo": ">=0.12.21+1.21.6"
   }
 }
