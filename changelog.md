@@ -11,7 +11,7 @@
 - Groups deleted with waypoints inside would not be moved to the Default group until next sync.
 - Fixed version checking (would allow any JourneyMap jar)
 
-## Persistent bugs (1.1.3-1.21.7 only)
+## Persistent bugs (1.1.3-1.21.7+ only with newer versions of journeymap)
 
 - Dragging and dropping waypoints does not work yet again, not my fault will be fixed with new JourneyMap version (use JM beta.54 or newer if avalible)
 
