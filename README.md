@@ -1,15 +1,8 @@
-# JourneyMap Waypoint Syncing
+This branch has been left because I couldnt continue work on it.
 
-This mod allows you to save waypoints on JourneyMap between multiple devices via the players account UUID on the server.
+There were APIs present in version 2.0 of JourneyMap API that I need for this mod to work, namely;
 
-Why? This is a personal project. I made it because I played on a server I owned on multiple devices (I played on PC, and before I went to bed I played on steam deck) 
-But, I could never find a mod that synced JourneyMap waypoints between devices (If you know / find one, please do let me know)
+- `Waypoint.toString()` does not return a Json formatable string (look at JsonStaticHelpers class file at line 49)
+- `Waypoint.fromWaypointJsonString()` and `Group.fromGroupJsonString()` do not exist in this version.
 
-This is also my first ever Java project, and publicly released programming project, so it is very likely there are bad practices. 
-View the source code and give me feedback. There are also no guarentees I will maintain this codebase as at heart, this is still a personal project and I will do with it as I please as long as it functions how I want it to.
-
-I have read basic legal things about using the JourneyMap API, but if I am violating any sort of licencing. Please let me know
-
-## How to use?
-
-Drop this mod into the client and servers mod folder. There is no extra setup.
+There were many other issues as well, but they were fixable. Those two reasons above is why I stopped with the backport.
