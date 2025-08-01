@@ -1,11 +1,7 @@
 package me.brynview.navidrohim.jmws;
 import me.brynview.navidrohim.jmws.common.JMWSConstants;
-import me.brynview.navidrohim.jmws.common.payloads.HandshakePayload;
-import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.server.JMWSServer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 
@@ -37,10 +33,14 @@ public class JMWS implements ModInitializer {
 
     @Override
     public void onInitialize() {
+
         FabricLoader fabricLoader = FabricLoader.getInstance();
         boolean isJMLoaded = fabricLoader.isModLoaded("journeymap");
 
+        // Need to fix version checking
+
         // Check if JourneyMap is installed, and what version (I hate this solution by the way, will change eventually(
+        /*
         try {
             if (fabricLoader.getEnvironmentType() == EnvType.CLIENT) {
                 if (isJMLoaded) {
@@ -80,14 +80,14 @@ public class JMWS implements ModInitializer {
             }
         } catch (NoSuchElementException | VersionParsingException | IllegalStateException exception) {
             _handleMissingMod(exception);
-        }
+        }*/
 
         // Packet registering (client)
-        PayloadTypeRegistry.playC2S().register(JMWSActionPayload.ID, JMWSActionPayload.CODEC);
-        PayloadTypeRegistry.playC2S().register(HandshakePayload.ID, HandshakePayload.CODEC);
+        //PayloadTypeRegistry.playC2S().register(JMWSActionPayload.ID, JMWSActionPayload.CODEC);
+        //PayloadTypeRegistry.playC2S().register(HandshakePayload.ID, HandshakePayload.CODEC);
 
         // Packet registering (server)
-        PayloadTypeRegistry.playS2C().register(JMWSActionPayload.ID, JMWSActionPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(HandshakePayload.ID, HandshakePayload.CODEC);
+        //PayloadTypeRegistry.playS2C().register(JMWSActionPayload.ID, JMWSActionPayload.CODEC);
+        //PayloadTypeRegistry.playS2C().register(HandshakePayload.ID, HandshakePayload.CODEC);
     }
 }

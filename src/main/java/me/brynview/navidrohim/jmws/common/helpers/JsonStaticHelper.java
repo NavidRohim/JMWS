@@ -3,8 +3,8 @@ package me.brynview.navidrohim.jmws.common.helpers;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import journeymap.api.v2.common.waypoint.Waypoint;
-import journeymap.api.v2.common.waypoint.WaypointGroup;
+import journeymap.client.api.display.Waypoint;
+import journeymap.client.api.display.WaypointGroup;
 import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,12 +45,8 @@ public class JsonStaticHelper {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, List.of(Map.of(), Map.of(), sendAlert));
     }
 
-    public static String makeCreationRequestJson(Waypoint waypoint, boolean silent, boolean isUpdate) {
+    public static String makeCreationRequestJson(journeymap.client.api.display.Waypoint waypoint, boolean silent, boolean isUpdate) {
         return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SERVER_CREATE, List.of(waypoint.toString(), silent, isUpdate));
-    }
-
-    public static String makeGroupCreationRequestJson(WaypointGroup waypointGroup, boolean silent, boolean isUpdate) {
-        return JsonStaticHelper.makeBaseJsonRequest(WaypointPayloadCommand.SERVER_CREATE_GROUP, List.of(waypointGroup.toString(), silent, isUpdate));
     }
 
     public static String makeSyncRequestResponseJson(HashMap<String, String> jsonArray, HashMap<String, String> jsonGroupArray, boolean sendAlert) {

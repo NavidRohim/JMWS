@@ -2,9 +2,8 @@ package me.brynview.navidrohim.jmws.server.io;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import journeymap.api.v2.common.waypoint.Waypoint;
-import journeymap.api.v2.common.waypoint.WaypointFactory;
-import journeymap.api.v2.common.waypoint.WaypointGroup;
+
+import journeymap.client.api.display.Waypoint;
 import me.brynview.navidrohim.jmws.JMWS;
 import me.brynview.navidrohim.jmws.client.objects.SavedWaypoint;
 import me.brynview.navidrohim.jmws.common.io.CommonIO;
@@ -28,7 +27,7 @@ public class JMWSServerIO {
     }
 
     public static String getWaypointFilename(Waypoint waypoint, UUID uuID) {
-        Vector3d waypointLocationVector = new Vector3d(waypoint.getX(), waypoint.getY(), waypoint.getZ());
+        Vector3d waypointLocationVector = new Vector3d(waypoint.getPosition().getX(), waypoint.getPosition().getY(), waypoint.getPosition().getZ());
         return _getWaypointFromRaw(waypointLocationVector, waypoint.getName(), uuID);
     }
 

@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.common.payloads;
 
+/*
 import me.brynview.navidrohim.jmws.JMWS;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
@@ -20,4 +21,4 @@ public record HandshakePayload() implements CustomPayload {
     }
 }
 
-
+*/

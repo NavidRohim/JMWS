@@ -1,5 +1,5 @@
 package me.brynview.navidrohim.jmws.common.payloads;
-
+/*
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.brynview.navidrohim.jmws.JMWS;
@@ -28,8 +28,7 @@ public record JMWSActionPayload(String jsonAction) implements CustomPayload {
     }
 
     @Override
-    public Id<? extends CustomPayload> getId() {
-        return ID;
+    public Id<? extends CustomPayload> getId() {return ID;
     }
 
     public JsonObject getJsonObject() {
@@ -44,3 +43,4 @@ public record JMWSActionPayload(String jsonAction) implements CustomPayload {
         return this.getJsonObject().asMap().get("arguments").getAsJsonArray().asList();
     }
 }
+*/

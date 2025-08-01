@@ -43,7 +43,6 @@ public class SavedWaypoint extends SavedObject {
     Boolean showDeviation;
 
     // Icon information
-    Identifier resourceLocation;
     Float opacity;
     Integer textureWidth;
     Integer textureHeight;
@@ -87,7 +86,7 @@ public class SavedWaypoint extends SavedObject {
         this.showDeviation = userSettings.get("showDeviation").getAsBoolean();
 
         // Icon information
-        this.resourceLocation = Identifier.of(iconSettings.get("resourceLocation").getAsString());
+        //this.resourceLocation = Identifier.of(iconSettings.get("resourceLocation").getAsString());
         this.opacity = iconSettings.get("opacity").getAsFloat();
         this.textureWidth = iconSettings.get("textureWidth").getAsInt();
         this.textureHeight = iconSettings.get("textureHeight").getAsInt();
@@ -130,7 +129,6 @@ public class SavedWaypoint extends SavedObject {
     public Boolean getWaypointDeviation() { return this.showDeviation; }
 
     // Icon information
-    public Identifier getWaypointResourceString() { return this.resourceLocation; }
     public Float getWaypointOpacity() { return this.opacity; }
     public Integer getWaypointTextureWidth() { return this.textureWidth; }
     public Integer getWaypointTextureHeight() { return this.textureHeight; }

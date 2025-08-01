@@ -2,9 +2,9 @@ package me.brynview.navidrohim.jmws.client.enums;
 
 public enum JMWSMessageType {
     FAILURE("§C"),
-    SUCCESS("§2"),
-    WARNING("§e"),
-    NEUTRAL("");
+    SUCCESS("§C"),
+    WARNING("§C"),
+    NEUTRAL("§C");
 
     private final String text;
 
