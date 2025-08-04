@@ -1,0 +1,64 @@
+plugins {
+    id 'multiloader-loader'
+    id 'fabric-loom' version '1.11-SNAPSHOT'
+}
+
+repositories {
+    maven {
+        name = "New JourneyMap Maven"
+        url = 'https://maven.blamejared.com'
+    }
+    maven { url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" }
+    maven { url = 'https://maven.wispforest.io/releases/' }
+    maven {
+        url = "https://jm.gserv.me/repository/maven-public/"
+    }
+}
+
+dependencies {
+    runtimeOnly 'net.fabricmc.unpick:unpick-format-utils:3.0.0-beta.5'
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
+    }
+
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+
+    modImplementation "io.wispforest:owo-lib:${project.owo_version}"
+    // only if you plan to use owo-config
+    annotationProcessor "io.wispforest:owo-lib:${project.owo_version}"
+
+    // include this if you don't want force your users to install owo
+    // sentinel will warn them and give the option to download it automatically
+    include "io.wispforest:owo-sentinel:${project.owo_version}"
+
+    // JourneyMap
+    modImplementation 'mysticdrew:common-networking-fabric:1.0.21-1.21.7'
+    modCompileOnlyApi group: 'info.journeymap', name: 'journeymap-api-common', version: project.journeymap_api_version, changing: true
+}
+
+loom {
+    def aw = project(':common').file("src/main/resources/${mod_id}.accesswidener")
+    if (aw.exists()) {
+        accessWidenerPath.set(aw)
+    }
+    mixin {
+        defaultRefmapName.set("${mod_id}.refmap.json")
+    }
+    runs {
+        client {
+            client()
+            setConfigName('Fabric Client')
+            ideConfigGenerated(true)
+            runDir('runs/client')
+        }
+        server {
+            server()
+            setConfigName('Fabric Server')
+            ideConfigGenerated(true)
+            runDir('runs/server')
+        }
+    }
+}

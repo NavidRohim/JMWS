@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "${description}",
+  "authors": [
+    "${mod_author}",
+    "Kay (Somali translations)",
+    "Dempy (Polish translations)"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/journeymap-waypoint-syncing",
+    "sources": "https://github.com/NavidRohim/JMServer",
+    "issues": "https://github.com/NavidRohim/JMServer/issues",
+    "discord": "https://discord.gg/WNXRSaEbPe"
+  },
+  "license": "${license}",
+  "icon": "jmws.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "me.brynview.navidrohim.jmws.client.JMWSClient"
+    ],
+    "main": [
+      "me.brynview.navidrohim.jmws.Jmws"
+    ],
+    "server": [
+      "me.brynview.navidrohim.jmws.server.JMWSServer"
+    ],
+    "journeymap": [
+      "me.brynview.navidrohim.jmws.plugin.JMWSPlugin"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}",
+    "java": ">=${java_version}",
+    "owo": ">=0.12.21+1.21.6"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}

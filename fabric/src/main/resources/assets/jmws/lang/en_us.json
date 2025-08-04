@@ -1,0 +1,94 @@
+{
+  "__comment__": "Waypoint language strings",
+  "message.jmws.deletion_success": "Deleted waypoint(s)",
+  "message.jmws.deletion_failure": "Could not delete waypoint(s) on the server",
+  "message.jmws.deletion_all_success": "Deleted all waypoints server-side",
+  "message.jmws.creation_success": "Created waypoint",
+  "message.jmws.creation_failure": "Could not create waypoint on the server.\nIt is recommended to delete the waypoint and try again.",
+  "message.jmws.modified_waypoint_success": "Synced updated waypoint",
+  "message.jmws.local_waypoint_upload": "Added local waypoint(s) to server.",
+  "message.jmws.synced_success": "Synced waypoints",
+  "message.jmws.server_disabled_waypoints": "Server has waypoint syncing disabled.",
+
+  "__comment__": "Group language strings",
+  "message.jmws.creation_group_success": "Created group",
+  "message.jmws.creation_group_failure": "Could not create group on the server.\nIt is recommended to delete the group and try again.",
+  "message.jmws.deletion_group_success": "Deleted group(s)",
+  "message.jmws.deletion_group_failure": "Could not delete group(s) on the server",
+  "message.jmws.modified_group_success": "Synced updated group",
+  "message.jmws.synced_group_success": "Synced groups",
+  "message.jmws.local_group_upload": "Added local group(s) to the server.",
+  "message.jmws.server_disabled_groups": "Server has group syncing disabled.",
+
+  "__comment__": "Common language strings",
+  "message.jmws.local_both_upload": "Added local waypoint(s) and group(s) to the server.",
+  "message.jmws.synced_both_success": "Synced waypoints and groups",
+  "message.jmws.sync_frequency": "JMWS syncs every %s second(s)",
+  "message.jmws.next_sync": "Next sync in %s second(s)",
+  "message.jmws.has_jmws": "Server has JMWS!",
+  "message.jmws.world_is_local": "Playing in single player. JMWS will be disabled for you and all clients.",
+
+  "__comment__": "Config language strings",
+  "text.config.jmws-config.title": "JourneyMap Waypoint Syncing (JMWS)",
+
+  "text.config.jmws-config.option.showAlerts.tooltip": "If waypoint creation, deletion or other alerts are shown",
+  "text.config.jmws-config.option.playEffects.tooltip": "If sound effects (usually from alerts) will play.",
+  "text.config.jmws-config.option.colouredText.tooltip": "If text will be coloured (e.g. successful action, failure)",
+  "text.config.jmws-config.option.enabled.tooltip": "If JMWS is enabled",
+  "text.config.jmws-config.option.uploadWaypoints.tooltip": "Enables / disables waypoint syncing",
+  "text.config.jmws-config.option.uploadGroups.tooltip": "Enables / disables group syncing",
+
+  "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency.tooltip": "Frequency of when waypoints are grabbed from the server (in ticks)",
+  "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout.tooltip": "How long until the mod determines that the server doesn't have JMWS installed",
+
+  "text.config.jmws-config.option.serverConfiguration.serverPacketLimit.tooltip": "How large a sync packet can be. Only editable by server.",
+  "text.config.jmws-config.option.serverConfiguration.serverEnabled.tooltip": "If server has JMWS enabled.",
+  "text.config.jmws-config.option.serverConfiguration.serverWaypointsEnabled.tooltip": "If server has waypoint syncing enabled.",
+  "text.config.jmws-config.option.serverConfiguration.serverGroupsEnabled.tooltip": "if server has group syncing enabled.",
+
+  "text.config.jmws-config.option.showAlerts": "Show alerts?",
+  "text.config.jmws-config.option.playEffects": "Sound alerts?",
+  "text.config.jmws-config.option.colouredText": "Coloured text?",
+  "text.config.jmws-config.option.enabled": "Waypoint Syncing Enabled",
+  "text.config.jmws-config.option.uploadWaypoints": "Sync waypoints?",
+  "text.config.jmws-config.option.uploadGroups": "Sync waypoint groups?",
+
+  "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency": "Waypoint update frequency",
+  "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout": "Server Handshake Timeout",
+
+  "text.config.jmws-config.option.serverConfiguration.serverPacketLimit": "Server packet size (Bytes)",
+  "text.config.jmws-config.option.serverConfiguration.serverEnabled": "JMWS Enabled on server?",
+  "text.config.jmws-config.option.serverConfiguration.serverWaypointsEnabled": "Waypoint syncing on server?",
+  "text.config.jmws-config.option.serverConfiguration.serverGroupsEnabled": "Group syncing on server?",
+
+  "text.config.jmws-config.category.clientConfiguration": "Client Settings",
+  "text.config.jmws-config.category.serverConfiguration": "Server Settings (Non-editable)",
+
+  "__comment__": "Section Header language strings",
+
+  "text.config.jmws-config.section.upload": "Sync",
+  "text.config.jmws-config.section.personalisation": "Personalisation",
+  "text.config.jmws-config.section.generalConfig": "Technical",
+
+  "__comment__": "Error / Warning language strings",
+
+  "error.jmws.error_packet_size": "You have too many waypoints and groups. Please delete some to continue making waypoints and syncing.",
+  "error.jmws.error_corrupted_waypoint": "One or more waypoints or groups are corrupted. Contact administration for details.",
+  "error.jmws.jmws_not_installed": "Server does not have JMWS installed. JMWS will be disabled.",
+
+  "warning.jmws.server_disabled_jmws": "Server has JMWS, but has been disabled on server.",
+  "warning.jmws.server_disabled_group": "Server has JMWS, but group syncing has been disabled.",
+  "warning.jmws.server_disabled_waypoint": "Server has JMWS, but waypoint syncing has been disabled.",
+  "warning.jmws.world_is_local": "Playing in single player. JMWS will be disabled for you and all clients.",
+  "warning.jmws.world_is_local_no_commands": "Playing in single player. Some commands will not work.",
+
+  "__comment__": "JourneyMap Buttons",
+  "button.jmws.update_button": "Sync waypoints",
+  "button.jmws.tooltip.update_button": "Synchronizes waypoints from the server",
+  "button.jmws.enable_button": "On / Off JMWS",
+  "button.jmws.tooltip.enable_button": "Turn on / off waypoint syncing",
+
+  "__comment__": "Subtitles for sounds",
+  "subtitle.jmws.waypoint_sync": "Syncing",
+  "subtitle.jmws.generic_error": "JMWS error"
+}

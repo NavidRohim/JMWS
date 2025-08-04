@@ -1,0 +1,35 @@
+plugins {
+    // see https://fabricmc.net/develop/ for new versions
+    id 'fabric-loom' version '1.11-SNAPSHOT' apply false
+    // see https://projects.neoforged.net/neoforged/moddevgradle for new versions
+    id 'net.neoforged.moddev' version '2.0.105' apply false
+}
+
+repositories {
+    maven {
+        name = 'Fabric'
+        url = uri('https://maven.fabricmc.net')
+    }
+    maven {
+        name = "JourneyMap (Public)"
+        url = "https://jm.gserv.me/repository/maven-public/"
+    }
+    // New maven repo our API. Please switch to this maven.
+    // We will continue to upload to jm.gserve.me, but that maven goes down more than we'd like.
+    maven {
+        name = "New JourneyMap Maven"
+        url = 'https://maven.blamejared.com'
+    }
+    // Optional cursemaven
+    maven {
+        name = "Curse Maven"
+        url "https://www.cursemaven.com"
+    }
+    // Optional Modrinth Maven
+    maven {
+        name = "Modrinth Maven"
+        url = "https://api.modrinth.com/maven"
+    }
+
+
+}

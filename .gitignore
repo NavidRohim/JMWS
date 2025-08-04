@@ -1,0 +1,8 @@
+run
+runs
+build
+buildSrc
+.idea/
+.gradle/
+
+*.lock
