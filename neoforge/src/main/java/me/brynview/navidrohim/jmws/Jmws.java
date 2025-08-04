@@ -1,8 +1,11 @@
 package me.brynview.navidrohim.jmws;
 
 
+import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(Constants.MODID)
 public class Jmws {
@@ -13,6 +16,7 @@ public class Jmws {
         // project.
 
         // Use NeoForge to bootstrap the Common mod.
+
         Constants.LOGGER.info("Hello NeoForge world!");
         CommonClass.init();
     }

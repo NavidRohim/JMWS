@@ -1,8 +1,8 @@
 package me.brynview.navidrohim.jmws.platform;
 
+import me.brynview.navidrohim.jmws.client.JMWSClient;
 import me.brynview.navidrohim.jmws.platform.services.IPlatformHelper;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.server.level.ServerPlayer;
 
 public class FabricPlatformHelper implements IPlatformHelper {
 
@@ -24,4 +24,24 @@ public class FabricPlatformHelper implements IPlatformHelper {
     @Override
     public String side() {return FabricLoader.getInstance().getEnvironmentType().toString();}
 
+    @Override
+    public int getSyncInTicks() {
+        return JMWSClient.tickCounterUpdateThreshold;
+    }
+
+    @Override
+    public int timeUntilNextSyncInTicks() {
+        return JMWSClient.tickCounter;
+    }
+
+    @Override
+    public boolean serverHasMod() {
+        return JMWSClient.serverHasMod;
+    }
+
+    @Override
+    public void setServerModStatus(boolean serverModStatus)
+    {
+        JMWSClient.setServerModStatus(serverModStatus);
+    }
 }

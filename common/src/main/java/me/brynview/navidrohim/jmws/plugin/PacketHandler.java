@@ -6,11 +6,15 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helpers.JMWSSounds;
 import me.brynview.navidrohim.jmws.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.platform.Services;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.network.chat.Component;
 
 import java.util.Objects;
+
+import static me.brynview.navidrohim.jmws.helper.PlayerHelper.sendUserAlert;
 
 public class PacketHandler {
     public static void handlePacket(PacketContext<JMWSActionPayload> Context) {
@@ -36,7 +40,7 @@ public class PacketHandler {
 
                 // was display_interval
                 // No outbound data
-                case COMMON_DISPLAY_INTERVAL -> PlayerHelper.sendUserAlert(Component.translatable("message.jmws.sync_frequency", CommonClass.getSyncFrequency()), true, false, JMWSMessageType.NEUTRAL);
+                case COMMON_DISPLAY_INTERVAL -> sendUserAlert(Component.translatable("message.jmws.sync_frequency", CommonClass.getSyncFrequency()), true, false, JMWSMessageType.NEUTRAL);
 
                 // was "alert"
                 // No outbound data
@@ -50,7 +54,7 @@ public class PacketHandler {
                         PlayerHelper.sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
                     }
 
-                    PlayerHelper.sendUserAlert(Component.translatable(firstArgument), waypointPayload.arguments().get(1).getAsBoolean(), false, messageType);
+                    sendUserAlert(Component.translatable(firstArgument), waypointPayload.arguments().get(1).getAsBoolean(), false, messageType);
                 }
 
                 // was "deleteWaypoint"
@@ -67,10 +71,28 @@ public class PacketHandler {
 
                 // was "display_next_update"
                 // No outbound data
-                case COMMON_DISPLAY_NEXT_UPDATE -> PlayerHelper.sendUserAlert(Component.translatable("message.jmws.next_sync", (CommonClass.timeUntilNextSync())), true, false, JMWSMessageType.NEUTRAL);
+                case COMMON_DISPLAY_NEXT_UPDATE -> sendUserAlert(Component.translatable("message.jmws.next_sync", (CommonClass.timeUntilNextSync())), true, false, JMWSMessageType.NEUTRAL);
 
                 default -> Constants.LOGGER.warn("Unknown packet command -> " + waypointPayload.command());
             }
         }
+    }
+
+    public static void HandshakeHandler(JMWSHandshakePayload handshakePayload) {
+
+        // !false > was !getInstance().serverEnabledJMWS()
+        // !false > (!getInstance().config.serverConfiguration.serverWaypointsEnabled())
+        // !false > (!getInstance().config.serverConfiguration.serverGroupsEnabled())
+        if (false == true) {
+            sendUserAlert(Component.translatable("warning.jmws.server_disabled_jmws"), true, false, JMWSMessageType.WARNING);
+        } else if (false == true) {
+            sendUserAlert(Component.translatable("warning.jmws.server_disabled_waypoint"), true, false, JMWSMessageType.WARNING);
+        } else if (false == true) {
+            sendUserAlert(Component.translatable("warning.jmws.server_disabled_group"), true, false, JMWSMessageType.WARNING);
+        } else {
+            sendUserAlert(Component.translatable("message.jmws.has_jmws"), true, false, JMWSMessageType.SUCCESS);
+        }
+
+        Services.PLATFORM.setServerModStatus(true);
     }
 }

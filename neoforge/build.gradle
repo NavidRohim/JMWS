@@ -41,6 +41,6 @@ repositories {
 }
 dependencies {
     compileOnly group: 'info.journeymap', name: 'journeymap-api-neoforge', version: project.journeymap_api_version, changing: true
-    implementation 'mysticdrew:common-networking-forge:1.0.21-1.21.7'
+    implementation 'mysticdrew:common-networking-neoforge:1.0.21-1.21.7'
 }
 sourceSets.main.resources { srcDir 'src/generated/resources' }

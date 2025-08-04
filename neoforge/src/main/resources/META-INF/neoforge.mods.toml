@@ -19,7 +19,7 @@ config = "${mod_id}.neoforge.mixins.json"
 [[dependencies."${mod_id}"]] #optional
 modId = "neoforge" #mandatory
 type = "required" #mandatory Can be one of "required", "optional", "incompatible" or "discouraged"
-versionRange = "[${neoforge_version},)" #mandatory
+versionRange = "[${neoforge_version},)" #mandatoryWDwad
 ordering = "NONE" # The order that this dependency should load in relation to your mod, required to be either 'BEFORE' or 'AFTER' if the dependency is not mandatory
 side = "BOTH" # Side this dependency is applied on - 'BOTH', 'CLIENT' or 'SERVER'
 [[dependencies."${mod_id}"]]
@@ -30,7 +30,7 @@ ordering = "NONE"
 side = "BOTH"
 [[dependencies."${mod_id}"]]
 modId = "journeymap"
-type = "required"
+type = "optional"
 versionRange = "[1.21.7-6.0.0-beta.52,)"
 ordering = "NONE"
 side = "CLIENT"

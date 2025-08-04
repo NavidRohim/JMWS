@@ -28,6 +28,6 @@ side = "BOTH"
 [[dependencies."${mod_id}"]]
 modId = "journeymap"
 mandatory = true
-versionRange = "[1.21.8-6.0.0-beta.53,)"
+versionRange = "[1.21.7-6.0.0-beta.53,)"
 ordering = "BEFORE"
 side = "CLIENT"

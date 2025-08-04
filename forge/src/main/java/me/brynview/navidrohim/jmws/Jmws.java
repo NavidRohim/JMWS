@@ -11,8 +11,8 @@ public class Jmws {
         // project.
 
         // Use Forge to bootstrap the Common mod.
-        //Constants.LOGGER.info("Hello Forge world!");
-        //CommonClass.init();
+        Constants.LOGGER.info("Hello Forge world!");
+        CommonClass.init();
 
     }
 }
