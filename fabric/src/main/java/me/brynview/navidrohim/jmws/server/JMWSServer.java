@@ -1,17 +1,15 @@
 package me.brynview.navidrohim.jmws.server;
 
-import me.brynview.navidrohim.jmws.server.config.JMWSServerConfig;
+import me.brynview.navidrohim.jmws.Constants;
 import net.fabricmc.api.DedicatedServerModInitializer;
 
-import java.io.File;
-
-
-
 public class JMWSServer implements DedicatedServerModInitializer {
-    public static JMWSServerConfig SERVER_CONFIG;
 
     @Override
-    public void onInitializeServer() {
-        SERVER_CONFIG = JMWSServerConfig.createAndLoad();
+    public void onInitializeServer()
+    {
+        // im so lonelyyyyy i got nobodyyyyy
+        Constants.getLogger().info("Initialised server on JMWS");
     }
+
 }

@@ -1,0 +1,15 @@
+{
+  "waypoint_sync": {
+    "subtitle": "subtitle.jmws.waypoint_sync",
+    "sounds": [
+      "jmws:waypoint_sync"
+    ]
+  },
+  "generic_error": {
+    "subtitle": "subtitle.jmws.generic_error",
+    "sounds": [
+      "jmws:generic_error"
+    ]
+  }
+}
+

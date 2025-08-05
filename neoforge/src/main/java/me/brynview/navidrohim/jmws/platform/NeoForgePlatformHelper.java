@@ -47,4 +47,9 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     public void setServerModStatus(boolean serverModStatus) {
 
     }
+
+    @Override
+    public void resetSyncThreshold() {
+
+    }
 }

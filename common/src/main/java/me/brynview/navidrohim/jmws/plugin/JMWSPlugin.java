@@ -5,10 +5,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import commonnetwork.api.Dispatcher;
-import commonnetwork.api.Network;
 import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.client.IClientPlugin;
 import journeymap.api.v2.client.JourneyMapPlugin;
+import journeymap.api.v2.client.event.RegistryEvent;
+import journeymap.api.v2.common.event.ClientEventRegistry;
 import journeymap.api.v2.common.event.CommonEventRegistry;
 import journeymap.api.v2.common.event.FullscreenEventRegistry;
 import journeymap.api.v2.common.event.common.WaypointEvent;
@@ -25,8 +26,9 @@ import me.brynview.navidrohim.jmws.client.objects.SavedGroup;
 import me.brynview.navidrohim.jmws.client.objects.SavedWaypoint;
 import me.brynview.navidrohim.jmws.helper.CommandHelper;
 import me.brynview.navidrohim.jmws.helper.PlayerHelper;
-import me.brynview.navidrohim.jmws.io.CommonIO;
+import me.brynview.navidrohim.jmws.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.platform.Services;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -34,6 +36,8 @@ import net.minecraft.network.chat.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static me.brynview.navidrohim.jmws.CommonClass.config;
 
 @JourneyMapPlugin(apiVersion = "2.0.0")
 public class JMWSPlugin implements IClientPlugin {
@@ -43,14 +47,13 @@ public class JMWSPlugin implements IClientPlugin {
     // JourneyMap API
     private IClientAPI jmAPI = null;
     private static JMWSPlugin INSTANCE;
-
-    // Config
-    // tbd
+    //private static final ConfigInterface config = CommonClass.config;
 
     // Required functions
 
     @Override
-    public void initialize(IClientAPI jmClientApi) {
+    public void initialize(IClientAPI jmClientApi)
+    {
 
         this.jmAPI = jmClientApi;
 
@@ -58,7 +61,8 @@ public class JMWSPlugin implements IClientPlugin {
         CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", Constants.MODID, this::groupEventListener);
         CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe("jmapi", Constants.MODID, this::waypointDragHandler); // Not working with current JourneyMap beta.53, should be fixed with new JM version with no changes on my end
         FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(Constants.MODID, JMButtonAddon::addJMButtons);
-
+        ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe("jmapi", (RegistryEvent.OptionsRegistryEvent optionsRegistryEvent) -> {
+            config = new ConfigInterface();});
     }
 
     @Override
@@ -99,7 +103,7 @@ public class JMWSPlugin implements IClientPlugin {
 
     private void deleteAction(Waypoint waypoint, boolean silent) {
 
-        String waypointFilename = CommonIO.getWaypointFilename(waypoint, CommonClass.minecraftClientInstance.player.getUUID());
+        String waypointFilename = CommonHelper.getWaypointFilename(waypoint, CommonClass.minecraftClientInstance.player.getUUID());
 
         ObjectIdentifierMap.removeWaypointFromMap(waypoint);
         String jsonPacketData = CommandHelper.makeDeleteRequestJson(waypointFilename, silent, false);
@@ -129,8 +133,7 @@ public class JMWSPlugin implements IClientPlugin {
 
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
     {
-        // true was (this.getEnabledStatus() && config.serverConfiguration.serverGroupsEnabled() && config.uploadGroups() && !JMWSConstants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid()))
-        if (true) {
+        if (CommonClass.getEnabledStatus() && config.uploadGroups.get() && !Constants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) {
             LocalPlayer player = CommonClass.minecraftClientInstance.player;
             WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
 
@@ -215,8 +218,7 @@ public class JMWSPlugin implements IClientPlugin {
     public static void updateWaypoints(boolean sendAlert) { // Might use delay some day
 
         // Sends "request" packet | New = "SYNC"
-        // true was getInstance().getEnabledStatus()
-        if (true) {
+        if (CommonClass.getEnabledStatus()) {
             Dispatcher.sendToServer(new JMWSActionPayload(CommandHelper.makeWaypointSyncRequestJson(sendAlert)));
         }
     }
@@ -329,13 +331,11 @@ public class JMWSPlugin implements IClientPlugin {
         boolean sendAlert = waypointPayload.arguments().getLast().getAsBoolean();
 
         try {
-            // true was config.uploadGroups() && config.serverConfiguration.serverGroupsEnabled()
-            if (true) {
+            if (config.uploadGroups.get()) {
                 hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), player);
             }
 
-            // true was config.uploadWaypoints() && config.serverConfiguration.serverWaypointsEnabled()
-            if (true) {
+            if (config.uploadGroups.get()) {
                 hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), player);
             }
 
@@ -351,20 +351,28 @@ public class JMWSPlugin implements IClientPlugin {
             } else if (sendAlert) {
                 String updateMessageKey = "message.jmws.synced_success";
 
-                // true was config.uploadWaypoints() && config.uploadGroups()
-                if (true) {
+                if (config.uploadGroups.get() && config.uploadGroups.get()) {
                     updateMessageKey = "message.jmws.synced_both_success";
-                } else if (true) {
-                    // true was config.uploadGroups()
+                } else if (config.uploadGroups.get()) {
                     updateMessageKey = "message.jmws.synced_group_success";
                 }
                 PlayerHelper.sendUserAlert(Component.translatable(updateMessageKey), true, false, JMWSMessageType.NEUTRAL);
             }
+
             PlayerHelper.sendUserSoundAlert(JMWSSounds.ACTION_SUCCEED);
+            Services.PLATFORM.resetSyncThreshold();
 
         } catch (IllegalStateException | JsonSyntaxException exception) {
             PlayerHelper.sendUserAlert(Component.translatable("error.jmws.error_corrupted_waypoint"), true, false, JMWSMessageType.FAILURE);
             PlayerHelper.sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
+        }
+    }
+
+    public static void removeAllGroups() {
+        for (WaypointGroup wp : getInstance().jmAPI.getAllWaypointGroups()) {
+            if (!Constants.forbiddenGroups.contains(wp.getGuid())) {
+                getInstance().jmAPI.removeWaypointGroup(wp, false);
+            }
         }
     }
 }

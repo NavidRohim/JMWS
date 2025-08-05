@@ -6,7 +6,7 @@ import com.google.gson.JsonParser;
 import me.brynview.navidrohim.jmws.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.objects.SavedWaypoint;
-import me.brynview.navidrohim.jmws.io.CommonIO;
+import me.brynview.navidrohim.jmws.helper.CommonHelper;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static me.brynview.navidrohim.jmws.io.CommonIO._getWaypointFromRaw;
+import static me.brynview.navidrohim.jmws.helper.CommonHelper._getWaypointFromRaw;
 
 public class JMWSServerIO {
 
@@ -38,7 +38,7 @@ public class JMWSServerIO {
         List<Boolean> successArray = new ArrayList<>();
 
         for (String objPath : objectList) {
-            successArray.add(CommonIO.deleteFile(objPath));
+            successArray.add(CommonHelper.deleteFile(objPath));
         }
         return successArray.isEmpty() || successArray.stream().allMatch(successArray.getFirst()::equals);
     }
@@ -116,7 +116,7 @@ public class JMWSServerIO {
         List<Boolean> deletionStatusList = new ArrayList<>();
 
         for (String waypointPath : getFileObjects(playerUUID, fetchType)) {
-            deletionStatusList.add(CommonIO.deleteFile(waypointPath));
+            deletionStatusList.add(CommonHelper.deleteFile(waypointPath));
         }
 
         return deletionStatusList.isEmpty() || deletionStatusList.stream().allMatch(deletionStatusList.getFirst()::equals);

@@ -20,8 +20,7 @@ public class PacketHandler {
     public static void handlePacket(PacketContext<JMWSActionPayload> Context) {
         JMWSActionPayload waypointPayload = Context.message();
 
-        // true was JMWSPlugin.getInstance().getEnabledStatus()
-        if (true) {
+        if (CommonClass.getEnabledStatus()) {
 
             if (CommonClass.minecraftClientInstance.player == null)
             {
@@ -78,21 +77,8 @@ public class PacketHandler {
         }
     }
 
-    public static void HandshakeHandler(JMWSHandshakePayload handshakePayload) {
-
-        // !false > was !getInstance().serverEnabledJMWS()
-        // !false > (!getInstance().config.serverConfiguration.serverWaypointsEnabled())
-        // !false > (!getInstance().config.serverConfiguration.serverGroupsEnabled())
-        if (false == true) {
-            sendUserAlert(Component.translatable("warning.jmws.server_disabled_jmws"), true, false, JMWSMessageType.WARNING);
-        } else if (false == true) {
-            sendUserAlert(Component.translatable("warning.jmws.server_disabled_waypoint"), true, false, JMWSMessageType.WARNING);
-        } else if (false == true) {
-            sendUserAlert(Component.translatable("warning.jmws.server_disabled_group"), true, false, JMWSMessageType.WARNING);
-        } else {
-            sendUserAlert(Component.translatable("message.jmws.has_jmws"), true, false, JMWSMessageType.SUCCESS);
-        }
-
+    public static void HandshakeHandler(JMWSHandshakePayload _handshakePayload) {
+        sendUserAlert(Component.translatable("message.jmws.has_jmws"), true, false, JMWSMessageType.SUCCESS);
         Services.PLATFORM.setServerModStatus(true);
     }
 }

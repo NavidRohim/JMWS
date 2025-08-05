@@ -12,11 +12,10 @@ public class JMButtonAddon {
     public static void addJMButtons(FullscreenDisplayEvent.AddonButtonDisplayEvent addonButtonDisplayEvent) {
 
         if (!CommonClass.minecraftClientInstance.isSingleplayer()) {
-            // true was getEnabledStatus
             IThemeButton buttonEnabled = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
                     "button.jmws.enable_button",
                     AssetHelper.onOffButtonAsset,
-                    true,
+                    CommonClass.getEnabledStatus(),
                     JMButtonAddon::enableMod);
 
             IThemeButton buttonSync = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
@@ -25,8 +24,7 @@ public class JMButtonAddon {
                     true,
                     JMButtonAddon::updateFromButton);
 
-            // true was getEnabledStatus()
-            buttonSync.setEnabled(true);
+            buttonSync.setEnabled(CommonClass.getEnabledStatus());
             buttonSync.setTooltip(Component.translatable("button.jmws.tooltip.update_button").getString());
 
             buttonEnabled.setTooltip(Component.translatable("button.jmws.tooltip.enable_button").getString());
@@ -38,12 +36,12 @@ public class JMButtonAddon {
                 Component.translatable("addServer.resourcePack.enabled").getString(),
                 Component.translatable("addServer.resourcePack.disabled").getString()
         );
-        // true was getEnabledStatus()
-        if (true) {
-            // config.enabled(false);
+
+        if (CommonClass.getEnabledStatus()) {
+            CommonClass.config.enabled.set(false);
             iThemeButton.setToggled(false);
         } else {
-            // config.enabled(true);
+            CommonClass.config.enabled.set(true);
             iThemeButton.setToggled(true);
         }
     }

@@ -46,4 +46,9 @@ public class ForgePlatformHelper implements IPlatformHelper {
     public void setServerModStatus(boolean serverModStatus) {
 
     }
+
+    @Override
+    public void resetSyncThreshold() {
+
+    }
 }

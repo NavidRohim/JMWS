@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.platform;
 
+import me.brynview.navidrohim.jmws.CommonClass;
 import me.brynview.navidrohim.jmws.client.JMWSClient;
 import me.brynview.navidrohim.jmws.platform.services.IPlatformHelper;
 import net.fabricmc.loader.api.FabricLoader;
@@ -43,5 +44,11 @@ public class FabricPlatformHelper implements IPlatformHelper {
     public void setServerModStatus(boolean serverModStatus)
     {
         JMWSClient.setServerModStatus(serverModStatus);
+    }
+
+    @Override
+    public void resetSyncThreshold()
+    {
+        JMWSClient.tickCounterUpdateThreshold = CommonClass.config.updateWaypointFrequency.get();
     }
 }

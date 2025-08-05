@@ -1,7 +1,0 @@
-{
-  "message.jmws.deletion_success": "Usunięty punkt trasy",
-  "message.jmws.deletion_failure": "Nie można usunąć punktu trasy na serwerze",
-  "message.jmws.creation_success": "Utworzono punkt orientacyjny",
-  "message.jmws.creation_failure": "Nie można utworzyć punktu nawigacyjnego na serwerze.\nZaleca się usunięcie punktu nawigacyjnego i ponowną próbę.",
-  "message.jmws.modified_success": "Zaktualizowany punkt trasy"
-}

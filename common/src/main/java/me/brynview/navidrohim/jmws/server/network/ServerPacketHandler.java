@@ -5,14 +5,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
-import me.brynview.navidrohim.jmws.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.enums.WaypointPayloadCommand;
 import me.brynview.navidrohim.jmws.helper.CommandHelper;
-import me.brynview.navidrohim.jmws.io.CommonIO;
+import me.brynview.navidrohim.jmws.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.io.IOException;
@@ -49,7 +47,7 @@ public class ServerPacketHandler {
                 if (deleteAllWaypointsInGroup) { JMWSServerIO.removeAllWaypointsFromGroup(player.getUUID(), groupGUID);}
 
                 if (!deleteAllObjects) {
-                    result = CommonIO.deleteFile(fileName);
+                    result = CommonHelper.deleteFile(fileName);
                 } else {
                     result = JMWSServerIO.deleteAllUserObjects(player.getUUID(), JMWSServerIO.FetchType.GROUP);
                 }
@@ -70,7 +68,7 @@ public class ServerPacketHandler {
                 boolean result;
 
                 if (!deleteAll) {
-                    result = CommonIO.deleteFile(fileName);
+                    result = CommonHelper.deleteFile(fileName);
                 } else {
                     result = JMWSServerIO.deleteAllUserObjects(player.getUUID(), JMWSServerIO.FetchType.WAYPOINT);
                 }
@@ -86,45 +84,48 @@ public class ServerPacketHandler {
 
             // Following two cases regarding creating groups and waypoints
             case WaypointPayloadCommand.SERVER_CREATE -> {
-                boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
-                // true was (serverEnabledJMWS() && (SERVER_CONFIG.serverConfiguration.serverWaypointsEnabled() || isUpdateFromCreation))
-                if (true) {
-                    JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
-                    boolean silent = arguments.get(1).getAsBoolean();
-                    boolean waypointCreationSuccess = JMWSServerIO.createWaypoint(jsonCreationData, player.getUUID());
+                //boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
 
-                    if (!silent) {
-                        if (waypointCreationSuccess) {
-                            sendUserMessage(player, "message.jmws.creation_success", true, false);
-                        } else {
+                JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
+                boolean silent = arguments.get(1).getAsBoolean();
+                boolean waypointCreationSuccess = JMWSServerIO.createWaypoint(jsonCreationData, player.getUUID());
 
-                            sendUserMessage(player, "message.jmws.creation_failure", false, true);
-                        }
+                if (!silent) {
+                    if (waypointCreationSuccess) {
+                        sendUserMessage(player, "message.jmws.creation_success", true, false);
+                    } else {
+
+                        sendUserMessage(player, "message.jmws.creation_failure", false, true);
                     }
+                }
+                /*
+                if (isUpdateFromCreation) {
+
                 } else {
                     sendUserMessage(player, "message.jmws.server_disabled_waypoints", true, true);
-                }
+                }*/
             }
 
             case WaypointPayloadCommand.SERVER_CREATE_GROUP -> {
-                boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
-                // true was (serverEnabledJMWS() && (SERVER_CONFIG.serverConfiguration.serverGroupsEnabled() || isUpdateFromCreation))
-                if (true) {
-                    JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
-                    boolean silent = arguments.get(1).getAsBoolean();
-                    boolean waypointCreationSuccess = JMWSServerIO.createGroup(jsonCreationData, player.getUUID());
+                //  boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
 
-                    if (!silent) {
-                        if (waypointCreationSuccess) {
-                            sendUserMessage(player, "message.jmws.creation_group_success", true, false);
-                        } else {
-                            sendUserMessage(player, "message.jmws.creation_group_failure", false, true);
+                JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
+                boolean silent = arguments.get(1).getAsBoolean();
+                boolean waypointCreationSuccess = JMWSServerIO.createGroup(jsonCreationData, player.getUUID());
 
-                        }
+                if (!silent) {
+                    if (waypointCreationSuccess) {
+                        sendUserMessage(player, "message.jmws.creation_group_success", true, false);
+                    } else {
+                        sendUserMessage(player, "message.jmws.creation_group_failure", false, true);
+
                     }
+                }
+                /*
+                if (isUpdateFromCreation) {
                 } else {
                     sendUserMessage(player, "message.jmws.server_disabled_groups", true, true);
-                }
+                }*/
             }
 
             // was "request"
@@ -150,8 +151,8 @@ public class ServerPacketHandler {
                     }
                     String jsonData = CommandHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert);
 
-                    // false == true was (jsonData.getBytes().length >= SERVER_CONFIG.serverConfiguration.serverPacketLimit())
-                    if (false == true) { // packet size limit, I tried to reach this limit but I got nowhere near.
+                    // 2000000 was (jsonData.getBytes().length >= SERVER_CONFIG.serverConfiguration.serverPacketLimit())
+                    if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit but I got nowhere near.
                         sendUserMessage(player, "error.jmws.error_packet_size", false, true);
                     } else {
                         JMWSActionPayload waypointPayloadOutbound = new JMWSActionPayload(jsonData);

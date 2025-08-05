@@ -40,6 +40,6 @@
     "owo": ">=0.12.21+1.21.6"
   },
   "suggests": {
-    "another-mod": "*"
+    "journeymap": "*"
   }
 }

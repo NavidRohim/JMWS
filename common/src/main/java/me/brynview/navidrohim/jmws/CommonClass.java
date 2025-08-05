@@ -8,6 +8,7 @@ import commonnetwork.networking.data.Side;
 import me.brynview.navidrohim.jmws.payloads .JMWSActionPayload;
 import me.brynview.navidrohim.jmws.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.platform.Services;
+import me.brynview.navidrohim.jmws.plugin.ConfigInterface;
 import me.brynview.navidrohim.jmws.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.plugin.PacketHandler;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
@@ -29,6 +30,7 @@ public class CommonClass {
     // code that gets invoked by the entry point of the loader specific projects.
 
     public static Minecraft minecraftClientInstance = null;
+    public static ConfigInterface config = null;
 
     public static int getSyncFrequency()
     {
@@ -63,6 +65,11 @@ public class CommonClass {
     public static void _createServerResources() {
         new File("./jmws").mkdir();
         new File("./jmws/groups").mkdir();
+    }
+
+
+    public static boolean getEnabledStatus() {
+        return Services.PLATFORM.serverHasMod() && config.enabled.get() && (config.uploadGroups.get() || config.uploadWaypoints.get()) && !minecraftClientInstance.isSingleplayer();
     }
 
     public static void init() {

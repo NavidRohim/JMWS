@@ -9,12 +9,11 @@ public class PlayerHelper {
     public static void sendUserAlert(Component text, boolean overlayText, boolean ignoreConfig, JMWSMessageType messageType) {
         String finalText = text.getString();
 
-        // true was config.colouredText()
-        if (true) {
+        if (CommonClass.config.colouredText.get()) {
             finalText = messageType.toString() + text.getString();
         }
-        // true was config.showAlerts()
-        if ((true || ignoreConfig) && CommonClass.minecraftClientInstance.player != null) {
+
+        if ((CommonClass.config.showAlerts.get() || ignoreConfig) && CommonClass.minecraftClientInstance.player != null) {
             if (overlayText) {
                 CommonClass.minecraftClientInstance.gui.setOverlayMessage(Component.literal(finalText), false);
             } else {
@@ -24,8 +23,8 @@ public class PlayerHelper {
     }
 
     public static void sendUserSoundAlert(SoundEvent sound) {
-        // true was config.playEffects()
-        if (true && CommonClass.minecraftClientInstance.player != null) {
+
+        if (CommonClass.config.playEffects.get() && CommonClass.minecraftClientInstance.player != null) {
             CommonClass.minecraftClientInstance.player.playSound(sound, 0.09f, 1f);
         }
     }

@@ -1,9 +1,5 @@
 package me.brynview.navidrohim.jmws;
 
-
-import commonnetwork.api.Network;
-import me.brynview.navidrohim.jmws.client.config.JMWSConfig;
-import me.brynview.navidrohim.jmws.payloads.JMWSActionPayload;
 import net.fabricmc.api.ModInitializer;
 
 public class Jmws implements ModInitializer {

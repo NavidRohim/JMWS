@@ -39,7 +39,7 @@
   "text.config.jmws-config.option.uploadGroups.tooltip": "Enables / disables group syncing",
 
   "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency.tooltip": "Frequency of when waypoints are grabbed from the server (in ticks)",
-  "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout.tooltip": "How long until the mod determines that the server doesn't have JMWS installed",
+  "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout.tooltip": "How long until the mod determines that the server doesn't have JMWS installed (in seconds)",
 
   "text.config.jmws-config.option.serverConfiguration.serverPacketLimit.tooltip": "How large a sync packet can be. Only editable by server.",
   "text.config.jmws-config.option.serverConfiguration.serverEnabled.tooltip": "If server has JMWS enabled.",
@@ -49,11 +49,11 @@
   "text.config.jmws-config.option.showAlerts": "Show alerts?",
   "text.config.jmws-config.option.playEffects": "Sound alerts?",
   "text.config.jmws-config.option.colouredText": "Coloured text?",
-  "text.config.jmws-config.option.enabled": "Waypoint Syncing Enabled",
+  "text.config.jmws-config.option.enabled": "JMWS Enabled",
   "text.config.jmws-config.option.uploadWaypoints": "Sync waypoints?",
   "text.config.jmws-config.option.uploadGroups": "Sync waypoint groups?",
 
-  "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency": "Waypoint update frequency",
+  "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency": "Sync frequency",
   "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout": "Server Handshake Timeout",
 
   "text.config.jmws-config.option.serverConfiguration.serverPacketLimit": "Server packet size (Bytes)",
@@ -66,9 +66,13 @@
 
   "__comment__": "Section Header language strings",
 
-  "text.config.jmws-config.section.upload": "Sync",
+  "text.config.jmws-config.section.upload": "Sync Settings (JMWS)",
   "text.config.jmws-config.section.personalisation": "Personalisation",
   "text.config.jmws-config.section.generalConfig": "Technical",
+
+  "text.config.jmws-config.section.upload.tooltip": "Settings regarding waypoint and group syncing",
+  "text.config.jmws-config.section.personalisation.tooltip": "Settings regarding general JMWS customisation",
+  "text.config.jmws-config.section.generalConfig.tooltip": "Settings regarding technical settings",
 
   "__comment__": "Error / Warning language strings",
 

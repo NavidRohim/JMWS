@@ -1,12 +1,13 @@
-package me.brynview.navidrohim.jmws.io;
+package me.brynview.navidrohim.jmws.helper;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
+import net.minecraft.network.chat.Component;
 import org.joml.Vector3d;
 
 import java.io.File;
 import java.util.UUID;
 
-public class CommonIO {
+public class CommonHelper {
     // This is kinda just a "put whatever here that is used everywhere" class
 
     public static String getWaypointFilename(Waypoint waypoint, UUID uuID) {
@@ -31,5 +32,10 @@ public class CommonIO {
     public static boolean deleteFile(String filename) {
         File waypointFileObj = new File(filename);
         return waypointFileObj.delete();
+    }
+
+    public static String getLanguageKeyAsString(String key)
+    {
+        return Component.translatable(key).getString();
     }
 }
