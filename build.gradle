@@ -30,6 +30,4 @@ repositories {
         name = "Modrinth Maven"
         url = "https://api.modrinth.com/maven"
     }
-
-
 }

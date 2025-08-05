@@ -60,7 +60,7 @@ public class CommonClass {
         }
     }
 
-    private static void _createServerResources() {
+    public static void _createServerResources() {
         new File("./jmws").mkdir();
         new File("./jmws/groups").mkdir();
     }
@@ -70,7 +70,7 @@ public class CommonClass {
         Network.registerPacket(JMWSActionPayload.type(), JMWSActionPayload.class, JMWSActionPayload.STREAM_CODEC, CommonClass::_determinePacketAction);
         Network.registerPacket(JMWSHandshakePayload.type(), JMWSHandshakePayload.class, JMWSHandshakePayload.STREAM_CODEC, CommonClass::_determineHandshakePacketAction);
 
-        Constants.LOGGER.debug("Registered action and handshake packets on " + Services.PLATFORM.getPlatformName());
+        //Constants.LOGGER.debug("Registered action and handshake packets on " + Services.PLATFORM.getPlatformName());
 
         if (Services.PLATFORM.side().equals("CLIENT") && Services.PLATFORM.getPlatformName().equals("Fabric"))
         {

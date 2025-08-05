@@ -158,11 +158,11 @@ public class ServerPacketHandler {
                         Dispatcher.sendToClient(waypointPayloadOutbound, player);
                     }
                 } catch (IOException ioe) {
-                    Constants.LOGGER.error(ioe.getMessage());
+                    Constants.getLogger().error(ioe.getMessage());
                 }
             }
 
-            default -> Constants.LOGGER.warn("Unknown packet command -> " + command);
+            default -> Constants.getLogger().warn("Unknown packet command -> " + command);
         }
     }
 }

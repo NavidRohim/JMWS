@@ -73,7 +73,7 @@ public class PacketHandler {
                 // No outbound data
                 case COMMON_DISPLAY_NEXT_UPDATE -> sendUserAlert(Component.translatable("message.jmws.next_sync", (CommonClass.timeUntilNextSync())), true, false, JMWSMessageType.NEUTRAL);
 
-                default -> Constants.LOGGER.warn("Unknown packet command -> " + waypointPayload.command());
+                default -> Constants.getLogger().warn("Unknown packet command -> " + waypointPayload.command());
             }
         }
     }

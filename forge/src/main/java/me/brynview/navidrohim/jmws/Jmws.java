@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws;
 
 import net.minecraftforge.fml.common.Mod;
 
+
 @Mod(Constants.MODID)
 public class Jmws {
 
@@ -11,7 +12,7 @@ public class Jmws {
         // project.
 
         // Use Forge to bootstrap the Common mod.
-        Constants.LOGGER.info("Hello Forge world!");
+        //Constants.LOGGER.info("Hello Forge world!");
         CommonClass.init();
 
     }

@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.server.io;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import me.brynview.navidrohim.jmws.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.objects.SavedWaypoint;
 import me.brynview.navidrohim.jmws.io.CommonIO;
@@ -62,15 +63,15 @@ public class JMWSServerIO {
 
         } catch (NoSuchFileException noSuchFileException) {
             //JMWSServer._createServerResources();
-            Constants.LOGGER.warn("`jmws` folder was not found so another was made. All server waypoints and groups have been wiped. (group error)");
+            Constants.getLogger().warn("`jmws` folder was not found so another was made. All server waypoints and groups have been wiped. (group error)");
             return createGroup(jsonObject, playerUUID);
 
         } catch (FileSystemException missingPerms) {
-            Constants.LOGGER.error("JMWS is missing write permissions to \"jmws\" folder. (group error)");
+            Constants.getLogger().error("JMWS is missing write permissions to \"jmws\" folder. (group error)");
             return false;
 
         } catch (IOException genericIOError) {
-            Constants.LOGGER.error("Got exception trying to make group -> " + genericIOError);
+            Constants.getLogger().error("Got exception trying to make group -> " + genericIOError);
             return false;
         }
     }
@@ -97,16 +98,16 @@ public class JMWSServerIO {
             return true;
 
         } catch (NoSuchFileException noSuchFileException) {
-            //JMWSServer._createServerResources();
-            Constants.LOGGER.warn("`jmws` folder was not found so another was made. All server waypoints and groups have been wiped. (waypoint error)");
+            CommonClass._createServerResources();
+            Constants.getLogger().warn("`jmws` folder was not found so another was made. All server waypoints and groups have been wiped. (waypoint error)");
             return createWaypoint(jsonObject, playerUUID);
 
         } catch (FileSystemException missingPerms) {
-            Constants.LOGGER.error("JMWS is missing write permissions to \"jmws\" folder. (waypoint error)");
+            Constants.getLogger().error("JMWS is missing write permissions to \"jmws\" folder. (waypoint error)");
             return false;
 
         } catch (IOException genericIOError) {
-            Constants.LOGGER.error("Got exception trying to make waypoint -> " + genericIOError);
+            Constants.getLogger().error("Got exception trying to make waypoint -> " + genericIOError);
             return false;
         }
     }
@@ -166,7 +167,7 @@ public class JMWSServerIO {
         try {
             return JsonParser.parseString(Files.readString(Path.of(objPath))).getAsJsonObject();
         } catch (IOException ioException) {
-            Constants.LOGGER.error("Error retrieving saved object data -> " + ioException);
+            Constants.getLogger().error("Error retrieving saved object data -> " + ioException);
         }
         return null;
     }
