@@ -79,6 +79,6 @@ public class PacketHandler {
 
     public static void HandshakeHandler(JMWSHandshakePayload _handshakePayload) {
         sendUserAlert(Component.translatable("message.jmws.has_jmws"), true, false, JMWSMessageType.SUCCESS);
-        Services.PLATFORM.setServerModStatus(true);
+        CommonClass.setServerModStatus(true);
     }
 }

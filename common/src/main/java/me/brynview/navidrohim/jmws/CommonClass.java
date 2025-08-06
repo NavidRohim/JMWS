@@ -19,6 +19,8 @@ import net.minecraft.world.item.Items;
 
 import java.io.File;
 
+import static me.brynview.navidrohim.jmws.client.ClientHandshakeHandler.timeoutTask;
+
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
 // common compatible binaries. This means common code can not directly use loader specific concepts such as Forge events
@@ -31,15 +33,34 @@ public class CommonClass {
 
     public static Minecraft minecraftClientInstance = null;
     public static ConfigInterface config = null;
+    public static SyncCounter syncCounter = null;
+
+    public static boolean serverHasMod = false;
+
+    public static void setServerModStatus(boolean serverModStatus)
+    {
+        serverHasMod = serverModStatus;
+
+        if (timeoutTask != null && !timeoutTask.isDone()) {
+            timeoutTask.cancel(false);
+        }
+
+        if (!serverModStatus)
+        {
+            syncCounter.resetSyncCounter();
+        }
+    }
 
     public static int getSyncFrequency()
     {
-        return Services.PLATFORM.getSyncInTicks() / 20;
+        return CommonClass.syncCounter.getTickCounterUpdateThreshold() / 20;
     }
 
     public static int timeUntilNextSync()
     {
-        return (Services.PLATFORM.getSyncInTicks() - Services.PLATFORM.timeUntilNextSyncInTicks()) / 20;
+        // syncCounter can be null but the chance of it ever being null while this method is being called is none.
+        // Same with getSyncFrequency
+        return (CommonClass.syncCounter.getTickCounterUpdateThreshold() - CommonClass.syncCounter.getCurrentTickCount()) / 20;
     }
 
     private static void _determinePacketAction(PacketContext<JMWSActionPayload> ctx)
@@ -69,15 +90,13 @@ public class CommonClass {
 
 
     public static boolean getEnabledStatus() {
-        return Services.PLATFORM.serverHasMod() && config.enabled.get() && (config.uploadGroups.get() || config.uploadWaypoints.get()) && !minecraftClientInstance.isSingleplayer();
+        return serverHasMod && config.enabled.get() && (config.uploadGroups.get() || config.uploadWaypoints.get()) && !minecraftClientInstance.isSingleplayer();
     }
 
     public static void init() {
 
         Network.registerPacket(JMWSActionPayload.type(), JMWSActionPayload.class, JMWSActionPayload.STREAM_CODEC, CommonClass::_determinePacketAction);
         Network.registerPacket(JMWSHandshakePayload.type(), JMWSHandshakePayload.class, JMWSHandshakePayload.STREAM_CODEC, CommonClass::_determineHandshakePacketAction);
-
-        //Constants.LOGGER.debug("Registered action and handshake packets on " + Services.PLATFORM.getPlatformName());
 
         if (Services.PLATFORM.side().equals("CLIENT") && Services.PLATFORM.getPlatformName().equals("Fabric"))
         {
@@ -99,5 +118,6 @@ public class CommonClass {
     public static void setupMinecraftClientInstance()
     {
         minecraftClientInstance = Minecraft.getInstance();
+        syncCounter = new SyncCounter();
     }
 }

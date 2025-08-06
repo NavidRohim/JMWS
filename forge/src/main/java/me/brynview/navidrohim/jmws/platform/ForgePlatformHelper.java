@@ -26,29 +26,4 @@ public class ForgePlatformHelper implements IPlatformHelper {
     public String side() {
         return FMLEnvironment.dist.name();
     }
-
-    @Override
-    public int getSyncInTicks() {
-        return 0;
-    }
-
-    @Override
-    public int timeUntilNextSyncInTicks() {
-        return 0;
-    }
-
-    @Override
-    public boolean serverHasMod() {
-        return false;
-    }
-
-    @Override
-    public void setServerModStatus(boolean serverModStatus) {
-
-    }
-
-    @Override
-    public void resetSyncThreshold() {
-
-    }
 }

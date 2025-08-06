@@ -360,7 +360,7 @@ public class JMWSPlugin implements IClientPlugin {
             }
 
             PlayerHelper.sendUserSoundAlert(JMWSSounds.ACTION_SUCCEED);
-            Services.PLATFORM.resetSyncThreshold();
+            CommonClass.syncCounter.resetSyncThreshold();
 
         } catch (IllegalStateException | JsonSyntaxException exception) {
             PlayerHelper.sendUserAlert(Component.translatable("error.jmws.error_corrupted_waypoint"), true, false, JMWSMessageType.FAILURE);
