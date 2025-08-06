@@ -16,7 +16,7 @@
     "discord": "https://discord.gg/WNXRSaEbPe"
   },
   "license": "${license}",
-  "icon": "jmws.png",
+  "icon": "assets/jmws/icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [

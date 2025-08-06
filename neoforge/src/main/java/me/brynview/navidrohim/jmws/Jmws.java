@@ -16,7 +16,6 @@ public class Jmws {
 
         // Use NeoForge to bootstrap the Common mod.
 
-        Constants.getLogger().info("Hello NeoForge world!");
         CommonClass.init();
     }
 }

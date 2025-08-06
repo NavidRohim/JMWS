@@ -18,7 +18,7 @@ import java.util.BitSet;
 import java.util.List;
 
 
-public class JMWSActionPayload
+public class  JMWSActionPayload
 {
     public static final ResourceLocation CHANNEL = ResourceLocation.fromNamespaceAndPath(Constants.MODID, "action_command");
     public static final StreamCodec<FriendlyByteBuf, JMWSActionPayload> STREAM_CODEC = StreamCodec.ofMember(JMWSActionPayload::encode, JMWSActionPayload::new);

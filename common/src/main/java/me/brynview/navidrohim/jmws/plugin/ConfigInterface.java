@@ -11,19 +11,19 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 
 public class ConfigInterface {
 
-    private OptionCategory category = new OptionCategory(
+    public OptionCategory category = new OptionCategory(
             "jmapi",
             "text.config.jmws-config.section.upload",
             "text.config.jmws-config.section.upload.tooltip"
     );
 
-    private OptionCategory personalisation = new OptionCategory(
+    public OptionCategory personalisation = new OptionCategory(
             "jmapi",
             "text.config.jmws-config.section.personalisation",
             "text.config.jmws-config.section.personalisation.tooltip"
     );
 
-    private OptionCategory technical = new OptionCategory(
+    public OptionCategory technical = new OptionCategory(
             "jmapi",
             "text.config.jmws-config.section.generalConfig",
             "text.config.jmws-config.section.generalConfig.tooltip"
@@ -49,7 +49,12 @@ public class ConfigInterface {
         this.playEffects = new BooleanOption(personalisation, "playEffects", "text.config.jmws-config.option.playEffects", true);
         this.colouredText = new BooleanOption(personalisation, "colouredText", "text.config.jmws-config.option.colouredText", true);
 
-        this.updateWaypointFrequency = new IntegerOption(technical, "updateWaypointFrequency", "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency", 800, 80, Integer.MAX_VALUE);
-        this.serverHandshakeTimeout = new IntegerOption(technical, "serverHandshakeTimeout", "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout", 5, 1, Integer.MAX_VALUE);
+        this.updateWaypointFrequency = new IntegerOption(technical, "updateWaypointFrequency", "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency", 40, 2, 120);
+        this.serverHandshakeTimeout = new IntegerOption(technical, "serverHandshakeTimeout", "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout", 5, 1, 60);
+    }
+
+    public int getUpdateWaypointFrequencyAsTicks()
+    {
+        return updateWaypointFrequency.get() * 20;
     }
 }

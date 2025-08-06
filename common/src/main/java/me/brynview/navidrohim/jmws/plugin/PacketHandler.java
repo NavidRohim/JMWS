@@ -8,7 +8,6 @@ import me.brynview.navidrohim.jmws.client.helpers.JMWSSounds;
 import me.brynview.navidrohim.jmws.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.platform.Services;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.network.chat.Component;
 
@@ -77,8 +76,18 @@ public class PacketHandler {
         }
     }
 
-    public static void HandshakeHandler(JMWSHandshakePayload _handshakePayload) {
-        sendUserAlert(Component.translatable("message.jmws.has_jmws"), true, false, JMWSMessageType.SUCCESS);
+    public static void HandshakeHandler(JMWSHandshakePayload handshakePayload) {
+
+        if (!handshakePayload.serverConfigData.jmwsEnabled) {
+            sendUserAlert(Component.translatable("warning.jmws.server_disabled_jmws"), true, false, JMWSMessageType.WARNING);
+        } else if (!handshakePayload.serverConfigData.waypointsEnabled) {
+            sendUserAlert(Component.translatable("warning.jmws.server_disabled_waypoint"), true, false, JMWSMessageType.WARNING);
+        } else if (!handshakePayload.serverConfigData.groupsEnabled) {
+            sendUserAlert(Component.translatable("warning.jmws.server_disabled_group"), true, false, JMWSMessageType.WARNING);
+        } else {
+            sendUserAlert(Component.translatable("message.jmws.has_jmws"), true, false, JMWSMessageType.SUCCESS);
+        }
+
         CommonClass.setServerModStatus(true);
     }
 }

@@ -14,6 +14,7 @@ public class ClientCommands {
     private static boolean isInSingleplayer() {
         return CommonClass.minecraftClientInstance.isSingleplayer();
     }
+
     private static void sendUserSinglePlayerWarning() {
         PlayerHelper.sendUserAlert(Component.translatable("warning.jmws.world_is_local_no_commands"), true, false, JMWSMessageType.WARNING);
     }

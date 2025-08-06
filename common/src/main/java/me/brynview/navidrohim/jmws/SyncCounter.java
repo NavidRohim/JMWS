@@ -22,7 +22,7 @@ public class SyncCounter {
 
     public void resetSyncThreshold()
     {
-        tickCounterUpdateThreshold = CommonClass.config.updateWaypointFrequency.get();
+        tickCounterUpdateThreshold = CommonClass.config.getUpdateWaypointFrequencyAsTicks();
     }
 
     public void resetSyncCounter() { tickCounter = 0; }

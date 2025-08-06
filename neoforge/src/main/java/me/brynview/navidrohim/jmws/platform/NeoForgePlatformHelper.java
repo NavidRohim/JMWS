@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.platform;
 
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.platform.services.IPlatformHelper;
 import net.minecraft.world.level.Level;
 import net.neoforged.fml.ModList;
@@ -25,6 +26,11 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public String side() {
-        return FMLEnvironment.dist.name();
+        String side = FMLEnvironment.dist.toString();
+        if (side.equalsIgnoreCase("SERVER") || side.equalsIgnoreCase("DEDICATED_SERVER"))
+        {
+            return "SERVER";
+        }
+        return "CLIENT";
     }
 }

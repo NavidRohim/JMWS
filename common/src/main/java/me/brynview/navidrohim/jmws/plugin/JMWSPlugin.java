@@ -28,11 +28,11 @@ import me.brynview.navidrohim.jmws.helper.CommandHelper;
 import me.brynview.navidrohim.jmws.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.platform.Services;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,12 +47,11 @@ public class JMWSPlugin implements IClientPlugin {
     // JourneyMap API
     private IClientAPI jmAPI = null;
     private static JMWSPlugin INSTANCE;
-    //private static final ConfigInterface config = CommonClass.config;
 
     // Required functions
 
     @Override
-    public void initialize(IClientAPI jmClientApi)
+    public void initialize(@NotNull IClientAPI jmClientApi)
     {
 
         this.jmAPI = jmClientApi;
