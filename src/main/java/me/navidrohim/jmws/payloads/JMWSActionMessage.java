@@ -1,0 +1,61 @@
+package me.navidrohim.jmws.payloads;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import io.netty.buffer.ByteBuf;
+import me.navidrohim.jmws.enums.WaypointPayloadCommand;
+import me.navidrohim.jmws.helper.CommandHelper;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+
+public class JMWSActionMessage implements IMessage {
+
+    private String jsonData;
+    public static WaypointPayloadCommand command = null;
+    public static JsonArray argumentList = null;
+
+    public static class JMWSActionMessageHandler implements IMessageHandler<JMWSActionMessage, IMessage>
+    {
+
+        @Override
+        public IMessage onMessage(JMWSActionMessage message, MessageContext ctx) {
+            return null;
+        }
+    }
+
+    public JMWSActionMessage() {}
+
+    public JMWSActionMessage(String jsonData)
+    {
+        this.jsonData = jsonData;
+    }
+
+    @Override
+    public void fromBytes(ByteBuf buf) {
+        this.jsonData = String.valueOf(buf.readBytes(buf.readableBytes()));
+    }
+
+    @Override
+    public void toBytes(ByteBuf buf) {
+        buf.writeBytes(this.jsonData.getBytes());
+    }
+
+    private void _setCommandAndArguments()
+    {
+        JsonObject jsonifyied = CommandHelper.getJsonObjectFromJsonString(jsonData);
+
+        command = WaypointPayloadCommand.valueOf(jsonifyied.get("command").getAsString());
+        argumentList = jsonifyied.get("arguments").getAsJsonArray();
+    }
+
+    public WaypointPayloadCommand command() {
+        _setCommandAndArguments();
+        return command;
+    }
+
+    public JsonArray arguments() {
+        _setCommandAndArguments();
+        return argumentList;
+    }
+}
