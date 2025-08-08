@@ -5,9 +5,13 @@ import com.google.gson.JsonObject;
 import io.netty.buffer.ByteBuf;
 import me.navidrohim.jmws.enums.WaypointPayloadCommand;
 import me.navidrohim.jmws.helper.CommandHelper;
+import me.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+
+import static me.navidrohim.jmws.plugin.PacketHandler.handlePacket;
 
 public class JMWSActionMessage implements IMessage {
 
@@ -20,6 +24,13 @@ public class JMWSActionMessage implements IMessage {
 
         @Override
         public IMessage onMessage(JMWSActionMessage message, MessageContext ctx) {
+            if (ctx.side.equals(Side.CLIENT))
+            {
+                handlePacket(message);
+                return null;
+            } else {
+                ServerPacketHandler.handleIncomingActionCommand(message, ctx.getServerHandler().player);
+            }
             return null;
         }
     }

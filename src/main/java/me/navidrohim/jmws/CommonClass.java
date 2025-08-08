@@ -57,27 +57,6 @@ public class CommonClass {
         return (CommonClass.syncCounter.getTickCounterUpdateThreshold() - CommonClass.syncCounter.getCurrentTickCount()) / 20;
     }
 
-    private static void _determinePacketAction(PacketContext<JMWSActionPayload> ctx)
-    {
-        if (Side.CLIENT.equals(ctx.side()))
-        {
-            PacketHandler.handlePacket(ctx);
-        } else {
-            ServerPacketHandler.handleIncomingActionCommand(ctx, ctx.sender());
-        }
-    }
-
-    private static void _determineHandshakePacketAction(PacketContext<JMWSHandshakePayload> ctx)
-    {
-        if (Side.CLIENT.equals(ctx.side()))
-        {
-            PacketHandler.HandshakeHandler(ctx.message());
-        } else {
-
-            //Dispatcher.sendToClient(new JMWSHandshakePayload(ServerConfig.getConfigJson()), ctx.sender());
-        }
-    }
-
     public static void _createServerResources() {
         ServerConfig.ensureExistence();
         new File("./jmws").mkdir();

@@ -68,7 +68,6 @@ public class SavedWaypoint extends SavedObject {
 
         // Identifier (used for code)
         this.universalIdentifier = payload.get("customData").getAsString();
-        this.groupIdentifier = payload.get("guid").getAsString();
 
         // location data
         this.ix = (int) pos.get("x").getAsDouble();

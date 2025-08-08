@@ -6,6 +6,7 @@ import me.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.navidrohim.jmws.client.helpers.JMWSSounds;
 import me.navidrohim.jmws.helper.CommonHelper;
 import me.navidrohim.jmws.helper.PlayerHelper;
+import me.navidrohim.jmws.payloads.JMWSActionMessage;
 import me.navidrohim.jmws.payloads.JMWSActionPayload;
 import me.navidrohim.jmws.payloads.JMWSHandshakePayload;
 import me.navidrohim.jmws.payloads.JMWSHandshakeReplyMessage;
@@ -19,8 +20,7 @@ import static me.navidrohim.jmws.helper.PlayerHelper.sendUserAlert;
 
 
 public class PacketHandler {
-    public static void handlePacket(MessageContext Context) {
-        JMWSActionPayload waypointPayload = Context.message();
+    public static void handlePacket(JMWSActionMessage waypointPayload) {
 
         if (CommonClass.getEnabledStatus()) {
 
@@ -33,21 +33,21 @@ public class PacketHandler {
 
                 // Was creation_response
                 // Sends no outbound data
-                case SYNC -> JMWSPlugin.syncHandler(waypointPayload, CommonClass.minecraftClientInstance.player);
+                case SYNC: JMWSPlugin.syncHandler(waypointPayload, CommonClass.minecraftClientInstance.player);
 
                 // was "update"
                 // Sends "request" packet | New = "SYNC"
-                case REQUEST_CLIENT_SYNC -> JMWSPlugin.updateWaypoints(true);
+                case REQUEST_CLIENT_SYNC: JMWSPlugin.updateWaypoints(true);
 
                 // was display_interval
                 // No outbound data
-                case COMMON_DISPLAY_INTERVAL -> sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.sync_frequency", CommonClass.getSyncFrequency()), true, false, JMWSMessageType.NEUTRAL);
+                case COMMON_DISPLAY_INTERVAL: sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.sync_frequency", CommonClass.getSyncFrequency()), true, false, JMWSMessageType.NEUTRAL);
 
                 // was "alert"
                 // No outbound data
-                case CLIENT_ALERT -> {
-                    String firstArgument = waypointPayload.arguments().getFirst().getAsString();
-                    boolean isError = waypointPayload.arguments().getLast().getAsBoolean();
+                case CLIENT_ALERT: {
+                    String firstArgument = waypointPayload.arguments().get(0).getAsString();
+                    boolean isError = waypointPayload.arguments().get(-1).getAsBoolean();
                     JMWSMessageType messageType = JMWSMessageType.NEUTRAL;
 
                     if (isError) {
@@ -58,22 +58,24 @@ public class PacketHandler {
                     sendUserAlert(CommonHelper.getTranslatableComponent(firstArgument), waypointPayload.arguments().get(1).getAsBoolean(), false, messageType);
                 }
 
+
+
                 // was "deleteWaypoint"
                 // No outbound data
-                case COMMON_DELETE_WAYPOINT ->
+                case COMMON_DELETE_WAYPOINT:
                 {
-                    String firstArgument = waypointPayload.arguments().getFirst().getAsString();
+                    String firstArgument1 = waypointPayload.arguments().get(0).getAsString();
                     JMWSPlugin.getInstance().deleteSavedObjects(
-                            Objects.equals(firstArgument, "*"),
-                            firstArgument
+                            Objects.equals(firstArgument1, "*"),
+                            firstArgument1
                     );
                 }
 
                 // was "display_next_update"
                 // No outbound data
-                case COMMON_DISPLAY_NEXT_UPDATE -> sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.next_sync", (CommonClass.timeUntilNextSync())), true, false, JMWSMessageType.NEUTRAL);
+                case COMMON_DISPLAY_NEXT_UPDATE: sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.next_sync", (CommonClass.timeUntilNextSync())), true, false, JMWSMessageType.NEUTRAL);
 
-                default -> Constants.getLogger().warn("Unknown packet command -> " + waypointPayload.command());
+                default: Constants.getLogger().warn("Unknown packet command -> " + waypointPayload.command());
             }
         }
     }

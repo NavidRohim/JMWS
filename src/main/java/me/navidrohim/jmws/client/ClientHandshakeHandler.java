@@ -1,6 +1,7 @@
 package me.navidrohim.jmws.client;
 
 import me.navidrohim.jmws.CommonClass;
+import me.navidrohim.jmws.Constants;
 import me.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.navidrohim.jmws.client.helpers.JMWSSounds;
 import me.navidrohim.jmws.helper.CommonHelper;
@@ -25,6 +26,7 @@ public class ClientHandshakeHandler {
 
     public static void sendHandshakeRequest(Minecraft client)
     {
+        Constants.LOGGER.info(client.isSingleplayer());
         if (!client.isSingleplayer()) {
             JMWSNetworkWrapper.INSTANCE.sendToServer(new JMWSHandshakeMessage());
             //Dispatcher.sendToServer(new JMWSHandshakePayload

@@ -6,7 +6,6 @@ import com.google.gson.JsonParser;
 
 import journeymap.client.api.display.Waypoint;
 import me.navidrohim.jmws.enums.WaypointPayloadCommand;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 

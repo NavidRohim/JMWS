@@ -1,7 +1,7 @@
 [
 {
-  "modid": "examplemod",
-  "name": "Example Mod",
+  "modid": "jmws",
+  "name": "JourneyMap Waypoint Syncing",
   "description": "Example placeholder mod.",
   "version": "${version}",
   "mcversion": "${mcversion}",
@@ -9,7 +9,7 @@
   "updateUrl": "",
   "authorList": ["ExampleDude"],
   "credits": "The Forge and FML guys, for making this example",
-  "logoFile": "",
+  "logoFile": "assets/jmws/icon.png",
   "screenshots": [],
   "dependencies": []
 }

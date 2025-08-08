@@ -6,8 +6,6 @@ import me.navidrohim.jmws.CommonClass;
 import me.navidrohim.jmws.Constants;
 import me.navidrohim.jmws.client.objects.SavedWaypoint;
 import me.navidrohim.jmws.helper.CommonHelper;
-import org.jetbrains.annotations.Nullable;
-import scala.actors.threadpool.Arrays;
 
 import javax.vecmath.Vector3d;
 import java.io.FileWriter;
@@ -90,9 +88,6 @@ public class JMWSServerIO {
         return waypointFileList;
     }
 
-
-
-    @Nullable
     public static JsonObject getObjectDataFromDisk(String objPath) {
         try {
             return new JsonParser().parse(new String(Files.readAllBytes(Paths.get("sample.txt")))).getAsJsonObject();
@@ -102,7 +97,6 @@ public class JMWSServerIO {
         return null;
     }
 
-    @Nullable
     private static SavedWaypoint getWaypointFromFile(String waypointPath, UUID playerUUID) {
         JsonObject waypointLocalData = getObjectDataFromDisk(waypointPath);
         if (waypointLocalData != null) {

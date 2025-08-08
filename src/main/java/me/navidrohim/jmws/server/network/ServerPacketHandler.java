@@ -1,5 +1,6 @@
 package me.navidrohim.jmws.server.network;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -7,17 +8,16 @@ import me.navidrohim.jmws.Constants;
 import me.navidrohim.jmws.enums.WaypointPayloadCommand;
 import me.navidrohim.jmws.helper.CommandHelper;
 import me.navidrohim.jmws.helper.CommonHelper;
+import me.navidrohim.jmws.payloads.JMWSActionMessage;
 import me.navidrohim.jmws.payloads.JMWSActionPayload;
+import me.navidrohim.jmws.payloads.JMWSNetworkWrapper;
 import me.navidrohim.jmws.server.config.ServerConfig;
 import me.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 import static me.navidrohim.jmws.server.network.PlayerNetworkingHelper.sendUserMessage;
 
@@ -27,16 +27,15 @@ public class ServerPacketHandler {
         return ServerConfig.getConfig().jmwsEnabled && (ServerConfig.getConfig().waypointsEnabled);
     }
 
-    public static void handleIncomingActionCommand(PacketContext<JMWSActionPayload> Context, EntityPlayerMP player) {
-        JMWSActionPayload waypointActionPayload = Context.message();
-        WaypointPayloadCommand command = waypointActionPayload.command();
-        List<JsonElement> arguments = waypointActionPayload.arguments();
+    public static void handleIncomingActionCommand(JMWSActionMessage Context, EntityPlayerMP player) {
+        WaypointPayloadCommand command = Context.command();
+        JsonArray arguments = Context.arguments();
 
         switch (command) {
 
             // Following two cases are for deleting waypoints and groups
 
-            case WaypointPayloadCommand.COMMON_DELETE_WAYPOINT -> {
+            case COMMON_DELETE_WAYPOINT: {
                 String fileName = arguments.get(0).getAsString().trim();
                 boolean silent = arguments.get(1).getAsBoolean();
                 boolean deleteAll = arguments.get(-1).getAsBoolean();
@@ -45,7 +44,7 @@ public class ServerPacketHandler {
                 if (!deleteAll) {
                     result = CommonHelper.deleteFile(fileName);
                 } else {
-                    result = JMWSServerIO.deleteAllUserObjects(player.getUUID());
+                    result = JMWSServerIO.deleteAllUserObjects(player.getUniqueID());
                 }
 
                 if (!silent) {
@@ -58,7 +57,7 @@ public class ServerPacketHandler {
             }
 
             // Following two cases regarding creating groups and waypoints
-            case WaypointPayloadCommand.SERVER_CREATE -> {
+            case SERVER_CREATE: {
                 boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
 
                 if (serverEnabledJMWS() && (ServerConfig.getConfig().waypointsEnabled || isUpdateFromCreation)) {
@@ -80,7 +79,7 @@ public class ServerPacketHandler {
             }
 
             // was "request"
-            case WaypointPayloadCommand.SYNC -> {
+            case SYNC:  {
                 try {
                     List<String> playerWaypoints = JMWSServerIO.getFileObjects(player.getUniqueID());
 
@@ -99,7 +98,8 @@ public class ServerPacketHandler {
                     if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit, but I got nowhere near.
                         sendUserMessage(player, "error.jmws.error_packet_size", false, true);
                     } else {
-                        JMWSActionPayload waypointPayloadOutbound = new JMWSActionPayload(jsonData);
+                        JMWSActionMessage waypointPayloadOutbound = new JMWSActionMessage(jsonData);
+                        JMWSNetworkWrapper.INSTANCE.sendTo(waypointPayloadOutbound, player);
                         //Dispatcher.sendToClient(waypointPayloadOutbound, player);
                     }
                 } catch (IOException ioe) {
@@ -107,7 +107,7 @@ public class ServerPacketHandler {
                 }
             }
 
-            default -> Constants.getLogger().warn("Unknown packet command -> {}", command);
+            default: Constants.getLogger().warn("Unknown packet command -> {}", command);
         }
     }
 }

@@ -5,7 +5,9 @@ import me.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.navidrohim.jmws.helper.CommandHelper;
 import me.navidrohim.jmws.helper.CommonHelper;
 import me.navidrohim.jmws.helper.PlayerHelper;
+import me.navidrohim.jmws.payloads.JMWSActionMessage;
 import me.navidrohim.jmws.payloads.JMWSActionPayload;
+import me.navidrohim.jmws.payloads.JMWSNetworkWrapper;
 import me.navidrohim.jmws.plugin.JMWSPlugin;
 
 public class ClientCommands {
@@ -37,7 +39,8 @@ public class ClientCommands {
     public static int clearAllWaypoints()
     {
         if (!isInSingleplayer()) {
-            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandHelper.makeDeleteRequestJson("", false, true)); // * = all
+            JMWSActionMessage deleteServerObjectPayload = new JMWSActionMessage(CommandHelper.makeDeleteRequestJson("", false, true)); // * = all
+            JMWSNetworkWrapper.INSTANCE.sendToServer(deleteServerObjectPayload);
             //Dispatcher.sendToServer(deleteServerObjectPayload);
             JMWSPlugin.updateWaypoints(false);
         } else {

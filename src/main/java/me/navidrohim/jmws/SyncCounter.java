@@ -1,11 +1,13 @@
 package me.navidrohim.jmws;
 
 
+import net.minecraft.client.multiplayer.WorldClient;
+
 import static me.navidrohim.jmws.plugin.JMWSPlugin.updateWaypoints;
 
 public class SyncCounter {
 
-    private ClientLevel oldWorld = null;
+    private WorldClient oldWorld = null;
     public static int tickCounterUpdateThreshold = 800;
     public static int tickCounter = 0;
 
@@ -28,7 +30,7 @@ public class SyncCounter {
 
     public void iterateCounter()
     {
-        ClientLevel world = CommonClass.minecraftClientInstance.level;
+        WorldClient world = CommonClass.minecraftClientInstance.world;
 
         if (world != null && CommonClass.getEnabledStatus()) {
             if (world != oldWorld) {
@@ -48,7 +50,7 @@ public class SyncCounter {
                     tickCounter = 0;
                 }
             }
-            oldWorld = CommonClass.minecraftClientInstance.level;
+            oldWorld = CommonClass.minecraftClientInstance.world;
         } else {
 
             tickCounter = 0;

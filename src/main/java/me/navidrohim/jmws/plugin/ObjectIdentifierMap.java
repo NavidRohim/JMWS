@@ -13,8 +13,9 @@ public class ObjectIdentifierMap {
     private static final HashMap<String, Waypoint> waypointIdentifierMap = new HashMap<>();
 
     public static Waypoint getOldWaypoint(Waypoint newWaypoint) {
-        String persistentWaypointID = newWaypoint.getCustomData();
-        return waypointIdentifierMap.get(persistentWaypointID);
+        //String persistentWaypointID = newWaypoint.getCustomData();
+        //return waypointIdentifierMap.get(persistentWaypointID);
+        return null;
     }
 
 
@@ -27,14 +28,15 @@ public class ObjectIdentifierMap {
     {
         String waypointIdentifier = CommonHelper.makeWaypointHash(minecraftClientInstance.player.getUniqueID(), waypoint.getGuid(), waypoint.getName());
         waypointIdentifierMap.put(waypointIdentifier, waypoint);
-        waypoint.setCustomData(waypointIdentifier);
+        //waypoint.setCustomData(waypointIdentifier);
 
         return waypointIdentifier;
     }
 
     public static void removeWaypointFromMap(Waypoint waypoint)
     {
-        waypointIdentifierMap.remove(waypoint.getCustomData());
+        //waypointIdentifierMap.remove(waypoint.getCustomData());
+        return;
     }
 
 }

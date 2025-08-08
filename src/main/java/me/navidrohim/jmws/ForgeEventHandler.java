@@ -1,6 +1,7 @@
 package me.navidrohim.jmws;
 
 import me.navidrohim.jmws.client.ClientHandshakeHandler;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -18,7 +19,7 @@ public class ForgeEventHandler
     }
 
     @SubscribeEvent
-    public static void onEntityJoinWorld(PlayerEvent.PlayerLoggedInEvent event)
+    public static void onEntityJoinWorld(EntityJoinWorldEvent event)
     {
         ClientHandshakeHandler.sendHandshakeRequest(CommonClass.minecraftClientInstance);
     }
@@ -28,7 +29,7 @@ public class ForgeEventHandler
     {
         CommonClass.setServerModStatus(false);
     }
-
+    /*
     @SubscribeEvent
     public static void RegisterClientCommandsEvent(RegisterClientCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
@@ -42,6 +43,6 @@ public class ForgeEventHandler
                             .then(Commands.literal("groups").executes(groupClearAllCtx -> ClientCommands.clearAllGroups()))
                             .then(Commands.literal("waypoints").executes(waypointClearAllCtx -> ClientCommands.clearAllWaypoints())))
         );
-    }
+    }*/
 
 }

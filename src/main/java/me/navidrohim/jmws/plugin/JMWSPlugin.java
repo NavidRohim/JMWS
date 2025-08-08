@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import com.sun.istack.internal.NotNull;
 import journeymap.client.api.ClientPlugin;
 import journeymap.client.api.IClientAPI;
 import journeymap.client.api.IClientPlugin;
@@ -21,10 +20,8 @@ import me.navidrohim.jmws.helper.CommandHelper;
 import me.navidrohim.jmws.helper.CommonHelper;
 import me.navidrohim.jmws.helper.PlayerHelper;
 import me.navidrohim.jmws.payloads.JMWSActionMessage;
-import me.navidrohim.jmws.payloads.JMWSActionPayload;
 
-import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
-
+import me.navidrohim.jmws.payloads.JMWSNetworkWrapper;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -46,7 +43,7 @@ public class JMWSPlugin implements IClientPlugin {
     // Required functions
 
     @Override
-    public void initialize(@NotNull IClientAPI jmClientApi)
+    public void initialize(IClientAPI jmClientApi)
     {
 
         this.jmAPI = jmClientApi;
@@ -82,6 +79,7 @@ public class JMWSPlugin implements IClientPlugin {
         waypoint.setPersistent(false);
 
         String creationData = CommandHelper.makeCreationRequestJson(waypoint, silent, isUpdate);
+        JMWSNetworkWrapper.INSTANCE.sendToServer(new JMWSActionMessage(creationData));
         //Dispatcher.sendToServer(new JMWSActionPayload(creationData));
     }
 
@@ -102,11 +100,10 @@ public class JMWSPlugin implements IClientPlugin {
 
         ObjectIdentifierMap.removeWaypointFromMap(waypoint);
         String jsonPacketData = CommandHelper.makeDeleteRequestJson(waypointFilename, silent, false);
-        JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
+        JMWSActionMessage waypointActionPayload = new JMWSActionMessage(jsonPacketData);
 
         jmAPI.remove(waypoint);
-        //jmAPI.removeWaypoint("journeymap", waypoint);
-        //Dispatcher.sendToServer(waypointActionPayload);
+        JMWSNetworkWrapper.INSTANCE.sendToServer(waypointActionPayload);
     }
 
     // JourneyMap event handlers
@@ -145,7 +142,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Sends "request" packet | New = "SYNC"
         if (CommonClass.getEnabledStatus()) {
-            //Dispatcher.sendToServer(new JMWSActionPayload(CommandHelper.makeWaypointSyncRequestJson(sendAlert)));
+            JMWSNetworkWrapper.INSTANCE.sendToServer(new JMWSActionMessage(CommandHelper.makeWaypointSyncRequestJson(sendAlert)));
         }
     }
 
@@ -166,9 +163,11 @@ public class JMWSPlugin implements IClientPlugin {
     // Helper for sync but for waypoints
     private boolean handleUploadWaypoints(JsonObject jsonWaypoints, EntityPlayerSP player) throws JsonSyntaxException, IllegalStateException {
         boolean hasLocalWaypoint = false;
+        String wa = "awd";//journeymap.client.model.Waypoint.GSON.toString();
 
+        /*
         // Get existing waypoints (local) and get waypoint objects saved on server
-        List<? extends Waypoint> existingWaypoints = jmAPI.getAllWaypoints();
+        List<? extends Waypoint> existingWaypoints = Collections.emptyList(); //jmAPI.getAllWaypoints();
         Set<SavedWaypoint> savedWaypoints = JMWSPlugin.getSavedWaypoints(jsonWaypoints, player.getUniqueID()); //POTENTIAL ISSUE
 
         // Get an identifier of every waypoint (BlockPos, location), used to detect if the waypoint already exists
@@ -197,6 +196,10 @@ public class JMWSPlugin implements IClientPlugin {
         } catch (Exception exception) {
             Constants.LOGGER.error("Could not display server waypoint.");
         }
+        return false;*/
+
+        Constants.LOGGER.info(wa);
+        return false;
     }
 
     public static void syncHandler(JMWSActionMessage waypointPayload, EntityPlayerSP player) {
