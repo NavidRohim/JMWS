@@ -10,7 +10,7 @@ public class PlayerNetworkingHelper {
         JMWSNetworkWrapper.INSTANCE.sendTo(handshakePayload, player);
     }
 
-    public static void sendUserMessage(EntityPlayerMP player, String messageKey, Boolean overlay, boolean isError) {
+    public static void      sendUserMessage(EntityPlayerMP player, String messageKey, Boolean overlay, boolean isError) {
         JMWSActionMessage messagePayload = new JMWSActionMessage(CommandHelper.makeClientAlertRequestJson(messageKey, overlay, isError));
         JMWSNetworkWrapper.INSTANCE.sendTo(messagePayload, player);
     }

@@ -26,7 +26,6 @@ public class ClientHandshakeHandler {
 
     public static void sendHandshakeRequest(Minecraft client)
     {
-        Constants.LOGGER.info(client.isSingleplayer());
         if (!client.isSingleplayer()) {
             JMWSNetworkWrapper.INSTANCE.sendToServer(new JMWSHandshakeMessage());
 

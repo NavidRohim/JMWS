@@ -67,7 +67,6 @@ public class ServerConfig {
 
     public static ServerConfigObject getConfig(String data)
     {
-        Constants.LOGGER.info("DATACONFIG " + data);
         Gson configJsonObj = new Gson();
         return configJsonObj.fromJson(data, ServerConfigObject.class);
     }

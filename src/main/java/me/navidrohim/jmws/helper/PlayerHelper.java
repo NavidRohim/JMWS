@@ -12,7 +12,6 @@ public class PlayerHelper {
     public static void sendUserAlert(String text, boolean overlayText, boolean ignoreConfig, JMWSMessageType messageType) {
         String finalText = text;
 
-        Constants.LOGGER.info(finalText);
         if (CommonClass.config.colouredText) {
             finalText = messageType.toString() + finalText;
         }

@@ -2,15 +2,16 @@
 {
   "modid": "jmws",
   "name": "JourneyMap Waypoint Syncing",
-  "description": "Example placeholder mod.",
-  "version": "${version}",
+  "description": "This mod allows you to save waypoints on JourneyMap between multiple devices via the player/account UUID on the server.",
+  "version": "1.1.4-1.12.2",
   "mcversion": "${mcversion}",
-  "url": "",
+  "url": "https://www.curseforge.com/minecraft/mc-mods/journeymap-waypoint-syncing",
   "updateUrl": "",
-  "authorList": ["ExampleDude"],
-  "credits": "The Forge and FML guys, for making this example",
+  "authorList": ["Navid Rohim", "Dempy", "Kay"],
+  "credits": "The Forge and FML guys, plus the translators I used",
   "logoFile": "assets/jmws/icon.png",
   "screenshots": [],
-  "dependencies": []
+  "dependencies": ["journeymap"],
+  "requiredMods": ["journeymap"]
 }
 ]

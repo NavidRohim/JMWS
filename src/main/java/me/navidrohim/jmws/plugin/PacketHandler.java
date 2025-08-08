@@ -33,21 +33,27 @@ public class PacketHandler {
 
                 // Was creation_response
                 // Sends no outbound data
-                case SYNC: JMWSPlugin.syncHandler(waypointPayload, CommonClass.minecraftClientInstance.player);
+                case SYNC:
+                    JMWSPlugin.syncHandler(waypointPayload, CommonClass.minecraftClientInstance.player);
+                    break;
 
                 // was "update"
                 // Sends "request" packet | New = "SYNC"
-                case REQUEST_CLIENT_SYNC: JMWSPlugin.updateWaypoints(true);
+                case REQUEST_CLIENT_SYNC:
+                    JMWSPlugin.updateWaypoints(true);
+                    break;
 
                 // was display_interval
                 // No outbound data
-                case COMMON_DISPLAY_INTERVAL: sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.sync_frequency", CommonClass.getSyncFrequency()), true, false, JMWSMessageType.NEUTRAL);
+                case COMMON_DISPLAY_INTERVAL:
+                    sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.sync_frequency", CommonClass.getSyncFrequency()), true, false, JMWSMessageType.NEUTRAL);
+                    break;
 
                 // was "alert"
                 // No outbound data
                 case CLIENT_ALERT: {
-                    String firstArgument = waypointPayload.arguments().get(0).getAsString();
-                    boolean isError = waypointPayload.arguments().get(-1).getAsBoolean();
+                    String firstArgument = waypointPayload.arguments().get(0). getAsString();
+                    boolean isError = waypointPayload.arguments().get(waypointPayload.arguments().size() - 1).getAsBoolean();
                     JMWSMessageType messageType = JMWSMessageType.NEUTRAL;
 
                     if (isError) {
@@ -56,6 +62,8 @@ public class PacketHandler {
                     }
 
                     sendUserAlert(CommonHelper.getTranslatableComponent(firstArgument), waypointPayload.arguments().get(1).getAsBoolean(), false, messageType);
+
+                    break;
                 }
 
 
@@ -69,11 +77,14 @@ public class PacketHandler {
                             Objects.equals(firstArgument1, "*"),
                             firstArgument1
                     );
+                    break;
                 }
 
                 // was "display_next_update"
                 // No outbound data
-                case COMMON_DISPLAY_NEXT_UPDATE: sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.next_sync", (CommonClass.timeUntilNextSync())), true, false, JMWSMessageType.NEUTRAL);
+                case COMMON_DISPLAY_NEXT_UPDATE:
+                    sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.next_sync", (CommonClass.timeUntilNextSync())), true, false, JMWSMessageType.NEUTRAL);
+                    break;
 
                 default: Constants.getLogger().warn("Unknown packet command -> " + waypointPayload.command());
             }

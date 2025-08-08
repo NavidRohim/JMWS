@@ -17,7 +17,7 @@ public class CommonHelper {
 
     public static String getTranslatableComponent(String key, Object... args)
     {
-        return I18n.format("message.jmws.creation_failure", args);
+        return I18n.format(key, args);
     }
 
     public static String getWaypointFilename(Waypoint waypoint, UUID uuID) {

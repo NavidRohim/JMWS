@@ -39,7 +39,6 @@ public class JMWSHandshakeReplyMessage implements IMessage {
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        Constants.LOGGER.info(buf.readableBytes());
         if (buf.readableBytes() != 0)
         {
             serverConfigDataJson = ByteBufUtils.readUTF8String(buf);

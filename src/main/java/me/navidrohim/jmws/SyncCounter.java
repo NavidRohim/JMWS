@@ -43,6 +43,7 @@ public class SyncCounter {
             } else {
 
                 tickCounter++;
+                Constants.LOGGER.info(tickCounter);
                 if (tickCounter >= tickCounterUpdateThreshold) {
 
                     updateWaypoints(true);

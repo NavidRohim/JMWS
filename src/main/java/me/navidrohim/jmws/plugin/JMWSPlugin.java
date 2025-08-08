@@ -11,6 +11,7 @@ import journeymap.client.api.IClientPlugin;
 import journeymap.client.api.display.DisplayType;
 import journeymap.client.api.display.Waypoint;
 import journeymap.client.api.event.ClientEvent;
+import journeymap.client.waypoint.WaypointStore;
 import me.navidrohim.jmws.CommonClass;
 import me.navidrohim.jmws.Constants;
 import me.navidrohim.jmws.client.enums.JMWSMessageType;
@@ -162,9 +163,6 @@ public class JMWSPlugin implements IClientPlugin {
 
     // Helper for sync but for waypoints
     private boolean handleUploadWaypoints(JsonObject jsonWaypoints, EntityPlayerSP player) throws JsonSyntaxException, IllegalStateException {
-        boolean hasLocalWaypoint = false;
-        String wa = "awd";//journeymap.client.model.Waypoint.GSON.toString();
-
         /*
         // Get existing waypoints (local) and get waypoint objects saved on server
         List<? extends Waypoint> existingWaypoints = Collections.emptyList(); //jmAPI.getAllWaypoints();
@@ -198,13 +196,16 @@ public class JMWSPlugin implements IClientPlugin {
         }
         return false;*/
 
-        Constants.LOGGER.info(wa);
+        //Constants.LOGGER.info(wa);
         return false;
     }
 
     public static void syncHandler(JMWSActionMessage waypointPayload, EntityPlayerSP player) {
         boolean hasLocalWaypoint = false;
-        boolean sendAlert = waypointPayload.arguments().get(-1).getAsBoolean();
+        boolean sendAlert = waypointPayload.arguments().get(waypointPayload.arguments().size() - 1).getAsBoolean();
+
+        String test = WaypointStore.INSTANCE.getAll().toString();
+        Constants.LOGGER.info("WPSTORE; " + test);
 
         try {
             if (config.uploadWaypoints) {

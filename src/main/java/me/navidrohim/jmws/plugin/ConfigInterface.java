@@ -21,7 +21,7 @@ public class ConfigInterface {
         this.playEffects = true;
         this.colouredText = true;
 
-        this.updateWaypointFrequency = 5;
+        this.updateWaypointFrequency = 40;
         this.serverHandshakeTimeout =  5;
     }
 

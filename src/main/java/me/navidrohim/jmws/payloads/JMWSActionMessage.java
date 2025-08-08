@@ -3,6 +3,7 @@ package me.navidrohim.jmws.payloads;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.netty.buffer.ByteBuf;
+import me.navidrohim.jmws.Constants;
 import me.navidrohim.jmws.enums.WaypointPayloadCommand;
 import me.navidrohim.jmws.helper.CommandHelper;
 import me.navidrohim.jmws.server.network.ServerPacketHandler;
@@ -68,5 +69,10 @@ public class JMWSActionMessage implements IMessage {
     public JsonArray arguments() {
         _setCommandAndArguments();
         return argumentList;
+    }
+
+    public String getRaw()
+    {
+        return this.jsonData;
     }
 }

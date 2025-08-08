@@ -1,7 +1,7 @@
 buildscript {
     repositories {
-        maven { url = 'https://maven.minecraftforge.net/' }
         mavenCentral()
+        maven { url = 'https://maven.minecraftforge.net/' }
         maven { url 'https://oss.sonatype.org/content/groups/public/' }
     }
     dependencies {
@@ -9,9 +9,12 @@ buildscript {
     }
 }
 
+configurations {
+    provided
+    compile.extendsFrom provided
+}
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
-apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
 version = '1.1.4-1.12.2-beta.1'
@@ -56,12 +59,20 @@ minecraft {
     }
 }
 
+repositories {
+    maven {
+        url "https://cursemaven.com"
+    }
+}
+
 dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
     compile group: "info.journeymap", name: "journeymap-api", version: project.journeymap_api_version, changing: true
+    implementation fg.deobf("curse.maven:journeymap-32274:5172461")
+
     // You may  put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"
     // compile "some.group:artifact:version"
@@ -116,17 +127,4 @@ publishing {
     }
 }
 
-sourceSets {
-    main {
-        resources {
-            srcDirs = ['src/main/resources']
-            include '**/*.lang'
-        }
-    }
-}
-processResources {
-    from(sourceSets.main.resources.srcDirs) {
-        include '**/*'
-    }
-    into "$buildDir/resources/main"
-}
+sourceSets { main { output.resourcesDir = output.classesDir } }

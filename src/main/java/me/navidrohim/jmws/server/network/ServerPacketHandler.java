@@ -38,7 +38,7 @@ public class ServerPacketHandler {
             case COMMON_DELETE_WAYPOINT: {
                 String fileName = arguments.get(0).getAsString().trim();
                 boolean silent = arguments.get(1).getAsBoolean();
-                boolean deleteAll = arguments.get(-1).getAsBoolean();
+                boolean deleteAll = arguments.get(2).getAsBoolean();
                 boolean result;
 
                 if (!deleteAll) {
@@ -54,6 +54,8 @@ public class ServerPacketHandler {
                         sendUserMessage(player, "message.jmws.deletion_failure", true, true);
                     }
                 }
+
+                break;
             }
 
             // Following two cases regarding creating groups and waypoints
@@ -76,6 +78,7 @@ public class ServerPacketHandler {
                 } else {
                     sendUserMessage(player, "message.jmws.server_disabled_waypoints", true, true);
                 }
+                break;
             }
 
             // was "request"
@@ -83,7 +86,7 @@ public class ServerPacketHandler {
                 try {
                     List<String> playerWaypoints = JMWSServerIO.getFileObjects(player.getUniqueID());
 
-                    boolean sendAlert = arguments.get(-1).getAsBoolean();
+                    boolean sendAlert = arguments.get(arguments.size() - 1).getAsBoolean();
                     HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
 
                     for (int i = 0 ; i < playerWaypoints.size() ; i++) {
@@ -100,11 +103,12 @@ public class ServerPacketHandler {
                     } else {
                         JMWSActionMessage waypointPayloadOutbound = new JMWSActionMessage(jsonData);
                         JMWSNetworkWrapper.INSTANCE.sendTo(waypointPayloadOutbound, player);
-                        //Dispatcher.sendToClient(waypointPayloadOutbound, player);
+
                     }
                 } catch (IOException ioe) {
                     Constants.getLogger().error(ioe.getMessage());
                 }
+                break;
             }
 
             default: Constants.getLogger().warn("Unknown packet command -> {}", command);
