@@ -52,7 +52,7 @@ public class ClientCommands {
     public static int nextSync()
     {
         if (!isInSingleplayer()) {
-            PlayerHelper.sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.next_sync", (CommonClass.syncCounter.getTickCounterUpdateThreshold() - CommonClass.syncCounter.getCurrentTickCount()) / 20), true, false, JMWSMessageType.NEUTRAL);
+            PlayerHelper.sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.next_sync", (CommonClass.syncCounter.getTickCounterUpdateThreshold() - CommonClass.syncCounter.getCurrentTickCount()) / 20 ), true, false, JMWSMessageType.NEUTRAL);
         } else {
             sendUserSinglePlayerWarning();
         }

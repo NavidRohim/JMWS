@@ -1,6 +1,7 @@
 package me.navidrohim.jmws.helper;
 
 import journeymap.client.api.display.Waypoint;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextComponentTranslation;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -14,9 +15,9 @@ import java.util.UUID;
 public class CommonHelper {
     // This is kinda just a "put whatever here that is used everywhere" class
 
-    public static TextComponentTranslation getTranslatableComponent(String key, Object... args)
+    public static String getTranslatableComponent(String key, Object... args)
     {
-        return new TextComponentTranslation(key, args);
+        return I18n.format("message.jmws.creation_failure", args);
     }
 
     public static String getWaypointFilename(Waypoint waypoint, UUID uuID) {

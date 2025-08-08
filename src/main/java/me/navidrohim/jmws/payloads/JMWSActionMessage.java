@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBuf;
 import me.navidrohim.jmws.enums.WaypointPayloadCommand;
 import me.navidrohim.jmws.helper.CommandHelper;
 import me.navidrohim.jmws.server.network.ServerPacketHandler;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -27,7 +28,6 @@ public class JMWSActionMessage implements IMessage {
             if (ctx.side.equals(Side.CLIENT))
             {
                 handlePacket(message);
-                return null;
             } else {
                 ServerPacketHandler.handleIncomingActionCommand(message, ctx.getServerHandler().player);
             }
@@ -44,12 +44,12 @@ public class JMWSActionMessage implements IMessage {
 
     @Override
     public void fromBytes(ByteBuf buf) {
-        this.jsonData = String.valueOf(buf.readBytes(buf.readableBytes()));
+        this.jsonData = ByteBufUtils.readUTF8String(buf);
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
-        buf.writeBytes(this.jsonData.getBytes());
+        ByteBufUtils.writeUTF8String(buf, this.jsonData);
     }
 
     private void _setCommandAndArguments()

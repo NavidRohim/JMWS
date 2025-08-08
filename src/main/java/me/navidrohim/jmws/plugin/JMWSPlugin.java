@@ -91,7 +91,7 @@ public class JMWSPlugin implements IClientPlugin {
         }
         this.createAction(waypoint, true, true);
 
-        PlayerHelper.sendUserAlert(new TextComponentTranslation("message.jmws.modified_waypoint_success"), true, false, JMWSMessageType.SUCCESS);
+        PlayerHelper.sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.modified_waypoint_success"), true, false, JMWSMessageType.SUCCESS);
     }
 
     private void deleteAction(Waypoint waypoint, boolean silent) {

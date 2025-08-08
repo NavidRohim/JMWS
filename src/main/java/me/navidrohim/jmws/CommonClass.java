@@ -26,7 +26,7 @@ public class CommonClass {
     // code that gets invoked by the entry point of the loader specific projects.
 
     public static Minecraft minecraftClientInstance = null;
-    public static ConfigInterface config = null;
+    public static ConfigInterface config = new ConfigInterface();// null
     public static SyncCounter syncCounter = null;
 
     public static boolean serverHasMod = false;
@@ -106,4 +106,6 @@ public class CommonClass {
         minecraftClientInstance = Minecraft.getMinecraft();
         syncCounter = new SyncCounter();
     }
+
+
 }

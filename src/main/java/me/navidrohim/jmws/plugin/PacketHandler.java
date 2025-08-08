@@ -80,7 +80,10 @@ public class PacketHandler {
         }
     }
 
-    public static void HandshakeHandler(JMWSHandshakeReplyMessage handshakePayload) {
+    public static void  HandshakeHandler(JMWSHandshakeReplyMessage handshakePayload) {
+
+        Constants.LOGGER.info("HPAYLOAD: " + handshakePayload);
+        Constants.LOGGER.info("HPAYLOAD CONFIG: " + handshakePayload.serverConfigData.jmwsEnabled);
 
         if (!handshakePayload.serverConfigData.jmwsEnabled) {
             sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.server_disabled_jmws"), true, false, JMWSMessageType.WARNING);

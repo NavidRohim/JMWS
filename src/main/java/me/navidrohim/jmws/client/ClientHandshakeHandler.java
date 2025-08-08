@@ -29,7 +29,6 @@ public class ClientHandshakeHandler {
         Constants.LOGGER.info(client.isSingleplayer());
         if (!client.isSingleplayer()) {
             JMWSNetworkWrapper.INSTANCE.sendToServer(new JMWSHandshakeMessage());
-            //Dispatcher.sendToServer(new JMWSHandshakePayload
 
             timeoutTask = scheduler.schedule(() -> {
                 if (!CommonClass.serverHasMod) {
