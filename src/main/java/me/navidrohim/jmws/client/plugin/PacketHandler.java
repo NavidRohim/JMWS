@@ -1,4 +1,4 @@
-package me.navidrohim.jmws.plugin;
+package me.navidrohim.jmws.client.plugin;
 
 import me.navidrohim.jmws.CommonClass;
 import me.navidrohim.jmws.Constants;
@@ -7,15 +7,11 @@ import me.navidrohim.jmws.client.helpers.JMWSSounds;
 import me.navidrohim.jmws.helper.CommonHelper;
 import me.navidrohim.jmws.helper.PlayerHelper;
 import me.navidrohim.jmws.payloads.JMWSActionMessage;
-import me.navidrohim.jmws.payloads.JMWSActionPayload;
-import me.navidrohim.jmws.payloads.JMWSHandshakePayload;
 import me.navidrohim.jmws.payloads.JMWSHandshakeReplyMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 
 import java.util.Objects;
 
-import static me.navidrohim.jmws.enums.WaypointPayloadCommand.*;
 import static me.navidrohim.jmws.helper.PlayerHelper.sendUserAlert;
 
 

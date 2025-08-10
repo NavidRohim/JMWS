@@ -1,4 +1,4 @@
-package me.navidrohim.jmws.client;
+package me.navidrohim.jmws.client.command;
 
 import me.navidrohim.jmws.CommonClass;
 import me.navidrohim.jmws.client.enums.JMWSMessageType;
@@ -6,9 +6,8 @@ import me.navidrohim.jmws.helper.CommandHelper;
 import me.navidrohim.jmws.helper.CommonHelper;
 import me.navidrohim.jmws.helper.PlayerHelper;
 import me.navidrohim.jmws.payloads.JMWSActionMessage;
-import me.navidrohim.jmws.payloads.JMWSActionPayload;
 import me.navidrohim.jmws.payloads.JMWSNetworkWrapper;
-import me.navidrohim.jmws.plugin.JMWSPlugin;
+import me.navidrohim.jmws.client.plugin.JMWSPlugin;
 
 public class ClientCommands {
 

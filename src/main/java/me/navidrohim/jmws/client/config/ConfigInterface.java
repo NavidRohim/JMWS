@@ -1,11 +1,10 @@
-package me.navidrohim.jmws.plugin;
+package me.navidrohim.jmws.client.config;
 
 
 public class ConfigInterface {
 
     public Boolean enabled;
     public final Boolean uploadWaypoints;
-    public final Boolean uploadGroups;
     public final Boolean showAlerts;
     public final Boolean playEffects;
     public final Boolean colouredText;
@@ -15,7 +14,6 @@ public class ConfigInterface {
     public ConfigInterface() {
         this.enabled =         true;
         this.uploadWaypoints = true;
-        this.uploadGroups =    true;
 
         this.showAlerts  = true;
         this.playEffects = true;

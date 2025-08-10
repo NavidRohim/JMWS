@@ -1,10 +1,9 @@
-package me.navidrohim.jmws;
+package me.navidrohim.jmws.client.events;
 
-import me.navidrohim.jmws.client.ClientHandshakeHandler;
+import me.navidrohim.jmws.CommonClass;
+import me.navidrohim.jmws.client.network.ClientHandshakeHandler;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;

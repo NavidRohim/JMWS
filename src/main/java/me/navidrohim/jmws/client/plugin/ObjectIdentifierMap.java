@@ -1,7 +1,8 @@
-package me.navidrohim.jmws.plugin;
+package me.navidrohim.jmws.client.plugin;
 
 
 import journeymap.client.api.display.Waypoint;
+//import journeymap.client.model.Waypoint;
 import me.navidrohim.jmws.helper.CommonHelper;
 
 import java.util.HashMap;

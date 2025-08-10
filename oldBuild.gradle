@@ -1,9 +1,9 @@
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
+        mavenCentral()
+        maven { url = 'https://maven.minecraftforge.net/' }
         maven { url 'https://oss.sonatype.org/content/groups/public/' }
         maven { url = 'https://repo.spongepowered.org/maven' }
-        mavenCentral()
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
@@ -11,32 +11,41 @@ buildscript {
     }
 }
 
+configurations {
+    provided
+    compile.extendsFrom provided
+}
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'org.spongepowered.mixin'
-apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
 
-version = mod_version
-group = mod_group
-archivesBaseName = mod_id
+version = '1.1.4-1.12.2-beta.1'
+group = 'me.navidrohim.jmws' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'jmws'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
 minecraft {
-    mappings channel: mappings_channel, version: mappings_version
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
-    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    mappings channel: 'snapshot', version: '20171003-1.12'
 
     runs {
         client {
             workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
             arg '-torg.spongepowered.asm.launch.MixinTweaker'
         }
 
         server {
+
+            // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
             arg '-torg.spongepowered.asm.launch.MixinTweaker'
         }
@@ -56,8 +65,10 @@ configurations {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-
+    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
+    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
+    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
+    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
     compile group: "info.journeymap", name: "journeymap-api", version: project.journeymap_api_version, changing: true
     implementation fg.deobf("curse.maven:journeymap-32274:5172461")
 
@@ -66,23 +77,7 @@ dependencies {
         exclude module: 'commons-io'
         exclude module: 'gson'
     }
-}
 
-processResources {
-    inputs.property 'version', project.version
-    inputs.property 'mcversion', minecraft_version
-
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-
-        expand 'mod_id': mod_id, 'mod_name': mod_name, 'version': project.version,
-                'mcversion': minecraft_version, 'mod_description': mod_description,
-                'mod_author': mod_author
-    }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
 }
 
 sourceSets {
@@ -94,14 +89,19 @@ sourceSets {
 mixin {
     config mod_mixin_configs.replace('${mod_id}', mod_id)
 }
-
+// Example for how to get properties into the manifest for reading by the runtime..
 jar {
-    from {
-        configurations.embed.collect { it.isDirectory() ? it : zipTree(it) }
-    } {
-        exclude 'LICENSE.txt', 'META-INF/MANIFSET.MF', 'META-INF/maven/**', 'META-INF/*.RSA', 'META-INF/*.SF'
+    manifest {
+        attributes([
+            "Specification-Title": "jmws",
+            "Specification-Vendor": "jmwssareus",
+            "Specification-Version": "1", // We are version 1 of ourselves
+            "Implementation-Title": project.name,
+            "Implementation-Version": "${version}",
+            "Implementation-Vendor" :"jmwssareus",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
     }
-
     manifest.attributes(
             'ForceLoadAsMod': 'true',
             'FMLCorePluginContainsFMLMod': 'true',
@@ -110,5 +110,23 @@ jar {
     )
 }
 
+// Example configuration to allow publishing using the maven-publish task
+// This is the preferred method to reobfuscate your jar file
 jar.finalizedBy('reobfJar')
-sourceSets { main { output.resourcesDir = output.classesDir } }
+// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
+//publish.dependsOn('reobfJar')
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file:///${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+//sourceSets { main { output.resourcesDir = output.classesDir } }

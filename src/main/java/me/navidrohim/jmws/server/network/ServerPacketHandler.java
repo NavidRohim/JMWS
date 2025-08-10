@@ -1,7 +1,6 @@
 package me.navidrohim.jmws.server.network;
 
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import me.navidrohim.jmws.Constants;
@@ -9,7 +8,6 @@ import me.navidrohim.jmws.enums.WaypointPayloadCommand;
 import me.navidrohim.jmws.helper.CommandHelper;
 import me.navidrohim.jmws.helper.CommonHelper;
 import me.navidrohim.jmws.payloads.JMWSActionMessage;
-import me.navidrohim.jmws.payloads.JMWSActionPayload;
 import me.navidrohim.jmws.payloads.JMWSNetworkWrapper;
 import me.navidrohim.jmws.server.config.ServerConfig;
 import me.navidrohim.jmws.server.io.JMWSServerIO;
@@ -40,6 +38,8 @@ public class ServerPacketHandler {
                 boolean silent = arguments.get(1).getAsBoolean();
                 boolean deleteAll = arguments.get(2).getAsBoolean();
                 boolean result;
+
+                Constants.LOGGER.info(fileName);
 
                 if (!deleteAll) {
                     result = CommonHelper.deleteFile(fileName);

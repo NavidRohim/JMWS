@@ -10,6 +10,7 @@ import me.navidrohim.jmws.enums.WaypointPayloadCommand;
 import java.util.*;
 
 public class CommandHelper {
+
     public static class PacketCommand {
         WaypointPayloadCommand command;
         List<Object> arguments;
@@ -33,8 +34,8 @@ public class CommandHelper {
         return CommandHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, Arrays.asList(Collections.emptyMap(), Collections.emptyMap(), sendAlert));
     }
 
-    public static String makeCreationRequestJson(Waypoint waypoint, boolean silent, boolean isUpdate) {
-        return CommandHelper.makeBaseJsonRequest(WaypointPayloadCommand.SERVER_CREATE, Arrays.asList(waypoint.toString(), silent, isUpdate));
+    public static String makeCreationRequestJson(String waypointData, boolean silent, boolean isUpdate) {
+        return CommandHelper.makeBaseJsonRequest(WaypointPayloadCommand.SERVER_CREATE, Arrays.asList(waypointData, silent, isUpdate));
     }
 
     public static String makeSyncRequestResponseJson(HashMap<String, String> jsonArray, boolean sendAlert) {

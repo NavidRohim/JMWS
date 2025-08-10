@@ -1,11 +1,10 @@
 package me.navidrohim.jmws;
 
 
+import me.navidrohim.jmws.client.SyncCounter;
 import me.navidrohim.jmws.payloads.*;
-import me.navidrohim.jmws.plugin.ConfigInterface;
-import me.navidrohim.jmws.plugin.PacketHandler;
+import me.navidrohim.jmws.client.config.ConfigInterface;
 import me.navidrohim.jmws.server.config.ServerConfig;
-import me.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
@@ -13,7 +12,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 import java.io.File;
 
-import static me.navidrohim.jmws.client.ClientHandshakeHandler.timeoutTask;
+import static me.navidrohim.jmws.client.network.ClientHandshakeHandler.timeoutTask;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -64,7 +63,7 @@ public class CommonClass {
 
 
     public static boolean getEnabledStatus() {
-        return serverHasMod && config.enabled && (config.uploadGroups || config.uploadWaypoints) && !minecraftClientInstance.isSingleplayer();
+        return serverHasMod && config.enabled && (config.uploadWaypoints) && !minecraftClientInstance.isSingleplayer();
     }
 
     public static String side() {

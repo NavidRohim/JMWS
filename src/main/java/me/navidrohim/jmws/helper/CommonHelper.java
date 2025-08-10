@@ -1,6 +1,7 @@
 package me.navidrohim.jmws.helper;
 
-import journeymap.client.api.display.Waypoint;
+import journeymap.client.model.Waypoint;
+import me.navidrohim.jmws.Constants;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextComponentTranslation;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -21,7 +22,7 @@ public class CommonHelper {
     }
 
     public static String getWaypointFilename(Waypoint waypoint, UUID uuID) {
-        Vector3d waypointLocationVector = new Vector3d(waypoint.getPosition().getX(), waypoint.getPosition().getY(), waypoint.getPosition().getZ());
+        Vector3d waypointLocationVector = new Vector3d(waypoint.getX(), waypoint.getY(), waypoint.getZ());
         return _getWaypointFromRaw(waypointLocationVector, waypoint.getName(), uuID);
     }
 
@@ -33,13 +34,14 @@ public class CommonHelper {
                 "_" +
                 coordVector.z +
                 "_" +
-                waypointName +
+                waypointName.replace(":", "-") +
                 "_" +
                 playerUUID +
                 ".json";
     }
 
     public static boolean deleteFile(String filename) {
+        Constants.LOGGER.info("delserver " + filename);
         File waypointFileObj = new File(filename);
         return waypointFileObj.delete();
     }

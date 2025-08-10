@@ -1,7 +1,6 @@
-package me.navidrohim.jmws.client;
+package me.navidrohim.jmws.client.network;
 
 import me.navidrohim.jmws.CommonClass;
-import me.navidrohim.jmws.Constants;
 import me.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.navidrohim.jmws.client.helpers.JMWSSounds;
 import me.navidrohim.jmws.helper.CommonHelper;

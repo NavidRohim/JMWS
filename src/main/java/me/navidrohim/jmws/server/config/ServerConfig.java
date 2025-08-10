@@ -2,11 +2,9 @@ package me.navidrohim.jmws.server.config;
 
 import com.google.gson.Gson;
 import me.navidrohim.jmws.Constants;
-import me.navidrohim.jmws.exceptions.ServerConfigurationException;
+import me.navidrohim.jmws.server.exceptions.ServerConfigurationException;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;

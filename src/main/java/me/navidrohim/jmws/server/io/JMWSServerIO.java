@@ -6,6 +6,7 @@ import me.navidrohim.jmws.CommonClass;
 import me.navidrohim.jmws.Constants;
 import me.navidrohim.jmws.client.objects.SavedWaypoint;
 import me.navidrohim.jmws.helper.CommonHelper;
+import scala.tools.nsc.backend.icode.analysis.CopyPropagation;
 
 import javax.vecmath.Vector3d;
 import java.io.FileWriter;
@@ -23,18 +24,17 @@ import static me.navidrohim.jmws.helper.CommonHelper._getWaypointFromRaw;
 public class JMWSServerIO {
 
     public static boolean createWaypoint(JsonObject jsonObject, UUID playerUUID) {
-        JsonObject pos = jsonObject.getAsJsonObject().getAsJsonObject("pos");
+        Constants.LOGGER.info(jsonObject.getAsJsonObject());
         String waypointFilePath = _getWaypointFromRaw(new Vector3d(
-                pos.get("x").getAsInt(),
-                pos.get("y").getAsInt(),
-                pos.get("z").getAsInt()
+                jsonObject.get("x").getAsInt(),
+                jsonObject.get("y").getAsInt(),
+                jsonObject.get("z").getAsInt()
                 ),
                 jsonObject.get("name").getAsString(),
                 playerUUID
-
         );
-        try {
 
+        try {
             Path waypointPathObj = Paths.get(waypointFilePath);
 
             Files.createFile(waypointPathObj);
@@ -50,6 +50,7 @@ public class JMWSServerIO {
             return createWaypoint(jsonObject, playerUUID);
 
         } catch (FileSystemException missingPerms) {
+            Constants.LOGGER.info(waypointFilePath);
             Constants.getLogger().error("JMWS is missing write permissions to \"jmws\" folder. (waypoint error)");
             return false;
 

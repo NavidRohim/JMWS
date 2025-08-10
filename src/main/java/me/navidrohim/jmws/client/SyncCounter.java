@@ -1,9 +1,10 @@
-package me.navidrohim.jmws;
+package me.navidrohim.jmws.client;
 
 
+import me.navidrohim.jmws.CommonClass;
 import net.minecraft.client.multiplayer.WorldClient;
 
-import static me.navidrohim.jmws.plugin.JMWSPlugin.updateWaypoints;
+import static me.navidrohim.jmws.client.plugin.JMWSPlugin.updateWaypoints;
 
 public class SyncCounter {
 
@@ -43,7 +44,6 @@ public class SyncCounter {
             } else {
 
                 tickCounter++;
-                Constants.LOGGER.info(tickCounter);
                 if (tickCounter >= tickCounterUpdateThreshold) {
 
                     updateWaypoints(true);

@@ -1,0 +1,12 @@
+{
+  "compatibilityLevel": "JAVA_8",
+  "package": "me.navidrohim.jmws.client.mixin",
+  "refmap": "refmap.jmws.json",
+  "mixins": [],
+  "client": [
+    "MixinMinecraft",
+    "WaypointManagerMixin",
+    "WaypointManagerItemMixin"
+  ],
+  "server": []
+}
