@@ -11,7 +11,7 @@
   "credits": "The Forge and FML guys, plus the translators I used",
   "logoFile": "assets/jmws/icon.png",
   "screenshots": [],
-  "dependencies": ["journeymap"],
-  "requiredMods": ["journeymap"]
+  "dependencies": [],
+  "requiredMods": []
 }
 ]

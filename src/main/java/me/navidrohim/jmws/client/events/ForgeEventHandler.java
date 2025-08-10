@@ -1,16 +1,27 @@
 package me.navidrohim.jmws.client.events;
 
+import me.navidrohim.jmws.Constants;
+import me.navidrohim.jmws.client.helpers.JMWSSounds;
 import me.navidrohim.jmws.CommonClass;
 import me.navidrohim.jmws.client.network.ClientHandshakeHandler;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.util.SoundEvent;
+import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.ConfigManager;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 
 
 public class ForgeEventHandler
 {
+    private static boolean pendingJoin = false;
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent clientTickEvent)
     {
@@ -21,9 +32,14 @@ public class ForgeEventHandler
     }
 
     @SubscribeEvent
-    public static void onEntityJoinWorld(EntityJoinWorldEvent event)
-    {
-        if (event.getEntity() instanceof EntityPlayerSP) {
+    public static void onClientConnect(FMLNetworkEvent.ClientConnectedToServerEvent event) {
+        pendingJoin = true; // Mark that we've just connected
+    }
+
+    @SubscribeEvent
+    public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
+        if (pendingJoin && event.getEntity() == CommonClass.minecraftClientInstance.player) {
+            pendingJoin = false; // Clear the flag so it only runs once
             ClientHandshakeHandler.sendHandshakeRequest(CommonClass.minecraftClientInstance);
         }
     }
@@ -31,22 +47,24 @@ public class ForgeEventHandler
     @SubscribeEvent
     public static void onEntityLeaveWorld(PlayerEvent.PlayerLoggedOutEvent event)
     {
+        pendingJoin = false; // Just in case
         CommonClass.setServerModStatus(false);
     }
-    /*
+
     @SubscribeEvent
-    public static void RegisterClientCommandsEvent(RegisterClientCommandsEvent event) {
-        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
+    public static void registerSounds(RegistryEvent.Register<SoundEvent> event)
+    {
+        final SoundEvent[] soundEvents = {
+                JMWSSounds.ACTION_SUCCEED,
+                JMWSSounds.ACTION_FAILURE
+        };
+        event.getRegistry().registerAll(soundEvents);
+    }
 
-        dispatcher.register(
-                Commands.literal("jmws")
-                    .then(Commands.literal("sync").executes(commandContext -> ClientCommands.sync()))
-                    .then(Commands.literal("getSyncInterval").executes(commandContext -> ClientCommands.getSyncInterval()))
-                    .then(Commands.literal("nextSync").executes(updateDisplayContext -> ClientCommands.nextSync()))
-                    .then(Commands.literal("clearAll")
-                            .then(Commands.literal("groups").executes(groupClearAllCtx -> ClientCommands.clearAllGroups()))
-                            .then(Commands.literal("waypoints").executes(waypointClearAllCtx -> ClientCommands.clearAllWaypoints())))
-        );
-    }*/
-
+    @SubscribeEvent
+    public static void onConfigChanged(final ConfigChangedEvent.OnConfigChangedEvent event) {
+        if (event.getModID().equals(Constants.MODID)) {
+            ConfigManager.sync(Constants.MODID, Config.Type.INSTANCE);
+        }
+    }
 }

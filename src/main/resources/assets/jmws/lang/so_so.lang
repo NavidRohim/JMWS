@@ -1,0 +1,5 @@
+message.jmws.deletion_success=Titir waypoint
+message.jmws.deletion_failure=Ma Tirtirikaro waypoint
+message.jmws.creation_success=Damaad waypoint
+message.jmws.creation_failure=Ma Tirtirikaro “waypoint”, Mar kale ku noqo athoo raali ah
+message.jmws.modified_waypoint_success=Cusboonaysiinta waypoint

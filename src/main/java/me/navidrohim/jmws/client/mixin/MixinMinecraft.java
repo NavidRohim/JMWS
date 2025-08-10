@@ -3,6 +3,8 @@ package me.navidrohim.jmws.client.mixin;
 
 import journeymap.client.model.Waypoint;
 
+import journeymap.client.ui.waypoint.WaypointEditor;
+import me.navidrohim.jmws.CommonClass;
 import me.navidrohim.jmws.Constants;
 import me.navidrohim.jmws.client.plugin.JMWSPlugin;
 import net.minecraft.client.gui.GuiButton;
@@ -14,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 
-@Mixin(journeymap.client.ui.waypoint.WaypointEditor.class) // I hope this isnt against JM TOS
+@Mixin(value = WaypointEditor.class) // I hope this isnt against JM TOS
 public abstract class MixinMinecraft {
 
     @Shadow
@@ -31,12 +33,15 @@ public abstract class MixinMinecraft {
     @Inject(method = "save()V", at = @At("HEAD"), remap = false)
     private void afterSave(CallbackInfo ci)
     {
-        if (!isNew)
+        if (CommonClass.getEnabledStatus())
         {
-            JMWSPlugin.getInstance().updateAction(editedWaypoint, originalWaypoint);
-            return;
+            if (!isNew)
+            {
+                JMWSPlugin.getInstance().updateAction(editedWaypoint, originalWaypoint);
+                return;
+            }
+            JMWSPlugin.createAction(editedWaypoint, false, false);
         }
-        JMWSPlugin.createAction(editedWaypoint, false, false);
     }
 
 }

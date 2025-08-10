@@ -3,7 +3,9 @@ package me.navidrohim.jmws.client;
 import me.navidrohim.jmws.CommonClass;
 import me.navidrohim.jmws.CommonProxy;
 import me.navidrohim.jmws.Constants;
+import me.navidrohim.jmws.client.command.ClientCommandBase;
 import me.navidrohim.jmws.client.events.ForgeEventHandler;
+import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -23,6 +25,7 @@ public class ClientProxy extends CommonProxy
     @Override
     public void init(FMLInitializationEvent event)
     {
+        ClientCommandHandler.instance.registerCommand(new ClientCommandBase());
     }
 
     @Override
@@ -31,9 +34,12 @@ public class ClientProxy extends CommonProxy
         Constants.LOGGER.info("postInit on client");
         if (Loader.isModLoaded("journeymap"))
         {
+            CommonClass.journeymapPresent = true;
             Constants.LOGGER.info("registering events");
             MinecraftForge.EVENT_BUS.register(ForgeEventHandler.class);
             CommonClass.setupMinecraftClientInstance();
+        } else {
+            Constants.LOGGER.error("JourneyMap is not present. Disabling JMWS..");
         }
     }
 

@@ -13,10 +13,12 @@ import me.navidrohim.jmws.server.config.ServerConfig;
 import me.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.entity.player.EntityPlayerMP;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
+import static me.navidrohim.jmws.helper.CommonHelper._getWaypointFromRaw;
 import static me.navidrohim.jmws.server.network.PlayerNetworkingHelper.sendUserMessage;
 
 public class ServerPacketHandler {
@@ -65,13 +67,25 @@ public class ServerPacketHandler {
                 if (serverEnabledJMWS() && (ServerConfig.getConfig().waypointsEnabled || isUpdateFromCreation)) {
                     JsonObject jsonCreationData = new JsonParser().parse(arguments.get(0).getAsString()).getAsJsonObject();
                     boolean silent = arguments.get(1).getAsBoolean();
-                    boolean waypointCreationSuccess = JMWSServerIO.createWaypoint(jsonCreationData, player.getUniqueID());
+
+                    String waypointFilePath = _getWaypointFromRaw(
+                            jsonCreationData.get("dimensions").getAsJsonArray().get(0).getAsInt(),
+                            jsonCreationData.get("y").getAsInt(),
+                            jsonCreationData.get("name").getAsString(),
+                            player.getUniqueID()
+                    );
+
+                    if (new File(waypointFilePath).isFile())
+                    {
+                        sendUserMessage(player, "message.jmws.duplicate_waypoint", true, true);
+                        break;
+                    }
+                    boolean waypointCreationSuccess = JMWSServerIO.createWaypoint(waypointFilePath, jsonCreationData, player);
 
                     if (!silent) {
                         if (waypointCreationSuccess) {
                             sendUserMessage(player, "message.jmws.creation_success", true, false);
                         } else {
-
                             sendUserMessage(player, "message.jmws.creation_failure", false, true);
                         }
                     }

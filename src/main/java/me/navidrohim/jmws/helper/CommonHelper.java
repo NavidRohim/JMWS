@@ -1,6 +1,8 @@
 package me.navidrohim.jmws.helper;
 
+import com.google.common.collect.Iterables;
 import journeymap.client.model.Waypoint;
+import me.navidrohim.jmws.CommonClass;
 import me.navidrohim.jmws.Constants;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -22,18 +24,29 @@ public class CommonHelper {
     }
 
     public static String getWaypointFilename(Waypoint waypoint, UUID uuID) {
-        Vector3d waypointLocationVector = new Vector3d(waypoint.getX(), waypoint.getY(), waypoint.getZ());
-        return _getWaypointFromRaw(waypointLocationVector, waypoint.getName(), uuID);
+        int primaryDim = Iterables.get(waypoint.getDimensions(), 0);/*
+        Vector3d waypointLocationVector;
+        Constants.LOGGER.info(waypoint.getX());
+        Constants.LOGGER.info(waypoint.getY());
+        Constants.LOGGER.info(waypoint.getZ());
+        if (primaryDim == -1)
+        {
+            waypointLocationVector = new Vector3d(waypoint.getX() * 8, waypoint.getY(), waypoint.getZ() * 8);
+        } else if (CommonClass.minecraftClientInstance.player.dimension == -1) {
+            waypointLocationVector = new Vector3d((double) waypoint.getX() / 8, waypoint.getY(), (double) waypoint.getZ() / 8);
+        } else {
+            waypointLocationVector = new Vector3d(waypoint.getX(), waypoint.getY(), waypoint.getZ());
+        }
+
+        Constants.LOGGER.info(waypointLocationVector);*/
+        //Vector3d waypointLocationVector = primaryDim == -1 ? new Vector3d(waypoint.getX() * 8, waypoint.getY(), waypoint.getZ() * 8) : new Vector3d(waypoint.getX(), waypoint.getY(), waypoint.getZ());
+        return _getWaypointFromRaw(primaryDim, waypoint.getY(), waypoint.getName(), uuID);
     }
 
-    public static String _getWaypointFromRaw(Vector3d coordVector, String waypointName, UUID playerUUID) {
+    public static String _getWaypointFromRaw(int waypointDim, int yLevel, String waypointName, UUID playerUUID) {
         return "./jmws/" +
-                coordVector.x +
-                "_" +
-                coordVector.y +
-                "_" +
-                coordVector.z +
-                "_" +
+                waypointDim +
+                yLevel +
                 waypointName.replace(":", "-") +
                 "_" +
                 playerUUID +

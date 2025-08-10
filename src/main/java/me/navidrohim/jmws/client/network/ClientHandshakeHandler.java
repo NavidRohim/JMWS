@@ -38,7 +38,6 @@ public class ClientHandshakeHandler {
             }, CommonClass.config.serverHandshakeTimeout, TimeUnit.SECONDS);
         } else {
             sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.world_is_local"), true, false, JMWSMessageType.WARNING);
-            sendUserSoundAlert(JMWSSounds.ACTION_SUCCEED);
         }
     }
 }

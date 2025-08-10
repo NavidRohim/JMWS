@@ -11,12 +11,12 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.Mixins;
 
-@Mod(modid = JMWS.MODID, name = JMWS.NAME, version = JMWS.VERSION)
+@Mod(modid = JMWS.MODID, name = JMWS.NAME, version = JMWS.VERSION, acceptableRemoteVersions = "*")
 public class JMWS
 {
     public static final String MODID = "jmws";
     public static final String NAME = "JourneyMap Waypoint Syncing";
-    public static final String VERSION = "1.1.4-1.12.2-alpha.1";
+    public static final String VERSION = "1.1.4-1.12.2-beta";
 
     public static Logger logger;
 

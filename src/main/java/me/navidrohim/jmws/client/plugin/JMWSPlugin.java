@@ -1,6 +1,7 @@
 package me.navidrohim.jmws.client.plugin;
 
 
+import com.google.common.collect.Iterables;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -9,6 +10,7 @@ import journeymap.client.api.ClientPlugin;
 import journeymap.client.api.IClientAPI;
 import journeymap.client.api.IClientPlugin;
 import journeymap.client.api.display.DisplayType;
+import journeymap.client.api.event.DeathWaypointEvent;
 import journeymap.client.model.Waypoint;
 import journeymap.client.api.event.ClientEvent;
 import journeymap.client.ui.UIManager;
@@ -26,7 +28,9 @@ import me.navidrohim.jmws.payloads.JMWSActionMessage;
 
 import me.navidrohim.jmws.payloads.JMWSNetworkWrapper;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraftforge.client.ClientCommandHandler;
 import scala.tools.nsc.backend.icode.analysis.CopyPropagation;
 
 import java.util.*;
@@ -64,7 +68,15 @@ public class JMWSPlugin implements IClientPlugin {
     @Override
     public void onEvent(ClientEvent clientEvent)
     {
+        if (CommonClass.getEnabledStatus())
+        {
+            DeathWaypointEvent deathWaypointEvent = (DeathWaypointEvent) clientEvent;
 
+            clientEvent.cancel();
+            Waypoint deathpoint = Waypoint.at(deathWaypointEvent.location, Waypoint.Type.Death, deathWaypointEvent.dimension);
+
+            createAction(deathpoint, true, false);
+        }
     }
 
     public static JMWSPlugin getInstance() {
@@ -82,6 +94,7 @@ public class JMWSPlugin implements IClientPlugin {
     public static void createAction(journeymap.client.model.Waypoint waypoint, boolean silent, boolean isUpdate)
     {
         WaypointStore.INSTANCE.remove(waypoint);
+        Constants.LOGGER.info(waypoint.toString());
         waypoint.setPersistent(false);
 
         String creationData = CommandHelper.makeCreationRequestJson(waypoint.toString(), silent, isUpdate);
@@ -93,7 +106,6 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (oldWaypoint != null) {
             this.deleteAction(oldWaypoint, true);
-            //jmAPI.remove(oldWaypoint);
         }
 
         Constants.LOGGER.info("new name > " + waypoint.getName());
@@ -184,10 +196,11 @@ public class JMWSPlugin implements IClientPlugin {
                         .mapToInt(Integer::intValue)
                         .toArray();
 
-                journeymap.client.api.display.Waypoint displayableWp = new journeymap.client.api.display.Waypoint(Constants.MODID, wp.getName(), 0, wp.getBlockPos())
+                int primaryDim = Iterables.get(wp.getDimensions(), 0);
+                journeymap.client.api.display.Waypoint displayableWp = new journeymap.client.api.display.Waypoint(Constants.MODID, wp.getName(), primaryDim, new BlockPos(wp.getPosition()))
                         .setPersistent(false)
                         .setDisplayDimensions(numArray)
-                        .setBackgroundColor(wp.getR() + wp.getG() + wp.getB());
+                        .setColor(wp.getColor());
 
                 jmAPI.show(displayableWp);
             }
@@ -205,7 +218,7 @@ public class JMWSPlugin implements IClientPlugin {
         String test = WaypointStore.INSTANCE.getAll().toString();
         /*
         try {*/
-        if (config.uploadWaypoints) {
+        if (CommonClass.getEnabledStatus()) {
             hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().get(0).getAsJsonObject(), player);
         }
 

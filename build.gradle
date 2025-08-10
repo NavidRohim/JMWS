@@ -48,6 +48,7 @@ repositories {
         url "https://cursemaven.com"
     }
     maven { url = 'https://repo.spongepowered.org/maven' }
+    maven { url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" }
 }
 
 configurations {
@@ -60,8 +61,9 @@ dependencies {
 
     compile group: "info.journeymap", name: "journeymap-api", version: project.journeymap_api_version, changing: true
     implementation fg.deobf("curse.maven:journeymap-32274:5172461")
+    implementation "me.djtheredstoner:DevAuth-forge-legacy:1.2.1"
 
-    embed('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
+embed('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
@@ -106,7 +108,8 @@ jar {
             'ForceLoadAsMod': 'true',
             'FMLCorePluginContainsFMLMod': 'true',
             'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
-            'TweakOrder': '0'
+            'TweakOrder': '0',
+            'MixinConfigs': "mixins.${mod_id}.json"
     )
 }
 

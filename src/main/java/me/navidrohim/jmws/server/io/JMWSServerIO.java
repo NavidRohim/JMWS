@@ -6,9 +6,11 @@ import me.navidrohim.jmws.CommonClass;
 import me.navidrohim.jmws.Constants;
 import me.navidrohim.jmws.client.objects.SavedWaypoint;
 import me.navidrohim.jmws.helper.CommonHelper;
+import net.minecraft.entity.player.EntityPlayerMP;
 import scala.tools.nsc.backend.icode.analysis.CopyPropagation;
 
 import javax.vecmath.Vector3d;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.*;
@@ -19,26 +21,19 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static me.navidrohim.jmws.helper.CommonHelper._getWaypointFromRaw;
+import static me.navidrohim.jmws.server.network.PlayerNetworkingHelper.sendUserMessage;
 
 
 public class JMWSServerIO {
 
-    public static boolean createWaypoint(JsonObject jsonObject, UUID playerUUID) {
-        Constants.LOGGER.info(jsonObject.getAsJsonObject());
-        String waypointFilePath = _getWaypointFromRaw(new Vector3d(
-                jsonObject.get("x").getAsInt(),
-                jsonObject.get("y").getAsInt(),
-                jsonObject.get("z").getAsInt()
-                ),
-                jsonObject.get("name").getAsString(),
-                playerUUID
-        );
+
+    public static boolean createWaypoint(String waypointFilename, JsonObject jsonObject, EntityPlayerMP player) {
 
         try {
-            Path waypointPathObj = Paths.get(waypointFilePath);
+            Path waypointPathObj = Paths.get(waypointFilename);
 
             Files.createFile(waypointPathObj);
-            FileWriter waypointFileWriter = new FileWriter(waypointFilePath);
+            FileWriter waypointFileWriter = new FileWriter(waypointFilename);
             waypointFileWriter.write(jsonObject.toString());
             waypointFileWriter.close();
 
@@ -47,10 +42,10 @@ public class JMWSServerIO {
         } catch (NoSuchFileException noSuchFileException) {
             CommonClass._createServerResources();
             Constants.getLogger().warn("`jmws` folder was not found so another was made. All server waypoints and groups have been wiped. (waypoint error)");
-            return createWaypoint(jsonObject, playerUUID);
+            return createWaypoint(waypointFilename, jsonObject, player);
 
         } catch (FileSystemException missingPerms) {
-            Constants.LOGGER.info(waypointFilePath);
+            Constants.LOGGER.info(waypointFilename);
             Constants.getLogger().error("JMWS is missing write permissions to \"jmws\" folder. (waypoint error)");
             return false;
 

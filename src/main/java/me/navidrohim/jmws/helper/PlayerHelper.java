@@ -7,6 +7,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.client.FMLClientHandler;
 
 public class PlayerHelper {
     public static void sendUserAlert(String text, boolean overlayText, boolean ignoreConfig, JMWSMessageType messageType) {
@@ -25,7 +26,7 @@ public class PlayerHelper {
     public static void sendUserSoundAlert(SoundEvent sound) {
 
         if (CommonClass.config.playEffects && CommonClass.minecraftClientInstance.player != null) {
-            CommonClass.minecraftClientInstance.player.playSound(sound, 0.09f, 1f);
+            FMLClientHandler.instance().getClientPlayerEntity().playSound(sound, 0.09f, 1f);
         }
     }
 }

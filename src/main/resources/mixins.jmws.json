@@ -1,5 +1,7 @@
 {
+  "required": false,
   "compatibilityLevel": "JAVA_8",
+  "minVersion": "0.7.10",
   "package": "me.navidrohim.jmws.client.mixin",
   "refmap": "refmap.jmws.json",
   "mixins": [],
