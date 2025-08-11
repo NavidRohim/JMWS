@@ -6,7 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
+        classpath group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "5.1.+"
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
@@ -22,33 +22,36 @@ archivesBaseName = mod_id
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
-minecraft {
-    mappings channel: mappings_channel, version: mappings_version
-    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
-    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
-    runs {
-        client {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-            arg '-torg.spongepowered.asm.launch.MixinTweaker'
-        }
-
-        server {
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-            arg '-torg.spongepowered.asm.launch.MixinTweaker'
-        }
-    }
-}
-
 repositories {
     maven {
         url "https://cursemaven.com"
     }
     maven { url = 'https://repo.spongepowered.org/maven' }
     maven { url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" }
+    maven {
+        url 'https://maven.cleanroommc.com'
+    }
+}
+
+minecraft {
+    mappings channel: mappings_channel, version: mappings_version
+    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    runs {
+    //    client {
+    //        workingDirectory project.file('run')
+    //        property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+    //        property 'forge.logging.console.level', 'debug'
+    //        arg '-torg.spongepowered.asm.launch.MixinTweaker'
+    //    }
+    //
+        server {
+            //property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            //property 'forge.logging.console.level', 'debug'
+            //arg '-torg.spongepowered.asm.launch.MixinTweaker'
+        }
+    }
 }
 
 configurations {
@@ -60,10 +63,20 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     compile group: "info.journeymap", name: "journeymap-api", version: project.journeymap_api_version, changing: true
-    implementation fg.deobf("curse.maven:journeymap-32274:5172461")
     implementation "me.djtheredstoner:DevAuth-forge-legacy:1.2.1"
 
-embed('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
+    annotationProcessor 'org.ow2.asm:asm-debug-all:5.2'
+    annotationProcessor 'com.google.guava:guava:32.1.2-jre'
+
+    implementation ('zone.rong:mixinbooter:10.0') {
+        transitive = false
+    }
+    annotationProcessor ('zone.rong:mixinbooter:10.0') {
+        transitive = false
+    }
+    implementation fg.deobf("curse.maven:journeymap-32274:5172461")
+
+embed('org.spongepowered:mixin:0.8.5-SNAPSHOT') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
@@ -73,45 +86,24 @@ embed('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
 processResources {
     inputs.property 'version', project.version
     inputs.property 'mcversion', minecraft_version
-
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
-
-        expand 'mod_id': mod_id, 'mod_name': mod_name, 'version': project.version,
-                'mcversion': minecraft_version, 'mod_description': mod_description,
-                'mod_author': mod_author
-    }
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-}
-
-sourceSets {
-    main {
-        refMap = mod_mixin_refmap.replace('${mod_id}', mod_id)
-    }
-}
-
-mixin {
-    config mod_mixin_configs.replace('${mod_id}', mod_id)
 }
 
 jar {
-    from {
-        configurations.embed.collect { it.isDirectory() ? it : zipTree(it) }
-    } {
-        exclude 'LICENSE.txt', 'META-INF/MANIFSET.MF', 'META-INF/maven/**', 'META-INF/*.RSA', 'META-INF/*.SF'
-    }
+    archiveBaseName.set(findProperty("mod_name"))
+    archiveVersion.set(findProperty("minecraft_version") + "-" + findProperty("mod_version"))
 
     manifest.attributes(
             'ForceLoadAsMod': 'true',
             'FMLCorePluginContainsFMLMod': 'true',
-            'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
-            'TweakOrder': '0',
-            'MixinConfigs': "mixins.${mod_id}.json"
     )
 }
-
+/*tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += [
+            //"-processor", "org.spongepowered.asm.mixin.MixinAnnotationProcessor",
+            "-Amixin.env=client",
+            "-Amixin.defaultObfuscationEnv=searge",
+            "-Amixin.outRefMapFile=${project.buildDir}/resources/main/META-INF/refmap.jmws.json"
+    ]
+}*/
 jar.finalizedBy('reobfJar')
-sourceSets { main { output.resourcesDir = output.classesDir } }
+sourceSets.all { it.output.resourcesDir = it.output.classesDirs.getFiles().iterator().next() }
