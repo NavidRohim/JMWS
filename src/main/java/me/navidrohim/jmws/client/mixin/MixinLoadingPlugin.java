@@ -1,5 +1,6 @@
 package me.navidrohim.jmws.client.mixin;
 
+/*
 import zone.rong.mixinbooter.ILateMixinLoader;
 
 import java.util.Collections;
@@ -11,4 +12,4 @@ public class MixinLoadingPlugin implements ILateMixinLoader {
     public List<String> getMixinConfigs() {
         return Collections.singletonList("mixins.jmws.json");
     }
-}
+}*/

@@ -1,0 +1,117 @@
+buildscript {
+    repositories {
+        maven { url = 'https://files.minecraftforge.net/maven' }
+        maven { url 'https://oss.sonatype.org/content/groups/public/' }
+        maven { url = 'https://repo.spongepowered.org/maven' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "5.1.+"
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+    }
+}
+
+apply plugin: "java"
+apply plugin: 'net.minecraftforge.gradle'
+// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'eclipse'
+
+version = mod_version
+group = mod_group
+archivesBaseName = mod_id
+
+//sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+
+repositories {
+    maven {
+        url "https://cursemaven.com"
+    }
+    maven { url = 'https://repo.spongepowered.org/maven' }
+    maven { url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1" }
+    maven {
+        url 'https://maven.cleanroommc.com'
+    }
+}
+
+minecraft {
+    mappings channel: mappings_channel, version: mappings_version
+    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    runs {
+        client {
+            workingDirectory project.file('run/client')
+            mods { "${project.name}" { source sourceSets.main } }
+
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+        }
+
+        server {
+            workingDirectory project.file('run/server')
+            mods { "${project.name}" { source sourceSets.main } }
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+        }
+    }
+}
+
+configurations {
+    embed
+    compile.extendsFrom(embed)
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+
+    compile group: "info.journeymap", name: "journeymap-api", version: project.journeymap_api_version, changing: true
+    implementation "me.djtheredstoner:DevAuth-forge-legacy:1.2.1"
+
+    //annotationProcessor 'org.ow2.asm:asm-debug-all:5.2'
+    compileOnly 'com.google.guava:guava:32.1.2-jre'
+    compileOnly 'com.google.code.gson:gson:2.8.9'
+
+    implementation('zone.rong:mixinbooter:10.0') {
+        transitive = false
+    }
+    annotationProcessor('zone.rong:mixinbooter:10.0') {
+        transitive = false
+    }
+    implementation fg.deobf("curse.maven:journeymap-32274:5172461")
+}
+
+embed('org.spongepowered:mixin:0.8.5-SNAPSHOT') {
+        exclude module: 'guava'
+        exclude module: 'commons-io'
+        exclude module: 'gson'
+        //exclude module: 'asm'
+}
+
+
+sourceSets {
+    main {
+        ext.refMap = "mixins.jmws.refmap.json"
+    }
+}
+
+processResources {
+    inputs.property 'version', project.version
+    inputs.property 'mcversion', minecraft_version
+}
+
+jar {
+    archiveBaseName.set(findProperty("mod_id"))
+    archiveVersion.set(findProperty("minecraft_version") + "-" + findProperty("mod_version"))
+
+    manifest.attributes(
+            'ForceLoadAsMod': 'true',
+            'FMLCorePluginContainsFMLMod': 'true',
+            'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
+            'TweakOrder': '0',
+            'MixinConfigs': "mixins.${mod_id}.json"
+    )
+}
+
+jar.finalizedBy('reobfJar')
+//sourceSets.all { it.output.resourcesDir = it.output.classesDirs.getFiles().iterator().next() }
