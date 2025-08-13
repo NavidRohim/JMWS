@@ -4,6 +4,7 @@ package me.navidrohim.jmws.client.mixin;
 import journeymap.client.model.Waypoint;
 
 import journeymap.client.ui.waypoint.WaypointEditor;
+import journeymap.client.ui.waypoint.WaypointManagerItem;
 import me.navidrohim.jmws.common.CommonClass;
 import me.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.navidrohim.jmws.common.Constants;
@@ -41,6 +42,14 @@ public abstract class MixinMinecraft {
                 return;
             }
             JMWSPlugin.createAction(editedWaypoint, false, false);
+        }
+    }
+
+    @Inject(method = "remove()V", at = @At("HEAD"), remap = false)
+    private void beforeRemove(CallbackInfo ci)
+    {
+        if (CommonClass.getEnabledStatus()) {
+            JMWSPlugin.getInstance().deleteAction(originalWaypoint, false);
         }
     }
 

@@ -93,7 +93,7 @@ processResources {
 
 jar {
     archiveBaseName.set(findProperty("mod_id"))
-    archiveVersion.set(findProperty("minecraft_version") + "-" + findProperty("mod_version"))
+    archiveVersion.set(findProperty("mod_version"))
 
     manifest.attributes(
             'ForceLoadAsMod': 'true',

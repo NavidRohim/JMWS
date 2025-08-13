@@ -16,7 +16,7 @@ public class JMWS
 {
     public static final String MODID = "jmws";
     public static final String NAME = "JourneyMap Waypoint Syncing";
-    public static final String VERSION = "1.1.4-1.12.2-beta";
+    public static final String VERSION = "1.1.4-1.12.2-beta.3";
 
     public static Logger logger;
 
