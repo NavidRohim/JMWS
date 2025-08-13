@@ -1,9 +1,7 @@
-package me.navidrohim.jmws.payloads;
+package me.navidrohim.jmws.common.payloads;
 
 import io.netty.buffer.ByteBuf;
-import me.navidrohim.jmws.Constants;
-import me.navidrohim.jmws.server.config.ServerConfig;
-import me.navidrohim.jmws.server.config.ServerConfigObject;
+import me.navidrohim.jmws.common.Constants;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -18,7 +16,8 @@ public class JMWSHandshakeMessage implements IMessage {
         public IMessage onMessage(JMWSHandshakeMessage message, MessageContext ctx) {
             if (ctx.side.equals(Side.SERVER))
             {
-                return new JMWSHandshakeReplyMessage(ServerConfig.getConfigJson());
+                Constants.LOGGER.info(ServerConfigSendable.getServerConfigSendable());
+                return new JMWSHandshakeReplyMessage(ServerConfigSendable.getServerConfigSendable());
             }
             return null;
         }

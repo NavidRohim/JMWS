@@ -1,11 +1,10 @@
 package me.navidrohim.jmws.client.command;
 
 import info.journeymap.shaded.org.jetbrains.annotations.Nullable;
-import me.navidrohim.jmws.CommonClass;
+import me.navidrohim.jmws.common.CommonClass;
 import me.navidrohim.jmws.client.enums.JMWSMessageType;
-import me.navidrohim.jmws.helper.CommandHelper;
-import me.navidrohim.jmws.helper.CommonHelper;
-import me.navidrohim.jmws.helper.PlayerHelper;
+import me.navidrohim.jmws.common.helper.CommonHelper;
+import me.navidrohim.jmws.common.helper.PlayerHelper;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;

@@ -1,10 +1,12 @@
-package me.navidrohim.jmws;
+package me.navidrohim.jmws.common;
 
 
 import me.navidrohim.jmws.client.SyncCounter;
-import me.navidrohim.jmws.payloads.*;
-import me.navidrohim.jmws.client.config.ConfigInterface;
-import me.navidrohim.jmws.server.config.ServerConfig;
+import me.navidrohim.jmws.common.payloads.JMWSActionMessage;
+import me.navidrohim.jmws.common.payloads.JMWSHandshakeMessage;
+import me.navidrohim.jmws.common.payloads.JMWSHandshakeReplyMessage;
+import me.navidrohim.jmws.common.payloads.JMWSNetworkWrapper;
+import me.navidrohim.jmws.common.config.ConfigInterface;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
@@ -59,7 +61,6 @@ public class CommonClass {
     }
 
     public static void _createServerResources() {
-        ServerConfig.ensureExistence();
         new File("./jmws").mkdir();
     }
 

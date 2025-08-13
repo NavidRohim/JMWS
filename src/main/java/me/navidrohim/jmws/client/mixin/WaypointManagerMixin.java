@@ -3,7 +3,7 @@ package me.navidrohim.jmws.client.mixin;
 import journeymap.client.model.Waypoint;
 import journeymap.client.ui.waypoint.WaypointManager;
 import journeymap.client.ui.waypoint.WaypointManagerItem;
-import me.navidrohim.jmws.CommonClass;
+import me.navidrohim.jmws.common.CommonClass;
 import me.navidrohim.jmws.client.plugin.JMWSPlugin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

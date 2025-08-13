@@ -1,4 +1,4 @@
-package me.navidrohim.jmws;
+package me.navidrohim.jmws.common;
 
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;

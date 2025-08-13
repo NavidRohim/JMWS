@@ -1,11 +1,11 @@
 package me.navidrohim.jmws.client.network;
 
-import me.navidrohim.jmws.CommonClass;
+import me.navidrohim.jmws.common.CommonClass;
 import me.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.navidrohim.jmws.client.helpers.JMWSSounds;
-import me.navidrohim.jmws.helper.CommonHelper;
-import me.navidrohim.jmws.payloads.JMWSHandshakeMessage;
-import me.navidrohim.jmws.payloads.JMWSNetworkWrapper;
+import me.navidrohim.jmws.common.helper.CommonHelper;
+import me.navidrohim.jmws.common.payloads.JMWSHandshakeMessage;
+import me.navidrohim.jmws.common.payloads.JMWSNetworkWrapper;
 import net.minecraft.client.Minecraft;
 
 
@@ -14,8 +14,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static me.navidrohim.jmws.helper.PlayerHelper.sendUserAlert;
-import static me.navidrohim.jmws.helper.PlayerHelper.sendUserSoundAlert;
+import static me.navidrohim.jmws.common.helper.PlayerHelper.sendUserAlert;
+import static me.navidrohim.jmws.common.helper.PlayerHelper.sendUserSoundAlert;
 
 
 public class ClientHandshakeHandler {

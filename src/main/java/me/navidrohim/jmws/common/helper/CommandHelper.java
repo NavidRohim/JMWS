@@ -1,11 +1,10 @@
-package me.navidrohim.jmws.helper;
+package me.navidrohim.jmws.common.helper;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import journeymap.client.api.display.Waypoint;
-import me.navidrohim.jmws.enums.WaypointPayloadCommand;
+import me.navidrohim.jmws.common.enums.WaypointPayloadCommand;
 
 import java.util.*;
 

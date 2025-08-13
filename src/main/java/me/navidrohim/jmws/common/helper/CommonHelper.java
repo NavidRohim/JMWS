@@ -1,14 +1,10 @@
-package me.navidrohim.jmws.helper;
+package me.navidrohim.jmws.common.helper;
 
 import com.google.common.collect.Iterables;
 import journeymap.client.model.Waypoint;
-import me.navidrohim.jmws.CommonClass;
-import me.navidrohim.jmws.Constants;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.text.TextComponentTranslation;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import javax.vecmath.Vector3d;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

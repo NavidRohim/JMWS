@@ -1,4 +1,4 @@
-package me.navidrohim.jmws.enums;
+package me.navidrohim.jmws.common.enums;
 
 public enum WaypointPayloadCommand {
 

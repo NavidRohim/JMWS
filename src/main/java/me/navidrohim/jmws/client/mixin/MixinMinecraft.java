@@ -4,10 +4,8 @@ package me.navidrohim.jmws.client.mixin;
 import journeymap.client.model.Waypoint;
 
 import journeymap.client.ui.waypoint.WaypointEditor;
-import me.navidrohim.jmws.CommonClass;
-import me.navidrohim.jmws.Constants;
+import me.navidrohim.jmws.common.CommonClass;
 import me.navidrohim.jmws.client.plugin.JMWSPlugin;
-import net.minecraft.client.gui.GuiButton;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 

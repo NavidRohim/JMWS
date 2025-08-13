@@ -1,9 +1,7 @@
-package me.navidrohim.jmws.payloads;
+package me.navidrohim.jmws.common.payloads;
 
 import io.netty.buffer.ByteBuf;
 import me.navidrohim.jmws.client.network.PacketHandler;
-import me.navidrohim.jmws.server.config.ServerConfig;
-import me.navidrohim.jmws.server.config.ServerConfigObject;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -13,7 +11,7 @@ import net.minecraftforge.fml.relauncher.Side;
 public class JMWSHandshakeReplyMessage implements IMessage {
 
     public String serverConfigDataJson;
-    public ServerConfigObject serverConfigData;
+    public ServerConfigSendable serverConfigData;
 
     public static class JMWSHandshakeReplyMessageHandler implements IMessageHandler<JMWSHandshakeReplyMessage, IMessage>
     {
@@ -41,7 +39,7 @@ public class JMWSHandshakeReplyMessage implements IMessage {
         if (buf.readableBytes() != 0)
         {
             serverConfigDataJson = ByteBufUtils.readUTF8String(buf);
-            serverConfigData = ServerConfig.getConfig(serverConfigDataJson);
+            serverConfigData = ServerConfigSendable.getServerConfigFromData(serverConfigDataJson);
         }
     }
 

@@ -1,13 +1,9 @@
 package me.navidrohim.jmws.client.events;
 
-import me.navidrohim.jmws.Constants;
-import me.navidrohim.jmws.client.enums.JMWSMessageType;
+import me.navidrohim.jmws.common.Constants;
 import me.navidrohim.jmws.client.helpers.JMWSSounds;
-import me.navidrohim.jmws.CommonClass;
+import me.navidrohim.jmws.common.CommonClass;
 import me.navidrohim.jmws.client.network.ClientHandshakeHandler;
-import me.navidrohim.jmws.helper.CommonHelper;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
@@ -18,8 +14,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
-
-import static me.navidrohim.jmws.helper.PlayerHelper.sendUserAlert;
 
 
 public class ForgeEventHandler

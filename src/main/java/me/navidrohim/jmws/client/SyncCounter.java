@@ -1,7 +1,7 @@
 package me.navidrohim.jmws.client;
 
 
-import me.navidrohim.jmws.CommonClass;
+import me.navidrohim.jmws.common.CommonClass;
 import net.minecraft.client.multiplayer.WorldClient;
 
 import static me.navidrohim.jmws.client.plugin.JMWSPlugin.updateWaypoints;

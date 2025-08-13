@@ -1,19 +1,19 @@
 package me.navidrohim.jmws.client.network;
 
-import me.navidrohim.jmws.CommonClass;
-import me.navidrohim.jmws.Constants;
+import me.navidrohim.jmws.common.CommonClass;
+import me.navidrohim.jmws.common.Constants;
 import me.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.navidrohim.jmws.client.helpers.JMWSSounds;
 import me.navidrohim.jmws.client.plugin.JMWSPlugin;
-import me.navidrohim.jmws.helper.CommonHelper;
-import me.navidrohim.jmws.helper.PlayerHelper;
-import me.navidrohim.jmws.payloads.JMWSActionMessage;
-import me.navidrohim.jmws.payloads.JMWSHandshakeReplyMessage;
+import me.navidrohim.jmws.common.helper.CommonHelper;
+import me.navidrohim.jmws.common.helper.PlayerHelper;
+import me.navidrohim.jmws.common.payloads.JMWSActionMessage;
+import me.navidrohim.jmws.common.payloads.JMWSHandshakeReplyMessage;
 
 
 import java.util.Objects;
 
-import static me.navidrohim.jmws.helper.PlayerHelper.sendUserAlert;
+import static me.navidrohim.jmws.common.helper.PlayerHelper.sendUserAlert;
 
 
 public class PacketHandler {
@@ -89,10 +89,8 @@ public class PacketHandler {
     }
 
     public static void HandshakeHandler(JMWSHandshakeReplyMessage handshakePayload) {
-        if (!handshakePayload.serverConfigData.jmwsEnabled) {
+        if (!handshakePayload.serverConfigData.enabled) {
             sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.server_disabled_jmws"), true, false, JMWSMessageType.WARNING);
-        } else if (!handshakePayload.serverConfigData.waypointsEnabled) {
-            sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.server_disabled_waypoint"), true, false, JMWSMessageType.WARNING);
         } else {
             sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.has_jmws"), true, false, JMWSMessageType.SUCCESS);
         }

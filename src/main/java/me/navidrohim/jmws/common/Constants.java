@@ -1,5 +1,6 @@
-package me.navidrohim.jmws;
+package me.navidrohim.jmws.common;
 
+import me.navidrohim.jmws.JMWS;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;

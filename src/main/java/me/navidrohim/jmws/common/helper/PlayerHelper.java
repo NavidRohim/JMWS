@@ -1,12 +1,9 @@
-package me.navidrohim.jmws.helper;
+package me.navidrohim.jmws.common.helper;
 
-import me.navidrohim.jmws.CommonClass;
-import me.navidrohim.jmws.Constants;
+import me.navidrohim.jmws.common.CommonClass;
 import me.navidrohim.jmws.client.enums.JMWSMessageType;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.client.FMLClientHandler;
 
 public class PlayerHelper {

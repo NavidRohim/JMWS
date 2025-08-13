@@ -1,8 +1,8 @@
 package me.navidrohim.jmws.client;
 
-import me.navidrohim.jmws.CommonClass;
-import me.navidrohim.jmws.CommonProxy;
-import me.navidrohim.jmws.Constants;
+import me.navidrohim.jmws.common.CommonClass;
+import me.navidrohim.jmws.common.CommonProxy;
+import me.navidrohim.jmws.common.Constants;
 import me.navidrohim.jmws.client.command.ClientCommandBase;
 import me.navidrohim.jmws.client.events.ForgeEventHandler;
 import net.minecraftforge.client.ClientCommandHandler;

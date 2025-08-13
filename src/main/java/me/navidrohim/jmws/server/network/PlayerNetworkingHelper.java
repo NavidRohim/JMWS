@@ -1,8 +1,10 @@
 package me.navidrohim.jmws.server.network;
 
 
-import me.navidrohim.jmws.helper.CommandHelper;
-import me.navidrohim.jmws.payloads.*;
+import me.navidrohim.jmws.common.helper.CommandHelper;
+import me.navidrohim.jmws.common.payloads.JMWSActionMessage;
+import me.navidrohim.jmws.common.payloads.JMWSHandshakeReplyMessage;
+import me.navidrohim.jmws.common.payloads.JMWSNetworkWrapper;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 public class PlayerNetworkingHelper {

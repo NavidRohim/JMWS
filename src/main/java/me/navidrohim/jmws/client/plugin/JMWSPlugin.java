@@ -9,34 +9,27 @@ import com.google.gson.JsonSyntaxException;
 import journeymap.client.api.ClientPlugin;
 import journeymap.client.api.IClientAPI;
 import journeymap.client.api.IClientPlugin;
-import journeymap.client.api.display.DisplayType;
 import journeymap.client.api.event.DeathWaypointEvent;
 import journeymap.client.model.Waypoint;
 import journeymap.client.api.event.ClientEvent;
-import journeymap.client.ui.UIManager;
-import journeymap.client.ui.waypoint.WaypointEditor;
 import journeymap.client.waypoint.WaypointStore;
-import me.navidrohim.jmws.CommonClass;
-import me.navidrohim.jmws.Constants;
+import me.navidrohim.jmws.common.CommonClass;
+import me.navidrohim.jmws.common.Constants;
 import me.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.navidrohim.jmws.client.helpers.JMWSSounds;
 import me.navidrohim.jmws.client.objects.SavedWaypoint;
-import me.navidrohim.jmws.helper.CommandHelper;
-import me.navidrohim.jmws.helper.CommonHelper;
-import me.navidrohim.jmws.helper.PlayerHelper;
-import me.navidrohim.jmws.payloads.JMWSActionMessage;
+import me.navidrohim.jmws.common.helper.CommandHelper;
+import me.navidrohim.jmws.common.helper.CommonHelper;
+import me.navidrohim.jmws.common.helper.PlayerHelper;
+import me.navidrohim.jmws.common.payloads.JMWSActionMessage;
 
-import me.navidrohim.jmws.payloads.JMWSNetworkWrapper;
+import me.navidrohim.jmws.common.payloads.JMWSNetworkWrapper;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.client.ClientCommandHandler;
-import scala.tools.nsc.backend.icode.analysis.CopyPropagation;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static me.navidrohim.jmws.CommonClass.config;
 
 @ClientPlugin
 public class JMWSPlugin implements IClientPlugin {
@@ -46,9 +39,6 @@ public class JMWSPlugin implements IClientPlugin {
     // JourneyMap API
     private IClientAPI jmAPI = null;
     private static JMWSPlugin INSTANCE;
-
-    public static void updateEvent(journeymap.client.model.Waypoint originalWaypoint, journeymap.client.model.Waypoint editedWaypoint) {
-    }
 
     // Required functions
 

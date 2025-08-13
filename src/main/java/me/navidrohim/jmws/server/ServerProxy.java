@@ -1,6 +1,6 @@
 package me.navidrohim.jmws.server;
 
-import me.navidrohim.jmws.CommonProxy;
+import me.navidrohim.jmws.common.CommonProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;

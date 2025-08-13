@@ -1,4 +1,4 @@
-package me.navidrohim.jmws.exceptions;
+package me.navidrohim.jmws.common.exceptions;
 
 public class Whoopsies extends RuntimeException {
     public Whoopsies(String message) {

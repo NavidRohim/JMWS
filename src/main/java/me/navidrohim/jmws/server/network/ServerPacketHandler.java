@@ -3,13 +3,13 @@ package me.navidrohim.jmws.server.network;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import me.navidrohim.jmws.Constants;
-import me.navidrohim.jmws.enums.WaypointPayloadCommand;
-import me.navidrohim.jmws.helper.CommandHelper;
-import me.navidrohim.jmws.helper.CommonHelper;
-import me.navidrohim.jmws.payloads.JMWSActionMessage;
-import me.navidrohim.jmws.payloads.JMWSNetworkWrapper;
-import me.navidrohim.jmws.server.config.ServerConfig;
+import me.navidrohim.jmws.common.CommonClass;
+import me.navidrohim.jmws.common.Constants;
+import me.navidrohim.jmws.common.enums.WaypointPayloadCommand;
+import me.navidrohim.jmws.common.helper.CommandHelper;
+import me.navidrohim.jmws.common.helper.CommonHelper;
+import me.navidrohim.jmws.common.payloads.JMWSActionMessage;
+import me.navidrohim.jmws.common.payloads.JMWSNetworkWrapper;
 import me.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -18,13 +18,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import static me.navidrohim.jmws.helper.CommonHelper._getWaypointFromRaw;
+import static me.navidrohim.jmws.common.helper.CommonHelper._getWaypointFromRaw;
 import static me.navidrohim.jmws.server.network.PlayerNetworkingHelper.sendUserMessage;
 
 public class ServerPacketHandler {
 
     private static boolean serverEnabledJMWS() {
-        return ServerConfig.getConfig().jmwsEnabled && (ServerConfig.getConfig().waypointsEnabled);
+        return CommonClass.config.enabled;
     }
 
     public static void handleIncomingActionCommand(JMWSActionMessage Context, EntityPlayerMP player) {
@@ -62,7 +62,7 @@ public class ServerPacketHandler {
             case SERVER_CREATE: {
                 boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
 
-                if (serverEnabledJMWS() && (ServerConfig.getConfig().waypointsEnabled || isUpdateFromCreation)) {
+                if (serverEnabledJMWS() && (CommonClass.config.enabled || isUpdateFromCreation)) {
                     JsonObject jsonCreationData = new JsonParser().parse(arguments.get(0).getAsString()).getAsJsonObject();
                     boolean silent = arguments.get(1).getAsBoolean();
 

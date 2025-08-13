@@ -2,15 +2,12 @@ package me.navidrohim.jmws.server.io;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import me.navidrohim.jmws.CommonClass;
-import me.navidrohim.jmws.Constants;
+import me.navidrohim.jmws.common.CommonClass;
+import me.navidrohim.jmws.common.Constants;
 import me.navidrohim.jmws.client.objects.SavedWaypoint;
-import me.navidrohim.jmws.helper.CommonHelper;
+import me.navidrohim.jmws.common.helper.CommonHelper;
 import net.minecraft.entity.player.EntityPlayerMP;
-import scala.tools.nsc.backend.icode.analysis.CopyPropagation;
 
-import javax.vecmath.Vector3d;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.*;
@@ -19,9 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
-
-import static me.navidrohim.jmws.helper.CommonHelper._getWaypointFromRaw;
-import static me.navidrohim.jmws.server.network.PlayerNetworkingHelper.sendUserMessage;
 
 
 public class JMWSServerIO {

@@ -1,5 +1,7 @@
 package me.navidrohim.jmws;
 
+import me.navidrohim.jmws.common.CommonClass;
+import me.navidrohim.jmws.common.CommonProxy;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;

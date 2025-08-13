@@ -1,6 +1,6 @@
 package me.navidrohim.jmws.client.helpers;
 
-import me.navidrohim.jmws.Constants;
+import me.navidrohim.jmws.common.Constants;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 

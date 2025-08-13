@@ -1,6 +1,6 @@
-package me.navidrohim.jmws.payloads;
+package me.navidrohim.jmws.common.payloads;
 
-import me.navidrohim.jmws.Constants;
+import me.navidrohim.jmws.common.Constants;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
