@@ -6,6 +6,7 @@ import journeymap.client.model.Waypoint;
 import journeymap.client.ui.waypoint.WaypointEditor;
 import me.navidrohim.jmws.common.CommonClass;
 import me.navidrohim.jmws.client.plugin.JMWSPlugin;
+import me.navidrohim.jmws.common.Constants;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 

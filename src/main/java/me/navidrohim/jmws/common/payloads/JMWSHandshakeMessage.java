@@ -16,7 +16,6 @@ public class JMWSHandshakeMessage implements IMessage {
         public IMessage onMessage(JMWSHandshakeMessage message, MessageContext ctx) {
             if (ctx.side.equals(Side.SERVER))
             {
-                Constants.LOGGER.info(ServerConfigSendable.getServerConfigSendable());
                 return new JMWSHandshakeReplyMessage(ServerConfigSendable.getServerConfigSendable());
             }
             return null;

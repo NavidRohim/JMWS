@@ -8,3 +8,7 @@ todo
 - ~~Add back commands~~
 - ~~Add back configuration for client~~
 - ~~Fix single player crashing as soon as joined~~
+
+bugs
+
+none as far as I am aware of

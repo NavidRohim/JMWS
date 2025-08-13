@@ -42,7 +42,6 @@ public class ClientProxy extends CommonProxy
                 MinecraftForge.EVENT_BUS.register(ForgeEventHandler.class);
                 CommonClass.setupMinecraftClientInstance();
             } else {
-
                 Constants.LOGGER.error("MixinBooter mod is not present. Disabled JMWS.");
             }
         } else {
