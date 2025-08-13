@@ -24,22 +24,7 @@ public class CommonHelper {
     }
 
     public static String getWaypointFilename(Waypoint waypoint, UUID uuID) {
-        int primaryDim = Iterables.get(waypoint.getDimensions(), 0);/*
-        Vector3d waypointLocationVector;
-        Constants.LOGGER.info(waypoint.getX());
-        Constants.LOGGER.info(waypoint.getY());
-        Constants.LOGGER.info(waypoint.getZ());
-        if (primaryDim == -1)
-        {
-            waypointLocationVector = new Vector3d(waypoint.getX() * 8, waypoint.getY(), waypoint.getZ() * 8);
-        } else if (CommonClass.minecraftClientInstance.player.dimension == -1) {
-            waypointLocationVector = new Vector3d((double) waypoint.getX() / 8, waypoint.getY(), (double) waypoint.getZ() / 8);
-        } else {
-            waypointLocationVector = new Vector3d(waypoint.getX(), waypoint.getY(), waypoint.getZ());
-        }
-
-        Constants.LOGGER.info(waypointLocationVector);*/
-        //Vector3d waypointLocationVector = primaryDim == -1 ? new Vector3d(waypoint.getX() * 8, waypoint.getY(), waypoint.getZ() * 8) : new Vector3d(waypoint.getX(), waypoint.getY(), waypoint.getZ());
+        int primaryDim = Iterables.get(waypoint.getDimensions(), 0);
         return _getWaypointFromRaw(primaryDim, waypoint.getY(), waypoint.getName(), uuID);
     }
 
@@ -54,7 +39,6 @@ public class CommonHelper {
     }
 
     public static boolean deleteFile(String filename) {
-        Constants.LOGGER.info("delserver " + filename);
         File waypointFileObj = new File(filename);
         return waypointFileObj.delete();
     }

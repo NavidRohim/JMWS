@@ -1,9 +1,10 @@
-package me.navidrohim.jmws.client.plugin;
+package me.navidrohim.jmws.client.network;
 
 import me.navidrohim.jmws.CommonClass;
 import me.navidrohim.jmws.Constants;
 import me.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.navidrohim.jmws.client.helpers.JMWSSounds;
+import me.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.navidrohim.jmws.helper.CommonHelper;
 import me.navidrohim.jmws.helper.PlayerHelper;
 import me.navidrohim.jmws.payloads.JMWSActionMessage;
@@ -87,11 +88,7 @@ public class PacketHandler {
         }
     }
 
-    public static void  HandshakeHandler(JMWSHandshakeReplyMessage handshakePayload) {
-
-        Constants.LOGGER.info("HPAYLOAD: " + handshakePayload);
-        Constants.LOGGER.info("HPAYLOAD CONFIG: " + handshakePayload.serverConfigData.jmwsEnabled);
-
+    public static void HandshakeHandler(JMWSHandshakeReplyMessage handshakePayload) {
         if (!handshakePayload.serverConfigData.jmwsEnabled) {
             sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.server_disabled_jmws"), true, false, JMWSMessageType.WARNING);
         } else if (!handshakePayload.serverConfigData.waypointsEnabled) {

@@ -34,12 +34,19 @@ public class ClientProxy extends CommonProxy
         Constants.LOGGER.info("postInit on client");
         if (Loader.isModLoaded("journeymap"))
         {
-            CommonClass.journeymapPresent = true;
-            Constants.LOGGER.info("registering events");
-            MinecraftForge.EVENT_BUS.register(ForgeEventHandler.class);
-            CommonClass.setupMinecraftClientInstance();
+            CommonClass.hasJourneyMap = true;
+            if (Loader.isModLoaded("mixinbooter")) {
+                CommonClass.hasMixinBooter = true;
+
+                Constants.LOGGER.info("registering events");
+                MinecraftForge.EVENT_BUS.register(ForgeEventHandler.class);
+                CommonClass.setupMinecraftClientInstance();
+            } else {
+
+                Constants.LOGGER.error("MixinBooter mod is not present. Disabled JMWS.");
+            }
         } else {
-            Constants.LOGGER.error("JourneyMap is not present. Disabling JMWS..");
+            Constants.LOGGER.error("JourneyMap is not present. Disabled JMWS.");
         }
     }
 

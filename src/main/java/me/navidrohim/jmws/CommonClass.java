@@ -29,7 +29,8 @@ public class CommonClass {
     public static SyncCounter syncCounter = null;
 
     public static boolean serverHasMod = false;
-    public static boolean journeymapPresent = false;
+    public static boolean hasMixinBooter = false;
+    public static boolean hasJourneyMap;
 
     public static void setServerModStatus(boolean serverModStatus)
     {
@@ -64,7 +65,7 @@ public class CommonClass {
 
 
     public static boolean getEnabledStatus() {
-        return journeymapPresent && serverHasMod && ConfigInterface.enabled && !minecraftClientInstance.isSingleplayer();
+        return hasJourneyMap && hasMixinBooter && serverHasMod && ConfigInterface.enabled && !minecraftClientInstance.isSingleplayer();
     }
 
     public static String side() {

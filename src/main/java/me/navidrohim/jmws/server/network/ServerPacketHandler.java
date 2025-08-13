@@ -41,8 +41,6 @@ public class ServerPacketHandler {
                 boolean deleteAll = arguments.get(2).getAsBoolean();
                 boolean result;
 
-                Constants.LOGGER.info(fileName);
-
                 if (!deleteAll) {
                     result = CommonHelper.deleteFile(fileName);
                 } else {

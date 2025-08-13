@@ -1,7 +1,7 @@
 package me.navidrohim.jmws.payloads;
 
 import io.netty.buffer.ByteBuf;
-import me.navidrohim.jmws.client.plugin.PacketHandler;
+import me.navidrohim.jmws.client.network.PacketHandler;
 import me.navidrohim.jmws.server.config.ServerConfig;
 import me.navidrohim.jmws.server.config.ServerConfigObject;
 import net.minecraftforge.fml.common.network.ByteBufUtils;

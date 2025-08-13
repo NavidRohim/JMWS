@@ -12,7 +12,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 
-import static me.navidrohim.jmws.client.plugin.PacketHandler.handlePacket;
+import static me.navidrohim.jmws.client.network.PacketHandler.handlePacket;
 
 public class JMWSActionMessage implements IMessage {
 

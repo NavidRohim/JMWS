@@ -45,7 +45,6 @@ public class JMWSServerIO {
             return createWaypoint(waypointFilename, jsonObject, player);
 
         } catch (FileSystemException missingPerms) {
-            Constants.LOGGER.info(waypointFilename);
             Constants.getLogger().error("JMWS is missing write permissions to \"jmws\" folder. (waypoint error)");
             return false;
 

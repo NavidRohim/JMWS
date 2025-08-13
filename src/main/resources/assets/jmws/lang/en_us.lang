@@ -29,12 +29,13 @@ text.config.jmws-config.title=JourneyMap Waypoint Syncing (JMWS)
 error.jmws.error_packet_size=You have too many waypoints. Please delete some to continue making waypoints and syncing.
 error.jmws.error_corrupted_waypoint=One or more waypoints are corrupted. Contact administration for details.
 error.jmws.jmws_not_installed=Server does not have JMWS installed. JMWS will be disabled.
+error.jmws.mixinbooter_not_installed=Sorry! This mod requires mixinbooter v10.6. You can download it mod on CurseForge.
 
 warning.jmws.server_disabled_jmws=Server has JMWS, but has been disabled on server.
-warning.jmws.server_disabled_group=Server has JMWS, but group syncing has been disabled.
 warning.jmws.server_disabled_waypoint=Server has JMWS, but waypoint syncing has been disabled.
 warning.jmws.world_is_local=Playing in single player. JMWS will be disabled for you and all clients.
 warning.jmws.world_is_local_no_commands=Playing in single player. Some commands will not work.
+warning.jmws.jm_is_missing=JourneyMap isn't present, disabling JMWS...
 
 # JourneyMap Buttons,
 button.jmws.update_button=Sync waypoints,

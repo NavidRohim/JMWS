@@ -94,7 +94,6 @@ public class JMWSPlugin implements IClientPlugin {
     public static void createAction(journeymap.client.model.Waypoint waypoint, boolean silent, boolean isUpdate)
     {
         WaypointStore.INSTANCE.remove(waypoint);
-        Constants.LOGGER.info(waypoint.toString());
         waypoint.setPersistent(false);
 
         String creationData = CommandHelper.makeCreationRequestJson(waypoint.toString(), silent, isUpdate);
@@ -108,9 +107,6 @@ public class JMWSPlugin implements IClientPlugin {
             this.deleteAction(oldWaypoint, true);
         }
 
-        Constants.LOGGER.info("new name > " + waypoint.getName());
-        Constants.LOGGER.info("old name > " + oldWaypoint.getName());
-
         createAction(waypoint, true, true);
         PlayerHelper.sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.modified_waypoint_success"), true, false, JMWSMessageType.SUCCESS);
     }
@@ -118,7 +114,6 @@ public class JMWSPlugin implements IClientPlugin {
     public void deleteAction(Waypoint waypoint, boolean silent) {
 
         String waypointFilename = CommonHelper.getWaypointFilename(waypoint, CommonClass.minecraftClientInstance.player.getUniqueID());
-        Constants.LOGGER.info("del + " + waypointFilename);
 
         String jsonPacketData = CommandHelper.makeDeleteRequestJson(waypointFilename, silent, false);
         JMWSActionMessage waypointActionPayload = new JMWSActionMessage(jsonPacketData);

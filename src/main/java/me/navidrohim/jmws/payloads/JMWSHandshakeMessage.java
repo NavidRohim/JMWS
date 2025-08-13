@@ -18,7 +18,6 @@ public class JMWSHandshakeMessage implements IMessage {
         public IMessage onMessage(JMWSHandshakeMessage message, MessageContext ctx) {
             if (ctx.side.equals(Side.SERVER))
             {
-                Constants.LOGGER.info("got handshake req");
                 return new JMWSHandshakeReplyMessage(ServerConfig.getConfigJson());
             }
             return null;

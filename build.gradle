@@ -40,19 +40,21 @@ repositories {
 }
 
 dependencies {
+    // mc
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    //annotationProcessor 'org.ow2.asm:asm-debug-all:5.2'
-    //annotationProcessor 'com.google.guava:guava:32.1.2-jre'
-    //annotationProcessor 'com.google.code.gson:gson:2.8.9'
+    // mixinbooter
+    annotationProcessor 'org.ow2.asm:asm-debug-all:5.2'
+    annotationProcessor 'com.google.guava:guava:32.1.2-jre'
+    annotationProcessor 'com.google.code.gson:gson:2.8.9'
 
-    implementation ('zone.rong:mixinbooter:10.0') {
+    implementation ('zone.rong:mixinbooter:10.6') {
         transitive = false
     }
-    annotationProcessor ('zone.rong:mixinbooter:10.0') {
+    annotationProcessor ('zone.rong:mixinbooter:10.6') {
         transitive = false
     }
-
+    // journeymap
     implementation fg.deobf("curse.maven:journeymap-32274:5172461")
 }
 
@@ -63,6 +65,7 @@ minecraft {
         "client" {
             workingDirectory file("./run")
             mods { "${project.name}" { source sourceSets.main } }
+            arg '-torg.spongepowered.asm.launch.MixinTweaker'
         }
 
         "server" {
@@ -89,7 +92,7 @@ processResources {
 }
 
 jar {
-    archiveBaseName.set(findProperty("mod_name"))
+    archiveBaseName.set(findProperty("mod_id"))
     archiveVersion.set(findProperty("minecraft_version") + "-" + findProperty("mod_version"))
 
     manifest.attributes(
