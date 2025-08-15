@@ -66,8 +66,11 @@ public class ServerPacketHandler {
                     JsonObject jsonCreationData = new JsonParser().parse(arguments.get(0).getAsString()).getAsJsonObject();
                     boolean silent = arguments.get(1).getAsBoolean();
 
+                    JsonArray dimensionsArray = jsonCreationData.get("dimensions").getAsJsonArray();
+                    int primaryDim = dimensionsArray.size() > 0 ? dimensionsArray.get(0).getAsInt() : 999;
+
                     String waypointFilePath = _getWaypointFromRaw(
-                            jsonCreationData.get("dimensions").getAsJsonArray().get(0).getAsInt(),
+                            primaryDim,
                             jsonCreationData.get("y").getAsInt(),
                             jsonCreationData.get("name").getAsString(),
                             player.getUniqueID()

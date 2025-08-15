@@ -20,7 +20,7 @@ public class CommonHelper {
     }
 
     public static String getWaypointFilename(Waypoint waypoint, UUID uuID) {
-        int primaryDim = Iterables.get(waypoint.getDimensions(), 0);
+        int primaryDim = waypoint.getDimensions().size() > 0 ? Iterables.get(waypoint.getDimensions(), 0) : 999;
         return _getWaypointFromRaw(primaryDim, waypoint.getY(), waypoint.getName(), uuID);
     }
 

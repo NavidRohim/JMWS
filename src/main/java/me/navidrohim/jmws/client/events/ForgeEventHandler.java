@@ -1,5 +1,6 @@
 package me.navidrohim.jmws.client.events;
 
+import me.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.navidrohim.jmws.common.Constants;
 import me.navidrohim.jmws.client.helpers.JMWSSounds;
 import me.navidrohim.jmws.common.CommonClass;
@@ -39,7 +40,6 @@ public class ForgeEventHandler
         if (pendingJoin && event.getEntity() == CommonClass.minecraftClientInstance.player) {
             pendingJoin = false; // Clear the flag so it only runs once
             ClientHandshakeHandler.sendHandshakeRequest(CommonClass.minecraftClientInstance);
-
         }
     }
 

@@ -12,6 +12,7 @@ import journeymap.client.api.IClientPlugin;
 import journeymap.client.api.event.DeathWaypointEvent;
 import journeymap.client.model.Waypoint;
 import journeymap.client.api.event.ClientEvent;
+import journeymap.client.ui.waypoint.WaypointManager;
 import journeymap.client.waypoint.WaypointStore;
 import me.navidrohim.jmws.common.CommonClass;
 import me.navidrohim.jmws.common.Constants;
@@ -66,6 +67,7 @@ public class JMWSPlugin implements IClientPlugin {
             Waypoint deathpoint = Waypoint.at(deathWaypointEvent.location, Waypoint.Type.Death, deathWaypointEvent.dimension);
 
             createAction(deathpoint, true, false);
+            updateWaypoints(false);
         }
     }
 
@@ -93,22 +95,27 @@ public class JMWSPlugin implements IClientPlugin {
 
     public void updateAction(Waypoint waypoint, Waypoint oldWaypoint)
     {
+        WaypointStore.INSTANCE.reset();
+
         if (oldWaypoint != null) {
             this.deleteAction(oldWaypoint, true);
+            WaypointStore.INSTANCE.remove(oldWaypoint);
+
         }
 
         createAction(waypoint, true, true);
         PlayerHelper.sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.modified_waypoint_success"), true, false, JMWSMessageType.SUCCESS);
+        updateWaypoints(false);
     }
 
     public void deleteAction(Waypoint waypoint, boolean silent) {
 
         String waypointFilename = CommonHelper.getWaypointFilename(waypoint, CommonClass.minecraftClientInstance.player.getUniqueID());
 
+        Constants.getLogger().info(waypointFilename);
         String jsonPacketData = CommandHelper.makeDeleteRequestJson(waypointFilename, silent, false);
         JMWSActionMessage waypointActionPayload = new JMWSActionMessage(jsonPacketData);
 
-        //jmAPI.remove(waypoint);
         JMWSNetworkWrapper.INSTANCE.sendToServer(waypointActionPayload);
     }
 
@@ -119,10 +126,6 @@ public class JMWSPlugin implements IClientPlugin {
         if (deleteAll) {
             INSTANCE.jmAPI.removeAll("journeymap");
         }
-        /*else {
-            INSTANCE.jmAPI.remove(ObjectIdentifierMap.getOldWaypoint(toDelete));
-        }*/
-
 
         PlayerHelper.sendUserAlert(CommonHelper.getTranslatableComponent(deletionMessageConfirmationKey), true, false, JMWSMessageType.NEUTRAL)  ;
     }
@@ -155,15 +158,13 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Get existing waypoints (local) and get waypoint objects saved on server
         Collection<journeymap.client.model.Waypoint> existingWaypoints = WaypointStore.INSTANCE.getAll();
-        Set<SavedWaypoint> savedWaypoints = JMWSPlugin.getSavedWaypoints(jsonWaypoints, player.getUniqueID()); //POTENTIAL ISSUE
+        Set<SavedWaypoint> savedWaypoints = JMWSPlugin.getSavedWaypoints(jsonWaypoints, player.getUniqueID());
 
         // Get an identifier of every waypoint (BlockPos, location), used to detect if the waypoint already exists
         Set<Vec3d> remoteWaypointPositions = savedWaypoints.stream()
                 .map(w -> new Vec3d(w.getWaypointX(), w.getWaypointY(), w.getWaypointZ()))
                 .collect(Collectors.toSet());
 
-        //jmAPI.removeAll("journeymap");
-        //jmAPI.removeAll(Constants.MODID);
         WaypointStore.INSTANCE.reset();
 
         // Test if any existing waypoints (persistent, usually death waypoints) have already been added to the server, if not, add them
@@ -176,18 +177,8 @@ public class JMWSPlugin implements IClientPlugin {
 
         try {
             for (SavedWaypoint savedWaypoint : savedWaypoints) {
-                journeymap.client.model.Waypoint wp = journeymap.client.model.Waypoint.fromString(savedWaypoint.getRawPacketData());
-                int[] numArray = wp.getDimensions().stream()
-                        .mapToInt(Integer::intValue)
-                        .toArray();
-
-                int primaryDim = Iterables.get(wp.getDimensions(), 0);
-                journeymap.client.api.display.Waypoint displayableWp = new journeymap.client.api.display.Waypoint(Constants.MODID, wp.getName(), primaryDim, new BlockPos(wp.getPosition()))
-                        .setPersistent(false)
-                        .setDisplayDimensions(numArray)
-                        .setColor(wp.getColor());
-
-                jmAPI.show(displayableWp);
+                Waypoint wp = journeymap.client.model.Waypoint.fromString(savedWaypoint.getRawPacketData());
+                WaypointStore.INSTANCE.save(wp);
             }
             return hasLocalWaypoint;
         } catch (Exception exception) {
@@ -200,9 +191,6 @@ public class JMWSPlugin implements IClientPlugin {
         boolean hasLocalWaypoint = false;
         boolean sendAlert = waypointPayload.arguments().get(waypointPayload.arguments().size() - 1).getAsBoolean();
 
-        String test = WaypointStore.INSTANCE.getAll().toString();
-        /*
-        try {*/
         if (CommonClass.getEnabledStatus()) {
             hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().get(0).getAsJsonObject(), player);
         }
@@ -218,11 +206,5 @@ public class JMWSPlugin implements IClientPlugin {
 
         PlayerHelper.sendUserSoundAlert(JMWSSounds.ACTION_SUCCEED);
         CommonClass.syncCounter.resetSyncThreshold();
-
-        /*
-        } catch (IllegalStateException | JsonSyntaxException exception) {
-            PlayerHelper.sendUserAlert(CommonHelper.getTranslatableComponent("error.jmws.error_corrupted_waypoint"), true, false, JMWSMessageType.FAILURE);
-            PlayerHelper.sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
-        }*/
     }
 }

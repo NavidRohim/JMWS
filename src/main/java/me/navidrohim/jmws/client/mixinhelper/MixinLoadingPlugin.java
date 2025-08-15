@@ -1,4 +1,4 @@
-package me.navidrohim.jmws.client;
+package me.navidrohim.jmws.client.mixinhelper;
 
 import zone.rong.mixinbooter.ILateMixinLoader;
 

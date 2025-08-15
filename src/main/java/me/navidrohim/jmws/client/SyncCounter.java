@@ -1,6 +1,7 @@
 package me.navidrohim.jmws.client;
 
 
+import me.navidrohim.jmws.client.mixinhelper.MixinManager;
 import me.navidrohim.jmws.common.CommonClass;
 import net.minecraft.client.multiplayer.WorldClient;
 
@@ -49,6 +50,7 @@ public class SyncCounter {
                     updateWaypoints(true);
                     resetSyncThreshold();
                     tickCounter = 0;
+                    MixinManager.didRemoveDeathpointRecently = false;
                 }
             }
             oldWorld = CommonClass.minecraftClientInstance.world;
