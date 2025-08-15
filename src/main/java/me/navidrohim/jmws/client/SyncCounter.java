@@ -49,8 +49,9 @@ public class SyncCounter {
 
                     updateWaypoints(true);
                     resetSyncThreshold();
+                    MixinManager.clearDeathpointCache();
+
                     tickCounter = 0;
-                    MixinManager.didRemoveDeathpointRecently = false;
                 }
             }
             oldWorld = CommonClass.minecraftClientInstance.world;

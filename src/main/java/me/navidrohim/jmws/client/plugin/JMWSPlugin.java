@@ -112,7 +112,6 @@ public class JMWSPlugin implements IClientPlugin {
 
         String waypointFilename = CommonHelper.getWaypointFilename(waypoint, CommonClass.minecraftClientInstance.player.getUniqueID());
 
-        Constants.getLogger().info(waypointFilename);
         String jsonPacketData = CommandHelper.makeDeleteRequestJson(waypointFilename, silent, false);
         JMWSActionMessage waypointActionPayload = new JMWSActionMessage(jsonPacketData);
 

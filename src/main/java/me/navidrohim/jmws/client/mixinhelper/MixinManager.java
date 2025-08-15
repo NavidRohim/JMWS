@@ -1,5 +1,12 @@
 package me.navidrohim.jmws.client.mixinhelper;
 
+import journeymap.client.model.Waypoint;
+
 public class MixinManager {
-    public static boolean didRemoveDeathpointRecently = false;
+    public static String recentlyRemovedDeathpointId = null;
+
+    public static void clearDeathpointCache()
+    {
+        MixinManager.recentlyRemovedDeathpointId = null;
+    }
 }

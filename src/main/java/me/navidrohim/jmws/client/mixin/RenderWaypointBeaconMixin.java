@@ -6,7 +6,6 @@ import journeymap.client.waypoint.WaypointStore;
 import me.navidrohim.jmws.client.mixinhelper.MixinManager;
 import me.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.navidrohim.jmws.common.CommonClass;
-import me.navidrohim.jmws.common.Constants;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -26,10 +25,8 @@ public abstract class RenderWaypointBeaconMixin {
     )
     private static void remove(WaypointStore instance, Waypoint waypoint)
     {
-        if (CommonClass.getEnabledStatus() && !MixinManager.didRemoveDeathpointRecently) {
-            Constants.LOGGER.info("testVicinity");
-            MixinManager.didRemoveDeathpointRecently = true;
-
+        if (CommonClass.getEnabledStatus() && !waypoint.getName().equals(MixinManager.recentlyRemovedDeathpointId)) {
+            MixinManager.recentlyRemovedDeathpointId = waypoint.getName();
             JMWSPlugin.getInstance().deleteAction(waypoint, false);
             JMWSPlugin.updateWaypoints(false);
         }

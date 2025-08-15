@@ -15,7 +15,5 @@ public class Constants {
     }
 
     public static final String MODID = JMWS.MODID;
-    public static final String MOD_NAME = JMWS.NAME;
-    public static final String VERSION = JMWS.VERSION;
     public static final Logger LOGGER = JMWS.logger;
 }
