@@ -29,6 +29,8 @@ public abstract class RenderWaypointBeaconMixin {
             MixinManager.recentlyRemovedDeathpointId = waypoint.getName();
             JMWSPlugin.getInstance().deleteAction(waypoint, false);
             JMWSPlugin.updateWaypoints(false);
+        } else if (CommonClass.minecraftClientInstance.isSingleplayer()) {
+            instance.remove(waypoint);
         }
     }
 }
