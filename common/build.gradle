@@ -17,7 +17,9 @@ neoForge {
 }
 
 repositories {
+
     maven {url = 'https://maven.blamejared.com'}
+
 }
 dependencies {
     //compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
