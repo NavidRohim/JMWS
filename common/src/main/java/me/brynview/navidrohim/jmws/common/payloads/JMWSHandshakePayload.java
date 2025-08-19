@@ -1,10 +1,12 @@
-package me.brynview.navidrohim.jmws.payloads;
+package me.brynview.navidrohim.jmws.common.payloads;
 
 import me.brynview.navidrohim.jmws.Constants;
 
-import me.brynview.navidrohim.jmws.platform.Services;
+import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.platform.Services;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.config.ServerConfigObject;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -21,7 +23,7 @@ public class JMWSHandshakePayload
 
     public JMWSHandshakePayload(FriendlyByteBuf friendlyByteBuf)
     {
-        if (Services.PLATFORM.side().equals("CLIENT"))
+        if (Services.PLATFORM.side().equals("CLIENT") || !CommonClass.isInternalServer())
         {
             if (friendlyByteBuf.readableBytes() != 0) {
                 serverConfigDataJson = friendlyByteBuf.readUtf(512);
@@ -45,7 +47,7 @@ public class JMWSHandshakePayload
 
     public void encode(FriendlyByteBuf buf)
     {
-        if (Services.PLATFORM.side().equals("SERVER"))
+        if (Services.PLATFORM.side().equals("SERVER") || CommonClass.isInternalServer())
         {
             buf.writeUtf(serverConfigDataJson);
         }

@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.helper;
+package me.brynview.navidrohim.jmws.common.helper;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import net.minecraft.network.chat.Component;
@@ -32,10 +32,5 @@ public class CommonHelper {
     public static boolean deleteFile(String filename) {
         File waypointFileObj = new File(filename);
         return waypointFileObj.delete();
-    }
-
-    public static String getLanguageKeyAsString(String key)
-    {
-        return Component.translatable(key).getString();
     }
 }

@@ -1,7 +1,7 @@
 package me.brynview.navidrohim.jmws;
 
-import com.mojang.datafixers.kinds.Const;
-import me.brynview.navidrohim.jmws.exceptions.Whoopsies;
+import me.brynview.navidrohim.jmws.client.exceptions.Whoopsies;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;

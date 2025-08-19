@@ -6,10 +6,10 @@ import com.google.gson.JsonParser;
 import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.enums.WaypointPayloadCommand;
-import me.brynview.navidrohim.jmws.helper.CommandHelper;
-import me.brynview.navidrohim.jmws.helper.CommonHelper;
-import me.brynview.navidrohim.jmws.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
+import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
+import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,7 +19,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 import static me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper.sendUserMessage;
 
@@ -48,7 +47,7 @@ public class ServerPacketHandler {
 
                 boolean result;
 
-                String fileName = JMWSServerIO.getGroupFilename(UUID.fromString(playerUUID), groupUniversalIdentifier);
+                String fileName = JMWSServerIO.getGroupFilename(player.getUUID(), groupUniversalIdentifier);
 
                 if (deleteAllWaypointsInGroup) { JMWSServerIO.removeAllWaypointsFromGroup(player.getUUID(), groupGUID);}
 

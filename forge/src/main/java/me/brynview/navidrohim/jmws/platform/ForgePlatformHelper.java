@@ -1,6 +1,6 @@
 package me.brynview.navidrohim.jmws.platform;
 
-import me.brynview.navidrohim.jmws.platform.services.IPlatformHelper;
+import me.brynview.navidrohim.jmws.common.platform.services.IPlatformHelper;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;

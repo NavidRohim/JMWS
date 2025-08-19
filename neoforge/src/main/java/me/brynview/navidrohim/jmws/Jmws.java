@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws;
 
 
 
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 

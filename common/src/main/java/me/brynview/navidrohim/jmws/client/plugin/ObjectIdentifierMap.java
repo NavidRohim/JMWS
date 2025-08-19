@@ -1,17 +1,23 @@
-package me.brynview.navidrohim.jmws.plugin;
+package me.brynview.navidrohim.jmws.client.plugin;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.client.helpers.CommonHelper;
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.HashMap;
+import java.util.UUID;
 
-import static me.brynview.navidrohim.jmws.CommonClass.*;
+import static me.brynview.navidrohim.jmws.common.CommonClass.*;
 
 public class ObjectIdentifierMap {
 
     private static final HashMap<String, Waypoint> waypointIdentifierMap = new HashMap<>();
     private static final HashMap<String, WaypointGroup> groupIdentifierMap = new HashMap<>();
+
+    private static String makeWaypointHash(UUID playerUUID, String waypointGUID, String objectName)
+    {
+        return DigestUtils.sha256Hex(playerUUID.toString() + waypointGUID + objectName);
+    }
 
     public static Waypoint getOldWaypoint(Waypoint newWaypoint) {
         String persistentWaypointID = newWaypoint.getCustomData();
@@ -38,7 +44,7 @@ public class ObjectIdentifierMap {
 
     public static String addWaypointToMap(Waypoint waypoint)
     {
-        String waypointIdentifier = CommonHelper.makeWaypointHash(minecraftClientInstance.player.getUUID(), waypoint.getGuid(), waypoint.getName());
+        String waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypoint.getGuid(), waypoint.getName());
         waypointIdentifierMap.put(waypointIdentifier, waypoint);
         waypoint.setCustomData(waypointIdentifier);
 
@@ -47,7 +53,7 @@ public class ObjectIdentifierMap {
 
     public static String addGroupToMap(WaypointGroup waypointGroup)
     {
-        String waypointIdentifier = CommonHelper.makeWaypointHash(minecraftClientInstance.player.getUUID(), waypointGroup.getGuid(), waypointGroup.getName());
+        String waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypointGroup.getGuid(), waypointGroup.getName());
         groupIdentifierMap.put(waypointIdentifier, waypointGroup);
         waypointGroup.setCustomData(waypointIdentifier);
 

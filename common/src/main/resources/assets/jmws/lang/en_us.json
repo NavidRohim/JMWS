@@ -27,6 +27,7 @@
   "message.jmws.next_sync": "Next sync in %s second(s)",
   "message.jmws.has_jmws": "Server has JMWS!",
   "message.jmws.world_is_local": "Playing in single player. JMWS will be disabled for you and all clients.",
+  "message.jmws.auto_sync_disabled": "Auto-Sync is disabled, enable it and try again.",
 
   "__comment__": "Config language strings",
   "text.config.jmws-config.title": "JourneyMap Waypoint Syncing (JMWS)",
@@ -37,7 +38,7 @@
   "text.config.jmws-config.option.enabled.tooltip": "If JMWS is enabled",
   "text.config.jmws-config.option.uploadWaypoints.tooltip": "Enables / disables waypoint syncing",
   "text.config.jmws-config.option.uploadGroups.tooltip": "Enables / disables group syncing",
-
+  "text.config.jmws-config.option.autoSync.tooltip": "If the client should sync waypoints with the server. Technically, this can be disabled and nothing would change.",
   "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency.tooltip": "Frequency of when waypoints are grabbed from the server (in seconds)",
   "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout.tooltip": "How long until the mod determines that the server doesn't have JMWS installed (in seconds)",
 
@@ -52,6 +53,7 @@
   "text.config.jmws-config.option.enabled": "JMWS Enabled",
   "text.config.jmws-config.option.uploadWaypoints": "Sync waypoints?",
   "text.config.jmws-config.option.uploadGroups": "Sync waypoint groups?",
+  "text.config.jmws-config.option.autoSync": "Auto-Sync",
 
   "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency": "Sync frequency",
   "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout": "Server Handshake Timeout",

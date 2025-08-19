@@ -1,19 +1,21 @@
-package me.brynview.navidrohim.jmws.plugin;
+package me.brynview.navidrohim.jmws.client.network;
 
 import commonnetwork.networking.data.PacketContext;
-import me.brynview.navidrohim.jmws.CommonClass;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
-import me.brynview.navidrohim.jmws.client.helpers.JMWSSounds;
-import me.brynview.navidrohim.jmws.helper.PlayerHelper;
-import me.brynview.navidrohim.jmws.payloads.JMWSHandshakePayload;
-import me.brynview.navidrohim.jmws.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
+import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
+import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
+import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
 import java.util.Objects;
 
-import static me.brynview.navidrohim.jmws.helper.PlayerHelper.sendUserAlert;
+import static me.brynview.navidrohim.jmws.client.helper.PlayerHelper.sendUserAlert;
 
 public class PacketHandler {
     public static void handlePacket(PacketContext<JMWSActionPayload> Context) {

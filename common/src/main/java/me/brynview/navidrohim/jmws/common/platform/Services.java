@@ -1,7 +1,7 @@
-package me.brynview.navidrohim.jmws.platform;
+package me.brynview.navidrohim.jmws.common.platform;
 
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.platform.services.IPlatformHelper;
+import me.brynview.navidrohim.jmws.common.platform.services.IPlatformHelper;
 
 import java.util.ServiceLoader;
 

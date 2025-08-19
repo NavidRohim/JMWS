@@ -1,12 +1,12 @@
 package me.brynview.navidrohim.jmws.client;
 
 import commonnetwork.api.Dispatcher;
-import me.brynview.navidrohim.jmws.CommonClass;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
-import me.brynview.navidrohim.jmws.helper.CommandHelper;
-import me.brynview.navidrohim.jmws.helper.PlayerHelper;
-import me.brynview.navidrohim.jmws.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.plugin.JMWSPlugin;
+import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
+import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import net.minecraft.network.chat.Component;
 
 public class ClientCommands {
@@ -40,8 +40,8 @@ public class ClientCommands {
         if (!isInSingleplayer()) {
             JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandHelper.makeDeleteGroupRequestJson(
                     CommonClass.minecraftClientInstance.player.getUUID(),
-                    "",
-                    "",
+                    "*",
+                    "*",
                     false,
                     false,
                     true
@@ -59,7 +59,7 @@ public class ClientCommands {
     public static int clearAllWaypoints()
     {
         if (!isInSingleplayer()) {
-            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandHelper.makeDeleteRequestJson("", false, true)); // * = all
+            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandHelper.makeDeleteRequestJson("*", false, true)); // * = all
             Dispatcher.sendToServer(deleteServerObjectPayload);
             JMWSPlugin.updateWaypoints(false);
         } else {
@@ -71,7 +71,12 @@ public class ClientCommands {
     public static int nextSync()
     {
         if (!isInSingleplayer()) {
-            PlayerHelper.sendUserAlert(Component.translatable("message.jmws.next_sync", (CommonClass.syncCounter.getTickCounterUpdateThreshold() - CommonClass.syncCounter.getCurrentTickCount()) / 20), true, false, JMWSMessageType.NEUTRAL);
+            if (CommonClass.config.autoSync.get())
+            {
+                PlayerHelper.sendUserAlert(Component.translatable("message.jmws.next_sync", (CommonClass.syncCounter.getTickCounterUpdateThreshold() - CommonClass.syncCounter.getCurrentTickCount()) / 20), true, false, JMWSMessageType.NEUTRAL);
+            } else {
+                PlayerHelper.sendUserAlert(Component.translatable("message.jmws.auto_sync_disabled"), true, false, JMWSMessageType.WARNING);
+            }
         } else {
             sendUserSinglePlayerWarning();
         }

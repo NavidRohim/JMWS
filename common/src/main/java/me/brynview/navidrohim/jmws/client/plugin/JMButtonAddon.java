@@ -1,12 +1,12 @@
-package me.brynview.navidrohim.jmws.plugin;
+package me.brynview.navidrohim.jmws.client.plugin;
 
 import journeymap.api.v2.client.event.FullscreenDisplayEvent;
 import journeymap.api.v2.client.fullscreen.IThemeButton;
-import me.brynview.navidrohim.jmws.CommonClass;
-import me.brynview.navidrohim.jmws.client.helpers.AssetHelper;
+import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.client.helper.AssetHelper;
 import net.minecraft.network.chat.Component;
 
-import static me.brynview.navidrohim.jmws.plugin.JMWSPlugin.updateWaypoints;
+import static me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin.updateWaypoints;
 
 public class JMButtonAddon {
     public static void addJMButtons(FullscreenDisplayEvent.AddonButtonDisplayEvent addonButtonDisplayEvent) {

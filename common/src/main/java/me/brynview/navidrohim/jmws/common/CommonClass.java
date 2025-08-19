@@ -1,24 +1,27 @@
-package me.brynview.navidrohim.jmws;
+package me.brynview.navidrohim.jmws.common;
 
 import commonnetwork.api.Dispatcher;
 import commonnetwork.api.Network;
 
 import commonnetwork.networking.data.PacketContext;
 import commonnetwork.networking.data.Side;
-import me.brynview.navidrohim.jmws.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.payloads.JMWSHandshakePayload;
-import me.brynview.navidrohim.jmws.platform.Services;
-import me.brynview.navidrohim.jmws.plugin.ConfigInterface;
+import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.SyncCounter;
+import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
+import me.brynview.navidrohim.jmws.common.platform.Services;
+import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 
-import me.brynview.navidrohim.jmws.plugin.PacketHandler;
+import me.brynview.navidrohim.jmws.client.network.PacketHandler;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 
 
 import java.io.File;
 
-import static me.brynview.navidrohim.jmws.client.ClientHandshakeHandler.timeoutTask;
+import static me.brynview.navidrohim.jmws.client.network.ClientHandshakeHandler.timeoutTask;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -39,10 +42,6 @@ public class CommonClass {
     public static void setServerModStatus(boolean serverModStatus)
     {
         serverHasMod = serverModStatus;
-
-        if (timeoutTask != null && !timeoutTask.isDone()) {
-            timeoutTask.cancel(false);
-        }
 
         if (!serverModStatus)
         {
@@ -66,7 +65,12 @@ public class CommonClass {
     {
         if (Side.CLIENT.equals(ctx.side()))
         {
-            PacketHandler.handlePacket(ctx);
+            if (minecraftClientInstance.player.getServer() == null)
+            {
+                PacketHandler.handlePacket(ctx);
+            } else {
+                ServerPacketHandler.handleIncomingActionCommand(ctx, ctx.sender());
+            }
         } else {
             ServerPacketHandler.handleIncomingActionCommand(ctx, ctx.sender());
         }
@@ -92,6 +96,13 @@ public class CommonClass {
         return serverHasMod && config.enabled.get() && (config.uploadGroups.get() || config.uploadWaypoints.get()) && !minecraftClientInstance.isSingleplayer();
     }
 
+    public static boolean isInternalServer() {
+        if (CommonClass.minecraftClientInstance instanceof Minecraft) {
+            return CommonClass.minecraftClientInstance.isLocalServer() && CommonClass.minecraftClientInstance.getSingleplayerServer() != null;
+        }
+        return false;
+    }
+
     public static void init() {
 
         Network.registerPacket(JMWSActionPayload.type(), JMWSActionPayload.class, JMWSActionPayload.STREAM_CODEC, CommonClass::_determinePacketAction);
@@ -102,13 +113,10 @@ public class CommonClass {
             CommonClass.setupMinecraftClientInstance();
         }
 
-        if (Services.PLATFORM.side().equals("SERVER"))
-        {
-            Constants.getLogger().info("Creating server resources..");
-            ServerConfig.ensureExistence();
-            _createServerResources();
+        Constants.getLogger().info("Creating server resources..");
+        ServerConfig.ensureExistence();
+        _createServerResources();
 
-        }
 
         // It is common for all supported loaders to provide a similar feature that can not be used directly in the
         // common code. A popular way to get around this is using Java's built-in service loader feature to create

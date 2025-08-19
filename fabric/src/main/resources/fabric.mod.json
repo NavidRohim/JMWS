@@ -29,7 +29,7 @@
       "me.brynview.navidrohim.jmws.server.JMWSServer"
     ],
     "journeymap": [
-      "me.brynview.navidrohim.jmws.plugin.JMWSPlugin"
+      "me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin"
     ]
   },
   "depends": {

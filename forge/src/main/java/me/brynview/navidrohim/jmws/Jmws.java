@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws;
 
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.minecraftforge.fml.common.Mod;
 
 

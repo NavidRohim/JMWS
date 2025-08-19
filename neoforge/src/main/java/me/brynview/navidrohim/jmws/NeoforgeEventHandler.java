@@ -2,7 +2,8 @@ package me.brynview.navidrohim.jmws;
 
 import com.mojang.brigadier.CommandDispatcher;
 import me.brynview.navidrohim.jmws.client.ClientCommands;
-import me.brynview.navidrohim.jmws.client.ClientHandshakeHandler;
+import me.brynview.navidrohim.jmws.client.network.ClientHandshakeHandler;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.world.entity.player.Player;

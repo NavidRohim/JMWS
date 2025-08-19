@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.enums;
+package me.brynview.navidrohim.jmws.common.enums;
 
 public enum WaypointPayloadCommand {
 

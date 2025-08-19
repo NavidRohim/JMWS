@@ -1,13 +1,6 @@
-package me.brynview.navidrohim.jmws.plugin;
+package me.brynview.navidrohim.jmws.client.config;
 
-import journeymap.api.v2.client.event.RegistryEvent;
 import journeymap.api.v2.client.option.*;
-import journeymap.api.v2.common.event.impl.Event;
-import journeymap.api.v2.common.event.impl.EventFactory;
-import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.helper.CommonHelper;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.phys.shapes.BooleanOp;
 
 public class ConfigInterface {
 
@@ -32,6 +25,7 @@ public class ConfigInterface {
     public final BooleanOption enabled;
     public final BooleanOption uploadWaypoints;
     public final BooleanOption uploadGroups;
+    public final BooleanOption autoSync;
 
     public final BooleanOption showAlerts;
     public final BooleanOption playEffects;
@@ -44,6 +38,7 @@ public class ConfigInterface {
         this.enabled = new BooleanOption(category, "master", "text.config.jmws-config.option.enabled", true, true);
         this.uploadWaypoints = new BooleanOption(category, "uploadWaypoints", "text.config.jmws-config.option.uploadWaypoints", true);
         this.uploadGroups = new BooleanOption(category, "uploadGroups", "text.config.jmws-config.option.uploadGroups", true);
+        this.autoSync = new BooleanOption(category, "autoSync", "text.config.jmws-config.option.autoSync", true);
 
         this.showAlerts = new BooleanOption(personalisation, "showAlerts", "text.config.jmws-config.option.showAlerts", true);
         this.playEffects = new BooleanOption(personalisation, "playEffects", "text.config.jmws-config.option.playEffects", true);

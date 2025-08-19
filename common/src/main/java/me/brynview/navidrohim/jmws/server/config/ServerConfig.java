@@ -2,12 +2,13 @@ package me.brynview.navidrohim.jmws.server.config;
 
 import com.google.gson.Gson;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.exceptions.ServerConfigurationException;
+import me.brynview.navidrohim.jmws.server.exceptions.ServerConfigurationException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class ServerConfig {
 
@@ -17,6 +18,8 @@ public class ServerConfig {
     {
         try
         {
+            Files.createDirectories(Paths.get(configPath).getParent());
+
             File configFileObj = new File(configPath);
             boolean didCreateNew = configFileObj.createNewFile();
 

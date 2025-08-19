@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.plugin;
+package me.brynview.navidrohim.jmws.client.plugin;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -18,16 +18,17 @@ import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.CommonClass;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
-import me.brynview.navidrohim.jmws.client.helpers.JMWSSounds;
+import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
 import me.brynview.navidrohim.jmws.client.objects.SavedGroup;
 import me.brynview.navidrohim.jmws.client.objects.SavedWaypoint;
-import me.brynview.navidrohim.jmws.helper.CommandHelper;
-import me.brynview.navidrohim.jmws.helper.PlayerHelper;
-import me.brynview.navidrohim.jmws.helper.CommonHelper;
-import me.brynview.navidrohim.jmws.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
+import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -37,7 +38,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static me.brynview.navidrohim.jmws.CommonClass.config;
+import static me.brynview.navidrohim.jmws.common.CommonClass.config;
 
 @JourneyMapPlugin(apiVersion = "2.0.0")
 public class JMWSPlugin implements IClientPlugin {

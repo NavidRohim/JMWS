@@ -1,8 +1,10 @@
-package me.brynview.navidrohim.jmws;
+package me.brynview.navidrohim.jmws.client;
 
+import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.minecraft.client.multiplayer.ClientLevel;
 
-import static me.brynview.navidrohim.jmws.plugin.JMWSPlugin.updateWaypoints;
+import static me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin.updateWaypoints;
 
 public class SyncCounter {
 
@@ -31,11 +33,10 @@ public class SyncCounter {
     {
         ClientLevel world = CommonClass.minecraftClientInstance.level;
 
-        if (world != null && CommonClass.getEnabledStatus()) {
+        if (world != null && CommonClass.getEnabledStatus() && CommonClass.config.autoSync.get()) {
             if (world != oldWorld) {
-                if (oldWorld == null) {
-                    tickCounterUpdateThreshold = 20 * (CommonClass.config.serverHandshakeTimeout.get() + 1); // Add 1 second buffer to not interrupt message
-                } else {
+                if (oldWorld != null) {
+                    //tickCounterUpdateThreshold = tickCounterUpdateThreshold = CommonClass.config.getUpdateWaypointFrequencyAsTicks(); // Add 1 second buffer to not interrupt message
                     tickCounterUpdateThreshold = 40; // 2-second delay when switching dimension
                 }
                 tickCounter = 0;

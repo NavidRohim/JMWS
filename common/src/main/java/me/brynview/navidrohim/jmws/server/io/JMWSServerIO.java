@@ -3,10 +3,10 @@ package me.brynview.navidrohim.jmws.server.io;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import me.brynview.navidrohim.jmws.CommonClass;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.objects.SavedWaypoint;
-import me.brynview.navidrohim.jmws.helper.CommonHelper;
+import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static me.brynview.navidrohim.jmws.helper.CommonHelper._getWaypointFromRaw;
+import static me.brynview.navidrohim.jmws.common.helper.CommonHelper._getWaypointFromRaw;
 
 public class JMWSServerIO {
 

@@ -1,8 +1,6 @@
 package me.brynview.navidrohim.jmws.platform;
 
-import me.brynview.navidrohim.jmws.CommonClass;
-import me.brynview.navidrohim.jmws.client.JMWSClient;
-import me.brynview.navidrohim.jmws.platform.services.IPlatformHelper;
+import me.brynview.navidrohim.jmws.common.platform.services.IPlatformHelper;
 import net.fabricmc.loader.api.FabricLoader;
 
 public class FabricPlatformHelper implements IPlatformHelper {

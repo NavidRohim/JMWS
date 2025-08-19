@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.helper;
+package me.brynview.navidrohim.jmws.common.helper;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -6,7 +6,7 @@ import com.google.gson.JsonParser;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.enums.WaypointPayloadCommand;
+import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -34,7 +34,7 @@ public class CommandHelper {
         return CommandHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_WAYPOINT, List.of(waypointFilename, silent, all));
     }
 
-    public static String makeDeleteGroupRequestJson(UUID playerUUID, @Nullable String groupUniversalIdentifier, @Nullable String groupGUID, boolean silent, boolean removeAllWaypointsInGroup, boolean deleteAllGroups) {
+    public static String makeDeleteGroupRequestJson(UUID playerUUID, String groupUniversalIdentifier, String groupGUID, boolean silent, boolean removeAllWaypointsInGroup, boolean deleteAllGroups) {
         return CommandHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_GROUP, List.of(
                 playerUUID,
                 groupUniversalIdentifier,

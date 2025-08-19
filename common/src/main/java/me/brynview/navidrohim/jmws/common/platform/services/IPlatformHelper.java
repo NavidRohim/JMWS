@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.platform.services;
+package me.brynview.navidrohim.jmws.common.platform.services;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;

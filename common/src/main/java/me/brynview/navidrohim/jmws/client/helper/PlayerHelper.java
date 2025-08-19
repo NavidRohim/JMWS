@@ -1,6 +1,6 @@
-package me.brynview.navidrohim.jmws.helper;
+package me.brynview.navidrohim.jmws.client.helper;
 
-import me.brynview.navidrohim.jmws.CommonClass;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;

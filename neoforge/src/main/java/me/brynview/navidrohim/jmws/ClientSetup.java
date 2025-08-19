@@ -1,7 +1,6 @@
 package me.brynview.navidrohim.jmws;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.entity.vehicle.Minecart;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;

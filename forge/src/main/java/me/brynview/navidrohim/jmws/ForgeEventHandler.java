@@ -1,14 +1,13 @@
 package me.brynview.navidrohim.jmws;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import me.brynview.navidrohim.jmws.client.ClientCommands;
-import me.brynview.navidrohim.jmws.client.ClientHandshakeHandler;
+import me.brynview.navidrohim.jmws.client.network.ClientHandshakeHandler;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.ClientCommandHandler;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;

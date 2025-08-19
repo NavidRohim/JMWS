@@ -1,11 +1,10 @@
-package me.brynview.navidrohim.jmws.client.helpers;
+package me.brynview.navidrohim.jmws.client.helper;
 
 
 
 import me.brynview.navidrohim.jmws.Constants;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 
 // Sounds are only used client side so I do not register them
 public interface JMWSSounds {

@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws;
 
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
