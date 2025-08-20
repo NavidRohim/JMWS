@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws;
 
 import com.mojang.brigadier.CommandDispatcher;
 import me.brynview.navidrohim.jmws.client.ClientCommands;
+import me.brynview.navidrohim.jmws.client.events.CommonEvents;
 import me.brynview.navidrohim.jmws.client.network.ClientHandshakeHandler;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.minecraft.commands.CommandSourceStack;
@@ -32,7 +33,7 @@ public class NeoforgeEventHandler
     {
         if (event.getEntity() instanceof Player)
         {
-            ClientHandshakeHandler.sendHandshakeRequest(CommonClass.minecraftClientInstance);
+            CommonEvents.handleJoin();
         }
     }
 
@@ -41,7 +42,7 @@ public class NeoforgeEventHandler
     {
         if (event.getEntity() instanceof Player)
         {
-            CommonClass.setServerModStatus(false);
+            CommonEvents.handleDisconnect();
         }
     }
 

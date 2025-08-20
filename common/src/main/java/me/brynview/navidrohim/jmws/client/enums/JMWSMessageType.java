@@ -4,6 +4,7 @@ public enum JMWSMessageType {
     FAILURE("§C"),
     SUCCESS("§2"),
     WARNING("§e"),
+    ONE_TIME_WARNING(WARNING.text),
     NEUTRAL("");
 
     private final String text;

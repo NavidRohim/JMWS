@@ -15,6 +15,9 @@ public class ServerConfig {
 
     private static final String configPath = "./config/jmws-server.json";
 
+    public static final String rawServerConfigData = getConfigJson();
+    public static final ServerConfigObject serverConfig = new Gson().fromJson(rawServerConfigData, ServerConfigObject.class);
+
     public static void ensureExistence()
     {
         try
@@ -63,8 +66,7 @@ public class ServerConfig {
 
     public static ServerConfigObject getConfig()
     {
-        Gson configJsonObj = new Gson();
-        return configJsonObj.fromJson(getConfigJson(), ServerConfigObject.class);
+        return serverConfig;
     }
 
     public static ServerConfigObject getConfig(String data)

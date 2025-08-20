@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.client;
 
+import me.brynview.navidrohim.jmws.client.events.CommonEvents;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.callback.ClientCommandCallback;
 
@@ -23,12 +24,10 @@ public class JMWSClient implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register(ClientCommandCallback::Callback);
 
         ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
-            ClientHandshakeHandler.sendHandshakeRequest(client);
+            CommonEvents.handleJoin();
         }));
-
         ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
-            CommonClass.setServerModStatus(false);
-            CommonClass.serverConfig = null;
+            CommonEvents.handleDisconnect();
         }));
     }
 

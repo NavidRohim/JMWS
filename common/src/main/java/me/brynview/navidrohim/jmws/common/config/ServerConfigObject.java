@@ -16,4 +16,19 @@ public class ServerConfigObject {
     {
         return (jmwsEnabled && (waypointsEnabled || groupsEnabled));
     }
+
+    public boolean waypointsEnabled()
+    {
+        return (jmwsEnabled && waypointsEnabled);
+    }
+
+    public boolean groupsEnabled()
+    {
+        return (jmwsEnabled && groupsEnabled);
+    }
+
+    public boolean allEnabled()
+    {
+        return (jmwsEnabled && waypointsEnabled && groupsEnabled);
+    }
 }

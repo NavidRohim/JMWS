@@ -38,12 +38,11 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static me.brynview.navidrohim.jmws.common.CommonClass.config;
+
 
 @JourneyMapPlugin(apiVersion = "2.0.0")
 public class JMWSPlugin implements IClientPlugin {
@@ -67,14 +66,11 @@ public class JMWSPlugin implements IClientPlugin {
         CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", Constants.MODID, this::groupEventListener);
         CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe("jmapi", Constants.MODID, this::waypointDragHandler); // Not working with current JourneyMap beta.53, should be fixed with new JM version with no changes on my end
         FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(Constants.MODID, JMButtonAddon::addJMButtons);
-        ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe("jmapi", (RegistryEvent.OptionsRegistryEvent optionsRegistryEvent) -> {
-            config = new ConfigInterface();});
+        ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe("jmapi", (RegistryEvent.OptionsRegistryEvent optionsRegistryEvent) -> config = new ConfigInterface());
     }
 
     private void handleUserDeath(DeathWaypointEvent deathWaypointEvent) {
-        ClientHandshakeHandler.scheduler.schedule(() -> {
-            updateWaypoints(true);
-        }, 5, TimeUnit.SECONDS);
+        ClientHandshakeHandler.scheduler.schedule(() -> updateWaypoints(true), 5, TimeUnit.SECONDS);
     }
 
     @Override
@@ -95,34 +91,46 @@ public class JMWSPlugin implements IClientPlugin {
     // Methods for manipulating / creating waypoints on the server
 
     private void createAction(Waypoint waypoint, boolean silent, boolean isUpdate) {
-        ObjectIdentifierMap.addWaypointToMap(waypoint);
-        waypoint.setPersistent(false);
+        if (CommonClass.serverConfig.waypointsEnabled()) {
+            ObjectIdentifierMap.addWaypointToMap(waypoint);
+            waypoint.setPersistent(false);
 
-        String creationData = CommandHelper.makeCreationRequestJson(waypoint, silent, isUpdate);
-        Dispatcher.sendToServer(new JMWSActionPayload(creationData));
+            String creationData = CommandHelper.makeCreationRequestJson(waypoint, silent, isUpdate);
+            Dispatcher.sendToServer(new JMWSActionPayload(creationData));
+        } else {
+            PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
+        }
     }
 
     private void updateAction(Waypoint waypoint, Waypoint oldWaypoint)
     {
-        if (oldWaypoint != null) {
-            this.deleteAction(oldWaypoint, true);
-            jmAPI.removeWaypoint("journeymap", oldWaypoint);
-        }
-        this.createAction(waypoint, true, true);
+        if (CommonClass.serverConfig.waypointsEnabled())
+        {
+            if (oldWaypoint != null) {
+                this.deleteAction(oldWaypoint, true);
+                jmAPI.removeWaypoint("journeymap", oldWaypoint);
+            }
+            this.createAction(waypoint, true, true);
 
-        PlayerHelper.sendUserAlert(Component.translatable("message.jmws.modified_waypoint_success"), true, false, JMWSMessageType.SUCCESS);
+            PlayerHelper.sendUserAlert(Component.translatable("message.jmws.modified_waypoint_success"), true, false, JMWSMessageType.SUCCESS);
+        } else {
+            PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
+        }
     }
 
     private void deleteAction(Waypoint waypoint, boolean silent) {
+        if (CommonClass.serverConfig.waypointsEnabled()) {
+            String waypointFilename = CommonHelper.getWaypointFilename(waypoint, CommonClass.minecraftClientInstance.player.getUUID());
 
-        String waypointFilename = CommonHelper.getWaypointFilename(waypoint, CommonClass.minecraftClientInstance.player.getUUID());
+            ObjectIdentifierMap.removeWaypointFromMap(waypoint);
+            String jsonPacketData = CommandHelper.makeDeleteRequestJson(waypointFilename, silent, false);
+            JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
 
-        ObjectIdentifierMap.removeWaypointFromMap(waypoint);
-        String jsonPacketData = CommandHelper.makeDeleteRequestJson(waypointFilename, silent, false);
-        JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
-
-        jmAPI.removeWaypoint("journeymap", waypoint);
-        Dispatcher.sendToServer(waypointActionPayload);
+            jmAPI.removeWaypoint("journeymap", waypoint);
+            Dispatcher.sendToServer(waypointActionPayload);
+        } else {
+            PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
+        }
     }
 
     // JourneyMap event handlers
@@ -155,7 +163,7 @@ public class JMWSPlugin implements IClientPlugin {
             WaypointGroup oldWaypointGroup = ObjectIdentifierMap.getOldGroup(waypointGroup);
 
             switch (waypointGroupEvent.getContext()) {
-                case CREATE -> this.groupCreationHandler(waypointGroup, player, false, false); // MAKE SURE you use beta 47 or higher
+                case CREATE -> this.groupCreationHandler(waypointGroup, false, false); // MAKE SURE you use beta 47 or higher
                 case DELETED -> this.groupDeletionHandler(waypointGroup, player, false, waypointGroupEvent.deleteWaypoints());
                 case UPDATE -> this.groupUpdateHandler(waypointGroup, oldWaypointGroup, player);
             }
@@ -164,27 +172,37 @@ public class JMWSPlugin implements IClientPlugin {
 
     private void groupDeletionHandler(WaypointGroup waypointGroup, LocalPlayer player, boolean silent, boolean deleteAllWaypoints)
     {
-        ObjectIdentifierMap.removeGroupFromMap(waypointGroup);
-        String jsonPacketData = CommandHelper.makeDeleteGroupRequestJson(
-                player.getUUID(),
-                waypointGroup.getCustomData(),
-                waypointGroup.getGuid(),
-                silent,
-                deleteAllWaypoints,
-                false);
+        if (CommonClass.serverConfig.groupsEnabled())
+        {
+            ObjectIdentifierMap.removeGroupFromMap(waypointGroup);
+            String jsonPacketData = CommandHelper.makeDeleteGroupRequestJson(
+                    player.getUUID(),
+                    waypointGroup.getCustomData(),
+                    waypointGroup.getGuid(),
+                    silent,
+                    deleteAllWaypoints,
+                    false);
 
-        JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
-        Dispatcher.sendToServer(waypointActionPayload);
+            JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
+            Dispatcher.sendToServer(waypointActionPayload);
+        } else {
+            PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
+        }
     }
 
     private void groupUpdateHandler(WaypointGroup waypointGroup, WaypointGroup oldWaypointGroup, LocalPlayer player)
     {
-        if (oldWaypointGroup != null) {
-            this.groupDeletionHandler(oldWaypointGroup, player, true, false);
-        }
-        this.groupCreationHandler(waypointGroup, player, true, true);
+        if (CommonClass.serverConfig.groupsEnabled())
+        {
+            if (oldWaypointGroup != null) {
+                this.groupDeletionHandler(oldWaypointGroup, player, true, false);
+            }
+            this.groupCreationHandler(waypointGroup, true, true);
 
-        PlayerHelper.sendUserAlert(Component.translatable("message.jmws.modified_group_success"), true, false, JMWSMessageType.SUCCESS);
+            PlayerHelper.sendUserAlert(Component.translatable("message.jmws.modified_group_success"), true, false, JMWSMessageType.SUCCESS);
+        } else {
+            PlayerHelper.sendUserAlert(Component.translatable("message.jmws.server_disabled_groups"), true, false, JMWSMessageType.ONE_TIME_WARNING);
+        }
     }
 
     private void waypointDragHandler(WaypointGroupTransferEvent waypointGroupTransferEvent) {
@@ -227,7 +245,7 @@ public class JMWSPlugin implements IClientPlugin {
         PlayerHelper.sendUserAlert(Component.translatable(deletionMessageConfirmationKey), true, false, JMWSMessageType.NEUTRAL);
     }
 
-    public static void updateWaypoints(boolean sendAlert) { // Might use delay some day
+    public static void updateWaypoints(boolean sendAlert) {
 
         // Sends "request" packet | New = "SYNC"
         if (CommonClass.getEnabledStatus()) {
@@ -235,15 +253,19 @@ public class JMWSPlugin implements IClientPlugin {
         }
     }
 
-    // Syncing -- Funcions for syncing waypoints and groups
+    // Syncing -- Functions for syncing waypoints and groups
 
-    private void groupCreationHandler(WaypointGroup waypointGroup, LocalPlayer player, boolean silent, boolean isUpdate)
+    private void groupCreationHandler(WaypointGroup waypointGroup, boolean silent, boolean isUpdate)
     {
-        ObjectIdentifierMap.addGroupToMap(waypointGroup);
-        waypointGroup.setPersistent(false);
-        String creationData = CommandHelper.makeGroupCreationRequestJson(waypointGroup, silent, isUpdate);
+        if (CommonClass.serverConfig.groupsEnabled()) {
+            ObjectIdentifierMap.addGroupToMap(waypointGroup);
+            waypointGroup.setPersistent(false);
+            String creationData = CommandHelper.makeGroupCreationRequestJson(waypointGroup, silent, isUpdate);
 
-        Dispatcher.sendToServer(new JMWSActionPayload(creationData));
+            Dispatcher.sendToServer(new JMWSActionPayload(creationData));
+        } else {
+            PlayerHelper.sendUserAlert(Component.translatable("message.jmws.server_disabled_groups"), true, false, JMWSMessageType.ONE_TIME_WARNING);
+        }
     }
 
     // Helper for handleUploadWaypoints
@@ -272,7 +294,7 @@ public class JMWSPlugin implements IClientPlugin {
     }
 
     // Helper for sync, handleUploadWaypoints is basically the same but different type annotations. I should've used generics
-    private boolean handleUploadGroups(JsonObject jsonGroupsRaw, LocalPlayer player) throws JsonSyntaxException, IllegalStateException {
+    private boolean handleUploadGroups(JsonObject jsonGroupsRaw) throws JsonSyntaxException, IllegalStateException {
         boolean hasLocalGroup = false;
 
         // Get existing groups (local) and get group objects saved on server
@@ -288,7 +310,7 @@ public class JMWSPlugin implements IClientPlugin {
         for (WaypointGroup existingGroup : existingGroups) {
             String key = existingGroup.getName() + existingGroup.getGuid();
             if (!remoteGroupKeys.contains(key) && !Constants.forbiddenGroups.contains(existingGroup.getGuid()) && existingGroup.isPersistent()) {
-                getInstance().groupCreationHandler(existingGroup, player, true, false);
+                getInstance().groupCreationHandler(existingGroup, true, false);
                 hasLocalGroup = true;
             }
         }
@@ -344,11 +366,11 @@ public class JMWSPlugin implements IClientPlugin {
         boolean sendAlert = waypointPayload.arguments().getLast().getAsBoolean();
 
         try {
-            if (config.uploadGroups.get()) {
-                hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), player);
+            if (config.uploadGroups.get() && CommonClass.serverConfig.groupsEnabled()) {
+                hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject());
             }
 
-            if (config.uploadGroups.get()) {
+            if (config.uploadGroups.get() && CommonClass.serverConfig.waypointsEnabled()) {
                 hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), player);
             }
 

@@ -20,6 +20,8 @@ import net.minecraft.client.Minecraft;
 
 
 import java.io.File;
+import java.util.Collections;
+import java.util.List;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -37,8 +39,8 @@ public class CommonClass {
     public static ServerConfigObject serverConfig = null;
 
     public static SyncCounter syncCounter = null;
-
     public static boolean serverHasMod = false;
+
 
     public static void setServerModStatus(boolean serverModStatus)
     {
@@ -83,7 +85,7 @@ public class CommonClass {
         {
             PacketHandler.HandshakeHandler(ctx.message());
         } else {
-            Dispatcher.sendToClient(new JMWSHandshakePayload(ServerConfig.getConfigJson()), ctx.sender());
+            Dispatcher.sendToClient(new JMWSHandshakePayload(ServerConfig.rawServerConfigData), ctx.sender());
         }
     }
 
