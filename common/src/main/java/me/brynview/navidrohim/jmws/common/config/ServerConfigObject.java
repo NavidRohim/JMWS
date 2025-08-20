@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.server.config;
+package me.brynview.navidrohim.jmws.common.config;
 
 public class ServerConfigObject {
 
@@ -12,4 +12,8 @@ public class ServerConfigObject {
         this.groupsEnabled = groupsEnabled;
     }
 
+    public boolean serverEnabled()
+    {
+        return (jmwsEnabled && (waypointsEnabled || groupsEnabled));
+    }
 }

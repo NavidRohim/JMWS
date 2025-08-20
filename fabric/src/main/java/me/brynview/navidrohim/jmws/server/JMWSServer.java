@@ -11,5 +11,4 @@ public class JMWSServer implements DedicatedServerModInitializer {
         // im so lonelyyyyy i got nobodyyyyy
         Constants.getLogger().info("Initialised server on JMWS");
     }
-
 }

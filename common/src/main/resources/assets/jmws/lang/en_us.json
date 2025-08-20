@@ -8,7 +8,7 @@
   "message.jmws.modified_waypoint_success": "Synced updated waypoint",
   "message.jmws.local_waypoint_upload": "Added local waypoint(s) to server.",
   "message.jmws.synced_success": "Synced waypoints",
-  "message.jmws.server_disabled_waypoints": "Server has waypoint syncing disabled.",
+  "message.jmws.server_disabled_waypoints": "Server has syncing disabled.",
 
   "__comment__": "Group language strings",
   "message.jmws.creation_group_success": "Created group",
@@ -39,6 +39,7 @@
   "text.config.jmws-config.option.uploadWaypoints.tooltip": "Enables / disables waypoint syncing",
   "text.config.jmws-config.option.uploadGroups.tooltip": "Enables / disables group syncing",
   "text.config.jmws-config.option.autoSync.tooltip": "If the client should sync waypoints with the server. Technically, this can be disabled and nothing would change.",
+  "text.config.jmws-config.option.syncIndicator.tooltip": "Shows '(S)' on the end of a waypoint if it is synced to the server.",
   "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency.tooltip": "Frequency of when waypoints are grabbed from the server (in seconds)",
   "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout.tooltip": "How long until the mod determines that the server doesn't have JMWS installed (in seconds)",
 
@@ -54,6 +55,7 @@
   "text.config.jmws-config.option.uploadWaypoints": "Sync waypoints?",
   "text.config.jmws-config.option.uploadGroups": "Sync waypoint groups?",
   "text.config.jmws-config.option.autoSync": "Auto-Sync",
+  "text.config.jmws-config.option.syncIndicator": "Sync Indicator",
 
   "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency": "Sync frequency",
   "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout": "Server Handshake Timeout",

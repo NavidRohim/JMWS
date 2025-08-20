@@ -14,14 +14,12 @@ import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 
 import me.brynview.navidrohim.jmws.client.network.PacketHandler;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
+import me.brynview.navidrohim.jmws.common.config.ServerConfigObject;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 
 
 import java.io.File;
-
-import static me.brynview.navidrohim.jmws.client.network.ClientHandshakeHandler.timeoutTask;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -34,7 +32,10 @@ public class CommonClass {
     // code that gets invoked by the entry point of the loader specific projects.
 
     public static Minecraft minecraftClientInstance = null;
+
     public static ConfigInterface config = null;
+    public static ServerConfigObject serverConfig = null;
+
     public static SyncCounter syncCounter = null;
 
     public static boolean serverHasMod = false;
@@ -65,7 +66,7 @@ public class CommonClass {
     {
         if (Side.CLIENT.equals(ctx.side()))
         {
-            if (minecraftClientInstance.player.getServer() == null)
+            if (!isInternalServer())
             {
                 PacketHandler.handlePacket(ctx);
             } else {

@@ -21,7 +21,7 @@ import static me.brynview.navidrohim.jmws.client.helper.PlayerHelper.sendUserSou
 public class ClientHandshakeHandler {
 
     public static ScheduledFuture<?> timeoutTask;
-    private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public static void sendHandshakeRequest(Minecraft client)
     {

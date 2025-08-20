@@ -79,6 +79,7 @@ public class PacketHandler {
     }
 
     public static void HandshakeHandler(JMWSHandshakePayload handshakePayload) {
+        CommonClass.serverConfig = handshakePayload.serverConfigData;
 
         if (!handshakePayload.serverConfigData.jmwsEnabled) {
             sendUserAlert(Component.translatable("warning.jmws.server_disabled_jmws"), true, false, JMWSMessageType.WARNING);

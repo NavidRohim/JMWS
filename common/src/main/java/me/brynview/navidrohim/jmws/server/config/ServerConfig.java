@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.server.config;
 
 import com.google.gson.Gson;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.common.config.ServerConfigObject;
 import me.brynview.navidrohim.jmws.server.exceptions.ServerConfigurationException;
 
 import java.io.*;

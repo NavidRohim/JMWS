@@ -8,6 +8,7 @@ import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.client.IClientPlugin;
 import journeymap.api.v2.client.JourneyMapPlugin;
+import journeymap.api.v2.client.event.DeathWaypointEvent;
 import journeymap.api.v2.client.event.RegistryEvent;
 import journeymap.api.v2.common.event.ClientEventRegistry;
 import journeymap.api.v2.common.event.CommonEventRegistry;
@@ -18,6 +19,7 @@ import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.client.network.ClientHandshakeHandler;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
@@ -36,6 +38,9 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static me.brynview.navidrohim.jmws.common.CommonClass.config;
@@ -57,12 +62,19 @@ public class JMWSPlugin implements IClientPlugin {
 
         this.jmAPI = jmClientApi;
 
+        ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe("jmapi", this::handleUserDeath);
         CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", this::waypointCreationHandler);
         CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", Constants.MODID, this::groupEventListener);
         CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe("jmapi", Constants.MODID, this::waypointDragHandler); // Not working with current JourneyMap beta.53, should be fixed with new JM version with no changes on my end
         FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(Constants.MODID, JMButtonAddon::addJMButtons);
         ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe("jmapi", (RegistryEvent.OptionsRegistryEvent optionsRegistryEvent) -> {
             config = new ConfigInterface();});
+    }
+
+    private void handleUserDeath(DeathWaypointEvent deathWaypointEvent) {
+        ClientHandshakeHandler.scheduler.schedule(() -> {
+            updateWaypoints(true);
+        }, 5, TimeUnit.SECONDS);
     }
 
     @Override
@@ -319,6 +331,7 @@ public class JMWSPlugin implements IClientPlugin {
         for (SavedWaypoint savedWaypoint : savedWaypoints) {
             Waypoint wp = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData());
             ObjectIdentifierMap.addWaypointToMap(wp);
+
             getInstance().jmAPI.addWaypoint("journeymap", wp);
         }
 

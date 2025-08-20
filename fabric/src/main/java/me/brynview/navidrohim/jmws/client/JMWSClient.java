@@ -28,6 +28,7 @@ public class JMWSClient implements ClientModInitializer {
 
         ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
             CommonClass.setServerModStatus(false);
+            CommonClass.serverConfig = null;
         }));
     }
 
