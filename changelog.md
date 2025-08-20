@@ -12,7 +12,7 @@
 - Internal changes
 - Death waypoints can now be synced without the need for auto-sync
 - Fixed bug where players local objects would be wiped if the server disallowed syncing, but the client synced anyway.
-
+- Fixed bug where if a user used an illegal character for a waypoint, there would be a recursion error on the server (from trying to create the filename too many times)
 ## Persistent bugs (only with newer versions of journeymap)
 
 - Dragging and dropping waypoints does not work, not my fault will be fixed with new JourneyMap version (use JM beta.54 or newer if avalible)

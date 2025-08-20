@@ -5,7 +5,11 @@ import net.minecraft.network.chat.Component;
 import org.joml.Vector3d;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class CommonHelper {
     // This is kinda just a "put whatever here that is used everywhere" class
@@ -16,7 +20,9 @@ public class CommonHelper {
     }
 
     public static String _getWaypointFromRaw(Vector3d coordVector, String waypointName, UUID playerUUID) {
-        return "./jmws/" +
+        Set<Character> charsToRemove = new HashSet<>(Arrays.asList('<', '>', ':', '*', '"', '\\', '|', '?', '/'));
+
+        String filename =
                 coordVector.x +
                 "_" +
                 coordVector.y +
@@ -27,6 +33,12 @@ public class CommonHelper {
                 "_" +
                 playerUUID +
                 ".json";
+
+        return "./jmws/" + filename.chars() // IntStream of characters
+                .mapToObj(c -> (char) c) // Convert int to Character
+                .filter(c -> !charsToRemove.contains(c)) // Filter out unwanted characters
+                .map(String::valueOf) // Convert Character to String
+                .collect(Collectors.joining());
     }
 
     public static boolean deleteFile(String filename) {
