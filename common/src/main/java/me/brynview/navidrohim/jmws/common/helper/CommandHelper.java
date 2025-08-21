@@ -34,13 +34,14 @@ public class CommandHelper {
         return CommandHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_WAYPOINT, List.of(waypointFilename, silent, all));
     }
 
-    public static String makeDeleteGroupRequestJson(UUID playerUUID, String groupUniversalIdentifier, String groupGUID, boolean silent, boolean removeAllWaypointsInGroup, boolean deleteAllGroups) {
+    public static String makeDeleteGroupRequestJson(UUID playerUUID, String groupUniversalIdentifier, String groupGUID, boolean silent, boolean removeAllWaypointsInGroup, boolean removeGroupItself, boolean deleteAllGroups) {
         return CommandHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_GROUP, List.of(
                 playerUUID,
                 groupUniversalIdentifier,
                 groupGUID,
                 silent,
                 removeAllWaypointsInGroup,
+                removeGroupItself,
                 deleteAllGroups));
     }
 

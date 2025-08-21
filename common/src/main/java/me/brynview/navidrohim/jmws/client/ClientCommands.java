@@ -44,6 +44,7 @@ public class ClientCommands {
                     "*",
                     false,
                     false,
+                    true,
                     true
             ));
             Dispatcher.sendToServer(deleteServerObjectPayload);

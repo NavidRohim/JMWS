@@ -27,12 +27,11 @@ public class JMWSServerIO {
         GROUP
     }
 
-    @Nullable
     public static Boolean removeAllWaypointsFromGroup(UUID playerUUID, String groupID) {
         List<String> objectList = getLocalWaypointsFromGroup(playerUUID, groupID);
 
         if (objectList == null) {
-            return null;
+            return false;
         }
 
         List<Boolean> successArray = new ArrayList<>();

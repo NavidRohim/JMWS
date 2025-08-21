@@ -153,10 +153,15 @@ public class JMWSPlugin implements IClientPlugin {
 
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
     {
-        if (CommonClass.getEnabledStatus() && config.uploadGroups.get() && !Constants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) {
-            LocalPlayer player = CommonClass.minecraftClientInstance.player;
-            WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
+        LocalPlayer player = CommonClass.minecraftClientInstance.player;
+        WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
 
+        if (Constants.forbiddenGroups.contains(waypointGroup.getGuid()) && waypointGroupEvent.getContext().equals(WaypointGroupEvent.Context.DELETED))
+        {
+            Constants.getLogger().info(waypointGroup.toString(), player );
+            this.groupDeletionHandler(waypointGroup, player, false, true, false);
+        }
+        else if (CommonClass.getEnabledStatus() && config.uploadGroups.get() && !Constants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) {
             if (player == null) {
                 return;
             }
@@ -164,13 +169,13 @@ public class JMWSPlugin implements IClientPlugin {
 
             switch (waypointGroupEvent.getContext()) {
                 case CREATE -> this.groupCreationHandler(waypointGroup, false, false); // MAKE SURE you use beta 47 or higher
-                case DELETED -> this.groupDeletionHandler(waypointGroup, player, false, waypointGroupEvent.deleteWaypoints());
+                case DELETED -> this.groupDeletionHandler(waypointGroup, player, false, waypointGroupEvent.deleteWaypoints(), true);
                 case UPDATE -> this.groupUpdateHandler(waypointGroup, oldWaypointGroup, player);
             }
         }
     }
 
-    private void groupDeletionHandler(WaypointGroup waypointGroup, LocalPlayer player, boolean silent, boolean deleteAllWaypoints)
+    private void groupDeletionHandler(WaypointGroup waypointGroup, LocalPlayer player, boolean silent, boolean deleteAllWaypoints, boolean removeGroupItself)
     {
         if (CommonClass.serverConfig.groupsEnabled())
         {
@@ -181,6 +186,7 @@ public class JMWSPlugin implements IClientPlugin {
                     waypointGroup.getGuid(),
                     silent,
                     deleteAllWaypoints,
+                    removeGroupItself,
                     false);
 
             JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
@@ -195,7 +201,7 @@ public class JMWSPlugin implements IClientPlugin {
         if (CommonClass.serverConfig.groupsEnabled())
         {
             if (oldWaypointGroup != null) {
-                this.groupDeletionHandler(oldWaypointGroup, player, true, false);
+                this.groupDeletionHandler(oldWaypointGroup, player, true, false, true);
             }
             this.groupCreationHandler(waypointGroup, true, true);
 

@@ -43,13 +43,21 @@ public class ServerPacketHandler {
                 String groupGUID = arguments.get(2).getAsString();
                 boolean silent = arguments.get(3).getAsBoolean();
                 boolean deleteAllWaypointsInGroup = arguments.get(4).getAsBoolean();
+                boolean removeGroupItself = arguments.get(5).getAsBoolean();
                 boolean deleteAllObjects = arguments.getLast().getAsBoolean();
 
                 boolean result;
 
                 String fileName = JMWSServerIO.getGroupFilename(player.getUUID(), groupUniversalIdentifier);
 
-                if (deleteAllWaypointsInGroup) { JMWSServerIO.removeAllWaypointsFromGroup(player.getUUID(), groupGUID);}
+                if (deleteAllWaypointsInGroup) {
+                    result = JMWSServerIO.removeAllWaypointsFromGroup(player.getUUID(), groupGUID);
+                    if (!removeGroupItself && result)
+                    {
+                        sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false);
+                        return;
+                    }
+                }
 
                 if (!deleteAllObjects) {
                     result = CommonHelper.deleteFile(fileName);
