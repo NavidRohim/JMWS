@@ -156,22 +156,25 @@ public class JMWSPlugin implements IClientPlugin {
         LocalPlayer player = CommonClass.minecraftClientInstance.player;
         WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
 
-        if (Constants.forbiddenGroups.contains(waypointGroup.getGuid()) && waypointGroupEvent.getContext().equals(WaypointGroupEvent.Context.DELETED))
+        if (CommonClass.getEnabledStatus() && config.uploadGroups.get())
         {
-            Constants.getLogger().info(waypointGroup.toString(), player );
-            this.groupDeletionHandler(waypointGroup, player, false, true, false);
-        }
-        else if (CommonClass.getEnabledStatus() && config.uploadGroups.get() && !Constants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) {
-            if (player == null) {
-                return;
+            if (Constants.forbiddenGroups.contains(waypointGroup.getGuid()) && waypointGroupEvent.getContext().equals(WaypointGroupEvent.Context.DELETED))
+            {
+                this.groupDeletionHandler(waypointGroup, player, false, true, false);
             }
-            WaypointGroup oldWaypointGroup = ObjectIdentifierMap.getOldGroup(waypointGroup);
+            else if (!Constants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) {
+                if (player == null) {
+                    return;
+                }
+                WaypointGroup oldWaypointGroup = ObjectIdentifierMap.getOldGroup(waypointGroup);
 
-            switch (waypointGroupEvent.getContext()) {
-                case CREATE -> this.groupCreationHandler(waypointGroup, false, false); // MAKE SURE you use beta 47 or higher
-                case DELETED -> this.groupDeletionHandler(waypointGroup, player, false, waypointGroupEvent.deleteWaypoints(), true);
-                case UPDATE -> this.groupUpdateHandler(waypointGroup, oldWaypointGroup, player);
+                switch (waypointGroupEvent.getContext()) {
+                    case CREATE -> this.groupCreationHandler(waypointGroup, false, false); // MAKE SURE you use beta 47 or higher
+                    case DELETED -> this.groupDeletionHandler(waypointGroup, player, false, waypointGroupEvent.deleteWaypoints(), true);
+                    case UPDATE -> this.groupUpdateHandler(waypointGroup, oldWaypointGroup, player);
+                }
             }
+
         }
     }
 
@@ -180,9 +183,11 @@ public class JMWSPlugin implements IClientPlugin {
         if (CommonClass.serverConfig.groupsEnabled())
         {
             ObjectIdentifierMap.removeGroupFromMap(waypointGroup);
+            String uID = waypointGroup.getGuid() != null ? waypointGroup.getGuid() : "null";
+
             String jsonPacketData = CommandHelper.makeDeleteGroupRequestJson(
                     player.getUUID(),
-                    waypointGroup.getCustomData(),
+                    uID,
                     waypointGroup.getGuid(),
                     silent,
                     deleteAllWaypoints,

@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,6 +36,7 @@ public class CommandHelper {
     }
 
     public static String makeDeleteGroupRequestJson(UUID playerUUID, String groupUniversalIdentifier, String groupGUID, boolean silent, boolean removeAllWaypointsInGroup, boolean removeGroupItself, boolean deleteAllGroups) {
+
         return CommandHelper.makeBaseJsonRequest(WaypointPayloadCommand.COMMON_DELETE_GROUP, List.of(
                 playerUUID,
                 groupUniversalIdentifier,
