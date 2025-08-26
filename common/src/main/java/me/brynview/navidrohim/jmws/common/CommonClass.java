@@ -13,6 +13,7 @@ import me.brynview.navidrohim.jmws.common.platform.Services;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 
 import me.brynview.navidrohim.jmws.client.network.PacketHandler;
+import me.brynview.navidrohim.jmws.common.platform.services.IPlatformHelper;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.common.config.ServerConfigObject;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
@@ -66,10 +67,22 @@ public class CommonClass {
 
     private static void _determinePacketAction(PacketContext<JMWSActionPayload> ctx)
     {
+        // This is a bodge fix. This is purely a consequence of me not doing things the right way. But I am
+        // so far deep now, I cannot reengineer everything just so I can avoid these 4 lines. (client and server use same packets)
+        // also ctx.sender() can usually never be null, but it is here.
+        if (
+                isInternalServer() &&
+                Constants.forgeModLoaders.contains(Services.PLATFORM.getPlatformName()) &&
+                (ctx.sender() == null || ctx.sender().getUUID() == CommonClass.minecraftClientInstance.player.getUUID()))
+        {
+            return;
+        }
+
         if (Side.CLIENT.equals(ctx.side()))
         {
             if (!isInternalServer())
             {
+                Constants.getLogger().info("got packet");
                 PacketHandler.handlePacket(ctx);
             } else {
                 ServerPacketHandler.handleIncomingActionCommand(ctx, ctx.sender());
@@ -85,7 +98,7 @@ public class CommonClass {
         {
             PacketHandler.HandshakeHandler(ctx.message());
         } else {
-            Dispatcher.sendToClient(new JMWSHandshakePayload(ServerConfig.rawServerConfigData), ctx.sender());
+            Dispatcher.sendToClient(new JMWSHandshakePayload(), ctx.sender());
         }
     }
 

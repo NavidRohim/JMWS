@@ -31,13 +31,11 @@ public class JMWSHandshakePayload
         }
     }
 
-    public JMWSHandshakePayload(String jsonDataStr)
+    public JMWSHandshakePayload()
     {
         serverConfigData = null;
-        serverConfigDataJson = jsonDataStr;
+        serverConfigDataJson = ServerConfig.rawServerConfigData;
     }
-
-    public JMWSHandshakePayload() {}
 
     public static CustomPacketPayload.Type<CustomPacketPayload> type()
     {
