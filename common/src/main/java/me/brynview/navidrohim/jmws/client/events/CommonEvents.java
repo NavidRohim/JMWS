@@ -6,7 +6,7 @@ import me.brynview.navidrohim.jmws.common.CommonClass;
 
 public class CommonEvents {
 
-    public static void handleDisconnect()
+    public static void clearCache()
     {
         CommonClass.setServerModStatus(false);
         CommonClass.serverConfig = null;

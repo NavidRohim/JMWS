@@ -25,7 +25,7 @@
   "message.jmws.synced_both_success": "Synced waypoints and groups",
   "message.jmws.sync_frequency": "JMWS syncs every %s second(s) when connected to a server.",
   "message.jmws.next_sync": "Next sync in %s second(s)",
-  "message.jmws.has_jmws": "Server has JMWS!",
+  "message.jmws.has_jmws": "Server has JMWS! (Go into JourneyMap Addon config to disable these alerts)",
   "message.jmws.world_is_local": "Playing in single player. JMWS will be disabled for you and all clients.",
   "message.jmws.auto_sync_disabled": "Auto-Sync is disabled, enable it and try again.",
   "message.jmws.deleted_waypoints_in_group": "Deleted all waypoints in group.",
@@ -88,7 +88,7 @@
   "warning.jmws.server_disabled_jmws": "Server has JMWS, but has been disabled on server.",
   "warning.jmws.server_disabled_group": "Server has JMWS, but group syncing has been disabled.",
   "warning.jmws.server_disabled_waypoint": "Server has JMWS, but waypoint syncing has been disabled.",
-  "warning.jmws.world_is_local": "JMWS will be put into LAN mode.",
+  "warning.jmws.world_is_local": "JMWS will be put into LAN mode. (Clients can sync to your internal-server)",
   "warning.jmws.world_is_local_no_commands": "Playing in single player. Some commands will not work.",
 
   "__comment__": "JourneyMap Buttons",

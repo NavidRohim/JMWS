@@ -94,6 +94,14 @@ public class CommonClass {
 
     private static void _determineHandshakePacketAction(PacketContext<JMWSHandshakePayload> ctx)
     {
+        if (
+                isInternalServer() &&
+                Constants.forgeModLoaders.contains(Services.PLATFORM.getPlatformName()) &&
+                (ctx.sender() == null || ctx.sender().getUUID() == CommonClass.minecraftClientInstance.player.getUUID()))
+        {
+            return;
+        }
+
         if (Side.CLIENT.equals(ctx.side()))
         {
             PacketHandler.HandshakeHandler(ctx.message());

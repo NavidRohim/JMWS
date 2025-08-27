@@ -4,7 +4,6 @@ import me.brynview.navidrohim.jmws.client.events.CommonEvents;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.callback.ClientCommandCallback;
 
-import me.brynview.navidrohim.jmws.client.network.ClientHandshakeHandler;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -27,7 +26,7 @@ public class JMWSClient implements ClientModInitializer {
             CommonEvents.handleJoin();
         }));
         ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
-            CommonEvents.handleDisconnect();
+            CommonEvents.clearCache();
         }));
     }
 

@@ -3,7 +3,6 @@ package me.brynview.navidrohim.jmws;
 import com.mojang.brigadier.CommandDispatcher;
 import me.brynview.navidrohim.jmws.client.ClientCommands;
 import me.brynview.navidrohim.jmws.client.events.CommonEvents;
-import me.brynview.navidrohim.jmws.client.network.ClientHandshakeHandler;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -31,8 +30,9 @@ public class ForgeEventHandler
     @SubscribeEvent
     public static void onEntityJoinWorld(EntityJoinLevelEvent event)
     {
-        if (event.getEntity() instanceof Player)
+        if (event.getEntity() instanceof Player && CommonClass.minecraftClientInstance.player != null && CommonClass.minecraftClientInstance.player.getUUID() == event.getEntity().getUUID())
         {
+            CommonEvents.clearCache();
             CommonEvents.handleJoin();
         }
     }
@@ -42,7 +42,7 @@ public class ForgeEventHandler
     {
         if (event.getEntity() instanceof Player)
         {
-            CommonEvents.handleDisconnect();
+            CommonEvents.clearCache();
         }
     }
 
