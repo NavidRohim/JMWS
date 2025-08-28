@@ -1,6 +1,6 @@
 package me.brynview.navidrohim.jmws.client;
 
-import me.brynview.navidrohim.jmws.client.events.CommonEvents;
+import me.brynview.navidrohim.jmws.common.events.CommonEvents;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.callback.ClientCommandCallback;
 
@@ -22,12 +22,9 @@ public class JMWSClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
         ClientCommandRegistrationCallback.EVENT.register(ClientCommandCallback::Callback);
 
-        ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
-            CommonEvents.handleJoin();
-        }));
-        ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
+        /*ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
             CommonEvents.clearCache();
-        }));
+        }));*/
     }
 
     private void handleTick(Minecraft _minecraftClient)

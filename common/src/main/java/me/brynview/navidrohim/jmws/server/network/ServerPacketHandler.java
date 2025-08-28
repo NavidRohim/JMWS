@@ -28,6 +28,42 @@ public class ServerPacketHandler {
         return ServerConfig.getConfig().jmwsEnabled && (ServerConfig.getConfig().groupsEnabled || ServerConfig.getConfig().waypointsEnabled);
     }
 
+    public static void sendUserSync(ServerPlayer player, boolean sendAlert)
+    {
+        if (ServerConfig.getConfig().serverEnabled())
+        {
+            try {
+                List<String> playerWaypoints = JMWSServerIO.getFileObjects(player.getUUID(), JMWSServerIO.FetchType.WAYPOINT);
+                List<String> playerGroups = JMWSServerIO.getFileObjects(player.getUUID(), JMWSServerIO.FetchType.GROUP);
+
+                HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
+                HashMap<String, String> jsonGroupPayloadArray = new HashMap<>();
+
+                for (int i = 0 ; i < playerWaypoints.size() ; i++) {
+                    String waypointFilename = playerWaypoints.get(i);
+                    String jsonWaypointFileString = Files.readString(Paths.get(waypointFilename));
+                    jsonWaypointPayloadArray.put(String.valueOf(i), jsonWaypointFileString);
+                }
+
+                for (int ix = 0 ; ix < playerGroups.size() ; ix++) {
+                    String groupFilename = playerGroups.get(ix);
+                    String jsonGroupFileString = Files.readString(Paths.get(groupFilename));
+                    jsonGroupPayloadArray.put(String.valueOf(ix), jsonGroupFileString);
+                }
+                String jsonData = CommandHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert);
+
+                // 2000000 was (jsonData.getBytes().length >= SERVER_CONFIG.serverConfiguration.serverPacketLimit())
+                if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit, but I got nowhere near.
+                    sendUserMessage(player, "error.jmws.error_packet_size", false, true);
+                } else {
+                    JMWSActionPayload waypointPayloadOutbound = new JMWSActionPayload(jsonData);
+                    Dispatcher.sendToClient(waypointPayloadOutbound, player);
+                }
+            } catch (IOException ioe) {
+                Constants.getLogger().error(ioe.getMessage());
+            }
+        }
+    }
     public static void handleIncomingActionCommand(PacketContext<JMWSActionPayload> Context, ServerPlayer player) {
         JMWSActionPayload waypointActionPayload = Context.message();
         WaypointPayloadCommand command = waypointActionPayload.command();
@@ -140,40 +176,8 @@ public class ServerPacketHandler {
 
             // was "request"
             case WaypointPayloadCommand.SYNC -> {
-                if (ServerConfig.getConfig().serverEnabled())
-                {
-                    try {
-                        List<String> playerWaypoints = JMWSServerIO.getFileObjects(player.getUUID(), JMWSServerIO.FetchType.WAYPOINT);
-                        List<String> playerGroups = JMWSServerIO.getFileObjects(player.getUUID(), JMWSServerIO.FetchType.GROUP);
-
-                        boolean sendAlert = arguments.getLast().getAsBoolean();
-                        HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
-                        HashMap<String, String> jsonGroupPayloadArray = new HashMap<>();
-
-                        for (int i = 0 ; i < playerWaypoints.size() ; i++) {
-                            String waypointFilename = playerWaypoints.get(i);
-                            String jsonWaypointFileString = Files.readString(Paths.get(waypointFilename));
-                            jsonWaypointPayloadArray.put(String.valueOf(i), jsonWaypointFileString);
-                        }
-
-                        for (int ix = 0 ; ix < playerGroups.size() ; ix++) {
-                            String groupFilename = playerGroups.get(ix);
-                            String jsonGroupFileString = Files.readString(Paths.get(groupFilename));
-                            jsonGroupPayloadArray.put(String.valueOf(ix), jsonGroupFileString);
-                        }
-                        String jsonData = CommandHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert);
-
-                        // 2000000 was (jsonData.getBytes().length >= SERVER_CONFIG.serverConfiguration.serverPacketLimit())
-                        if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit, but I got nowhere near.
-                            sendUserMessage(player, "error.jmws.error_packet_size", false, true);
-                        } else {
-                            JMWSActionPayload waypointPayloadOutbound = new JMWSActionPayload(jsonData);
-                            Dispatcher.sendToClient(waypointPayloadOutbound, player);
-                        }
-                    } catch (IOException ioe) {
-                        Constants.getLogger().error(ioe.getMessage());
-                    }
-                }
+                boolean sendAlert = arguments.getLast().getAsBoolean();
+                sendUserSync(player, sendAlert);
             }
 
             default -> Constants.getLogger().warn("Unknown packet command -> {}", command);

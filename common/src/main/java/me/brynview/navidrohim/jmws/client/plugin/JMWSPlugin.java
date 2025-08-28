@@ -9,10 +9,12 @@ import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.client.IClientPlugin;
 import journeymap.api.v2.client.JourneyMapPlugin;
 import journeymap.api.v2.client.event.DeathWaypointEvent;
+import journeymap.api.v2.client.event.InfoSlotDisplayEvent;
 import journeymap.api.v2.client.event.RegistryEvent;
 import journeymap.api.v2.common.event.ClientEventRegistry;
 import journeymap.api.v2.common.event.CommonEventRegistry;
 import journeymap.api.v2.common.event.FullscreenEventRegistry;
+import journeymap.api.v2.common.event.MinimapEventRegistry;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.event.common.WaypointGroupEvent;
 import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
@@ -42,6 +44,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static me.brynview.navidrohim.jmws.common.CommonClass.config;
+import static me.brynview.navidrohim.jmws.common.CommonClass.isInternalServer;
 
 
 @JourneyMapPlugin(apiVersion = "2.0.0")
@@ -70,7 +73,10 @@ public class JMWSPlugin implements IClientPlugin {
     }
 
     private void handleUserDeath(DeathWaypointEvent deathWaypointEvent) {
-        ClientHandshakeHandler.scheduler.schedule(() -> updateWaypoints(true), 5, TimeUnit.SECONDS);
+        if (!isInternalServer())
+        {
+            ClientHandshakeHandler.scheduler.schedule(() -> updateWaypoints(true), 5, TimeUnit.SECONDS);
+        }
     }
 
     @Override
@@ -136,45 +142,50 @@ public class JMWSPlugin implements IClientPlugin {
     // JourneyMap event handlers
     void waypointCreationHandler(WaypointEvent waypointEvent) {
 
-        Waypoint oldWaypoint = ObjectIdentifierMap.getOldWaypoint(waypointEvent.waypoint);
+        if (!isInternalServer()) {
+            Waypoint oldWaypoint = ObjectIdentifierMap.getOldWaypoint(waypointEvent.waypoint);
 
-        switch (waypointEvent.getContext()) {
-            case CREATE ->
-                // Sends "create" packet | new = "SERVER_CREATE"
-                    this.createAction(waypointEvent.waypoint, false, false);
-            case DELETED ->
-                // Sends "delete" packet | new = "COMMON_SERVER_DELETE"
-                    this.deleteAction(waypointEvent.waypoint, false);
-            case UPDATE ->
-                // Sends both "delete" and "create" packet in respective order and respective enums.
-                    this.updateAction(waypointEvent.waypoint, oldWaypoint);
+            switch (waypointEvent.getContext()) {
+                case CREATE ->
+                    // Sends "create" packet | new = "SERVER_CREATE"
+                        this.createAction(waypointEvent.waypoint, false, false);
+                case DELETED ->
+                    // Sends "delete" packet | new = "COMMON_SERVER_DELETE"
+                        this.deleteAction(waypointEvent.waypoint, false);
+                case UPDATE ->
+                    // Sends both "delete" and "create" packet in respective order and respective enums.
+                        this.updateAction(waypointEvent.waypoint, oldWaypoint);
+            }
         }
     }
 
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
     {
-        LocalPlayer player = CommonClass.minecraftClientInstance.player;
-        WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
-
-        if (CommonClass.getEnabledStatus() && config.uploadGroups.get())
+        if (!isInternalServer())
         {
-            if (Constants.forbiddenGroups.contains(waypointGroup.getGuid()) && waypointGroupEvent.getContext().equals(WaypointGroupEvent.Context.DELETED))
+            LocalPlayer player = CommonClass.minecraftClientInstance.player;
+            WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
+
+            if (CommonClass.getEnabledStatus() && config.uploadGroups.get())
             {
-                this.groupDeletionHandler(waypointGroup, player, false, true, false);
-            }
-            else if (!Constants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) {
-                if (player == null) {
-                    return;
+                if (Constants.forbiddenGroups.contains(waypointGroup.getGuid()) && waypointGroupEvent.getContext().equals(WaypointGroupEvent.Context.DELETED))
+                {
+                    this.groupDeletionHandler(waypointGroup, player, false, true, false);
                 }
-                WaypointGroup oldWaypointGroup = ObjectIdentifierMap.getOldGroup(waypointGroup);
+                else if (!Constants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) {
+                    if (player == null) {
+                        return;
+                    }
+                    WaypointGroup oldWaypointGroup = ObjectIdentifierMap.getOldGroup(waypointGroup);
 
-                switch (waypointGroupEvent.getContext()) {
-                    case CREATE -> this.groupCreationHandler(waypointGroup, false, false); // MAKE SURE you use beta 47 or higher
-                    case DELETED -> this.groupDeletionHandler(waypointGroup, player, false, waypointGroupEvent.deleteWaypoints(), true);
-                    case UPDATE -> this.groupUpdateHandler(waypointGroup, oldWaypointGroup, player);
+                    switch (waypointGroupEvent.getContext()) {
+                        case CREATE -> this.groupCreationHandler(waypointGroup, false, false); // MAKE SURE you use beta 47 or higher
+                        case DELETED -> this.groupDeletionHandler(waypointGroup, player, false, waypointGroupEvent.deleteWaypoints(), true);
+                        case UPDATE -> this.groupUpdateHandler(waypointGroup, oldWaypointGroup, player);
+                    }
                 }
-            }
 
+            }
         }
     }
 
@@ -183,7 +194,7 @@ public class JMWSPlugin implements IClientPlugin {
         if (CommonClass.serverConfig.groupsEnabled())
         {
             ObjectIdentifierMap.removeGroupFromMap(waypointGroup);
-            String uID = waypointGroup.getGuid() != null ? waypointGroup.getGuid() : "null";
+            String uID = waypointGroup.getCustomData() != null ? waypointGroup.getCustomData() : "null";
 
             String jsonPacketData = CommandHelper.makeDeleteGroupRequestJson(
                     player.getUUID(),
@@ -217,10 +228,13 @@ public class JMWSPlugin implements IClientPlugin {
     }
 
     private void waypointDragHandler(WaypointGroupTransferEvent waypointGroupTransferEvent) {
-        Waypoint subjectedChangeWp = waypointGroupTransferEvent.getWaypoint();
-        waypointGroupTransferEvent.getGroupTo().addWaypoint(subjectedChangeWp);
+        if (!isInternalServer())
+        {
+            Waypoint subjectedChangeWp = waypointGroupTransferEvent.getWaypoint();
+            waypointGroupTransferEvent.getGroupTo().addWaypoint(subjectedChangeWp);
 
-        updateAction(subjectedChangeWp, subjectedChangeWp);
+            updateAction(subjectedChangeWp, subjectedChangeWp);
+        }
     }
 
     public static void deleteAllGroups() {

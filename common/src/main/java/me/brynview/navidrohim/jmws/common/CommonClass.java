@@ -37,7 +37,7 @@ public class CommonClass {
     public static Minecraft minecraftClientInstance = null;
 
     public static ConfigInterface config = null;
-    public static ServerConfigObject serverConfig = null;
+    public static ServerConfigObject serverConfig = ServerConfigObject.empty();
 
     public static SyncCounter syncCounter = null;
     public static boolean serverHasMod = false;
@@ -94,14 +94,6 @@ public class CommonClass {
 
     private static void _determineHandshakePacketAction(PacketContext<JMWSHandshakePayload> ctx)
     {
-        if (
-                isInternalServer() &&
-                Constants.forgeModLoaders.contains(Services.PLATFORM.getPlatformName()) &&
-                (ctx.sender() == null || ctx.sender().getUUID() == CommonClass.minecraftClientInstance.player.getUUID()))
-        {
-            return;
-        }
-
         if (Side.CLIENT.equals(ctx.side()))
         {
             PacketHandler.HandshakeHandler(ctx.message());
@@ -117,7 +109,7 @@ public class CommonClass {
 
 
     public static boolean getEnabledStatus() {
-        return serverHasMod && config.enabled.get() && (config.uploadGroups.get() || config.uploadWaypoints.get()) && !minecraftClientInstance.isSingleplayer();
+        return serverHasMod && config.enabled.get() && (config.uploadGroups.get() || config.uploadWaypoints.get()) && !minecraftClientInstance.isSingleplayer() && !isInternalServer();
     }
 
     public static boolean isInternalServer() {

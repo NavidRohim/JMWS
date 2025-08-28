@@ -4,3 +4,4 @@ if you get a rendering error with neoforge, go to neoforge/run/config/neoforge-c
 
 Current bugs in this beta;
 - ~~waypoints made while the server has JMWS disabled will not be added to the server once re-enabled.~~
+- Events are fucked, internal server getting client events and shit like that. Will have to fix the problem deeper

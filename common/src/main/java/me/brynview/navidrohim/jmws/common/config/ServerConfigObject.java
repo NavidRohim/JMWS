@@ -31,4 +31,9 @@ public class ServerConfigObject {
     {
         return (jmwsEnabled && waypointsEnabled && groupsEnabled);
     }
+
+    public static ServerConfigObject empty()
+    {
+        return new ServerConfigObject(false, false, false);
+    }
 }

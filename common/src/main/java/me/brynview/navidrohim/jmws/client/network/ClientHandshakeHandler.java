@@ -7,8 +7,11 @@ import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
+import me.brynview.navidrohim.jmws.server.config.ServerConfig;
+import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -23,24 +26,11 @@ public class ClientHandshakeHandler {
     public static ScheduledFuture<?> timeoutTask;
     public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    public static void sendHandshakeRequest(Minecraft client)
+    public static void sendHandshakeRequest(Minecraft client, ServerPlayer serverPlayer)
     {
-        if (!client.isSingleplayer()) {
-            Dispatcher.sendToServer(new JMWSHandshakePayload());
-
-            timeoutTask = scheduler.schedule(() -> {
-                if (!CommonClass.serverHasMod) {
-                    CommonClass.minecraftClientInstance.execute(() -> {
-                        sendUserAlert(Component.translatable("error.jmws.jmws_not_installed"), true, true, JMWSMessageType.FAILURE);
-                        sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
-                    });
-                } else {
-                    JMWSPlugin.updateWaypoints(true);
-                }
-            }, CommonClass.config.serverHandshakeTimeout.get(), TimeUnit.SECONDS);
-        } else {
-            sendUserAlert(Component.translatable("warning.jmws.world_is_local"), true, false, JMWSMessageType.NEUTRAL);
-            sendUserSoundAlert(JMWSSounds.ACTION_SUCCEED);
-        }
+        timeoutTask = scheduler.schedule(() -> {
+            Dispatcher.sendToClient(new JMWSHandshakePayload(), serverPlayer);
+            ServerPacketHandler.sendUserSync(serverPlayer, false);
+        }, 1, TimeUnit.SECONDS);
     }
 }

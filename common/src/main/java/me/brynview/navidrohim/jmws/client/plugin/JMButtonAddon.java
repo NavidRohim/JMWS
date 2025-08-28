@@ -11,7 +11,7 @@ import static me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin.updateWaypoin
 public class JMButtonAddon {
     public static void addJMButtons(FullscreenDisplayEvent.AddonButtonDisplayEvent addonButtonDisplayEvent) {
 
-        if (!CommonClass.minecraftClientInstance.isSingleplayer()) {
+        if (!CommonClass.isInternalServer()) {
             IThemeButton buttonEnabled = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
                     "button.jmws.enable_button",
                     AssetHelper.onOffButtonAsset,

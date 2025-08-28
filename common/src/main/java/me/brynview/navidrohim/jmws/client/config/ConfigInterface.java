@@ -32,7 +32,7 @@ public class ConfigInterface {
     public final BooleanOption colouredText;
 
     public final IntegerOption updateWaypointFrequency;
-    public final IntegerOption serverHandshakeTimeout;
+    //public final IntegerOption serverHandshakeTimeout;
 
     public ConfigInterface() {
         this.enabled = new BooleanOption(category, "master", "text.config.jmws-config.option.enabled", true, true);
@@ -45,7 +45,7 @@ public class ConfigInterface {
         this.colouredText = new BooleanOption(personalisation, "colouredText", "text.config.jmws-config.option.colouredText", true);
 
         this.updateWaypointFrequency = new IntegerOption(technical, "updateWaypointFrequency", "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency", 40, 2, 120);
-        this.serverHandshakeTimeout = new IntegerOption(technical, "serverHandshakeTimeout", "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout", 5, 1, 60);
+        //this.serverHandshakeTimeout = new IntegerOption(technical, "serverHandshakeTimeout", "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout", 2, 1, 60);
     }
 
     public int getUpdateWaypointFrequencyAsTicks()
