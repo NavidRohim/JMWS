@@ -82,7 +82,6 @@ public class CommonClass {
         {
             if (!isInternalServer())
             {
-                Constants.getLogger().info("got packet");
                 PacketHandler.handlePacket(ctx);
             } else {
                 ServerPacketHandler.handleIncomingActionCommand(ctx, ctx.sender());

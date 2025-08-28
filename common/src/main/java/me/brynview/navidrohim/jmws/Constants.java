@@ -17,7 +17,7 @@ public class Constants {
 
     public static final String MODID = "jmws";
     public static final String MOD_NAME = "JMWS";
-    public static final String VERSION = "1.1.5-1.21.8-rc3";
+    public static final String VERSION = "1.1.5-1.21.8-rc4";
 
     public static final List<String> forgeModLoaders = List.of("Forge", "NeoForge");
     public static final List<String> forbiddenGroups = List.of("journeymap_death", "journeymap_all", "journeymap_temp", "journeymap_default");
