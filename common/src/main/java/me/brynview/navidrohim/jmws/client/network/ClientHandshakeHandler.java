@@ -26,11 +26,11 @@ public class ClientHandshakeHandler {
     public static ScheduledFuture<?> timeoutTask;
     public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    public static void sendHandshakeRequest(Minecraft client, ServerPlayer serverPlayer)
+    public static void sendHandshakeRequest(ServerPlayer serverPlayer)
     {
         timeoutTask = scheduler.schedule(() -> {
             Dispatcher.sendToClient(new JMWSHandshakePayload(), serverPlayer);
             ServerPacketHandler.sendUserSync(serverPlayer, false);
-        }, 1, TimeUnit.SECONDS);
+        }, 3, TimeUnit.SECONDS);
     }
 }

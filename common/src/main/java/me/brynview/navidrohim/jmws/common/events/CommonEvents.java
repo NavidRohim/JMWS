@@ -24,6 +24,6 @@ public class CommonEvents {
 
     public static void handleJoin(ServerPlayer serverPlayer)
     {
-        ClientHandshakeHandler.sendHandshakeRequest(CommonClass.minecraftClientInstance, serverPlayer);
+        ClientHandshakeHandler.sendHandshakeRequest(serverPlayer);
     }
 }
