@@ -74,7 +74,7 @@ public class JMWSPlugin implements IClientPlugin {
     private void handleUserDeath(DeathWaypointEvent deathWaypointEvent) {
         if (!isInternalServer())
         {
-            ClientHandshakeHandler.scheduler.schedule(() -> updateWaypoints(true), 5, TimeUnit.SECONDS);
+            scheduler.schedule(() -> updateWaypoints(true), 5, TimeUnit.SECONDS);
         }
     }
 
@@ -141,7 +141,7 @@ public class JMWSPlugin implements IClientPlugin {
     // JourneyMap event handlers
     void waypointCreationHandler(WaypointEvent waypointEvent) {
 
-        if (!isInternalServer() && config.waypointsEnabled() && serverConfig.waypointsEnabled()) {
+        if (CommonClass.getEnabledStatus() && config.waypointsEnabled() && serverConfig.waypointsEnabled()) {
             Waypoint oldWaypoint = ObjectIdentifierMap.getOldWaypoint(waypointEvent.waypoint);
 
             switch (waypointEvent.getContext()) {
@@ -160,7 +160,7 @@ public class JMWSPlugin implements IClientPlugin {
 
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
     {
-        if (!isInternalServer() && config.groupsEnabled() && serverConfig.waypointsEnabled())
+        if (CommonClass.getEnabledStatus() && config.groupsEnabled() && serverConfig.groupsEnabled())
         {
             LocalPlayer player = CommonClass.minecraftClientInstance.player;
             WaypointGroup waypointGroup = waypointGroupEvent.getGroup();

@@ -18,7 +18,7 @@ public class ForgeServerEventHandler {
 
         if (event.getEntity() instanceof ServerPlayer && ServerConfig.serverConfig.serverEnabled())
         {
-            CommonEvents.handleJoin((ServerPlayer) event.getEntity());
+            CommonEvents.handleJoin((ServerPlayer) event.getEntity(), false);
         }
     }
 }

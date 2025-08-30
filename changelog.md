@@ -4,18 +4,21 @@
 
 - JMWS now works in LAN servers!
 - Can now turn off auto-syncing
+- Many bug fixes
 
 ## Bug fixes
 
 - Fixed bug where /jmws clearAll and any subcommands did not work
 - Fixed bug where if the player was dead and JMWS tried to auto-sync, an error would occur
-- Internal changes
 - Death waypoints can now be synced without the need for auto-sync
-- Fixed bug where players local objects would be wiped if the server disallowed syncing, but the client synced anyway.
-- Fixed bug where if a user used an illegal character for a waypoint, there would be a recursion error on the server (from trying to create the filename too many times)
-## Persistent bugs (only with newer versions of journeymap)
+- Fixed bug where players local objects would be wiped if the server disallowed syncing, but the client synced anyway
+- Fixed major bug where if a user used an illegal character for a waypoint, there would be a recursion error on the server (from trying to create the filename too many times)
+- Fixed bug where JMWS would not obligate config value for waypoint events
+- Internal changes due to LAN support (mainly to the handshake packet sequence, **Please report any bugs**)
 
-- Dragging and dropping waypoints does not work, not my fault will be fixed with new JourneyMap version (use JM beta.54 or newer if avalible)
+## Persistent bugs that I am aware of
+
+- Dragging and dropping waypoints does not work, not my fault will be fixed with new JourneyMap version (use JM beta.54 or newer if available)
 
 ## Future beyond v1.1.5
 

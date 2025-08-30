@@ -24,6 +24,9 @@ import net.minecraft.client.server.IntegratedServer;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -39,6 +42,9 @@ public class CommonClass {
 
     public static ConfigInterface config = null;
     public static ServerConfigObject serverConfig = ServerConfigObject.empty();
+
+    public static ScheduledFuture<?> timeoutTask;
+    public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public static SyncCounter syncCounter = null;
     public static boolean serverHasMod = false;

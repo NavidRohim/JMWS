@@ -5,4 +5,4 @@ if you get a rendering error with neoforge, go to neoforge/run/config/neoforge-c
 Current bugs in this beta (rc4);
 - ~~waypoints made while the server has JMWS disabled will not be added to the server once re-enabled.~~
 - ~~Events are fucked, internal server getting client events and shit like that. Will have to fix the problem deeper~~
-- fabric internal server events arent working (JMWS doesnt sync when joining, possibly a internal server event issue)
+- ~~fabric internal server events arent working (JMWS doesnt sync when joining, possibly a internal server event issue)~~

@@ -26,7 +26,7 @@ public class JMWSClient implements ClientModInitializer {
         ServerPlayConnectionEvents.JOIN.register(((handler, sender, server) -> {
             if (ServerConfig.serverConfig.serverEnabled())
             {
-                CommonEvents.handleJoin(handler.player);
+                CommonEvents.handleJoin(handler.player, true);
             }
         }));
         /*ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {

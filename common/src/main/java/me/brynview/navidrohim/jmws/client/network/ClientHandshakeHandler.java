@@ -23,12 +23,11 @@ import static me.brynview.navidrohim.jmws.client.helper.PlayerHelper.sendUserSou
 
 public class ClientHandshakeHandler {
 
-    public static ScheduledFuture<?> timeoutTask;
-    public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
 
     public static void sendHandshakeRequest(ServerPlayer serverPlayer)
     {
-        timeoutTask = scheduler.schedule(() -> {
+        CommonClass.timeoutTask = CommonClass.scheduler.schedule(() -> {
             Dispatcher.sendToClient(new JMWSHandshakePayload(), serverPlayer);
             ServerPacketHandler.sendUserSync(serverPlayer, false);
         }, 3, TimeUnit.SECONDS);

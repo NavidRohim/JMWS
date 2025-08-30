@@ -24,9 +24,9 @@ import net.minecraftforge.fml.common.Mod;
 public class ForgeEventHandler
 {
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent clientTickEvent)
+    public static void onClientTick(TickEvent.ClientTickEvent.Post clientTickEvent)
     {
-        if (CommonClass.syncCounter != null && clientTickEvent.phase.equals(TickEvent.Phase.END)) // will be depricated and will become something like neo
+        if (CommonClass.syncCounter != null) // will be depricated and will become something like neo
         {
             CommonClass.syncCounter.iterateCounter();
         }
@@ -37,7 +37,7 @@ public class ForgeEventHandler
     {
         if (event.getEntity() instanceof ServerPlayer && ServerConfig.serverConfig.serverEnabled())
         {
-            CommonEvents.handleJoin((ServerPlayer) event.getEntity());
+            CommonEvents.handleJoin((ServerPlayer) event.getEntity(), true);
         }
     }
 
