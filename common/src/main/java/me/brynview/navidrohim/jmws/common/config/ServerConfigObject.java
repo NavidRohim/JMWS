@@ -36,4 +36,9 @@ public class ServerConfigObject {
     {
         return new ServerConfigObject(false, false, false);
     }
+
+    public static ServerConfigObject serverOwner()
+    {
+        return new ServerConfigObject(true, true, true);
+    }
 }

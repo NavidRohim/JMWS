@@ -7,6 +7,7 @@ import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.common.config.ServerConfigObject;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
@@ -79,13 +80,13 @@ public class PacketHandler {
     }
 
     public static void HandshakeHandler(JMWSHandshakePayload handshakePayload) {
-        CommonClass.serverConfig = handshakePayload.serverConfigData;
+        CommonClass.serverConfig = handshakePayload.serverConfigData != null ? handshakePayload.serverConfigData : ServerConfigObject.serverOwner();
 
-        if (!handshakePayload.serverConfigData.jmwsEnabled) {
+        if (!CommonClass.serverConfig.jmwsEnabled) {
             sendUserAlert(Component.translatable("warning.jmws.server_disabled_jmws"), true, false, JMWSMessageType.WARNING);
-        } else if (!handshakePayload.serverConfigData.waypointsEnabled) {
+        } else if (!CommonClass.serverConfig.waypointsEnabled) {
             sendUserAlert(Component.translatable("warning.jmws.server_disabled_waypoint"), true, false, JMWSMessageType.WARNING);
-        } else if (!handshakePayload.serverConfigData.groupsEnabled) {
+        } else if (!CommonClass.serverConfig.groupsEnabled) {
             sendUserAlert(Component.translatable("warning.jmws.server_disabled_group"), true, false, JMWSMessageType.WARNING);
         } else {
             sendUserAlert(Component.translatable("message.jmws.has_jmws"), true, false, JMWSMessageType.SUCCESS);

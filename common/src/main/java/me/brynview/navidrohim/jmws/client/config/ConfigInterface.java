@@ -52,4 +52,21 @@ public class ConfigInterface {
     {
         return updateWaypointFrequency.get() * 20;
     }
+
+    public boolean clientEnabled()
+    {
+        return (this.enabled.get() && (this.uploadWaypoints.get() || this.uploadGroups.get()));
+    }
+
+    public boolean waypointsEnabled()
+    {
+        return (this.enabled.get() && this.uploadWaypoints.get());
+    }
+
+    public boolean groupsEnabled()
+    {
+        return (this.enabled.get() && this.uploadGroups.get());
+    }
+
+
 }

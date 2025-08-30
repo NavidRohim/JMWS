@@ -176,8 +176,11 @@ public class ServerPacketHandler {
 
             // was "request"
             case WaypointPayloadCommand.SYNC -> {
-                boolean sendAlert = arguments.getLast().getAsBoolean();
-                sendUserSync(player, sendAlert);
+                if (player instanceof ServerPlayer)
+                {
+                    boolean sendAlert = arguments.getLast().getAsBoolean();
+                    sendUserSync(player, sendAlert);
+                }
             }
 
             default -> Constants.getLogger().warn("Unknown packet command -> {}", command);

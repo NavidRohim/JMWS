@@ -43,8 +43,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static me.brynview.navidrohim.jmws.common.CommonClass.config;
-import static me.brynview.navidrohim.jmws.common.CommonClass.isInternalServer;
+import static me.brynview.navidrohim.jmws.common.CommonClass.*;
 
 
 @JourneyMapPlugin(apiVersion = "2.0.0")
@@ -142,7 +141,7 @@ public class JMWSPlugin implements IClientPlugin {
     // JourneyMap event handlers
     void waypointCreationHandler(WaypointEvent waypointEvent) {
 
-        if (!isInternalServer()) {
+        if (!isInternalServer() && config.waypointsEnabled() && serverConfig.waypointsEnabled()) {
             Waypoint oldWaypoint = ObjectIdentifierMap.getOldWaypoint(waypointEvent.waypoint);
 
             switch (waypointEvent.getContext()) {
@@ -161,7 +160,7 @@ public class JMWSPlugin implements IClientPlugin {
 
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
     {
-        if (!isInternalServer())
+        if (!isInternalServer() && config.groupsEnabled() && serverConfig.waypointsEnabled())
         {
             LocalPlayer player = CommonClass.minecraftClientInstance.player;
             WaypointGroup waypointGroup = waypointGroupEvent.getGroup();

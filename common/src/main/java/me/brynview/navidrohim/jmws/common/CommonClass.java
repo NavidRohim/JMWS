@@ -18,6 +18,7 @@ import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.common.config.ServerConfigObject;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.server.IntegratedServer;
 
 
 import java.io.File;
@@ -113,7 +114,7 @@ public class CommonClass {
 
     public static boolean isInternalServer() {
         if (CommonClass.minecraftClientInstance instanceof Minecraft) {
-            return CommonClass.minecraftClientInstance.isLocalServer() && CommonClass.minecraftClientInstance.getSingleplayerServer() != null;
+            return CommonClass.minecraftClientInstance.isLocalServer() && CommonClass.minecraftClientInstance.getSingleplayerServer() instanceof IntegratedServer;
         }
         return false;
     }
