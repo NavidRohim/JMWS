@@ -1,33 +1,18 @@
-# 1.1.5 Changelog
+# 1.1.6 Changelog
 
 ## New
 
-- JMWS now works in LAN servers!
-- Can now turn off auto-syncing
-- Many bug fixes
+- Waypoint drag-and-drop now finally works
+- JMWS will now sync as soon as JourneyMap is ready (There was a 3-second delay before, due to initialisation)
 
-## Bug fixes
+## Bug fixes / Changes
 
-- Fixed bug where /jmws clearAll and any subcommands did not work
-- Fixed bug where if the player was dead and JMWS tried to auto-sync, an error would occur
-- Death waypoints can now be synced without the need for auto-sync
-- Fixed bug where players local objects would be wiped if the server disallowed syncing, but the client synced anyway
-- Fixed major bug where if a user used an illegal character for a waypoint, there would be a recursion error on the server (from trying to create the filename too many times)
-- Fixed bug where JMWS would not obligate config value for waypoint events
-- Internal changes due to LAN support (mainly to the handshake packet sequence, **Please report any bugs**)
+- Server will once again send handshake packet as soon as possible (There was a 3-second delay before because the clients map needed to initialise)
+- Game can load without JourneyMap installed (JMWS will be disabled, before the game would send an error)
 
 ## Persistent bugs that I am aware of
 
-- Dragging and dropping waypoints does not work, not my fault will be fixed with new JourneyMap version (use JM beta.54 or newer if available)
-
-## Future beyond v1.1.5
-
-Ports for new minecraft versions and nothing more. This mod is finished in my eyes and I have no further ideas.
-If there are any bugs that are found, let me know via issue or discord and I will fix them.
-If you have some sort of feature request I will do my best to fulfill it but as for me, I have no further ideas.
-
-Thank you for anyone who has showed an interest, joined the discord or just has used the mod.
-
+None. If there are any please do make a GitHub issue or join my discord.
 
 
 

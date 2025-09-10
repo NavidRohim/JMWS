@@ -28,6 +28,12 @@ side = "BOTH"
 [[dependencies."${mod_id}"]]
 modId = "journeymap"
 mandatory = true
-versionRange = "[1.21.7-6.0.0-beta.53,)"
+versionRange = "[1.21.8-6.0.0-beta.52,)"
 ordering = "BEFORE"
 side = "CLIENT"
+[[dependencies."${mod_id}"]]
+modId = "commonnetworking"
+mandatory = true
+versionRange = "1.0.21-1.21.7"
+ordering = "BEFORE"
+side = "SERVER"

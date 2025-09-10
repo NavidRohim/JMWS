@@ -10,6 +10,7 @@ import journeymap.api.v2.client.IClientPlugin;
 import journeymap.api.v2.client.JourneyMapPlugin;
 import journeymap.api.v2.client.event.DeathWaypointEvent;
 import journeymap.api.v2.client.event.InfoSlotDisplayEvent;
+import journeymap.api.v2.client.event.MappingEvent;
 import journeymap.api.v2.client.event.RegistryEvent;
 import journeymap.api.v2.common.event.ClientEventRegistry;
 import journeymap.api.v2.common.event.CommonEventRegistry;
@@ -69,6 +70,8 @@ public class JMWSPlugin implements IClientPlugin {
         CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe("jmapi", Constants.MODID, this::waypointDragHandler); // Not working with current JourneyMap beta.53, should be fixed with new JM version with no changes on my end
         FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(Constants.MODID, JMButtonAddon::addJMButtons);
         ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe("jmapi", (RegistryEvent.OptionsRegistryEvent optionsRegistryEvent) -> config = new ConfigInterface());
+        ClientEventRegistry.MAPPING_EVENT.subscribe("jmapi", (MappingEvent event) -> {JMWSPlugin.updateWaypoints(false);});
+
     }
 
     private void handleUserDeath(DeathWaypointEvent deathWaypointEvent) {

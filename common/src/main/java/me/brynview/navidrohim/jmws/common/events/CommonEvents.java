@@ -26,10 +26,15 @@ public class CommonEvents {
         PlayerHelper.clearWarningAlertCache();
     }
 
-    public static void handleJoin(ServerPlayer serverPlayer, boolean isInternal)
+    public static void handleJoin(ServerPlayer serverPlayer, boolean isInternal, boolean sendWarningIfJMNotPresent)
     {
+
         if (isInternal && CommonClass.minecraftClientInstance.player == null)
         {
+            if (sendWarningIfJMNotPresent && !CommonClass.clientHasJM) {
+                CommonClass.scheduler.schedule(() -> {PlayerHelper.sendUserAlert(Component.translatable("warning.jmws.jm_not_installed"), true, false, JMWSMessageType.NEUTRAL);}, 2, TimeUnit.SECONDS);
+                return;
+            }
             CommonClass.scheduler.schedule(() -> {PlayerHelper.sendUserAlert(Component.translatable("warning.jmws.world_is_local"), true, false, JMWSMessageType.NEUTRAL);}, 2, TimeUnit.SECONDS);
         } else {
             ClientHandshakeHandler.sendHandshakeRequest(serverPlayer);

@@ -26,7 +26,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
     // JourneyMap
-    modImplementation 'mysticdrew:common-networking-fabric:1.0.21-1.21.7'
+    modImplementation "mysticdrew:common-networking-fabric:${common_networking_version}"
     modCompileOnlyApi group: 'info.journeymap', name: 'journeymap-api-common', version: project.journeymap_api_version, changing: true
 }
 

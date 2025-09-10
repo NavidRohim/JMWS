@@ -19,7 +19,8 @@ public class Jmws implements ModInitializer {
 
     private void _handleMissingMod(@Nullable Exception exc) {
         Constants.getLogger().error("Got error checking JM version; %s".formatted(exc));
-        throw new Whoopsies("JourneyMap might be installed, but the version cannot be detected. Need JourneyMap version %s or higher.".formatted(Constants.JourneyMapVersionString));
+        Constants.getLogger().error("JourneyMap might be installed, but the version cannot be detected. Need JourneyMap version %s or higher.".formatted(Constants.JourneyMapVersionString));
+        CommonClass.clientHasJM = false;
     }
 
     @Override
@@ -35,6 +36,7 @@ public class Jmws implements ModInitializer {
 
         // Check if JourneyMap is installed, and what version (I hate this solution by the way, will change eventually(
         try {
+
             if (fabricLoader.getEnvironmentType() == EnvType.CLIENT) {
                 if (isJMLoaded) {
                     Optional<ModContainer> jmModContainer = fabricLoader.getModContainer("journeymap");
@@ -56,20 +58,27 @@ public class Jmws implements ModInitializer {
                         regexBetaVersionPatternMinMatcher.find();
                         regexBetaVersionPatternJarMatcher.find();
 
-                        Integer jarVersionString = Integer.valueOf(regexBetaVersionPatternJarMatcher.group(1));
-                        Integer minVersionString = Integer.valueOf(regexBetaVersionPatternMinMatcher.group(1));
+                        int jarVersionString = Integer.parseInt(regexBetaVersionPatternJarMatcher.group(1));
+                        int minVersionString = Integer.parseInt(regexBetaVersionPatternMinMatcher.group(1));
 
                         if (!(mcVersionMinor >= minMcVersionMinor && mcVersionPatch == minMcVersionPatch && jarVersionString >= minVersionString)) {
-                            throw new Whoopsies("JourneyMap is installed (version %s) but it is the wrong version. Need %s or higher".formatted(versionString, Constants.JourneyMapVersionString)); // using translatable string because this could be a common error
+                            Constants.getLogger().error("JourneyMap is installed (version %s) but it is the wrong version. Need %s or higher but will continue with loading anyway.".formatted(versionString, Constants.JourneyMapVersionString));
+                            CommonClass.clientHasJM = false;
                         }
-                        Constants.getLogger().info("Good to go. JMWS Version %s with JourneyMap Version %s on client-side.".formatted(Constants.VERSION, versionString));
+                        else {
+                            Constants.getLogger().info("Good to go. JMWS Version %s with JourneyMap Version %s on client-side.".formatted(Constants.VERSION, versionString));
+                            CommonClass.clientHasJM = true;
+                        }
                     } else {
                         _handleMissingMod(null);
                     }
                 } else {
-                    throw new Whoopsies("JourneyMap %s is required on the client-side of JMWS.".formatted(Constants.JourneyMapVersionString));
+                    Constants.getLogger().error("JourneyMap %s is required on the client-side of JMWS. Will continue with loading anyway.".formatted(Constants.JourneyMapVersionString));
+                    CommonClass.clientHasJM = false;
                 }
 
+            } else {
+                Constants.getLogger().info("JourneyMap is not needed on the server-side. If you get a warning about it on the server, you can safely ignore it.");
             }
         } catch (NoSuchElementException | VersionParsingException | IllegalStateException exception) {
             _handleMissingMod(exception);

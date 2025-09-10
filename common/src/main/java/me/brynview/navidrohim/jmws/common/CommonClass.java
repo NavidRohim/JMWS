@@ -43,12 +43,12 @@ public class CommonClass {
     public static ConfigInterface config = null;
     public static ServerConfigObject serverConfig = ServerConfigObject.empty();
 
-    public static ScheduledFuture<?> timeoutTask;
+    //public static ScheduledFuture<?> timeoutTask;
     public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public static SyncCounter syncCounter = null;
     public static boolean serverHasMod = false;
-
+    public static boolean clientHasJM = false;
 
     public static void setServerModStatus(boolean serverModStatus)
     {

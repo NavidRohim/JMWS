@@ -27,9 +27,15 @@ side = "BOTH"
 [[dependencies."${mod_id}"]]
 modId = "journeymap"
 type = "required"
-versionRange = "[1.21.7-6.0.0-beta.53,)"
+versionRange = "[1.21.8-6.0.0-beta.52,)"
 ordering = "NONE"
 side = "CLIENT"
+[[dependencies."${mod_id}"]]
+modId = "commonnetworking"
+mandatory = true
+versionRange = "1.0.21-1.21.7"
+ordering = "BEFORE"
+side = "SERVER"
 
 # Features are specific properties of the game environment, that you may want to declare you require. This example declares
 # that your mod requires GL version 3.2 or higher. Other features will be added. They are side aware so declaring this won't

@@ -15,7 +15,7 @@ public class NeoforgeServerEventHandler {
     {
         if (event.getEntity() instanceof ServerPlayer && ServerConfig.serverConfig.serverEnabled())
         {
-            CommonEvents.handleJoin((ServerPlayer) event.getEntity(), false);
+            CommonEvents.handleJoin((ServerPlayer) event.getEntity(), false, false);
         }
     }
 }

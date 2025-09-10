@@ -27,9 +27,6 @@ public class ClientHandshakeHandler {
 
     public static void sendHandshakeRequest(ServerPlayer serverPlayer)
     {
-        CommonClass.timeoutTask = CommonClass.scheduler.schedule(() -> {
-            Dispatcher.sendToClient(new JMWSHandshakePayload(), serverPlayer);
-            ServerPacketHandler.sendUserSync(serverPlayer, false);
-        }, 3, TimeUnit.SECONDS);
+        Dispatcher.sendToClient(new JMWSHandshakePayload(), serverPlayer);
     }
 }
