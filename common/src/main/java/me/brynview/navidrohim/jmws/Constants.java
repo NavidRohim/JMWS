@@ -17,7 +17,7 @@ public class Constants {
 
     public static final String MODID = "jmws";
     public static final String MOD_NAME = "JourneyMap Waypoint Syncing";
-    public static final String VERSION = "1.1.6-1.21.8-beta.1`";
+    public static final String VERSION = "1.1.6-1.21.8-beta.rc`";
 
     public static final List<String> forgeModLoaders = List.of("Forge", "NeoForge");
     public static final List<String> forbiddenGroups = List.of("journeymap_death", "journeymap_all", "journeymap_temp", "journeymap_default");
