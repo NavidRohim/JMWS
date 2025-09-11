@@ -3,6 +3,10 @@ plugins {
     id 'fabric-loom' version '1.11-SNAPSHOT'
 }
 
+base {
+    archivesName = "${mod_id}-fabric"
+}
+
 repositories {
     maven {
         name = "New JourneyMap Maven"

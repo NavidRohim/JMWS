@@ -32,7 +32,7 @@ ordering = "NONE"
 side = "CLIENT"
 [[dependencies."${mod_id}"]]
 modId = "commonnetworking"
-mandatory = true
+type = "required"
 versionRange = "1.0.21-1.21.7"
 ordering = "BEFORE"
 side = "SERVER"

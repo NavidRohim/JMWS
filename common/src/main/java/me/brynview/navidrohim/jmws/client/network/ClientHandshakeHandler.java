@@ -23,8 +23,6 @@ import static me.brynview.navidrohim.jmws.client.helper.PlayerHelper.sendUserSou
 
 public class ClientHandshakeHandler {
 
-
-
     public static void sendHandshakeRequest(ServerPlayer serverPlayer)
     {
         Dispatcher.sendToClient(new JMWSHandshakePayload(), serverPlayer);

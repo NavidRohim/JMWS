@@ -19,8 +19,7 @@ public class Jmws implements ModInitializer {
 
     private void _handleMissingMod(@Nullable Exception exc) {
         Constants.getLogger().error("Got error checking JM version; %s".formatted(exc));
-        Constants.getLogger().error("JourneyMap might be installed, but the version cannot be detected. Need JourneyMap version %s or higher.".formatted(Constants.JourneyMapVersionString));
-        CommonClass.clientHasJM = false;
+        throw new Whoopsies("JourneyMap might be installed, but the version cannot be detected. Need JourneyMap version %s or higher.".formatted(Constants.JourneyMapVersionString));
     }
 
     @Override
@@ -34,7 +33,13 @@ public class Jmws implements ModInitializer {
         FabricLoader fabricLoader = FabricLoader.getInstance();
         boolean isJMLoaded = fabricLoader.isModLoaded("journeymap");
 
-        // Check if JourneyMap is installed, and what version (I hate this solution by the way, will change eventually(
+        // Check if JourneyMap is installed, and what version (I hate this solution by the way, will change eventually)
+        // This has to be here because if it is not the client will crash when connecting to a server when JM is not installed.
+        // Why cant I just specify JM needs to be installed in fabric.mod.json? Well because fabric is lacking a feature to specify if a dependency is on
+        // client, server or both sides. (on server, only commonnetworking is needed. On the client, CommonNetworking and JourneyMap is required but CommonNetworking
+        // is bundled with JM.
+        // TLDR; Version checking is required because server has to have CommonNetworking and client doesn't implicitly need it but JMWS needs JourneyMap.
+
         try {
 
             if (fabricLoader.getEnvironmentType() == EnvType.CLIENT) {
@@ -62,8 +67,7 @@ public class Jmws implements ModInitializer {
                         int minVersionString = Integer.parseInt(regexBetaVersionPatternMinMatcher.group(1));
 
                         if (!(mcVersionMinor >= minMcVersionMinor && mcVersionPatch == minMcVersionPatch && jarVersionString >= minVersionString)) {
-                            Constants.getLogger().error("JourneyMap is installed (version %s) but it is the wrong version. Need %s or higher but will continue with loading anyway.".formatted(versionString, Constants.JourneyMapVersionString));
-                            CommonClass.clientHasJM = false;
+                            throw new Whoopsies("JourneyMap is installed (version %s) but it is the wrong version. Need %s or higher.".formatted(versionString, Constants.JourneyMapVersionString));
                         }
                         else {
                             Constants.getLogger().info("Good to go. JMWS Version %s with JourneyMap Version %s on client-side.".formatted(Constants.VERSION, versionString));
@@ -73,8 +77,7 @@ public class Jmws implements ModInitializer {
                         _handleMissingMod(null);
                     }
                 } else {
-                    Constants.getLogger().error("JourneyMap %s is required on the client-side of JMWS. Will continue with loading anyway.".formatted(Constants.JourneyMapVersionString));
-                    CommonClass.clientHasJM = false;
+                    throw new Whoopsies("JourneyMap %s is required on the client-side of JMWS.".formatted(Constants.JourneyMapVersionString));
                 }
 
             } else {
