@@ -37,7 +37,7 @@ public class Jmws implements ModInitializer {
         // This has to be here because if it is not the client will crash when connecting to a server when JM is not installed.
         // Why cant I just specify JM needs to be installed in fabric.mod.json? Well because fabric is lacking a feature to specify if a dependency is on
         // client, server or both sides. (on server, only commonnetworking is needed. On the client, CommonNetworking and JourneyMap is required but CommonNetworking
-        // is bundled with JM.
+        // is bundled with JM)
         // TLDR; Version checking is required because server has to have CommonNetworking and client doesn't implicitly need it but JMWS needs JourneyMap.
 
         try {

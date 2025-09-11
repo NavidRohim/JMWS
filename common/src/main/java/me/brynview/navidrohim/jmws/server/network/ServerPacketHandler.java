@@ -28,7 +28,7 @@ public class ServerPacketHandler {
         return ServerConfig.getConfig().jmwsEnabled && (ServerConfig.getConfig().groupsEnabled || ServerConfig.getConfig().waypointsEnabled);
     }
 
-    public static void sendUserSync(ServerPlayer player, boolean sendAlert)
+    public static void sendUserSync(ServerPlayer player, boolean sendAlert, boolean isDeathSync)
     {
         if (ServerConfig.getConfig().serverEnabled())
         {
@@ -50,7 +50,7 @@ public class ServerPacketHandler {
                     String jsonGroupFileString = Files.readString(Paths.get(groupFilename));
                     jsonGroupPayloadArray.put(String.valueOf(ix), jsonGroupFileString);
                 }
-                String jsonData = CommandHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert);
+                String jsonData = CommandHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert, isDeathSync);
 
                 // 2000000 was (jsonData.getBytes().length >= SERVER_CONFIG.serverConfiguration.serverPacketLimit())
                 if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit, but I got nowhere near.
@@ -178,8 +178,9 @@ public class ServerPacketHandler {
             case WaypointPayloadCommand.SYNC -> {
                 if (player instanceof ServerPlayer)
                 {
-                    boolean sendAlert = arguments.getLast().getAsBoolean();
-                    sendUserSync(player, sendAlert);
+                    boolean sendAlert = arguments.get(2).getAsBoolean();
+                    boolean isDeathSync = arguments.getLast().getAsBoolean();
+                    sendUserSync(player, sendAlert, isDeathSync);
                 }
             }
 

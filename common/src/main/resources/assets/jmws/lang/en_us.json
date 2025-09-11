@@ -9,6 +9,7 @@
   "message.jmws.local_waypoint_upload": "Added local waypoint(s) to server.",
   "message.jmws.synced_success": "Synced waypoints",
   "message.jmws.server_disabled_waypoints": "Server has syncing disabled.",
+  "message.jmws.death_waypoint_sync": "Synced Death Waypoint",
 
   "__comment__": "Group language strings",
   "message.jmws.creation_group_success": "Created group",

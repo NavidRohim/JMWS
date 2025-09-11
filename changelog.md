@@ -12,6 +12,7 @@ This is mostly bug fixing and tweaks.
 - Server will once again send handshake packet as soon as possible (There was a 3-second delay before because the clients map needed to initialise)
 - Game can load without JourneyMap installed (JMWS will be disabled, before the game would send an error)
 - CommonNetworking or JourneyMap is now sadly required on the server side. It has always been required, but I only realised now. I have no clue why it took me so long.
+- Added unique text when death waypoint is made
 
 ## Persistent bugs that I am aware of
 

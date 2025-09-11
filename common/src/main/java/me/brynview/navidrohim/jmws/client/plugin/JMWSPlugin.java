@@ -38,6 +38,7 @@ import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -77,7 +78,7 @@ public class JMWSPlugin implements IClientPlugin {
     private void handleUserDeath(DeathWaypointEvent deathWaypointEvent) {
         if (!isInternalServer())
         {
-            scheduler.schedule(() -> updateWaypoints(true), 5, TimeUnit.SECONDS);
+            scheduler.schedule(() -> updateWaypoints(true, true), 5, TimeUnit.SECONDS);
         }
     }
 
@@ -272,12 +273,16 @@ public class JMWSPlugin implements IClientPlugin {
         PlayerHelper.sendUserAlert(Component.translatable(deletionMessageConfirmationKey), true, false, JMWSMessageType.NEUTRAL);
     }
 
-    public static void updateWaypoints(boolean sendAlert) {
+    public static void updateWaypoints(boolean sendAlert, boolean fromDeathEvent) {
 
         // Sends "request" packet | New = "SYNC"
         if (CommonClass.getEnabledStatus()) {
-            Dispatcher.sendToServer(new JMWSActionPayload(CommandHelper.makeWaypointSyncRequestJson(sendAlert)));
+            Dispatcher.sendToServer(new JMWSActionPayload(CommandHelper.makeWaypointSyncRequestJson(sendAlert, fromDeathEvent)));
         }
+    }
+
+    public static void updateWaypoints(boolean sendAlert) {
+        updateWaypoints(sendAlert, false);
     }
 
     // Syncing -- Functions for syncing waypoints and groups
@@ -390,7 +395,8 @@ public class JMWSPlugin implements IClientPlugin {
     public static void syncHandler(JMWSActionPayload waypointPayload, LocalPlayer player) {
         boolean hasLocalGroup = false;
         boolean hasLocalWaypoint = false;
-        boolean sendAlert = waypointPayload.arguments().getLast().getAsBoolean();
+        boolean sendAlert = waypointPayload.arguments().get(2).getAsBoolean();
+        boolean isDeathSync = waypointPayload.arguments().getLast().getAsBoolean();
 
         try {
             if (config.uploadGroups.get() && CommonClass.serverConfig.groupsEnabled()) {
@@ -403,13 +409,16 @@ public class JMWSPlugin implements IClientPlugin {
 
             if (hasLocalGroup || hasLocalWaypoint) {
                 updateWaypoints(false);
-                if (hasLocalGroup && hasLocalWaypoint) {
+                if (isDeathSync) {
+                    PlayerHelper.sendUserAlert(Component.translatable("message.jmws.death_waypoint_sync"), true, false, JMWSMessageType.SUCCESS);
+                } else if (hasLocalGroup && hasLocalWaypoint) {
                     PlayerHelper.sendUserAlert(Component.translatable("message.jmws.local_both_upload"), true, false, JMWSMessageType.SUCCESS);
                 } else if (hasLocalGroup) {
                     PlayerHelper.sendUserAlert(Component.translatable("message.jmws.local_group_upload"), true, false, JMWSMessageType.SUCCESS);
                 } else {
                     PlayerHelper.sendUserAlert(Component.translatable("message.jmws.local_waypoint_upload"), true, false, JMWSMessageType.SUCCESS);
                 }
+
             } else if (sendAlert) {
                 String updateMessageKey = "message.jmws.synced_success";
 

@@ -47,8 +47,8 @@ public class CommandHelper {
                 deleteAllGroups));
     }
 
-    public static String makeWaypointSyncRequestJson(boolean sendAlert) {
-        return CommandHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, List.of(Map.of(), Map.of(), sendAlert));
+    public static String makeWaypointSyncRequestJson(boolean sendAlert, boolean isForDeathSync) {
+        return CommandHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, List.of(Map.of(), Map.of(), sendAlert, isForDeathSync));
     }
 
     public static String makeCreationRequestJson(Waypoint waypoint, boolean silent, boolean isUpdate) {
@@ -59,8 +59,8 @@ public class CommandHelper {
         return CommandHelper.makeBaseJsonRequest(WaypointPayloadCommand.SERVER_CREATE_GROUP, List.of(waypointGroup.toString(), silent, isUpdate));
     }
 
-    public static String makeSyncRequestResponseJson(HashMap<String, String> jsonArray, HashMap<String, String> jsonGroupArray, boolean sendAlert) {
-        return CommandHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, List.of(jsonArray, jsonGroupArray, sendAlert));
+    public static String makeSyncRequestResponseJson(HashMap<String, String> jsonArray, HashMap<String, String> jsonGroupArray, boolean sendAlert, boolean isDeathSync) {
+        return CommandHelper.makeBaseJsonRequest(WaypointPayloadCommand.SYNC, List.of(jsonArray, jsonGroupArray, sendAlert, isDeathSync));
     }
 
     public static String makeClientAlertRequestJson(String message, boolean overlay, boolean isError) {
