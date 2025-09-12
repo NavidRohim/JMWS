@@ -1,5 +1,11 @@
 # 1.1.6 Changelog
 
+## Installation Changes (JMWS 1.21.8)
+
+There have been changes regarding dependencies.
+The server-side must have [CommonNetworking 1.0.21-1.21.7](https://www.curseforge.com/minecraft/mc-mods/common-network/files/all?page=1&pageSize=20) installed. 
+As usual, the client-side must have JourneyMap 1.21.8-6.0.0-beta.52 or newer.
+
 ## New
 
 This is mostly bug fixing and tweaks.
@@ -16,7 +22,7 @@ This is mostly bug fixing and tweaks.
 
 ## Persistent bugs that I am aware of
 
-None. If there are any please do make a GitHub issue or join my discord.
+None. If there are any please do make a GitHub issue or join my discord. I will be happy to help
 
 
 
