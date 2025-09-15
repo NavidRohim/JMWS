@@ -1,6 +1,6 @@
 package me.brynview.navidrohim.jmws;
 
-import me.brynview.navidrohim.jmws.client.exceptions.Whoopsies;
+
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
@@ -8,7 +8,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.VersionParsingException;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -16,11 +15,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Jmws implements ModInitializer {
-
-    private void _handleMissingMod(@Nullable Exception exc) {
-        Constants.getLogger().error("Got error checking JM version; %s".formatted(exc));
-        throw new Whoopsies("JourneyMap might be installed, but the version cannot be detected. Need JourneyMap version %s or higher.".formatted(Constants.JourneyMapVersionString));
-    }
 
     @Override
     public void onInitialize() {
@@ -66,27 +60,23 @@ public class Jmws implements ModInitializer {
                         int jarVersionString = Integer.parseInt(regexBetaVersionPatternJarMatcher.group(1));
                         int minVersionString = Integer.parseInt(regexBetaVersionPatternMinMatcher.group(1));
 
-                        if (!(mcVersionMinor >= minMcVersionMinor && mcVersionPatch == minMcVersionPatch && jarVersionString >= minVersionString)) {
-                            throw new Whoopsies("JourneyMap is installed (version %s) but it is the wrong version. Need %s or higher.".formatted(versionString, Constants.JourneyMapVersionString));
-                        }
-                        else {
+                        if ((mcVersionMinor >= minMcVersionMinor && mcVersionPatch == minMcVersionPatch && jarVersionString >= minVersionString)) {
                             Constants.getLogger().info("Good to go. JMWS Version %s with JourneyMap Version %s on client-side.".formatted(Constants.VERSION, versionString));
                             CommonClass.clientHasJM = true;
+                            CommonClass.init();
                         }
-                    } else {
-                        _handleMissingMod(null);
                     }
-                } else {
-                    throw new Whoopsies("JourneyMap %s is required on the client-side of JMWS.".formatted(Constants.JourneyMapVersionString));
                 }
 
             } else {
                 Constants.getLogger().info("JourneyMap is not needed on the server-side. If you get a warning about it on the server, you can safely ignore it.");
+                CommonClass.init();
             }
-        } catch (NoSuchElementException | VersionParsingException | IllegalStateException exception) {
-            _handleMissingMod(exception);
-        }
+        } catch (NoSuchElementException | VersionParsingException | IllegalStateException ignored) {
 
-        CommonClass.init();
+        }
     }
+
+
+
 }
