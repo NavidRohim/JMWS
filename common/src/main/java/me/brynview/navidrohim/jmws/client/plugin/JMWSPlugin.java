@@ -8,21 +8,17 @@ import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.client.IClientPlugin;
 import journeymap.api.v2.client.JourneyMapPlugin;
-import journeymap.api.v2.client.event.DeathWaypointEvent;
-import journeymap.api.v2.client.event.InfoSlotDisplayEvent;
-import journeymap.api.v2.client.event.MappingEvent;
-import journeymap.api.v2.client.event.RegistryEvent;
+import journeymap.api.v2.client.event.*;
 import journeymap.api.v2.common.event.ClientEventRegistry;
 import journeymap.api.v2.common.event.CommonEventRegistry;
 import journeymap.api.v2.common.event.FullscreenEventRegistry;
-import journeymap.api.v2.common.event.MinimapEventRegistry;
+import journeymap.api.v2.common.event.common.TeleportEvent;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.event.common.WaypointGroupEvent;
 import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.client.network.ClientHandshakeHandler;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
@@ -38,7 +34,6 @@ import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -65,14 +60,34 @@ public class JMWSPlugin implements IClientPlugin {
 
         this.jmAPI = jmClientApi;
 
-        ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe("jmapi", this::handleUserDeath);
         CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", this::waypointCreationHandler);
         CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", Constants.MODID, this::groupEventListener);
-        CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe("jmapi", Constants.MODID, this::waypointDragHandler); // Not working with current JourneyMap beta.53, should be fixed with new JM version with no changes on my end
+        CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe("jmapi", Constants.MODID, this::waypointDragHandler);
+        CommonEventRegistry.TELEPORT_EVENT.subscribe("jmapi", Constants.MODID, this::correctTeleportDestination);
         FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(Constants.MODID, JMButtonAddon::addJMButtons);
+
+        ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe("jmapi", this::handleUserDeath);
         ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe("jmapi", (RegistryEvent.OptionsRegistryEvent optionsRegistryEvent) -> config = new ConfigInterface());
         ClientEventRegistry.MAPPING_EVENT.subscribe("jmapi", (MappingEvent event) -> {JMWSPlugin.updateWaypoints(false);});
 
+    }
+
+    private void correctTeleportDestination(TeleportEvent teleportEvent) {
+        /*BlockPos wpBlockPos = teleportEvent.getPos();
+        String fromLevel = teleportEvent.getFromLevel().location().getPath();
+        String toLevel = teleportEvent.getDestinationLevel().location().getPath();
+
+        Constants.getLogger().info(fromLevel);
+        Constants.getLogger().info(toLevel);
+        if (toLevel.equals("the_nether") && !fromLevel.equals("the_nether"))
+        {
+            wpBlockPos = new BlockPos(wpBlockPos.getX() / 8, wpBlockPos.getY(), wpBlockPos.getZ() / 8);
+        } else if (!toLevel.equals("the_nether") && fromLevel.equals("the_nether"))
+        {
+            wpBlockPos = new BlockPos(wpBlockPos.getX() * 8, wpBlockPos.getY(), wpBlockPos.getZ() * 8);
+        }
+
+        teleportEvent.setPos(wpBlockPos);*/
     }
 
     private void handleUserDeath(DeathWaypointEvent deathWaypointEvent) {
@@ -104,6 +119,7 @@ public class JMWSPlugin implements IClientPlugin {
             ObjectIdentifierMap.addWaypointToMap(waypoint);
             waypoint.setPersistent(false);
 
+            Constants.getLogger().info(String.valueOf(waypoint.getBlockPos()));
             String creationData = CommandHelper.makeCreationRequestJson(waypoint, silent, isUpdate);
             Dispatcher.sendToServer(new JMWSActionPayload(creationData));
         } else {
@@ -182,7 +198,7 @@ public class JMWSPlugin implements IClientPlugin {
                     WaypointGroup oldWaypointGroup = ObjectIdentifierMap.getOldGroup(waypointGroup);
 
                     switch (waypointGroupEvent.getContext()) {
-                        case CREATE -> this.groupCreationHandler(waypointGroup, false, false); // MAKE SURE you use beta 47 or higher
+                        case CREATE -> this.groupCreationHandler(waypointGroup, false, false);
                         case DELETED -> this.groupDeletionHandler(waypointGroup, player, false, waypointGroupEvent.deleteWaypoints(), true);
                         case UPDATE -> this.groupUpdateHandler(waypointGroup, oldWaypointGroup, player);
                     }
@@ -386,6 +402,7 @@ public class JMWSPlugin implements IClientPlugin {
             Waypoint wp = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData());
             ObjectIdentifierMap.addWaypointToMap(wp);
 
+            Constants.getLogger().info(String.valueOf(wp.getBlockPos()));
             getInstance().jmAPI.addWaypoint("journeymap", wp);
         }
 

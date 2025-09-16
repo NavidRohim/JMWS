@@ -7,3 +7,4 @@ verspec/
 .idea/
 .gradle/
 *.lock
+journeymap-*

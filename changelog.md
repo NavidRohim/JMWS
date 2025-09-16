@@ -7,10 +7,11 @@ No new features.
 ## Bug fixes / Changes
 
 - When JourneyMap is not installed on the client side, a screen is now shown instead of a overly-verbose crash report.
+- Fixed problem where a waypoint in the nether wouldnt function properly unless you were in the nether.
 
-## Persistent bugs that I am aware of
+## Bugs that I am aware of
 
-None. If there are any please do make a GitHub issue or join my discord. I will be happy to help
+- Coordinates in nether relative to other dimensions is wrong (will teleport you to wrong location)
 
 
 
