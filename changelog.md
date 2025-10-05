@@ -12,6 +12,5 @@ No new features.
 ## Bugs that I am aware of
 
 - Coordinates in nether relative to other dimensions is wrong (will teleport you to wrong location)
-
-
+- Couldn't delete waypoints in nether when in dimension other than nether (and vice versa)
 

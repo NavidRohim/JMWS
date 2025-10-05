@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import com.mojang.datafixers.kinds.Const;
 import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.client.IClientPlugin;
@@ -31,9 +32,11 @@ import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
+import net.minecraft.client.particle.SuspendedTownParticle;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.monster.Zombie;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -63,7 +66,7 @@ public class JMWSPlugin implements IClientPlugin {
         CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", this::waypointCreationHandler);
         CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", Constants.MODID, this::groupEventListener);
         CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe("jmapi", Constants.MODID, this::waypointDragHandler);
-        CommonEventRegistry.TELEPORT_EVENT.subscribe("jmapi", Constants.MODID, this::correctTeleportDestination);
+        CommonEventRegistry.TELEPORT_EVENT.subscribe("jmapi", Constants.MODID, this::correctTeleportDestination); // Should be temporary
         FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(Constants.MODID, JMButtonAddon::addJMButtons);
 
         ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe("jmapi", this::handleUserDeath);
@@ -73,21 +76,21 @@ public class JMWSPlugin implements IClientPlugin {
     }
 
     private void correctTeleportDestination(TeleportEvent teleportEvent) {
-        /*BlockPos wpBlockPos = teleportEvent.getPos();
+        // Should only been needed temporarily since I believe there is a bug with JM where teleporting to or from the nether will put you in the wrong place
+        BlockPos wpBlockPos = teleportEvent.getPos();
         String fromLevel = teleportEvent.getFromLevel().location().getPath();
         String toLevel = teleportEvent.getDestinationLevel().location().getPath();
 
-        Constants.getLogger().info(fromLevel);
-        Constants.getLogger().info(toLevel);
-        if (toLevel.equals("the_nether") && !fromLevel.equals("the_nether"))
+        if (toLevel.equals("the_nether") && !fromLevel.equals("the_nether")) // If we are going to the Nether
         {
             wpBlockPos = new BlockPos(wpBlockPos.getX() / 8, wpBlockPos.getY(), wpBlockPos.getZ() / 8);
-        } else if (!toLevel.equals("the_nether") && fromLevel.equals("the_nether"))
+        }
+        else if (!toLevel.equals("the_nether") && fromLevel.equals("the_nether")) // If we are leaving the Nether
         {
             wpBlockPos = new BlockPos(wpBlockPos.getX() * 8, wpBlockPos.getY(), wpBlockPos.getZ() * 8);
         }
 
-        teleportEvent.setPos(wpBlockPos);*/
+        teleportEvent.setPos(wpBlockPos);
     }
 
     private void handleUserDeath(DeathWaypointEvent deathWaypointEvent) {

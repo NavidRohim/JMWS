@@ -15,7 +15,7 @@ public class CommonHelper {
     // This is kinda just a "put whatever here that is used everywhere" class
 
     public static String getWaypointFilename(Waypoint waypoint, UUID uuID) {
-        Vector3d waypointLocationVector = new Vector3d(waypoint.getX(), waypoint.getY(), waypoint.getZ());
+        Vector3d waypointLocationVector = new Vector3d(waypoint.getBlockPos().getX(), waypoint.getBlockPos().getY(), waypoint.getBlockPos().getZ());
         return _getWaypointFromRaw(waypointLocationVector, waypoint.getName(), uuID);
     }
 
