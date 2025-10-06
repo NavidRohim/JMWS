@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.client;
 
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -41,7 +42,6 @@ public class SyncCounter {
                 }
                 tickCounter = 0;
             } else {
-
                 tickCounter++;
                 if (tickCounter >= tickCounterUpdateThreshold) {
 
