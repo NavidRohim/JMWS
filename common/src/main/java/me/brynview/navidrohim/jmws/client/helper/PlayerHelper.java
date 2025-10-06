@@ -46,8 +46,4 @@ public class PlayerHelper {
             CommonClass.minecraftClientInstance.player.playSound(sound, 0.09f, 1f);
         }
     }
-
-    public static void teleportPlayer() {
-
-    }
 }

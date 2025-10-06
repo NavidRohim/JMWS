@@ -29,16 +29,10 @@ public abstract class WaypointDecorationRendererMixin {
             method = "renderNameTag",
             at = @At(value = "TAIL")
     )
-    private void callWaypointIconRenderEvent(GuiGraphics graphics, ClientWaypointImpl waypoint, double labelX, double labelY, float alpha, double actualDistance, int size, CallbackInfo ci)
-    {
+    private void callWaypointIconRenderEvent(GuiGraphics graphics, ClientWaypointImpl waypoint, double labelX, double labelY, float alpha, double actualDistance, int size, CallbackInfo ci) {
         double angle = this.angleToBeacon(waypoint.getPosition());
-        if ( angle < 2 && CommonClass.isHoldingTeleportKey)
-        {
+        if (angle < 2 && CommonClass.isHoldingTeleportKey) {
             JMWSPlugin.getInstance().teleportPlayer(waypoint.getPosition());
-        } else {
-            CommonClass.isLookingAtWaypoint = false;
         }
     }
-
-
 }

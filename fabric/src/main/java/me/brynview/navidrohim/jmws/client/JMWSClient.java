@@ -37,7 +37,7 @@ public class JMWSClient implements ClientModInitializer {
     {
         keyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "jmws.key.teleport",
-                GLFW.GLFW_KEY_HOME,
+                GLFW.GLFW_KEY_LEFT_ALT,
                 "jmws.keybinds"
         ));
         // fabric tick events

@@ -49,8 +49,7 @@ public class CommonClass {
     public static SyncCounter syncCounter = null;
     public static boolean serverHasMod = false;
     public static boolean clientHasJM = false;
-
-    public static boolean isLookingAtWaypoint = false;
+    
     public static boolean isHoldingTeleportKey = false;
 
     public static void setServerModStatus(boolean serverModStatus)

@@ -35,6 +35,8 @@ import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
@@ -467,11 +469,6 @@ public class JMWSPlugin implements IClientPlugin {
     }
 
     public void teleportPlayer(Vec3 waypointVec) {
-        if (CommonClass.isInternalServer())
-        {
-            minecraftClientInstance.player.setPos(waypointVec);
-        } else {
-            Dispatcher.sendToServer(new JMWSActionPayload(CommandHelper.makeUserWaypointTeleportRequest(waypointVec, minecraftClientInstance.player.getUUID())));
-        }
+        Dispatcher.sendToServer(new JMWSActionPayload(CommandHelper.makeUserWaypointTeleportRequest(waypointVec, minecraftClientInstance.player.getUUID())));
     }
 }

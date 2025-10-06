@@ -2,7 +2,7 @@
 
 ## New
 
-No new features.
+Look-to-teleport-- Look at a waypoint, press HOME key and user will be teleported.
 
 ## Bug fixes / Changes
 
