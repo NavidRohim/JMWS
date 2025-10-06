@@ -101,5 +101,9 @@
 
   "__comment__": "Subtitles for sounds",
   "subtitle.jmws.waypoint_sync": "Syncing",
-  "subtitle.jmws.generic_error": "JMWS error"
+  "subtitle.jmws.generic_error": "JMWS error",
+
+  "__comment__": "Keybind category",
+  "jmws.keybinds": "JMWS Keybinds",
+  "jmws.key.teleport": "Teleport-upon-look"
 }

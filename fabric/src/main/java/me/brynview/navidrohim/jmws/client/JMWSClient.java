@@ -36,7 +36,7 @@ public class JMWSClient implements ClientModInitializer {
     public void onInitializeClient()
     {
         keyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-                "key.jmws.teleport",
+                "jmws.key.teleport",
                 GLFW.GLFW_KEY_HOME,
                 "jmws.keybinds"
         ));
