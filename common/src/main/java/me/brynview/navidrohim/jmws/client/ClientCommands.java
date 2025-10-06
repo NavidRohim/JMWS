@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.client;
 
 import commonnetwork.api.Dispatcher;
+import journeymap.api.v2.common.waypoint.WaypointFactory;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.common.helper.CommandHelper;

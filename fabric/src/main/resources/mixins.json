@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "me.brynview.navidrohim.jmws.client.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "WaypointDecorationRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

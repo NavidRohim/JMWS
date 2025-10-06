@@ -32,6 +32,9 @@
       "me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin"
     ]
   },
+  "mixins": [
+    "mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
     "fabric-api": "*",
