@@ -33,7 +33,7 @@ public class PacketHandler {
 
                 // Was creation_response
                 // Sends no outbound data
-                case SYNC -> JMWSPlugin.syncHandler(waypointPayload, CommonClass.minecraftClientInstance.player);
+                case SYNC -> JMWSPlugin.syncHandler(waypointPayload);
 
                 // was "update"
                 // Sends "request" packet | New = "SYNC"

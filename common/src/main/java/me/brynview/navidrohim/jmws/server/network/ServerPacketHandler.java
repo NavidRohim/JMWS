@@ -184,6 +184,14 @@ public class ServerPacketHandler {
                 }
             }
 
+            case WaypointPayloadCommand.TELEPORT -> {
+                double x = arguments.get(0).getAsDouble();
+                double y = arguments.get(1).getAsDouble();
+                double z = arguments.get(2).getAsDouble();
+
+                player.teleportTo(x, y, z);
+            }
+
             default -> Constants.getLogger().warn("Unknown packet command -> {}", command);
         }
     }

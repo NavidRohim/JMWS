@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import com.mojang.datafixers.kinds.Const;
+import commonnetwork.CommonNetworkMod;
 import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.client.IClientPlugin;
@@ -32,11 +32,10 @@ import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
-import net.minecraft.client.particle.SuspendedTownParticle;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -412,7 +411,7 @@ public class JMWSPlugin implements IClientPlugin {
         return hasLocalWaypoint;
     }
 
-    public static void syncHandler(JMWSActionPayload waypointPayload, LocalPlayer player) {
+    public static void syncHandler(JMWSActionPayload waypointPayload) {
         boolean hasLocalGroup = false;
         boolean hasLocalWaypoint = false;
         boolean sendAlert = waypointPayload.arguments().get(2).getAsBoolean();
@@ -424,7 +423,7 @@ public class JMWSPlugin implements IClientPlugin {
             }
 
             if (config.uploadGroups.get() && CommonClass.serverConfig.waypointsEnabled()) {
-                hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), player);
+                hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), minecraftClientInstance.player);
             }
 
             if (hasLocalGroup || hasLocalWaypoint) {
@@ -464,6 +463,15 @@ public class JMWSPlugin implements IClientPlugin {
             if (!Constants.forbiddenGroups.contains(wp.getGuid())) {
                 getInstance().jmAPI.removeWaypointGroup(wp, false);
             }
+        }
+    }
+
+    public void teleportPlayer(Vec3 waypointVec) {
+        if (CommonClass.isInternalServer())
+        {
+            minecraftClientInstance.player.setPos(waypointVec);
+        } else {
+            Dispatcher.sendToServer(new JMWSActionPayload(CommandHelper.makeUserWaypointTeleportRequest(waypointVec, minecraftClientInstance.player.getUUID())));
         }
     }
 }

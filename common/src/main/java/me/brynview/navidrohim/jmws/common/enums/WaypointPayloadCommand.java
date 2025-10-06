@@ -16,4 +16,6 @@ public enum WaypointPayloadCommand {
     CLIENT_ALERT,
     COMMON_DISPLAY_INTERVAL,
     COMMON_DISPLAY_NEXT_UPDATE,
+
+    TELEPORT
 }

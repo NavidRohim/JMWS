@@ -8,6 +8,7 @@ import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -67,7 +68,13 @@ public class CommandHelper {
         return CommandHelper.makeBaseJsonRequest(WaypointPayloadCommand.CLIENT_ALERT, List.of(message, overlay, isError));
     }
 
+    public static String makeUserWaypointTeleportRequest(Vec3 position, UUID playerUUID)
+    {
+        return CommandHelper.makeBaseJsonRequest(WaypointPayloadCommand.TELEPORT, List.of(position.x, position.y, position.z, playerUUID));
+    }
+
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {
         return JsonParser.parseString(jsonString).getAsJsonObject();
     }
+
 }
