@@ -81,6 +81,7 @@ public class PacketHandler {
 
     public static void HandshakeHandler(JMWSHandshakePayload handshakePayload) {
         CommonClass.serverConfig = handshakePayload.serverConfigData != null ? handshakePayload.serverConfigData : ServerConfigObject.serverOwner();
+        // TODO; add server version checking text. Very easy to do just tired at the moment.
 
         if (!CommonClass.serverConfig.jmwsEnabled) {
             sendUserAlert(Component.translatable("warning.jmws.server_disabled_jmws"), true, false, JMWSMessageType.WARNING);
@@ -89,7 +90,7 @@ public class PacketHandler {
         } else if (!CommonClass.serverConfig.groupsEnabled) {
             sendUserAlert(Component.translatable("warning.jmws.server_disabled_group"), true, false, JMWSMessageType.WARNING);
         } else {
-            sendUserAlert(Component.translatable("message.jmws.has_jmws"), true, false, JMWSMessageType.SUCCESS);
+            sendUserAlert(Component.translatable("message.jmws.has_jmws", (CommonClass.serverConfig.getServerVersion())), true, false, JMWSMessageType.SUCCESS);
         }
 
         CommonClass.setServerModStatus(true);

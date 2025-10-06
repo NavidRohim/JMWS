@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.common.payloads;
 
+import io.netty.handler.codec.DecoderException;
 import me.brynview.navidrohim.jmws.Constants;
 
 import me.brynview.navidrohim.jmws.common.CommonClass;
@@ -10,7 +11,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-
+import org.jetbrains.annotations.Nullable;
 
 
 public class JMWSHandshakePayload
@@ -24,9 +25,21 @@ public class JMWSHandshakePayload
     {
         if (Services.PLATFORM.side().equals("CLIENT") || !CommonClass.isInternalServer())
         {
+            @Nullable Double version = null;
             if (friendlyByteBuf.readableBytes() != 0) {
-                serverConfigDataJson = friendlyByteBuf.readUtf(512);
-                serverConfigData = ServerConfig.getConfig(serverConfigDataJson);
+                try
+                {
+                    serverConfigDataJson = friendlyByteBuf.readUtf(512);
+                    version = friendlyByteBuf.readDouble();
+                }
+                catch (IndexOutOfBoundsException ignored)
+                {
+                    Constants.getLogger().error("Server does not have JMWS server version! Things are likely to break!");
+                }
+                finally
+                {
+                    serverConfigData = ServerConfig.getConfig(serverConfigDataJson, version);
+                }
             }
         }
     }
@@ -47,6 +60,7 @@ public class JMWSHandshakePayload
         if (Services.PLATFORM.side().equals("SERVER") || CommonClass.isInternalServer())
         {
             buf.writeUtf(serverConfigDataJson);
+            buf.writeDouble(Constants.SERVER_VERSION);
         }
     }
 
