@@ -40,6 +40,6 @@
     "commonnetworking": ">=1.0.21-1.21.7"
   },
   "recommends": {
-    "journeymap": ">=1.21.8-6.0.0-beta.52"
+    "journeymap": ">=1.21.9-6.0.0-beta.53"
   }
 }

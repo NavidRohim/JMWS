@@ -59,7 +59,7 @@ public class ConfigInterface {
 
         this.serverEnabled = new BooleanOption(server, "serverEnabled", "text.config.jmws-config.option.serverEnabled", true);
         this.serverUploadWaypoints = new BooleanOption(server, "serverUploadWaypoints", "text.config.jmws-config.option.serverUploadWaypoints", true);
-        this.serverUploadGroups = new BooleanOption(server, "serverUploadGroups", "text.config.jmws-config.option.serverUploadgroups", true);
+        this.serverUploadGroups = new BooleanOption(server, "serverUploadGroups", "text.config.jmws-config.option.serverUploadGroups", true);
     }
 
     public int getUpdateWaypointFrequencyAsTicks()

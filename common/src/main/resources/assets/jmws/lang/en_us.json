@@ -50,6 +50,7 @@
   "text.config.jmws-config.option.serverConfiguration.serverWaypointsEnabled.tooltip": "If server has waypoint syncing enabled.",
   "text.config.jmws-config.option.serverConfiguration.serverGroupsEnabled.tooltip": "if server has group syncing enabled.",
 
+
   "text.config.jmws-config.option.showAlerts": "Show alerts?",
   "text.config.jmws-config.option.playEffects": "Sound alerts?",
   "text.config.jmws-config.option.colouredText": "Coloured text?",
@@ -58,6 +59,9 @@
   "text.config.jmws-config.option.uploadGroups": "Sync waypoint groups?",
   "text.config.jmws-config.option.autoSync": "Auto-Sync",
   "text.config.jmws-config.option.syncIndicator": "Sync Indicator",
+  "text.config.jmws-config.option.serverEnabled": "Server Enabled",
+  "text.config.jmws-config.option.serverUploadWaypoints": "Server Syncs Waypoints",
+  "text.config.jmws-config.option.serverUploadGroups": "Server Syncs Groups",
 
   "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency": "Sync frequency",
   "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout": "Server Handshake Timeout",
