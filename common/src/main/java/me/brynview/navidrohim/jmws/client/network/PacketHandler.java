@@ -13,6 +13,7 @@ import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -79,20 +80,33 @@ public class PacketHandler {
         }
     }
 
-    public static void HandshakeHandler(JMWSHandshakePayload handshakePayload) {
-        CommonClass.serverConfig = handshakePayload.serverConfigData != null ? handshakePayload.serverConfigData : ServerConfigObject.serverOwner();
-        // TODO; add server version checking text. Very easy to do just tired at the moment.
+    private static void sendUserJoinAlert(@Nullable Double serverVersion)
+    {
+        if (serverVersion == null)
+        {
+            sendUserAlert(Component.translatable("warning.jmws.server.no_version"), true, false, JMWSMessageType.FAILURE);
+        } else if (serverVersion < Constants.SERVER_VERSION) {
+            sendUserAlert(Component.translatable("warning.jmws.server.older_server_version"), true, false, JMWSMessageType.WARNING);
+            Constants.getLogger().warn("Got server version; %s expected; %s".formatted(serverVersion, Constants.SERVER_VERSION));
+        } else if (serverVersion > Constants.SERVER_VERSION) {
+            sendUserAlert(Component.translatable("warning.jmws.server.newer_server_version"), true, false, JMWSMessageType.WARNING);
+            Constants.getLogger().warn("Got server version; %s expected; %s".formatted(serverVersion, Constants.SERVER_VERSION));
 
-        if (!CommonClass.serverConfig.jmwsEnabled) {
-            sendUserAlert(Component.translatable("warning.jmws.server_disabled_jmws"), true, false, JMWSMessageType.WARNING);
+        } else if (!CommonClass.serverConfig.jmwsEnabled) {
+            sendUserAlert(Component.translatable("warning.jmws.server.disabled_jmws"), true, false, JMWSMessageType.WARNING);
         } else if (!CommonClass.serverConfig.waypointsEnabled) {
-            sendUserAlert(Component.translatable("warning.jmws.server_disabled_waypoint"), true, false, JMWSMessageType.WARNING);
+            sendUserAlert(Component.translatable("warning.jmws.server.disabled_waypoint"), true, false, JMWSMessageType.WARNING);
         } else if (!CommonClass.serverConfig.groupsEnabled) {
-            sendUserAlert(Component.translatable("warning.jmws.server_disabled_group"), true, false, JMWSMessageType.WARNING);
+            sendUserAlert(Component.translatable("warning.jmws.server.disabled_group"), true, false, JMWSMessageType.WARNING);
         } else {
             sendUserAlert(Component.translatable("message.jmws.has_jmws", (CommonClass.serverConfig.getServerVersion())), true, false, JMWSMessageType.SUCCESS);
         }
+    }
 
+    public static void HandshakeHandler(JMWSHandshakePayload handshakePayload) {
+        CommonClass.serverConfig = handshakePayload.serverConfigData != null ? handshakePayload.serverConfigData : ServerConfigObject.serverOwner();
+        @Nullable Double serverVersion =  CommonClass.serverConfig.getServerVersion();
         CommonClass.setServerModStatus(true);
+        sendUserJoinAlert(serverVersion);
     }
 }
