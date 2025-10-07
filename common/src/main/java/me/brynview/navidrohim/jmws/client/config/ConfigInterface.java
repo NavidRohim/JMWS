@@ -1,25 +1,33 @@
 package me.brynview.navidrohim.jmws.client.config;
 
 import journeymap.api.v2.client.option.*;
+import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 
 public class ConfigInterface {
 
-    public OptionCategory category = new OptionCategory(
-            "jmapi",
+    private OptionCategory category = new OptionCategory(
+            Constants.MODID,
             "text.config.jmws-config.section.upload",
             "text.config.jmws-config.section.upload.tooltip"
     );
 
-    public OptionCategory personalisation = new OptionCategory(
-            "jmapi",
+    private OptionCategory personalisation = new OptionCategory(
+            Constants.MODID,
             "text.config.jmws-config.section.personalisation",
             "text.config.jmws-config.section.personalisation.tooltip"
     );
 
-    public OptionCategory technical = new OptionCategory(
-            "jmapi",
+    private OptionCategory technical = new OptionCategory(
+            Constants.MODID,
             "text.config.jmws-config.section.generalConfig",
             "text.config.jmws-config.section.generalConfig.tooltip"
+    );
+
+    private OptionCategory server = new OptionCategory(
+            Constants.MODID,
+            "text.config.jmws-config.section.server",
+            "text.config.jmws-config.section.server.tooltip"
     );
 
     public final BooleanOption enabled;
@@ -34,6 +42,10 @@ public class ConfigInterface {
 
     public final IntegerOption updateWaypointFrequency;
 
+    public final BooleanOption serverEnabled;
+    public final BooleanOption serverUploadWaypoints;
+    public final BooleanOption serverUploadGroups;
+
 
     public ConfigInterface() {
         this.enabled = new BooleanOption(category, "master", "text.config.jmws-config.option.enabled", true, true);
@@ -47,6 +59,10 @@ public class ConfigInterface {
         this.colouredText = new BooleanOption(personalisation, "colouredText", "text.config.jmws-config.option.colouredText", true);
 
         this.updateWaypointFrequency = new IntegerOption(technical, "updateWaypointFrequency", "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency", 40, 2, 120);
+
+        this.serverEnabled = new BooleanOption(server, "serverEnabled", "text.config.jmws-config.option.serverEnabled", true);
+        this.serverUploadWaypoints = new BooleanOption(server, "serverUploadWaypoints", "text.config.jmws-config.option.serverUploadWaypoints", true);
+        this.serverUploadGroups = new BooleanOption(server, "serverUploadGroups", "text.config.jmws-config.option.serverUploadGroups", true);
     }
 
     public int getUpdateWaypointFrequencyAsTicks()

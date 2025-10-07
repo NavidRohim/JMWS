@@ -60,6 +60,9 @@
   "text.config.jmws-config.option.uploadGroups": "Sync waypoint groups?",
   "text.config.jmws-config.option.autoSync": "Auto-Sync",
   "text.config.jmws-config.option.syncIndicator": "Sync Indicator",
+  "text.config.jmws-config.option.serverEnabled": "Server Enabled",
+  "text.config.jmws-config.option.serverUploadWaypoints": "Server Syncs Waypoints",
+  "text.config.jmws-config.option.serverUploadGroups": "Server Syncs Groups",
   "text.config.jmws-config.option.lookAltTeleporting": "Look-Alt Teleporting",
 
   "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency": "Sync frequency",
