@@ -123,7 +123,6 @@ public class JMWSPlugin implements IClientPlugin {
             ObjectIdentifierMap.addWaypointToMap(waypoint);
             waypoint.setPersistent(false);
 
-            Constants.getLogger().info(String.valueOf(waypoint.getBlockPos()));
             String creationData = CommandHelper.makeCreationRequestJson(waypoint, silent, isUpdate);
             Dispatcher.sendToServer(new JMWSActionPayload(creationData));
         } else {
@@ -406,7 +405,6 @@ public class JMWSPlugin implements IClientPlugin {
             Waypoint wp = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData());
             ObjectIdentifierMap.addWaypointToMap(wp);
 
-            Constants.getLogger().info(String.valueOf(wp.getBlockPos()));
             getInstance().jmAPI.addWaypoint("journeymap", wp);
         }
 

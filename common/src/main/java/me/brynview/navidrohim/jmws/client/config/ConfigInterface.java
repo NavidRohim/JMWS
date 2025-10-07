@@ -26,26 +26,27 @@ public class ConfigInterface {
     public final BooleanOption uploadWaypoints;
     public final BooleanOption uploadGroups;
     public final BooleanOption autoSync;
+    public final BooleanOption lookAltTeleporting;
 
     public final BooleanOption showAlerts;
     public final BooleanOption playEffects;
     public final BooleanOption colouredText;
 
     public final IntegerOption updateWaypointFrequency;
-    //public final IntegerOption serverHandshakeTimeout;
+
 
     public ConfigInterface() {
         this.enabled = new BooleanOption(category, "master", "text.config.jmws-config.option.enabled", true, true);
         this.uploadWaypoints = new BooleanOption(category, "uploadWaypoints", "text.config.jmws-config.option.uploadWaypoints", true);
         this.uploadGroups = new BooleanOption(category, "uploadGroups", "text.config.jmws-config.option.uploadGroups", true);
         this.autoSync = new BooleanOption(category, "autoSync", "text.config.jmws-config.option.autoSync", true);
+        this.lookAltTeleporting = new BooleanOption(category, "lookAltTeleporting", "text.config.jmws-config.option.lookAltTeleporting", true);
 
         this.showAlerts = new BooleanOption(personalisation, "showAlerts", "text.config.jmws-config.option.showAlerts", true);
         this.playEffects = new BooleanOption(personalisation, "playEffects", "text.config.jmws-config.option.playEffects", true);
         this.colouredText = new BooleanOption(personalisation, "colouredText", "text.config.jmws-config.option.colouredText", true);
 
         this.updateWaypointFrequency = new IntegerOption(technical, "updateWaypointFrequency", "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency", 40, 2, 120);
-        //this.serverHandshakeTimeout = new IntegerOption(technical, "serverHandshakeTimeout", "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout", 2, 1, 60);
     }
 
     public int getUpdateWaypointFrequencyAsTicks()

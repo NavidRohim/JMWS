@@ -4,9 +4,12 @@ package me.brynview.navidrohim.jmws.client.mixin;
 import journeymap.client.render.ingame.WaypointDecorationRenderer;
 import journeymap.client.waypoint.ClientWaypointImpl;
 
+import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 
+import me.brynview.navidrohim.jmws.common.config.ServerConfigObject;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.phys.Vec3;
 
@@ -36,8 +39,16 @@ public abstract class WaypointDecorationRendererMixin {
         teleportCooldown -= 1;
 
         if (angle < 2 && CommonClass.isHoldingTeleportKey && teleportCooldown <= 0) {
-            JMWSPlugin.getInstance().teleportPlayer(waypoint.getPosition());
             teleportCooldown = 120;
+            if (CommonClass.serverConfig instanceof ServerConfigObject && CommonClass.serverConfig.lookAltTeleportingEnabled && CommonClass.config.lookAltTeleporting.get())
+            {
+                JMWSPlugin.getInstance().teleportPlayer(waypoint.getPosition());
+            } else {
+                if (CommonClass.serverConfig.lookAltTeleportingEnabled == false)
+                {
+                    Constants.getLogger().warn("Server has Look-Alt teleporting turned off.");
+                }
+            }
         }
     }
 }

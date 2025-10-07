@@ -8,12 +8,15 @@ public class ServerConfigObject {
     public Boolean jmwsEnabled;
     public Boolean waypointsEnabled;
     public Boolean groupsEnabled;
+    public Boolean lookAltTeleportingEnabled;
+
     @Nullable private Double serverVersion = null;
 
-    public ServerConfigObject(boolean jmwsEnabled, boolean waypointsEnabled, boolean groupsEnabled) {
+    public ServerConfigObject(boolean jmwsEnabled, boolean waypointsEnabled, boolean groupsEnabled, boolean lookAltTeleportingEnabled) {
         this.jmwsEnabled = jmwsEnabled;
         this.waypointsEnabled = waypointsEnabled;
         this.groupsEnabled = groupsEnabled;
+        this.lookAltTeleportingEnabled = lookAltTeleportingEnabled;
     }
 
     public boolean serverEnabled()
@@ -50,12 +53,12 @@ public class ServerConfigObject {
 
     public static ServerConfigObject empty()
     {
-        return new ServerConfigObject(false, false, false);
+        return new ServerConfigObject(false, false, false, false);
     }
 
     public static ServerConfigObject serverOwner()
     {
-        return new ServerConfigObject(true, true, true);
+        return new ServerConfigObject(true, true, true, true);
     }
 
 

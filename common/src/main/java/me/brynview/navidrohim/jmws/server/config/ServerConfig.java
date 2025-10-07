@@ -34,7 +34,8 @@ public class ServerConfig {
                 String configJsonString = configJson.toJson(new ServerConfigObject(
                                 true,
                                 true,
-                                true
+                                true,
+                        true
                         )
                 );
 
