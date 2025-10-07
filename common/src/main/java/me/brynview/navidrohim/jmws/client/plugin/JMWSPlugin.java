@@ -67,12 +67,22 @@ public class JMWSPlugin implements IClientPlugin {
         CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", Constants.MODID, this::groupEventListener);
         CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe("jmapi", Constants.MODID, this::waypointDragHandler);
         CommonEventRegistry.TELEPORT_EVENT.subscribe("jmapi", Constants.MODID, this::correctTeleportDestination); // Should be temporary
+
         FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(Constants.MODID, JMButtonAddon::addJMButtons);
+        FullscreenEventRegistry.FULLSCREEN_RENDER_EVENT.subscribe(Constants.MODID, (renderEvent) -> {
+            CommonClass.config.serverEnabled.set(CommonClass.serverConfig.serverEnabled());
+            CommonClass.config.serverUploadWaypoints.set(CommonClass.serverConfig.waypointsEnabled());
+            CommonClass.config.serverUploadGroups.set(CommonClass.serverConfig.groupsEnabled());
+        });
 
         ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe("jmapi", this::handleUserDeath);
-        ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe("jmapi", (RegistryEvent.OptionsRegistryEvent optionsRegistryEvent) -> config = new ConfigInterface());
+        ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe("jmapi", this::registerConfig);
         ClientEventRegistry.MAPPING_EVENT.subscribe("jmapi", (MappingEvent event) -> {JMWSPlugin.updateWaypoints(false);});
 
+    }
+
+    private void registerConfig(RegistryEvent.OptionsRegistryEvent optionsRegistryEvent) {
+        config = new ConfigInterface();
     }
 
     private void correctTeleportDestination(TeleportEvent teleportEvent) {
