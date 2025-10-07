@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.config.ServerConfigObject;
 import me.brynview.navidrohim.jmws.server.exceptions.ServerConfigurationException;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -69,9 +70,14 @@ public class ServerConfig {
         return serverConfig;
     }
 
-    public static ServerConfigObject getConfig(String data)
+    public static ServerConfigObject getConfig(String data, @Nullable Double serverVersion)
     {
         Gson configJsonObj = new Gson();
-        return configJsonObj.fromJson(data, ServerConfigObject.class);
+        ServerConfigObject connectedServerConfig = configJsonObj.fromJson(data, ServerConfigObject.class);
+        if (serverVersion != null) {
+            connectedServerConfig._setServerVersion(serverVersion);
+        }
+
+        return connectedServerConfig;
     }
 }
