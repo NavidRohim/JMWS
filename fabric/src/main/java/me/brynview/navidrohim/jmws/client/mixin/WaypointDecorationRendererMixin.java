@@ -40,7 +40,7 @@ public abstract class WaypointDecorationRendererMixin {
 
         if (angle < 2 && CommonClass.isHoldingTeleportKey && teleportCooldown <= 0) {
             teleportCooldown = 120;
-            if (CommonClass.serverConfig instanceof ServerConfigObject && CommonClass.serverConfig.lookAltTeleportingEnabled && CommonClass.config.lookAltTeleporting.get())
+            if ((CommonClass.serverConfig instanceof ServerConfigObject && CommonClass.serverConfig.lookAltTeleportingEnabled && CommonClass.config.lookAltTeleporting.get()) || CommonClass.isInternalServer())
             {
                 JMWSPlugin.getInstance().teleportPlayer(waypoint.getPosition());
             } else {

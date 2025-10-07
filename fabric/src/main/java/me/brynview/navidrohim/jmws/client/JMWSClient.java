@@ -20,6 +20,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 
 
@@ -38,7 +39,7 @@ public class JMWSClient implements ClientModInitializer {
         keyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "jmws.key.teleport",
                 GLFW.GLFW_KEY_LEFT_ALT,
-                "jmws.keybinds"
+                new KeyMapping.Category(ResourceLocation.fromNamespaceAndPath(Constants.MODID, "jmws.keybinds"))
         ));
         // fabric tick events
         ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
