@@ -19,10 +19,6 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
 
 
-import java.awt.*;
-
-
-
 public class JMWSClient implements ClientModInitializer {
 
 

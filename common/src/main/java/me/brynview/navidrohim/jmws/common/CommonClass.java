@@ -20,6 +20,7 @@ import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
+import org.jetbrains.annotations.Nullable;
 
 
 import java.io.File;
@@ -46,6 +47,9 @@ public class CommonClass {
 
     public static SyncCounter syncCounter = null;
     public static boolean serverHasMod = false;
+
+    @Nullable
+    public static String clientJMVersion = null;
     public static boolean clientHasJM = false;
 
     public static void setServerModStatus(boolean serverModStatus)
