@@ -89,6 +89,7 @@
   "error.jmws.error_packet_size": "You have too many waypoints and groups. Please delete some to continue making waypoints and syncing.",
   "error.jmws.error_corrupted_waypoint": "One or more waypoints or groups are corrupted. Contact administration for details.",
   "error.jmws.jmws_not_installed": "Server does not have JMWS installed. JMWS will be disabled.",
+  "error.jmws.screen.needing_got": "Need: %s or newer. Got: %s",
 
   "warning.jmws.server.disabled_jmws": "Server has JMWS, but has been disabled on server.",
   "warning.jmws.server.disabled_group": "Server has JMWS, but group syncing has been disabled.",

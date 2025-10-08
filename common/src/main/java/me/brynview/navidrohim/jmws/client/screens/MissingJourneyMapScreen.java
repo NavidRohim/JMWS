@@ -30,7 +30,7 @@ public class MissingJourneyMapScreen extends ErrorScreen {
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        String renderedString = "Need: %s or newer. Got: %s".formatted(Constants.JourneyMapVersionString, !CommonClass.clientHasJM && CommonClass.clientJMVersion instanceof String ? CommonClass.clientJMVersion : "Nothing!");
+        Component renderedString = Component.translatable("error.jmws.screen.needing_got", Constants.JourneyMapVersionString, !CommonClass.clientHasJM && CommonClass.clientJMVersion instanceof String ? CommonClass.clientJMVersion : "Nothing!");
         guiGraphics.drawCenteredString(this.font, renderedString, this.width / 2, 130, -1);
     }
 }
