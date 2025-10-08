@@ -1,5 +1,8 @@
 package me.brynview.navidrohim.jmws.client.objects;
 
+/**
+ * Dataclass to hold groups and waypoints from server. This is old code, so I wouldn't mess with it.
+ */
 public class SavedObject {
     String rawPacketData;
     String name;

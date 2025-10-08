@@ -2,50 +2,59 @@ package me.brynview.navidrohim.jmws.client.config;
 
 import journeymap.api.v2.client.option.*;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.CommonClass;
 
 public class ConfigInterface {
 
+    // Category for general sync settings
     private OptionCategory category = new OptionCategory(
             Constants.MODID,
             "text.config.jmws-config.section.upload",
             "text.config.jmws-config.section.upload.tooltip"
     );
 
+    // Category for personalisation settings
     private OptionCategory personalisation = new OptionCategory(
             Constants.MODID,
             "text.config.jmws-config.section.personalisation",
             "text.config.jmws-config.section.personalisation.tooltip"
     );
 
+    // Category for technical settings, usually best if left alone
     private OptionCategory technical = new OptionCategory(
             Constants.MODID,
             "text.config.jmws-config.section.generalConfig",
             "text.config.jmws-config.section.generalConfig.tooltip"
     );
 
+    // Category for server settings, for display only and cannot be changed
     private OptionCategory server = new OptionCategory(
             Constants.MODID,
             "text.config.jmws-config.section.server",
             "text.config.jmws-config.section.server.tooltip"
     );
 
-    public final BooleanOption enabled;
-    public final BooleanOption uploadWaypoints;
-    public final BooleanOption uploadGroups;
-    public final BooleanOption autoSync;
+    // All client side options
 
-    public final BooleanOption showAlerts;
-    public final BooleanOption playEffects;
-    public final BooleanOption colouredText;
+    public final BooleanOption enabled; // If JMWS is enabled
+    public final BooleanOption uploadWaypoints; // If to sync waypoints
+    public final BooleanOption uploadGroups; // If to sync groups
+    public final BooleanOption autoSync; // If to auto-sync, can be disabled with little effect.
 
-    public final IntegerOption updateWaypointFrequency;
+    public final BooleanOption showAlerts; // If to show chat / action bar alerts
+    public final BooleanOption playEffects; // If to play sound effects, usually alongside text alerts
+    public final BooleanOption colouredText; // If text alerts should be coloured, usually by importance
 
-    public final BooleanOption serverEnabled;
-    public final BooleanOption serverUploadWaypoints;
-    public final BooleanOption serverUploadGroups;
+    public final IntegerOption updateWaypointFrequency; // How often auto-sync should sync
+
+    // Server side display options
+
+    public final BooleanOption serverEnabled; // If the server has JMWS enabled
+    public final BooleanOption serverUploadWaypoints; // If the server syncs waypoints
+    public final BooleanOption serverUploadGroups; // if the server syncs groups
 
     public ConfigInterface() {
+
+        // These follow the same order as the uninitialised definitions
         this.enabled = new BooleanOption(category, "master", "text.config.jmws-config.option.enabled", true, true);
         this.uploadWaypoints = new BooleanOption(category, "uploadWaypoints", "text.config.jmws-config.option.uploadWaypoints", true);
         this.uploadGroups = new BooleanOption(category, "uploadGroups", "text.config.jmws-config.option.uploadGroups", true);
@@ -62,21 +71,37 @@ public class ConfigInterface {
         this.serverUploadGroups = new BooleanOption(server, "serverUploadGroups", "text.config.jmws-config.option.serverUploadGroups", true);
     }
 
+    /**
+     * How often auto-sync syncs with server in seconds.
+     * @return int -- How often auto-sync syncs with server in seconds.
+     */
     public int getUpdateWaypointFrequencyAsTicks()
     {
         return updateWaypointFrequency.get() * 20;
     }
 
+    /**
+     * If the user has JMWS enabled in any capacity.
+     * @return boolean -- If the user has JMWS enabled in any capacity (at least must have either waypoint or group syncing on to return `true`)
+     */
     public boolean clientEnabled()
     {
         return (this.enabled.get() && (this.uploadWaypoints.get() || this.uploadGroups.get()));
     }
 
+    /**
+     * If waypoints should be synced.
+     * @return boolean -- If waypoints should be synced.
+     */
     public boolean waypointsEnabled()
     {
         return (this.enabled.get() && this.uploadWaypoints.get());
     }
 
+    /**
+     * If groups should be synced.
+     * @return boolean -- If groups should be synced.
+     */
     public boolean groupsEnabled()
     {
         return (this.enabled.get() && this.uploadGroups.get());
