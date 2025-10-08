@@ -524,7 +524,6 @@ public class JMWSPlugin implements IClientPlugin {
             Waypoint wp = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData());
             ObjectIdentifierMap.addWaypointToMap(wp);
 
-            Constants.getLogger().info(String.valueOf(wp.getBlockPos()));
             getInstance().jmAPI.addWaypoint("journeymap", wp);
         }
 

@@ -60,7 +60,7 @@ public class ServerPacketHandler {
                     Dispatcher.sendToClient(waypointPayloadOutbound, player);
                 }
             } catch (IOException ioe) {
-                Constants.getLogger().error(ioe.getMessage());
+                Constants.getLogger().error("Error on server when trying to process sync from %s ERROR: %s".formatted(player.getUUID(), ioe.getMessage()));
             }
         }
     }

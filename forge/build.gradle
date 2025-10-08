@@ -70,8 +70,9 @@ dependencies {
     // Forge's hack fix
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
     implementation 'org.slf4j:slf4j-api:2.0.17'
-    //compileOnly group: 'info.journeymap', name: 'journeymap-api-forge', version: project.journeymap_api_version, changing: true
-    //implementation "mysticdrew:common-networking-forge:${common_networking_version}"
+
+    compileOnly group: 'info.journeymap', name: 'journeymap-api-forge', version: project.journeymap_api_version, changing: true
+    implementation "mysticdrew:common-networking-forge:${common_networking_version}"
 
 }
 

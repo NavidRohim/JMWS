@@ -26,7 +26,7 @@
   "message.jmws.synced_both_success": "Synced waypoints and groups",
   "message.jmws.sync_frequency": "JMWS syncs every %s second(s) when connected to a server.",
   "message.jmws.next_sync": "Next sync in %s second(s)",
-  "message.jmws.has_jmws": "Server has JMWS! (Go into JourneyMap Addon config to disable these alerts, %s)",
+  "message.jmws.has_jmws": "Server has JMWS! (Go into JourneyMap addon config to disable alerts. %s)",
   "message.jmws.world_is_local": "Playing in single player. JMWS will be disabled for you and all clients.",
   "message.jmws.auto_sync_disabled": "Auto-Sync is disabled, enable it and try again.",
   "message.jmws.deleted_waypoints_in_group": "Deleted all waypoints in group.",

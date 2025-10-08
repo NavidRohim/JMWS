@@ -12,9 +12,10 @@ No new features.
 - Fixed problem where a waypoint in the nether wouldn't function properly unless you were in the nether.
 - Added server version checking. This is to make debugging easier.
 - Added JavaDocs to GitHub
+
 ## Bugs that I am aware of
 
 - Coordinates in nether relative to other dimensions is wrong (will teleport you to wrong location)
 - Couldn't delete waypoints in nether when in dimension other than nether (and vice versa)
 
-Server version is 1.01
+*Server version is 1.01*
