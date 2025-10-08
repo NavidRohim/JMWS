@@ -5,11 +5,11 @@ import journeymap.client.render.ingame.WaypointDecorationRenderer;
 import journeymap.client.waypoint.ClientWaypointImpl;
 
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 
-import me.brynview.navidrohim.jmws.common.config.ServerConfigObject;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.phys.Vec3;
 
@@ -40,11 +40,11 @@ public abstract class WaypointDecorationRendererMixin {
 
         if (angle < 2 && CommonClass.isHoldingTeleportKey && teleportCooldown <= 0) {
             teleportCooldown = 120;
-            if ((CommonClass.serverConfig instanceof ServerConfigObject && CommonClass.serverConfig.lookAltTeleportingEnabled && CommonClass.config.lookAltTeleporting.get()) || CommonClass.isInternalServer())
+            if ((CommonClass.serverConfig instanceof ClientSideServerConfigObject && CommonClass.serverConfig.lookAltTeleportingEnabled && CommonClass.config.lookAltTeleporting.get()) || CommonClass.isInternalServer())
             {
                 JMWSPlugin.getInstance().teleportPlayer(waypoint.getPosition());
             } else {
-                if (CommonClass.serverConfig.lookAltTeleportingEnabled == false)
+                if (!CommonClass.serverConfig.lookAltTeleportingEnabled)
                 {
                     Constants.getLogger().warn("Server has Look-Alt teleporting turned off.");
                 }

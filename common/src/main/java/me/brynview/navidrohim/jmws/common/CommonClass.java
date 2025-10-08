@@ -7,26 +7,26 @@ import commonnetwork.networking.data.PacketContext;
 import commonnetwork.networking.data.Side;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.SyncCounter;
+import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.platform.Services;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 
 import me.brynview.navidrohim.jmws.client.network.PacketHandler;
-import me.brynview.navidrohim.jmws.common.platform.services.IPlatformHelper;
+
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
-import me.brynview.navidrohim.jmws.common.config.ServerConfigObject;
+
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
+import org.jetbrains.annotations.Nullable;
 
 
 import java.io.File;
-import java.util.Collections;
-import java.util.List;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -41,12 +41,15 @@ public class CommonClass {
     public static Minecraft minecraftClientInstance = null;
 
     public static ConfigInterface config = null;
-    public static ServerConfigObject serverConfig = ServerConfigObject.empty();
+    public static ClientSideServerConfigObject serverConfig = ClientSideServerConfigObject.empty();
 
     public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public static SyncCounter syncCounter = null;
     public static boolean serverHasMod = false;
+
+    @Nullable
+    public static String clientJMVersion = null;
     public static boolean clientHasJM = false;
     
     public static boolean isHoldingTeleportKey = false;
@@ -115,7 +118,7 @@ public class CommonClass {
     }
 
 
-    public static boolean getEnabledStatus() {
+    public static boolean  getEnabledStatus() {
         return serverHasMod && config.enabled.get() && (config.uploadGroups.get() || config.uploadWaypoints.get()) && !minecraftClientInstance.isSingleplayer() && !isInternalServer();
     }
 

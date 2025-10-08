@@ -2,9 +2,7 @@ package me.brynview.navidrohim.jmws.server.config;
 
 import com.google.gson.Gson;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.config.ServerConfigObject;
 import me.brynview.navidrohim.jmws.server.exceptions.ServerConfigurationException;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -69,16 +67,5 @@ public class ServerConfig {
     public static ServerConfigObject getConfig()
     {
         return serverConfig;
-    }
-
-    public static ServerConfigObject getConfig(String data, @Nullable Double serverVersion)
-    {
-        Gson configJsonObj = new Gson();
-        ServerConfigObject connectedServerConfig = configJsonObj.fromJson(data, ServerConfigObject.class);
-        if (serverVersion != null) {
-            connectedServerConfig._setServerVersion(serverVersion);
-        }
-
-        return connectedServerConfig;
     }
 }

@@ -9,6 +9,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+/**
+ * Dataclass that holds a synced waypoint from the server. Contains data to make a local waypoint.
+ */
 public class SavedWaypoint extends SavedObject {
 
     // Packet information

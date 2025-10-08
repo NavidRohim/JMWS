@@ -40,9 +40,9 @@
     "fabric-api": "*",
     "minecraft": "${minecraft_version}",
     "java": ">=${java_version}",
-    "commonnetworking": ">=1.0.21-1.21.7"
+    "commonnetworking": ">=1.0.21-1.21.10"
   },
   "recommends": {
-    "journeymap": ">=1.21.9-6.0.0-beta.53"
+    "journeymap": ">=1.21.10-6.0.0-beta.52"
   }
 }

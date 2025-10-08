@@ -1,17 +1,19 @@
 package me.brynview.navidrohim.jmws.common.payloads;
 
-import io.netty.handler.codec.DecoderException;
+import com.google.gson.*;
+
 import me.brynview.navidrohim.jmws.Constants;
 
+import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.platform.Services;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
-import me.brynview.navidrohim.jmws.common.config.ServerConfigObject;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
+
 
 
 public class JMWSHandshakePayload
@@ -19,35 +21,40 @@ public class JMWSHandshakePayload
     public static final ResourceLocation CHANNEL = ResourceLocation.fromNamespaceAndPath(Constants.MODID, "jmws_handshake");
     public static final StreamCodec<FriendlyByteBuf, JMWSHandshakePayload> STREAM_CODEC = StreamCodec.ofMember(JMWSHandshakePayload::encode, JMWSHandshakePayload::new);
     public String serverConfigDataJson;
-    public ServerConfigObject serverConfigData;
+    public ClientSideServerConfigObject serverConfigData;
 
+    /**
+     * Client-side constructor
+     * @param friendlyByteBuf Packet data from server (byte buffer, can read json string from it)
+     */
     public JMWSHandshakePayload(FriendlyByteBuf friendlyByteBuf)
     {
-        if (Services.PLATFORM.side().equals("CLIENT") || !CommonClass.isInternalServer())
+        if ((Services.PLATFORM.side().equals("CLIENT") || !CommonClass.isInternalServer()) && friendlyByteBuf.readableBytes() != 0)
         {
-            @Nullable Double version = null;
-            if (friendlyByteBuf.readableBytes() != 0) {
-                try
-                {
-                    serverConfigDataJson = friendlyByteBuf.readUtf(512);
-                    version = friendlyByteBuf.readDouble();
-                }
-                catch (IndexOutOfBoundsException ignored)
-                {
-                    Constants.getLogger().error("Server does not have JMWS server version! Things are likely to break!");
-                }
-                finally
-                {
-                    serverConfigData = ServerConfig.getConfig(serverConfigDataJson, version);
-                }
+            try
+            {
+                serverConfigDataJson = friendlyByteBuf.readUtf(512);
+                Gson configJsonObj = new Gson();
+                serverConfigData = configJsonObj.fromJson(serverConfigDataJson, ClientSideServerConfigObject.class);
+            }
+            catch (IndexOutOfBoundsException | JsonSyntaxException malformed) {
+                Constants.getLogger().error("Missing or corrupted server data! Usually means a server version mismatch.");
+                throw malformed;
             }
         }
     }
 
+    /**
+     * Server-side constructor
+     */
     public JMWSHandshakePayload()
     {
         serverConfigData = null;
-        serverConfigDataJson = ServerConfig.rawServerConfigData;
+
+        JsonObject jsonObject = JsonParser.parseString(ServerConfig.rawServerConfigData).getAsJsonObject();
+        jsonObject.addProperty("serverVersion", Constants.SERVER_VERSION);
+
+        serverConfigDataJson = jsonObject.toString();
     }
 
     public static CustomPacketPayload.Type<CustomPacketPayload> type()
@@ -55,12 +62,15 @@ public class JMWSHandshakePayload
         return new CustomPacketPayload.Type<>(CHANNEL);
     }
 
+    /**
+     * Encodes data ready to send to client
+     * @param buf Buffer to add data to for the client
+     */
     public void encode(FriendlyByteBuf buf)
     {
         if (Services.PLATFORM.side().equals("SERVER") || CommonClass.isInternalServer())
         {
             buf.writeUtf(serverConfigDataJson);
-            buf.writeDouble(Constants.SERVER_VERSION);
         }
     }
 

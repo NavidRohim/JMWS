@@ -24,11 +24,6 @@ import net.minecraft.resources.ResourceLocation;
 import org.lwjgl.glfw.GLFW;
 
 
-import javax.swing.text.JTextComponent;
-import java.awt.*;
-
-
-
 public class JMWSClient implements ClientModInitializer {
 
     private static KeyMapping keyMapping;

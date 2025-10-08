@@ -1,5 +1,8 @@
 package me.brynview.navidrohim.jmws.common.enums;
 
+/**
+ * Enums for different packet commands
+ */
 public enum WaypointPayloadCommand {
 
     // Waypoint handling
