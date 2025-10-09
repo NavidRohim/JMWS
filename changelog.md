@@ -11,9 +11,11 @@ No new features.
 - When JourneyMap is not installed on the client side, a screen is now shown instead of an overly-verbose crash report.
 - Added server version checking. This is to make debugging easier.
 - Added JavaDocs to GitHub
+- Couldn't delete waypoints in nether when in dimension other than nether (and vice versa)
 
 ## Bugs that I am aware of
 
-- Couldn't delete waypoints in nether when in dimension other than nether (and vice versa)
+None!
 
-*Server version is 1.01*
+### Other
+*Server version is 1.00*
