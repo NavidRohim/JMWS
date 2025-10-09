@@ -108,6 +108,9 @@
   "button.jmws.enable_button": "On / Off JMWS",
   "button.jmws.tooltip.enable_button": "Turn on / off waypoint syncing",
 
+  "button.jmws.enable_button.enabled": "Enabled",
+  "button.jmws.enable_button.disabled": "Disabled",
+
   "__comment__": "Subtitles for sounds",
   "subtitle.jmws.waypoint_sync": "Syncing",
   "subtitle.jmws.generic_error": "JMWS error"

@@ -48,8 +48,8 @@ public class JMButtonAddon {
      */
     private static void enableMod(IThemeButton iThemeButton) {
         iThemeButton.setLabels(
-                Component.translatable("addServer.resourcePack.enabled").getString(),
-                Component.translatable("addServer.resourcePack.disabled").getString()
+                Component.translatable("button.jmws.enable_button.enabled").getString(),
+                Component.translatable("button.jmws.enable_button.disabled").getString()
         );
 
         if (CommonClass.getEnabledStatus()) { // Turn off
