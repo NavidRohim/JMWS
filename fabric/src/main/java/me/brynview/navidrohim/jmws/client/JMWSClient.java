@@ -29,10 +29,7 @@ public class JMWSClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
         ClientCommandRegistrationCallback.EVENT.register(ClientCommandCallback::Callback);
         ServerPlayConnectionEvents.JOIN.register(((handler, sender, server) -> {
-            if (ServerConfig.serverConfig.serverEnabled())
-            {
-                CommonEvents.handleJoin(handler.player, true, true);
-            }
+            CommonEvents.handleJoin(handler.player, true, true);
         }));
         ScreenEvents.AFTER_INIT.register(this::waitForStartScreenRegister);
         /*ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {

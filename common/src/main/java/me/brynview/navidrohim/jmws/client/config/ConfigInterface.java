@@ -66,9 +66,9 @@ public class ConfigInterface {
 
         this.updateWaypointFrequency = new IntegerOption(technical, "updateWaypointFrequency", "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency", 40, 2, 120);
 
-        this.serverEnabled = new BooleanOption(server, "serverEnabled", "text.config.jmws-config.option.serverEnabled", true);
-        this.serverUploadWaypoints = new BooleanOption(server, "serverUploadWaypoints", "text.config.jmws-config.option.serverUploadWaypoints", true);
-        this.serverUploadGroups = new BooleanOption(server, "serverUploadGroups", "text.config.jmws-config.option.serverUploadGroups", true);
+        this.serverEnabled = new BooleanOption(server, "serverEnabled", "text.config.jmws-config.option.serverEnabled", false);
+        this.serverUploadWaypoints = new BooleanOption(server, "serverUploadWaypoints", "text.config.jmws-config.option.serverUploadWaypoints", false);
+        this.serverUploadGroups = new BooleanOption(server, "serverUploadGroups", "text.config.jmws-config.option.serverUploadGroups", false);
     }
 
     /**
