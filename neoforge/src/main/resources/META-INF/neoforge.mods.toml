@@ -33,7 +33,7 @@ side = "CLIENT"
 [[dependencies."${mod_id}"]]
 modId = "commonnetworking"
 type = "required"
-versionRange = "1.0.22-1.21.10"
+versionRange = "[1.0.21-1.21.10,)"
 ordering = "BEFORE"
 side = "SERVER"
 
