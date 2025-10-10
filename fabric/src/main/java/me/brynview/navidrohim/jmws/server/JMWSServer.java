@@ -16,10 +16,7 @@ public class JMWSServer implements DedicatedServerModInitializer {
         Constants.getLogger().info("Initialised server on JMWS");
 
         ServerPlayConnectionEvents.JOIN.register(((handler, sender, server) -> {
-            if (ServerConfig.serverConfig.serverEnabled())
-            {
-                CommonEvents.handleJoin(handler.player, false, false);
-            }
+            CommonEvents.handleJoin(handler.player, false, false);
         }));
     }
 }

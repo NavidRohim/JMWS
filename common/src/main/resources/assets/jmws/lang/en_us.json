@@ -26,7 +26,7 @@
   "message.jmws.synced_both_success": "Synced waypoints and groups",
   "message.jmws.sync_frequency": "JMWS syncs every %s second(s) when connected to a server.",
   "message.jmws.next_sync": "Next sync in %s second(s)",
-  "message.jmws.has_jmws": "Server has JMWS! (Go into JourneyMap addon config to disable alerts. %s)",
+  "message.jmws.has_jmws": "Server has JMWS! (Go into JourneyMap addon config to disable alerts. v%s)",
   "message.jmws.world_is_local": "Playing in single player. JMWS will be disabled for you and all clients.",
   "message.jmws.auto_sync_disabled": "Auto-Sync is disabled, enable it and try again.",
   "message.jmws.deleted_waypoints_in_group": "Deleted all waypoints in group.",
@@ -60,8 +60,14 @@
   "text.config.jmws-config.option.uploadGroups": "Sync waypoint groups?",
   "text.config.jmws-config.option.autoSync": "Auto-Sync",
   "text.config.jmws-config.option.syncIndicator": "Sync Indicator",
+
   "text.config.jmws-config.option.serverEnabled": "Server Enabled",
+  "text.config.jmws-config.option.serverEnabled.tooltip": "If remote server has JMWS enabled. Does not effect your game in any way.",
+
+  "text.config.jmws-config.option.serverUploadWaypoints.tooltip": "If remote server has waypoint syncing enabled. Does not effect your game in any way.",
   "text.config.jmws-config.option.serverUploadWaypoints": "Server Syncs Waypoints",
+
+  "text.config.jmws-config.option.serverUploadGroups.tooltip": "If remote server has group syncing enabled. Does not effect your game in any way.",
   "text.config.jmws-config.option.serverUploadGroups": "Server Syncs Groups",
   "text.config.jmws-config.option.lookAltTeleporting": "Look-Alt Teleporting",
 
@@ -109,6 +115,9 @@
   "button.jmws.tooltip.update_button": "Synchronizes waypoints from the server",
   "button.jmws.enable_button": "On / Off JMWS",
   "button.jmws.tooltip.enable_button": "Turn on / off waypoint syncing",
+
+  "button.jmws.enable_button.enabled": "Enabled",
+  "button.jmws.enable_button.disabled": "Disabled",
 
   "__comment__": "Subtitles for sounds",
   "subtitle.jmws.waypoint_sync": "Syncing",

@@ -64,7 +64,6 @@ public class JMWSPlugin implements IClientPlugin {
         CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", this::waypointCreationHandler);
         CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", Constants.MODID, this::groupEventListener);
         CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe("jmapi", Constants.MODID, this::waypointDragHandler);
-        CommonEventRegistry.TELEPORT_EVENT.subscribe("jmapi", Constants.MODID, this::correctTeleportDestination); // Should be temporary
 
         FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(Constants.MODID, JMButtonAddon::addJMButtons);
         FullscreenEventRegistry.FULLSCREEN_RENDER_EVENT.subscribe(Constants.MODID, (renderEvent) -> {
@@ -77,31 +76,6 @@ public class JMWSPlugin implements IClientPlugin {
         ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe("jmapi", (optionsRegistryEvent -> config = new ConfigInterface()));
         ClientEventRegistry.MAPPING_EVENT.subscribe("jmapi", (MappingEvent event) -> {JMWSPlugin.updateWaypoints(false);});
 
-    }
-
-    /**
-     * Only called from TELEPORT_EVENT (when user teleports) Do not call.
-     * This method shouldn't be here. When teleporting to the overworld from the nether or vice versa, you will be put in the wrong location.
-     * This is due to the fact that the coordinates between the nether and overworld are not 1:1, it is a well-known fact that 1 block in the nether
-     * equals 8 blocks in the overworld. This must be accounted for, but it seems JourneyMap gets these calculations mixed up, which I account for here.
-     * @param teleportEvent -- The event.
-     */
-    private void correctTeleportDestination(TeleportEvent teleportEvent) {
-        // Should only been needed temporarily since I believe there is a bug with JM where teleporting to or from the nether will put you in the wrong place
-        BlockPos wpBlockPos = teleportEvent.getPos();
-        String fromLevel = teleportEvent.getFromLevel().location().getPath();
-        String toLevel = teleportEvent.getDestinationLevel().location().getPath();
-
-        if (toLevel.equals("the_nether") && !fromLevel.equals("the_nether")) // If we are going to the Nether
-        {
-            wpBlockPos = new BlockPos(wpBlockPos.getX() / 8, wpBlockPos.getY(), wpBlockPos.getZ() / 8);
-        }
-        else if (!toLevel.equals("the_nether") && fromLevel.equals("the_nether")) // If we are leaving the Nether
-        {
-            wpBlockPos = new BlockPos(wpBlockPos.getX() * 8, wpBlockPos.getY(), wpBlockPos.getZ() * 8);
-        }
-
-        teleportEvent.setPos(wpBlockPos);
     }
 
     /**
