@@ -1,13 +1,13 @@
-# 1.1.7 Changelog
+# 1.1.7-001 Changelog
 
-## New
+## New (001)
 
-No new features.
+No new features, but 001 is a hotfix to fix a fabric fatal dependency issue.
 
 ## Bug fixes / Changes
 
 - The servers JMWS configuration is now visible to the client in the Addon Options screen
-  - This may be helpful if you find you cannot create waypoints or groups.
+    - This may be helpful if you find you cannot create waypoints or groups.
 - When JourneyMap is not installed on the client side, a screen is now shown instead of an overly-verbose crash report.
 - Added server version checking. This is to make debugging easier.
 - Added JavaDocs to GitHub
