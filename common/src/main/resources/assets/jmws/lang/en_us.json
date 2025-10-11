@@ -124,6 +124,7 @@
   "subtitle.jmws.generic_error": "JMWS error",
 
   "__comment__": "Keybind category",
-  "jmws.keybinds": "JMWS Keybinds",
-  "jmws.key.teleport": "Teleport-upon-look"
+  "key.category.jmws.keybinds": "JMWS Keybinds",
+  "jmws.key.teleport": "Teleport-upon-look",
+  "jmws.key.teleport_confirm": "Confirm teleport"
 }

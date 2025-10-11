@@ -27,6 +27,8 @@ import org.lwjgl.glfw.GLFW;
 public class JMWSClient implements ClientModInitializer {
 
     private static KeyMapping keyMapping;
+    private static KeyMapping keyMappingConfirm;
+    private static final KeyMapping.Category jmwsKeybinds = new KeyMapping.Category(ResourceLocation.fromNamespaceAndPath(Constants.MODID, "keybinds"));
 
     @Override
     public void onInitializeClient()
@@ -34,7 +36,12 @@ public class JMWSClient implements ClientModInitializer {
         keyMapping = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "jmws.key.teleport",
                 GLFW.GLFW_KEY_LEFT_ALT,
-                new KeyMapping.Category(ResourceLocation.fromNamespaceAndPath(Constants.MODID, "jmws.keybinds"))
+                jmwsKeybinds
+        ));
+        keyMappingConfirm = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "jmws.key.teleport_confirm",
+                GLFW.GLFW_MOUSE_BUTTON_RIGHT,
+                jmwsKeybinds
         ));
         // fabric tick events
         ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
@@ -64,12 +71,7 @@ public class JMWSClient implements ClientModInitializer {
         {
             CommonClass.syncCounter.iterateCounter();
         }
-        if (keyMapping.isDown())
-        {
-            CommonClass.isHoldingTeleportKey = true;
-        } else {
-            CommonClass.isHoldingTeleportKey = false;
-        }
+        CommonClass.isHoldingTeleportKey = keyMapping.isDown() && keyMappingConfirm.isDown();
     }
 
 
