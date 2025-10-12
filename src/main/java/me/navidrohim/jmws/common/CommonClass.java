@@ -2,19 +2,23 @@ package me.navidrohim.jmws.common;
 
 
 import me.navidrohim.jmws.client.SyncCounter;
+import me.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.navidrohim.jmws.common.payloads.JMWSActionMessage;
-import me.navidrohim.jmws.common.payloads.JMWSHandshakeMessage;
 import me.navidrohim.jmws.common.payloads.JMWSHandshakeReplyMessage;
 import me.navidrohim.jmws.common.payloads.JMWSNetworkWrapper;
 import me.navidrohim.jmws.common.config.ConfigInterface;
+import me.navidrohim.jmws.server.config.ServerConfig;
+import me.navidrohim.jmws.server.events.ForgeServerEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 
 
 import java.io.File;
-
-import static me.navidrohim.jmws.client.network.ClientHandshakeHandler.timeoutTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -30,17 +34,21 @@ public class CommonClass {
     public static ConfigInterface config = new ConfigInterface();// null
     public static SyncCounter syncCounter = null;
 
+    public static final boolean debug = true;
+
     public static boolean serverHasMod = false;
     public static boolean hasMixinBooter = false;
     public static boolean hasJourneyMap;
+    public static boolean clientHasJM;
+
+    public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    public static ClientSideServerConfigObject serverConfig;
+
+    // config
 
     public static void setServerModStatus(boolean serverModStatus)
     {
         serverHasMod = serverModStatus;
-
-        if (timeoutTask != null && !timeoutTask.isDone()) {
-            timeoutTask.cancel(false);
-        }
 
         if (!serverModStatus)
         {
@@ -69,6 +77,13 @@ public class CommonClass {
         return hasJourneyMap && hasMixinBooter && serverHasMod && ConfigInterface.enabled && !minecraftClientInstance.isSingleplayer();
     }
 
+    public static boolean isInternalServer() {
+        if (CommonClass.minecraftClientInstance instanceof Minecraft) {
+            return CommonClass.minecraftClientInstance.isIntegratedServerRunning() && CommonClass.minecraftClientInstance.getIntegratedServer() instanceof IntegratedServer;
+        }
+        return false;
+    }
+
     public static String side() {
         String side = FMLCommonHandler.instance().getSide().toString();
         if (side.equalsIgnoreCase("SERVER") || side.equalsIgnoreCase("DEDICATED_SERVER"))
@@ -80,20 +95,20 @@ public class CommonClass {
 
     public static void init() {
 
-        if (side().equals("SERVER"))
+        Constants.getLogger().info("Creating server resources..");
+        _createServerResources();
+        ServerConfig.ensureExistence();
+
+        MinecraftForge.EVENT_BUS.register(ForgeServerEvents.class);
+
+        JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSActionMessage.JMWSActionMessageHandler.class, JMWSActionMessage.class, 0, Side.SERVER);
+        JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSHandshakeReplyMessage.JMWSHandshakeReplyMessageHandler.class, JMWSHandshakeReplyMessage.class, 1, Side.SERVER);
+
+        if (!side().equals("SERVER"))
         {
-            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSActionMessage.JMWSActionMessageHandler.class, JMWSActionMessage.class, 0, Side.SERVER);
-            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSHandshakeMessage.JMWSHandshakeMessageHandler.class, JMWSHandshakeMessage.class, 1, Side.SERVER);
-            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSHandshakeReplyMessage.JMWSHandshakeReplyMessageHandler.class, JMWSHandshakeReplyMessage.class, 2, Side.SERVER);
 
-            Constants.getLogger().info("Creating server resources..");
-            _createServerResources();
-
-        } else {
-
-            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSActionMessage.JMWSActionMessageHandler.class, JMWSActionMessage.class, 0, Side.CLIENT);
-            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSHandshakeMessage.JMWSHandshakeMessageHandler.class, JMWSHandshakeMessage.class, 1, Side.CLIENT);
-            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSHandshakeReplyMessage.JMWSHandshakeReplyMessageHandler.class, JMWSHandshakeReplyMessage.class, 2, Side.CLIENT);
+            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSActionMessage.JMWSActionMessageHandler.class, JMWSActionMessage.class, 2, Side.CLIENT);
+            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSHandshakeReplyMessage.JMWSHandshakeReplyMessageHandler.class, JMWSHandshakeReplyMessage.class, 3, Side.CLIENT);
         }
 
         // It is common for all supported loaders to provide a similar feature that can not be used directly in the

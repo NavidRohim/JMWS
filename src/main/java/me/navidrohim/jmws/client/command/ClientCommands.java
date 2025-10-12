@@ -51,7 +51,12 @@ public class ClientCommands {
     public static int nextSync()
     {
         if (!isInSingleplayer()) {
-            PlayerHelper.sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.next_sync", (CommonClass.syncCounter.getTickCounterUpdateThreshold() - CommonClass.syncCounter.getCurrentTickCount()) / 20 ), true, false, JMWSMessageType.NEUTRAL);
+            if (CommonClass.config.autoSync)
+            {
+                PlayerHelper.sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.next_sync", (CommonClass.syncCounter.getTickCounterUpdateThreshold() - CommonClass.syncCounter.getCurrentTickCount()) / 20), true, false, JMWSMessageType.NEUTRAL);
+            } else {
+                PlayerHelper.sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.auto_sync_disabled"), true, false, JMWSMessageType.WARNING);
+            }
         } else {
             sendUserSinglePlayerWarning();
         }

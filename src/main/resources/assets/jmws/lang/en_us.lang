@@ -1,49 +1,113 @@
-#PARSE_ESCAPES
-
-# Waypoint language strings,
 message.jmws.deletion_success=Deleted waypoint(s)
 message.jmws.deletion_failure=Could not delete waypoint(s) on the server
 message.jmws.deletion_all_success=Deleted all waypoints server-side
 message.jmws.creation_success=Created waypoint
-message.jmws.creation_failure="Could not create waypoint on the server.\nIt is recommended to delete the waypoint and try again."
+message.jmws.creation_failure=Could not create waypoint on the server.\nIt is recommended to delete the waypoint and try again.
 message.jmws.modified_waypoint_success=Synced updated waypoint
 message.jmws.local_waypoint_upload=Added local waypoint(s) to server.
 message.jmws.synced_success=Synced waypoints
-message.jmws.server_disabled_waypoints=Server has waypoint syncing disabled.
-message.jmws.duplicate_waypoint=Sorry, with JMWS you cannot have duplicate waypoint names in the same dimension.
+message.jmws.server_disabled_waypoints=Server has syncing disabled.
+message.jmws.death_waypoint_sync=Synced Death Waypoint
 
-# Common language strings,
-message.jmws.sync_frequency=JMWS syncs every %s second(s)
+message.jmws.creation_group_success=Created group
+message.jmws.creation_group_failure=Could not create group on the server.\nIt is recommended to delete the group and try again.
+message.jmws.deletion_group_success=Deleted group(s)
+message.jmws.deletion_group_failure=Could not delete group(s) on the server
+message.jmws.modified_group_success=Synced updated group
+message.jmws.synced_group_success=Synced groups
+message.jmws.local_group_upload=Added local group(s) to the server.
+message.jmws.server_disabled_groups=Server has group syncing disabled.
+
+message.jmws.local_both_upload=Added local waypoint(s) and group(s) to the server.
+message.jmws.synced_both_success=Synced waypoints and groups
+message.jmws.sync_frequency=JMWS syncs every %s second(s) when connected to a server.
 message.jmws.next_sync=Next sync in %s second(s)
-message.jmws.has_jmws=Server has JMWS!
+message.jmws.has_jmws=Server has JMWS! (Go into JourneyMap addon config to disable alerts. v%s)
 message.jmws.world_is_local=Playing in single player. JMWS will be disabled for you and all clients.
+message.jmws.auto_sync_disabled=Auto-Sync is disabled, enable it and try again.
+message.jmws.deleted_waypoints_in_group=Deleted all waypoints in group.
 
-message.jmws.commandUnavailable=JMWS commands have been disabled. Turn on JMWS to use commands.
-message.jmws.commandUsage=Usage: %s
-message.jmws.unknownSubcommand=Unknown JMWS subcommand, press tab to view commands.
-
-# Config language strings,
 text.config.jmws-config.title=JourneyMap Waypoint Syncing (JMWS)
 
-# Error / Warning language strings,
-error.jmws.error_packet_size=You have too many waypoints. Please delete some to continue making waypoints and syncing.
-error.jmws.error_corrupted_waypoint=One or more waypoints are corrupted. Contact administration for details.
+text.config.jmws-config.option.showAlerts.tooltip=If waypoint creation, deletion or other alerts are shown
+text.config.jmws-config.option.playEffects.tooltip=If sound effects (usually from alerts) will play.
+text.config.jmws-config.option.colouredText.tooltip=If text will be coloured (e.g. successful action, failure)
+text.config.jmws-config.option.enabled.tooltip=If JMWS is enabled
+text.config.jmws-config.option.uploadWaypoints.tooltip=Enables / disables waypoint syncing
+text.config.jmws-config.option.uploadGroups.tooltip=Enables / disables group syncing
+text.config.jmws-config.option.autoSync.tooltip=If the client should sync waypoints with the server. Technically, this can be disabled and nothing would change.
+text.config.jmws-config.option.syncIndicator.tooltip=Shows '(S)' on the end of a waypoint if it is synced to the server.
+text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency.tooltip=Frequency of when waypoints are grabbed from the server (in seconds)
+text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout.tooltip=How long until the mod determines that the server doesn't have JMWS installed (in seconds)
+
+text.config.jmws-config.option.serverConfiguration.serverPacketLimit.tooltip=How large a sync packet can be. Only editable by server.
+text.config.jmws-config.option.serverConfiguration.serverEnabled.tooltip=If server has JMWS enabled.
+text.config.jmws-config.option.serverConfiguration.serverWaypointsEnabled.tooltip=If server has waypoint syncing enabled.
+text.config.jmws-config.option.serverConfiguration.serverGroupsEnabled.tooltip=if server has group syncing enabled.
+
+
+text.config.jmws-config.option.showAlerts=Show alerts?
+text.config.jmws-config.option.playEffects=Sound alerts?
+text.config.jmws-config.option.colouredText=Coloured text?
+text.config.jmws-config.option.enabled=JMWS Enabled
+text.config.jmws-config.option.uploadWaypoints=Sync waypoints?
+text.config.jmws-config.option.uploadGroups=Sync waypoint groups?
+text.config.jmws-config.option.autoSync=Auto-Sync
+text.config.jmws-config.option.syncIndicator=Sync Indicator
+
+text.config.jmws-config.option.serverEnabled=Server Enabled
+text.config.jmws-config.option.serverEnabled.tooltip=If remote server has JMWS enabled. Does not effect your game in any way.
+
+text.config.jmws-config.option.serverUploadWaypoints.tooltip=If remote server has waypoint syncing enabled. Does not effect your game in any way.
+text.config.jmws-config.option.serverUploadWaypoints=Server Syncs Waypoints
+
+text.config.jmws-config.option.serverUploadGroups.tooltip=If remote server has group syncing enabled. Does not effect your game in any way.
+text.config.jmws-config.option.serverUploadGroups=Server Syncs Groups
+
+text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency=Sync frequency
+text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout=Server Handshake Timeout
+
+text.config.jmws-config.option.serverConfiguration.serverPacketLimit=Server packet size (Bytes)
+text.config.jmws-config.option.serverConfiguration.serverEnabled=JMWS Enabled on server?
+text.config.jmws-config.option.serverConfiguration.serverWaypointsEnabled=Waypoint syncing on server?
+text.config.jmws-config.option.serverConfiguration.serverGroupsEnabled=Group syncing on server?
+
+text.config.jmws-config.category.clientConfiguration=Client Settings
+text.config.jmws-config.category.serverConfiguration=Server Settings (Non-editable)
+
+text.config.jmws-config.section.upload=Sync Settings (JMWS)
+text.config.jmws-config.section.personalisation=Personalisation
+text.config.jmws-config.section.generalConfig=Technical
+
+text.config.jmws-config.section.upload.tooltip=Settings regarding waypoint and group syncing
+text.config.jmws-config.section.personalisation.tooltip=Settings regarding general JMWS customisation
+text.config.jmws-config.section.generalConfig.tooltip=Settings regarding technical settings
+
+error.jmws.error_packet_size=You have too many waypoints and groups. Please delete some to continue making waypoints and syncing.
+error.jmws.error_corrupted_waypoint=One or more waypoints or groups are corrupted. Contact administration for details.
 error.jmws.jmws_not_installed=Server does not have JMWS installed. JMWS will be disabled.
-error.jmws.mixinbooter_not_installed=Sorry! This mod requires mixinbooter v10.6. You can download it mod on CurseForge.
+error.jmws.screen.needing_got=Need: %s or newer. Got: %s
 
-warning.jmws.server_disabled_jmws=Server has JMWS, but has been disabled on server.
-warning.jmws.server_disabled_waypoint=Server has JMWS, but waypoint syncing has been disabled.
-warning.jmws.world_is_local=Playing in single player. JMWS will be disabled for you and all clients.
+warning.jmws.server.disabled_jmws=Server has JMWS, but has been disabled on server.
+warning.jmws.server.disabled_group=Server has JMWS, but group syncing has been disabled.
+warning.jmws.server.disabled_waypoint=Server has JMWS, but waypoint syncing has been disabled.
+warning.jmws.server.no_version=JMWS detected but no server version! Things will likely break!
+warning.jmws.server.older_server_version=JMWS installed but server version is older than expected! Things may not work!
+warning.jmws.server.newer_server_version=JMWS installed but server version is newer than expected! Things may not work!
+
+warning.jmws.world_is_local=JMWS will be put into LAN mode. (Clients can sync to your internal-server)
 warning.jmws.world_is_local_no_commands=Playing in single player. Some commands will not work.
-warning.jmws.jm_is_missing=JourneyMap isn't present, disabling JMWS...
+warning.jmws.jm_not_installed=Sorry! JourneyMap is not installed or the version is wrong!
 
-# JourneyMap Buttons,
-button.jmws.update_button=Sync waypoints,
-button.jmws.tooltip.update_button=Synchronizes waypoints from the server,
+
+button.jmws.tooltip.update_button=Synchronizes waypoints from the server
+button.jmws.update_button=Sync waypoints
 button.jmws.enable_button=On / Off JMWS
 button.jmws.tooltip.enable_button=Turn on / off waypoint syncing
 
-# Subtitles for sounds
+button.jmws.enable_button.enabled=Enabled
+button.jmws.enable_button.disabled=Disabled
+
+
 subtitle.jmws.waypoint_sync=Syncing
 subtitle.jmws.generic_error=JMWS error
-

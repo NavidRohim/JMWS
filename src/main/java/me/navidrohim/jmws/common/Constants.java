@@ -16,4 +16,5 @@ public class Constants {
 
     public static final String MODID = JMWS.MODID;
     public static final Logger LOGGER = JMWS.logger;
+    public static final double SERVER_VERSION = 1.00;
 }

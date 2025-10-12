@@ -27,9 +27,10 @@ public class ConfigInterface {
     @Config.Name("Sync frequency")
     public static Integer updateWaypointFrequency = 40;
 
-    @Config.Comment("How long until JMWS handshake timeout. (client only)")
-    @Config.Name("Server handshake timeout")
-    public static Integer serverHandshakeTimeout = 3;
+    @Config.Comment("If the client should sync waypoints with the server. Technically, this can be disabled and nothing would change.")
+    @Config.Name("Auto-Sync")
+    public static boolean autoSync = true;
+
 
     public int getUpdateWaypointFrequencyAsTicks()
     {

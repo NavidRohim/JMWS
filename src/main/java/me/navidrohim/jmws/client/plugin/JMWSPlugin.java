@@ -48,7 +48,7 @@ public class JMWSPlugin implements IClientPlugin {
     {
 
         this.jmAPI = jmClientApi;
-        this.jmAPI.subscribe(Constants.MODID, EnumSet.of(ClientEvent.Type.DEATH_WAYPOINT));
+        this.jmAPI.subscribe(Constants.MODID, EnumSet.of(ClientEvent.Type.DEATH_WAYPOINT, ClientEvent.Type.MAPPING_STARTED));
     }
 
     @Override
@@ -59,15 +59,27 @@ public class JMWSPlugin implements IClientPlugin {
     @Override
     public void onEvent(ClientEvent clientEvent)
     {
-        if (CommonClass.getEnabledStatus())
+        switch (clientEvent.type)
         {
-            DeathWaypointEvent deathWaypointEvent = (DeathWaypointEvent) clientEvent;
+            case MAPPING_STARTED: {
+                JMWSPlugin.updateWaypoints(false);
+                break;
+            }
 
-            clientEvent.cancel();
-            Waypoint deathpoint = Waypoint.at(deathWaypointEvent.location, Waypoint.Type.Death, deathWaypointEvent.dimension);
+            case DEATH_WAYPOINT: {
+                if (CommonClass.getEnabledStatus())
+                {
+                    DeathWaypointEvent deathWaypointEvent = (DeathWaypointEvent) clientEvent;
 
-            createAction(deathpoint, true, false);
-            updateWaypoints(false);
+                    clientEvent.cancel();
+                    Waypoint deathpoint = Waypoint.at(deathWaypointEvent.location, Waypoint.Type.Death, deathWaypointEvent.dimension);
+
+                    createAction(deathpoint, true, false);
+                    updateWaypoints(false);
+                }
+                break;
+            }
+
         }
     }
 

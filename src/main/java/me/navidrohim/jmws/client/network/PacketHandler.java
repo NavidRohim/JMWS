@@ -1,5 +1,6 @@
 package me.navidrohim.jmws.client.network;
 
+import me.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.navidrohim.jmws.common.CommonClass;
 import me.navidrohim.jmws.common.Constants;
 import me.navidrohim.jmws.client.enums.JMWSMessageType;
@@ -9,6 +10,7 @@ import me.navidrohim.jmws.common.helper.CommonHelper;
 import me.navidrohim.jmws.common.helper.PlayerHelper;
 import me.navidrohim.jmws.common.payloads.JMWSActionMessage;
 import me.navidrohim.jmws.common.payloads.JMWSHandshakeReplyMessage;
+import org.jetbrains.annotations.Nullable;
 
 
 import java.util.Objects;
@@ -88,13 +90,39 @@ public class PacketHandler {
         }
     }
 
-    public static void HandshakeHandler(JMWSHandshakeReplyMessage handshakePayload) {
-        if (!handshakePayload.serverConfigData.enabled) {
-            sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.server_disabled_jmws"), true, false, JMWSMessageType.WARNING);
-        } else {
-            sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.has_jmws"), true, false, JMWSMessageType.SUCCESS);
-        }
+    /**
+     * Send text alert for user join
+     * @param serverVersion -- What server version to check against expected local version to give response.
+     */
+    private static void sendUserJoinAlert(@Nullable Double serverVersion)
+    {
 
-        CommonClass.setServerModStatus(true);
+        // I hate all the following code :)
+        if (serverVersion == null)
+        {
+            sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.server.no_version"), true, false, JMWSMessageType.FAILURE);
+        } else if (serverVersion < Constants.SERVER_VERSION) {
+            sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.server.older_server_version"), true, false, JMWSMessageType.WARNING);
+            Constants.getLogger().warn(String.format("Got server version; %s expected; %s", serverVersion, Constants.SERVER_VERSION));
+        } else if (serverVersion > Constants.SERVER_VERSION) {
+            sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.server.newer_server_version"), true, false, JMWSMessageType.WARNING);
+            Constants.getLogger().warn(String.format("Got server version; %s expected; %s", serverVersion, Constants.SERVER_VERSION));
+
+        } else if (!CommonClass.serverConfig.jmwsEnabled) {
+            sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.server.disabled_jmws"), true, false, JMWSMessageType.WARNING);
+        } else if (!CommonClass.serverConfig.waypointsEnabled) {
+            sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.server.disabled_waypoint"), true, false, JMWSMessageType.WARNING);
+        } else if (!CommonClass.serverConfig.groupsEnabled) {
+            sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.server.disabled_group"), true, false, JMWSMessageType.WARNING);
+        } else {
+            sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.has_jmws", (CommonClass.serverConfig.getServerVersion())), true, false, JMWSMessageType.SUCCESS);
+        }
+    }
+
+    public static void HandshakeHandler(JMWSHandshakeReplyMessage handshakePayload) {
+        CommonClass.serverConfig = handshakePayload.serverConfigData != null ? handshakePayload.serverConfigData : ClientSideServerConfigObject.serverOwner(); // Use serverOwner if on LAN, serverConfigData will be null if so (Because there is no physical server), so instantiate our own fake config just so shit don't crash.
+        @Nullable Double serverVersion =  CommonClass.serverConfig.getServerVersion();
+        CommonClass.setServerModStatus(true); // We have JMWS on server side
+        sendUserJoinAlert(serverVersion);
     }
 }

@@ -1,5 +1,6 @@
 package me.navidrohim.jmws.client;
 
+import me.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.navidrohim.jmws.common.CommonClass;
 import me.navidrohim.jmws.common.CommonProxy;
 import me.navidrohim.jmws.common.Constants;
@@ -17,6 +18,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class ClientProxy extends CommonProxy
 {
+
+    public static ClientSideServerConfigObject serverConfig = ClientSideServerConfigObject.empty();
+
     @Override
     public void preInit(FMLPreInitializationEvent event)
     {
@@ -35,7 +39,7 @@ public class ClientProxy extends CommonProxy
         if (Loader.isModLoaded("journeymap"))
         {
             CommonClass.hasJourneyMap = true;
-            if (Loader.isModLoaded("mixinbooter")) {
+            if (Loader.isModLoaded("mixinbooter") || CommonClass.debug) {
                 CommonClass.hasMixinBooter = true;
 
                 Constants.LOGGER.info("registering events");
