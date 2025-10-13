@@ -31,10 +31,6 @@ public class ConfigInterface {
     @Config.Name("Auto-Sync")
     public static boolean autoSync = true;
 
-    @Config.Comment("If remote server has JMWS enabled. Does not effect your game in any way.")
-    @Config.Name("Server Enabled")
-    public static boolean serverEnabled = false;
-
     public int getUpdateWaypointFrequencyAsTicks()
     {
         return updateWaypointFrequency * 20;

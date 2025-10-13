@@ -48,13 +48,7 @@ public class ForgeEventHandler
     public static void onConfigChanged(final ConfigChangedEvent.OnConfigChangedEvent event) {
         if (event.getModID().equals(Constants.MODID)) {
             ConfigManager.sync(Constants.MODID, Config.Type.INSTANCE);
-            ConfigInterface.serverEnabled = CommonClass.serverConfig.serverEnabled();
         }
     }
-    @SubscribeEvent
-    public static void onConfigChangedRevert(final ConfigChangedEvent.PostConfigChangedEvent event) {
-        if (event.getModID().equals(Constants.MODID)) {
-            ConfigInterface.serverEnabled = CommonClass.serverConfig.serverEnabled();
-        }
-    }
+
 }
