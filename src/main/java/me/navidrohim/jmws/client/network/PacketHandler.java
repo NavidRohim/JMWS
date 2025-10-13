@@ -110,12 +110,10 @@ public class PacketHandler {
 
         } else if (!CommonClass.serverConfig.jmwsEnabled) {
             sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.server.disabled_jmws"), true, false, JMWSMessageType.WARNING);
-        } else if (!CommonClass.serverConfig.waypointsEnabled) {
-            sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.server.disabled_waypoint"), true, false, JMWSMessageType.WARNING);
-        } else if (!CommonClass.serverConfig.groupsEnabled) {
-            sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.server.disabled_group"), true, false, JMWSMessageType.WARNING);
         } else {
-            sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.has_jmws", (CommonClass.serverConfig.getServerVersion())), true, false, JMWSMessageType.SUCCESS);
+            String test = CommonHelper.getTranslatableComponent("message.jmws.has_jmws", (CommonClass.serverConfig.getServerVersion()));
+            Constants.getLogger().info(test);
+            sendUserAlert(test, true, false, JMWSMessageType.SUCCESS);
         }
     }
 

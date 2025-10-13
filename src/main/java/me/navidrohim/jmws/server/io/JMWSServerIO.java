@@ -19,8 +19,6 @@ import java.util.stream.Stream;
 
 
 public class JMWSServerIO {
-
-
     public static boolean createWaypoint(String waypointFilename, JsonObject jsonObject, EntityPlayerMP player) {
 
         try {
@@ -35,7 +33,7 @@ public class JMWSServerIO {
 
         } catch (NoSuchFileException noSuchFileException) {
             CommonClass._createServerResources();
-            Constants.getLogger().warn("`jmws` folder was not found so another was made. All server waypoints and groups have been wiped. (waypoint error)");
+            Constants.getLogger().warn("`jmws` folder was not found so another was made. All server waypoints have been wiped. (waypoint error)");
             return createWaypoint(waypointFilename, jsonObject, player);
 
         } catch (FileSystemException missingPerms) {
@@ -75,23 +73,6 @@ public class JMWSServerIO {
             return Collections.emptyList();
             }
         return waypointFileList;
-    }
-
-    public static JsonObject getObjectDataFromDisk(String objPath) {
-        try {
-            return new JsonParser().parse(new String(Files.readAllBytes(Paths.get("sample.txt")))).getAsJsonObject();
-        } catch (IOException ioException) {
-            Constants.getLogger().error("Error retrieving saved object data -> " + ioException);
-        }
-        return null;
-    }
-
-    private static SavedWaypoint getWaypointFromFile(String waypointPath, UUID playerUUID) {
-        JsonObject waypointLocalData = getObjectDataFromDisk(waypointPath);
-        if (waypointLocalData != null) {
-            return new SavedWaypoint(waypointLocalData, playerUUID);
-        }
-        return null;
     }
 }
 

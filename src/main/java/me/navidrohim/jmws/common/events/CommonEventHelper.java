@@ -14,7 +14,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 
 import java.util.concurrent.TimeUnit;
 
-public class CommonEvents {
+public class CommonEventHelper {
 
     public static void clearCache()
     {

@@ -2,6 +2,7 @@ package me.navidrohim.jmws;
 
 import me.navidrohim.jmws.common.CommonClass;
 import me.navidrohim.jmws.common.CommonProxy;
+import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -10,15 +11,18 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 
-@Mod(modid = JMWS.MODID, name = JMWS.NAME, version = JMWS.VERSION, acceptableRemoteVersions = "*")
+
+@Mod(modid = JMWS.MODID, name = JMWS.NAME, version = JMWS.VERSION, guiFactory="me.navidrohim.jmws.client.config.JMWSGuiConfigFactory", acceptableRemoteVersions = "*")
 public class JMWS
 {
     public static final String MODID = "jmws";
     public static final String NAME = "JourneyMap Waypoint Syncing";
-    public static final String VERSION = "1.1.7-1.12.2-beta.2";
+    public static final String VERSION = "1.1.7-1.12.2-beta.3";
 
     public static Logger logger;
+    public static Configuration config;
 
     @SidedProxy(clientSide = "me.navidrohim.jmws.client.ClientProxy", serverSide = "me.navidrohim.jmws.server.ServerProxy")
     public static CommonProxy proxy;
@@ -28,6 +32,10 @@ public class JMWS
     {
         proxy.preInit(event);
         logger = event.getModLog();
+
+        File configFile = event.getSuggestedConfigurationFile();
+        config = new Configuration(configFile);
+
     }
 
     @EventHandler

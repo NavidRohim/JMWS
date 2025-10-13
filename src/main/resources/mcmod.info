@@ -12,6 +12,7 @@
   "logoFile": "assets/jmws/icon.png",
   "screenshots": [],
   "dependencies": [],
-  "requiredMods": []
+  "requiredMods": [],
+  "clientconfiggui": "me.navidrohim.jmws.client.config.NonEditableConfig"
 }
 ]

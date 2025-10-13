@@ -19,12 +19,16 @@ import java.util.HashMap;
 import java.util.List;
 
 import static me.navidrohim.jmws.common.helper.CommonHelper._getWaypointFromRaw;
-import static me.navidrohim.jmws.server.network.PlayerNetworkingHelper.sendUserMessage;
 
 public class ServerPacketHandler {
 
     private static boolean serverEnabledJMWS() {
         return CommonClass.config.enabled;
+    }
+
+    public static void sendUserMessage(EntityPlayerMP player, String messageKey, Boolean overlay, boolean isError) {
+        JMWSActionMessage messagePayload = new JMWSActionMessage(CommandHelper.makeClientAlertRequestJson(messageKey, overlay, isError));
+        JMWSNetworkWrapper.INSTANCE.sendTo(messagePayload, player);
     }
 
     public static void handleIncomingActionCommand(JMWSActionMessage Context, EntityPlayerMP player) {

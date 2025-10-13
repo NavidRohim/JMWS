@@ -1,13 +1,15 @@
 package me.navidrohim.jmws.client.events;
 
+import me.navidrohim.jmws.client.config.ConfigInterface;
 import me.navidrohim.jmws.common.Constants;
 import me.navidrohim.jmws.client.helpers.JMWSSounds;
 import me.navidrohim.jmws.common.CommonClass;
-import me.navidrohim.jmws.common.events.CommonEvents;
+import me.navidrohim.jmws.common.events.CommonEventHelper;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.client.config.GuiConfig;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
@@ -29,7 +31,7 @@ public class ForgeEventHandler
     @SubscribeEvent
     public static void onEntityLeaveWorld(PlayerEvent.PlayerLoggedOutEvent event)
     {
-        CommonEvents.clearCache();
+        CommonEventHelper.clearCache();
     }
 
     @SubscribeEvent
@@ -46,6 +48,13 @@ public class ForgeEventHandler
     public static void onConfigChanged(final ConfigChangedEvent.OnConfigChangedEvent event) {
         if (event.getModID().equals(Constants.MODID)) {
             ConfigManager.sync(Constants.MODID, Config.Type.INSTANCE);
+            ConfigInterface.serverEnabled = CommonClass.serverConfig.serverEnabled();
+        }
+    }
+    @SubscribeEvent
+    public static void onConfigChangedRevert(final ConfigChangedEvent.PostConfigChangedEvent event) {
+        if (event.getModID().equals(Constants.MODID)) {
+            ConfigInterface.serverEnabled = CommonClass.serverConfig.serverEnabled();
         }
     }
 }

@@ -6,10 +6,6 @@ public enum WaypointPayloadCommand {
     SERVER_CREATE,
     COMMON_DELETE_WAYPOINT,
 
-    // Group handling
-    SERVER_CREATE_GROUP,
-    COMMON_DELETE_GROUP,
-
     // Utility
     SYNC,
     REQUEST_CLIENT_SYNC,

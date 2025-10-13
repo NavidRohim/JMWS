@@ -1,13 +1,13 @@
 package me.navidrohim.jmws.client.config;
 
 import me.navidrohim.jmws.common.Constants;
-import me.navidrohim.jmws.server.config.ServerConfigObject;
+import me.navidrohim.jmws.common.config.ConfigObject;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Client-side version of ServerConfigObject. Holds extra data which is the server version
  */
-public class ClientSideServerConfigObject extends ServerConfigObject {
+public class ClientSideServerConfigObject extends ConfigObject {
 
     @Nullable
     private final Double serverVersion;
@@ -15,12 +15,10 @@ public class ClientSideServerConfigObject extends ServerConfigObject {
     /**
      * Create server config object. Do not use this constructor and get an instance from CommonClass.serverConfig
      * @param jmwsEnabled If JMWS is enabled.
-     * @param waypointsEnabled If waypoints are allowed to be synced.
-     * @param groupsEnabled If groups are allowed to be synced.
      * @param serverVersion The remote servers JMWS server version
      */
-    public ClientSideServerConfigObject(boolean jmwsEnabled, boolean waypointsEnabled, boolean groupsEnabled, @Nullable Double serverVersion) {
-        super(jmwsEnabled, waypointsEnabled, groupsEnabled);
+    public ClientSideServerConfigObject(boolean jmwsEnabled, @Nullable Double serverVersion) {
+        super(jmwsEnabled);
         this.serverVersion = serverVersion;
     }
 
@@ -40,7 +38,7 @@ public class ClientSideServerConfigObject extends ServerConfigObject {
      */
     public static ClientSideServerConfigObject empty()
     {
-        return new ClientSideServerConfigObject(false, false, false, Constants.SERVER_VERSION);
+        return new ClientSideServerConfigObject(false, Constants.SERVER_VERSION);
     }
 
     /**
@@ -49,6 +47,6 @@ public class ClientSideServerConfigObject extends ServerConfigObject {
      */
     public static ClientSideServerConfigObject serverOwner()
     {
-        return new ClientSideServerConfigObject(true, true, true, Constants.SERVER_VERSION);
+        return new ClientSideServerConfigObject(true, Constants.SERVER_VERSION);
     }
 }

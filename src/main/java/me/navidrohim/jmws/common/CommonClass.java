@@ -6,12 +6,13 @@ import me.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.navidrohim.jmws.common.payloads.JMWSActionMessage;
 import me.navidrohim.jmws.common.payloads.JMWSHandshakeReplyMessage;
 import me.navidrohim.jmws.common.payloads.JMWSNetworkWrapper;
-import me.navidrohim.jmws.common.config.ConfigInterface;
+import me.navidrohim.jmws.client.config.ConfigInterface;
 import me.navidrohim.jmws.server.config.ServerConfig;
-import me.navidrohim.jmws.server.events.ForgeServerEvents;
+import me.navidrohim.jmws.common.events.CommonForgeEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -31,7 +32,7 @@ public class CommonClass {
     // code that gets invoked by the entry point of the loader specific projects.
 
     public static Minecraft minecraftClientInstance = null;
-    public static ConfigInterface config = new ConfigInterface();// null
+    public static ConfigInterface config = new ConfigInterface();
     public static SyncCounter syncCounter = null;
 
     public static final boolean debug = true;
@@ -99,16 +100,16 @@ public class CommonClass {
         _createServerResources();
         ServerConfig.ensureExistence();
 
-        MinecraftForge.EVENT_BUS.register(ForgeServerEvents.class);
+        MinecraftForge.EVENT_BUS.register(CommonForgeEvents.class);
 
-        JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSActionMessage.JMWSActionMessageHandler.class, JMWSActionMessage.class, 0, Side.SERVER);
-        JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSHandshakeReplyMessage.JMWSHandshakeReplyMessageHandler.class, JMWSHandshakeReplyMessage.class, 1, Side.SERVER);
-
-        if (!side().equals("SERVER"))
+        if (side().equals("SERVER"))
         {
 
-            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSActionMessage.JMWSActionMessageHandler.class, JMWSActionMessage.class, 2, Side.CLIENT);
-            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSHandshakeReplyMessage.JMWSHandshakeReplyMessageHandler.class, JMWSHandshakeReplyMessage.class, 3, Side.CLIENT);
+            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSActionMessage.JMWSActionMessageHandler.class, JMWSActionMessage.class, 0, Side.SERVER);
+            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSHandshakeReplyMessage.JMWSHandshakeReplyMessageHandler.class, JMWSHandshakeReplyMessage.class, 1, Side.SERVER);
+        } else {
+            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSActionMessage.JMWSActionMessageHandler.class, JMWSActionMessage.class, 0, Side.CLIENT);
+            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSHandshakeReplyMessage.JMWSHandshakeReplyMessageHandler.class, JMWSHandshakeReplyMessage.class, 1, Side.CLIENT);
         }
 
         // It is common for all supported loaders to provide a similar feature that can not be used directly in the

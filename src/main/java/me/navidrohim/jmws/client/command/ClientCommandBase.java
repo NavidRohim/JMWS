@@ -38,9 +38,11 @@ public class ClientCommandBase extends CommandBase {
                 }
                 case "getSyncInterval": {
                     ClientCommands.getSyncInterval();
+                    break;
                 }
                 case "nextSync": {
                     ClientCommands.nextSync();
+                    break;
                 }
                 default: {
                     PlayerHelper.sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.unknownSubcommand"), true, false, JMWSMessageType.FAILURE);

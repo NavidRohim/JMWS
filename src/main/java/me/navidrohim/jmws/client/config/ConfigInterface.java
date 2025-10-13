@@ -1,4 +1,4 @@
-package me.navidrohim.jmws.common.config;
+package me.navidrohim.jmws.client.config;
 
 import me.navidrohim.jmws.common.Constants;
 import net.minecraftforge.common.config.Config;
@@ -31,6 +31,9 @@ public class ConfigInterface {
     @Config.Name("Auto-Sync")
     public static boolean autoSync = true;
 
+    @Config.Comment("If remote server has JMWS enabled. Does not effect your game in any way.")
+    @Config.Name("Server Enabled")
+    public static boolean serverEnabled = false;
 
     public int getUpdateWaypointFrequencyAsTicks()
     {

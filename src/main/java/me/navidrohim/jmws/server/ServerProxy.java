@@ -1,12 +1,9 @@
 package me.navidrohim.jmws.server;
 
 import me.navidrohim.jmws.common.CommonProxy;
-import me.navidrohim.jmws.server.events.ForgeServerEvents;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 

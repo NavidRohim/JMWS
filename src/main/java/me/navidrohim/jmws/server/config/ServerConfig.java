@@ -2,13 +2,12 @@ package me.navidrohim.jmws.server.config;
 
 import com.google.gson.Gson;
 import me.navidrohim.jmws.common.Constants;
+import me.navidrohim.jmws.common.config.ConfigObject;
 import me.navidrohim.jmws.server.exceptions.ServerConfigurationException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class ServerConfig {
@@ -16,7 +15,7 @@ public class ServerConfig {
     private static final String configPath = "./config/jmws-server.json";
 
     public static final String rawServerConfigData = getConfigJson();
-    public static final ServerConfigObject serverConfig = new Gson().fromJson(rawServerConfigData, ServerConfigObject.class);
+    public static final ConfigObject serverConfig = new Gson().fromJson(rawServerConfigData, ConfigObject.class);
 
     public static void ensureExistence()
     {
@@ -30,9 +29,7 @@ public class ServerConfig {
             if (didCreateNew)
             {
                 Gson configJson = new Gson();
-                String configJsonString = configJson.toJson(new ServerConfigObject(
-                                true,
-                                true,
+                String configJsonString = configJson.toJson(new ConfigObject(
                                 true
                         )
                 );
@@ -64,7 +61,7 @@ public class ServerConfig {
         return content;
     }
 
-    public static ServerConfigObject getConfig()
+    public static ConfigObject getConfig()
     {
         return serverConfig;
     }

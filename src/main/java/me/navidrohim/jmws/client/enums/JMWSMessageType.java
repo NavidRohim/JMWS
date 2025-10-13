@@ -1,9 +1,9 @@
 package me.navidrohim.jmws.client.enums;
 
 public enum JMWSMessageType {
-    FAILURE("§C"),
-    SUCCESS("§2"),
-    WARNING("§e"),
+    FAILURE("\u00A7c"),
+    SUCCESS("\u00A72"),
+    WARNING("\u00A7e"),
     NEUTRAL("");
 
     private final String text;

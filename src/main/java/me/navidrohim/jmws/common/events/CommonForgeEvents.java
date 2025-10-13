@@ -1,22 +1,19 @@
-package me.navidrohim.jmws.server.events;
+package me.navidrohim.jmws.common.events;
 
 import me.navidrohim.jmws.common.CommonClass;
-import me.navidrohim.jmws.common.Constants;
-import me.navidrohim.jmws.common.events.CommonEvents;
+import me.navidrohim.jmws.common.events.CommonEventHelper;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
-public class ForgeServerEvents {
+public class CommonForgeEvents {
 
     @SubscribeEvent
     public static void onEntityJoinWorld(PlayerEvent.PlayerLoggedInEvent event)
     {
-        Constants.getLogger().info("handling join");
-
         if (event.player instanceof EntityPlayerMP)
         {
-            CommonEvents.handleJoin((EntityPlayerMP) event.player, CommonClass.isInternalServer(), false);
+            CommonEventHelper.handleJoin((EntityPlayerMP) event.player, CommonClass.isInternalServer(), false);
         }
     }
 }
