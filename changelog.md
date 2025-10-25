@@ -13,6 +13,7 @@
 - Server now sends handshake instead of the client
 - Fixed bug where getSyncInterval and nextSync commands wouldn't work.
 - Fixed bug where coloured action bar text would glitch
+- Fixed bug where server config just did not work.
 
 ## Bugs that I am aware of
 

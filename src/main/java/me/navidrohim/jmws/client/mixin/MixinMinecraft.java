@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 
-@Mixin(value = WaypointEditor.class) // I hope this isnt against JM TOS
+@Mixin(value = WaypointEditor.class) // I hope this  isn't against JM TOS
 public abstract class MixinMinecraft {
 
     @Shadow

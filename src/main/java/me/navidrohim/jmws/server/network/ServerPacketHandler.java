@@ -10,6 +10,7 @@ import me.navidrohim.jmws.common.helper.CommandHelper;
 import me.navidrohim.jmws.common.helper.CommonHelper;
 import me.navidrohim.jmws.common.payloads.JMWSActionMessage;
 import me.navidrohim.jmws.common.payloads.JMWSNetworkWrapper;
+import me.navidrohim.jmws.server.config.ServerConfig;
 import me.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -34,6 +35,11 @@ public class ServerPacketHandler {
     public static void handleIncomingActionCommand(JMWSActionMessage Context, EntityPlayerMP player) {
         WaypointPayloadCommand command = Context.command();
         JsonArray arguments = Context.arguments();
+
+        if (!ServerConfig.getConfig().serverEnabled())
+        {
+            sendUserMessage(player, "message.jmws.server_disabled_waypoints", true, true);
+        }
 
         switch (command) {
 
@@ -82,7 +88,7 @@ public class ServerPacketHandler {
 
                     if (new File(waypointFilePath).isFile())
                     {
-                        sendUserMessage(player, "message.jmws.duplicate_waypoint", true, true);
+                        sendUserMessage(player, "warning.jmws.duplicate_waypoint", true, true);
                         break;
                     }
                     boolean waypointCreationSuccess = JMWSServerIO.createWaypoint(waypointFilePath, jsonCreationData, player);
@@ -125,8 +131,7 @@ public class ServerPacketHandler {
 
                     }
                 } catch (IOException ioe) {
-                    Constants.getLogger().error(ioe.getMessage());
-                }
+                    Constants.getLogger().error(String.format("Error on server when trying to process sync from %s ERROR: %s", player.getUniqueID(), ioe.getMessage()));                }
                 break;
             }
 

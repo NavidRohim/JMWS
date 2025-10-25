@@ -59,7 +59,6 @@ public class JMWSHandshakeReplyMessage implements IMessage {
     public void toBytes(ByteBuf buf) {
         serverConfigData = null;
 
-        Constants.getLogger().info(ServerConfig.rawServerConfigData);
         JsonObject jsonObject = new JsonParser().parse(ServerConfig.rawServerConfigData).getAsJsonObject();
         jsonObject.addProperty("serverVersion", Constants.SERVER_VERSION);
 

@@ -1,6 +1,7 @@
 package me.navidrohim.jmws.common.events;
 
 import me.navidrohim.jmws.common.CommonClass;
+import me.navidrohim.jmws.common.Constants;
 import me.navidrohim.jmws.common.events.CommonEventHelper;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;

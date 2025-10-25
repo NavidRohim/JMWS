@@ -102,7 +102,6 @@ public class JMWSPlugin implements IClientPlugin {
 
         String creationData = CommandHelper.makeCreationRequestJson(waypoint.toString(), silent, isUpdate);
         JMWSNetworkWrapper.INSTANCE.sendToServer(new JMWSActionMessage(creationData));
-
     }
 
     public void updateAction(Waypoint waypoint, Waypoint oldWaypoint)
@@ -112,7 +111,6 @@ public class JMWSPlugin implements IClientPlugin {
         if (oldWaypoint != null) {
             this.deleteAction(oldWaypoint, true);
             WaypointStore.INSTANCE.remove(oldWaypoint);
-
         }
 
         createAction(waypoint, true, true);

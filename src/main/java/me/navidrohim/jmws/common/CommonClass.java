@@ -35,7 +35,7 @@ public class CommonClass {
     public static ConfigInterface config = new ConfigInterface();
     public static SyncCounter syncCounter = null;
 
-    public static final boolean debug = true;
+    public static final boolean debug = false;
 
     public static boolean serverHasMod = false;
     public static boolean hasMixinBooter = false;
@@ -75,7 +75,7 @@ public class CommonClass {
 
 
     public static boolean getEnabledStatus() {
-        return hasJourneyMap && hasMixinBooter && serverHasMod && ConfigInterface.enabled && !minecraftClientInstance.isSingleplayer();
+        return hasJourneyMap && hasMixinBooter && serverHasMod && ConfigInterface.enabled && !minecraftClientInstance.isSingleplayer() && CommonClass.serverConfig.serverEnabled();
     }
 
     public static boolean isInternalServer() {
@@ -102,11 +102,10 @@ public class CommonClass {
 
         MinecraftForge.EVENT_BUS.register(CommonForgeEvents.class);
 
+        JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSActionMessage.JMWSActionMessageHandler.class, JMWSActionMessage.class, 0, Side.SERVER);
+        JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSHandshakeReplyMessage.JMWSHandshakeReplyMessageHandler.class, JMWSHandshakeReplyMessage.class, 1, Side.SERVER);
         if (side().equals("SERVER"))
         {
-
-            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSActionMessage.JMWSActionMessageHandler.class, JMWSActionMessage.class, 0, Side.SERVER);
-            JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSHandshakeReplyMessage.JMWSHandshakeReplyMessageHandler.class, JMWSHandshakeReplyMessage.class, 1, Side.SERVER);
         } else {
             JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSActionMessage.JMWSActionMessageHandler.class, JMWSActionMessage.class, 0, Side.CLIENT);
             JMWSNetworkWrapper.INSTANCE.registerMessage(JMWSHandshakeReplyMessage.JMWSHandshakeReplyMessageHandler.class, JMWSHandshakeReplyMessage.class, 1, Side.CLIENT);

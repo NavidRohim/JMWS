@@ -29,12 +29,13 @@ public class ClientProxy extends CommonProxy
     @Override
     public void init(FMLInitializationEvent event)
     {
-        ClientCommandHandler.instance.registerCommand(new ClientCommandBase());
+        //ClientCommandHandler.instance.registerCommand(new ClientCommandBase());
     }
 
     @Override
     public void postInit(FMLPostInitializationEvent event)
     {
+        ClientCommandHandler.instance.registerCommand(new ClientCommandBase());
         Constants.LOGGER.info("postInit on client");
         if (Loader.isModLoaded("journeymap"))
         {

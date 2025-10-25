@@ -3,6 +3,7 @@ package me.navidrohim.jmws.common.payloads;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.netty.buffer.ByteBuf;
+import me.navidrohim.jmws.common.Constants;
 import me.navidrohim.jmws.common.enums.WaypointPayloadCommand;
 import me.navidrohim.jmws.common.helper.CommandHelper;
 import me.navidrohim.jmws.server.network.ServerPacketHandler;

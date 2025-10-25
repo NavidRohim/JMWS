@@ -96,7 +96,6 @@ public class PacketHandler {
      */
     private static void sendUserJoinAlert(@Nullable Double serverVersion)
     {
-
         // I hate all the following code :)
         if (serverVersion == null)
         {
@@ -111,9 +110,7 @@ public class PacketHandler {
         } else if (!CommonClass.serverConfig.jmwsEnabled) {
             sendUserAlert(CommonHelper.getTranslatableComponent("warning.jmws.server.disabled_jmws"), true, false, JMWSMessageType.WARNING);
         } else {
-            String test = CommonHelper.getTranslatableComponent("message.jmws.has_jmws", (CommonClass.serverConfig.getServerVersion()));
-            Constants.getLogger().info(test);
-            sendUserAlert(test, true, false, JMWSMessageType.SUCCESS);
+            sendUserAlert(CommonHelper.getTranslatableComponent("message.jmws.has_jmws", (CommonClass.serverConfig.getServerVersion())), true, false, JMWSMessageType.SUCCESS);
         }
     }
 
