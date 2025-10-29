@@ -146,7 +146,7 @@ public class JMWSPlugin implements IClientPlugin {
         {
             if (oldWaypoint != null) { // oldWaypoint can be null if it's not found in the identifier map. Can happen if there's a corrupted waypoint
                 this.deleteAction(oldWaypoint, true);
-                jmAPI.removeWaypoint("journeymap", oldWaypoint);
+                jmAPI.removeWaypoint(oldWaypoint.getModId(), oldWaypoint);
             }
             this.createAction(waypoint, true, true);
 
@@ -171,7 +171,7 @@ public class JMWSPlugin implements IClientPlugin {
 
             // removedWaypoint is called here because, yes, we do listen for the deletion with the event (meaning, the waypoint should be already gone by the time the event is called)
             // But for some reason it bugs out and the waypoint stays and becomes persistent
-            jmAPI.removeWaypoint("journeymap", waypoint);
+            jmAPI.removeWaypoint(waypoint.getModId(), waypoint);
             Dispatcher.sendToServer(waypointActionPayload);
         } else {
             PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
@@ -306,7 +306,7 @@ public class JMWSPlugin implements IClientPlugin {
     }
 
     /**
-     * Removes all local groups. I remember jmAPI.removeAllWaypoints() for some reason doesn't work.
+     * Removes all local groups. There is no API call to remove all groups.
      */
     public static void deleteAllGroups() {
         // This method is a bodge fix. removeWaypointGroups (which I believe removes all groups) does not work because you cannot change the modId of a group.
@@ -316,6 +316,17 @@ public class JMWSPlugin implements IClientPlugin {
             if (!Constants.forbiddenGroups.contains(wp.getGuid())) {
                 getInstance().jmAPI.removeWaypointGroup(wp, false);
             }
+        }
+    }
+
+    /**
+     * Removes all local waypoints. Used instead of jmAPI.removeAllWaypoints as that requires a mod ID. This does not and will remove all waypoints.
+     */
+    public static void deleteAllWaypoints()
+    {
+        for (Waypoint wp : getInstance().jmAPI.getAllWaypoints())
+        {
+            getInstance().jmAPI.removeWaypoint(wp.getModId(), wp);
         }
     }
 
@@ -330,10 +341,11 @@ public class JMWSPlugin implements IClientPlugin {
         String deletionMessageConfirmationKey = "message.jmws.deletion_all_success";
 
         if (deletionType == JMWSServerIO.FetchType.WAYPOINT) {
+            Waypoint oldWp = ObjectIdentifierMap.getOldWaypoint(toDelete);
             if (deleteAll) {
-                INSTANCE.jmAPI.removeAllWaypoints("journeymap");
+                deleteAllWaypoints();
             } else {
-                INSTANCE.jmAPI.removeWaypoint("journeymap", ObjectIdentifierMap.getOldWaypoint(toDelete));
+                INSTANCE.jmAPI.removeWaypoint(oldWp.getModId(), oldWp);
             }
 
         } else {
@@ -449,6 +461,7 @@ public class JMWSPlugin implements IClientPlugin {
         for (WaypointGroup existingGroup : existingGroups) {
             String key = existingGroup.getName() + existingGroup.getGuid();
             if (!remoteGroupKeys.contains(key) && !Constants.forbiddenGroups.contains(existingGroup.getGuid()) && existingGroup.isPersistent()) {
+                existingGroup.setPersistent(false);
                 getInstance().groupCreationHandler(existingGroup, true, false);
                 hasLocalGroup = true;
             }
@@ -483,11 +496,12 @@ public class JMWSPlugin implements IClientPlugin {
                 .map(w -> new BlockPos(w.getWaypointX(), w.getWaypointY(), w.getWaypointZ()))
                 .collect(Collectors.toSet());
 
-        getInstance().jmAPI.removeAllWaypoints("journeymap");
+        deleteAllWaypoints();
 
         // Test if any existing waypoints (persistent, usually death waypoints) have already been added to the server, if not, add them
         for (Waypoint existing : existingWaypoints) {
             if (!remoteWaypointPositions.contains(existing.getBlockPos()) && existing.isPersistent()) {
+                existing.setPersistent(false);
                 getInstance().createAction(existing, true, false);
                 hasLocalWaypoint = true;
             }
@@ -498,7 +512,7 @@ public class JMWSPlugin implements IClientPlugin {
             Waypoint wp = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData());
             ObjectIdentifierMap.addWaypointToMap(wp);
 
-            getInstance().jmAPI.addWaypoint("journeymap", wp);
+            getInstance().jmAPI.addWaypoint(wp.getModId(), wp);
         }
 
         return hasLocalWaypoint;
