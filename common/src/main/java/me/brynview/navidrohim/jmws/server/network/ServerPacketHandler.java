@@ -6,7 +6,8 @@ import com.google.gson.JsonParser;
 import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
+import me.brynview.navidrohim.jmws.common.enums.FetchType;
+import me.brynview.navidrohim.jmws.common.enums.ObjectPayloadCommands;
 import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
@@ -33,8 +34,8 @@ public class ServerPacketHandler {
         if (ServerConfig.getConfig().serverEnabled())
         {
             try {
-                List<String> playerWaypoints = JMWSServerIO.getFileObjects(player.getUUID(), JMWSServerIO.FetchType.WAYPOINT);
-                List<String> playerGroups = JMWSServerIO.getFileObjects(player.getUUID(), JMWSServerIO.FetchType.GROUP);
+                List<String> playerWaypoints = JMWSServerIO.getFileObjects(player.getUUID(), FetchType.WAYPOINT);
+                List<String> playerGroups = JMWSServerIO.getFileObjects(player.getUUID(), FetchType.GROUP);
 
                 HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
                 HashMap<String, String> jsonGroupPayloadArray = new HashMap<>();
@@ -66,13 +67,13 @@ public class ServerPacketHandler {
     }
     public static void handleIncomingActionCommand(PacketContext<JMWSActionPayload> Context, ServerPlayer player) {
         JMWSActionPayload waypointActionPayload = Context.message();
-        WaypointPayloadCommand command = waypointActionPayload.command();
+        ObjectPayloadCommands command = waypointActionPayload.command();
         List<JsonElement> arguments = waypointActionPayload.arguments();
 
         switch (command) {
 
             // Following two cases are for deleting waypoints and groups
-            case WaypointPayloadCommand.COMMON_DELETE_GROUP -> {
+            case ObjectPayloadCommands.COMMON_DELETE_GROUP -> {
 
                 String playerUUID = arguments.getFirst().getAsString();
                 String groupUniversalIdentifier = arguments.get(1).getAsString();
@@ -98,7 +99,7 @@ public class ServerPacketHandler {
                 if (!deleteAllObjects) {
                     result = CommonHelper.deleteFile(fileName);
                 } else {
-                    result = JMWSServerIO.deleteAllUserObjects(player.getUUID(), JMWSServerIO.FetchType.GROUP);
+                    result = JMWSServerIO.deleteAllUserObjects(player.getUUID(), FetchType.GROUP);
                 }
 
                 if (!silent) {
@@ -110,7 +111,7 @@ public class ServerPacketHandler {
                 }
             }
 
-            case WaypointPayloadCommand.COMMON_DELETE_WAYPOINT -> {
+            case ObjectPayloadCommands.COMMON_DELETE_WAYPOINT -> {
                 String fileName = arguments.getFirst().getAsString().stripTrailing();
                 boolean silent = arguments.get(1).getAsBoolean();
                 boolean deleteAll = arguments.getLast().getAsBoolean();
@@ -119,7 +120,7 @@ public class ServerPacketHandler {
                 if (!deleteAll) {
                     result = CommonHelper.deleteFile(fileName);
                 } else {
-                    result = JMWSServerIO.deleteAllUserObjects(player.getUUID(), JMWSServerIO.FetchType.WAYPOINT);
+                    result = JMWSServerIO.deleteAllUserObjects(player.getUUID(), FetchType.WAYPOINT);
                 }
 
                 if (!silent) {
@@ -132,7 +133,7 @@ public class ServerPacketHandler {
             }
 
             // Following two cases regarding creating groups and waypoints
-            case WaypointPayloadCommand.SERVER_CREATE -> {
+            case ObjectPayloadCommands.SERVER_CREATE -> {
                 boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
 
                 if (serverEnabledJMWS() && (ServerConfig.getConfig().waypointsEnabled || isUpdateFromCreation)) {
@@ -153,7 +154,7 @@ public class ServerPacketHandler {
                 }
             }
 
-            case WaypointPayloadCommand.SERVER_CREATE_GROUP -> {
+            case ObjectPayloadCommands.SERVER_CREATE_GROUP -> {
                 boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
 
                 if (serverEnabledJMWS() && ( ServerConfig.getConfig().groupsEnabled || isUpdateFromCreation)) {
@@ -175,7 +176,7 @@ public class ServerPacketHandler {
             }
 
             // was "request"
-            case WaypointPayloadCommand.SYNC -> {
+            case ObjectPayloadCommands.SYNC -> {
                 if (player instanceof ServerPlayer)
                 {
                     boolean sendAlert = arguments.get(2).getAsBoolean();

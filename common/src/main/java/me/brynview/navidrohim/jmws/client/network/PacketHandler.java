@@ -8,6 +8,7 @@ import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
@@ -77,7 +78,7 @@ public class PacketHandler {
                     // firstArgument can be "*" to delete all waypoints / groups, deleteAll must be `true` for this to happen still.
                     JMWSPlugin.getInstance().deleteSavedObjects(
                             Objects.equals(firstArgument, "*"),
-                            JMWSServerIO.FetchType.valueOf(waypointPayload.arguments().get(1).getAsString()),
+                            FetchType.valueOf(waypointPayload.arguments().get(1).getAsString()),
                             firstArgument
                     );
                 }

@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.client;
 
 import commonnetwork.api.Dispatcher;
+import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
@@ -8,6 +9,7 @@ import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 
 /**
  * Static class that holds methods which commands use.
@@ -111,6 +113,18 @@ public class ClientCommands {
         } else {
             sendUserSinglePlayerWarning();
         }
+        return 1;
+    }
+
+    /**
+     * this function is a WIP and has not been tested and is likely not functional.
+     * @param player wip
+     * @param waypointUUID wip
+     * @return int -- If the command was successful. Will always be 1
+     */
+    public static int sendObjectShareRequest(ServerPlayer player, String waypointUUID)
+    {
+        Dispatcher.sendToClient(new JMWSActionPayload(CommandHelper.makeObjectShareRequestForUser(ObjectIdentifierMap.getOldWaypoint(waypointUUID))), player);
         return 1;
     }
 }

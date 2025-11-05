@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.objects.SavedWaypoint;
+import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
@@ -21,11 +22,6 @@ import java.util.stream.Stream;
 import static me.brynview.navidrohim.jmws.common.helper.CommonHelper._getWaypointFromRaw;
 
 public class JMWSServerIO {
-
-    public enum FetchType {
-        WAYPOINT,
-        GROUP
-    }
 
     public static Boolean removeAllWaypointsFromGroup(UUID playerUUID, String groupID) {
         List<String> objectList = getLocalWaypointsFromGroup(playerUUID, groupID);

@@ -27,6 +27,7 @@ import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
 import me.brynview.navidrohim.jmws.client.objects.SavedGroup;
 import me.brynview.navidrohim.jmws.client.objects.SavedWaypoint;
+import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
@@ -336,11 +337,11 @@ public class JMWSPlugin implements IClientPlugin {
      * @param deletionType -- What saved object to delete (waypoint or group)
      * @param toDelete -- ObjectIdentifierMap ID, this is stored on the server only in the "customData" field (example; 38ab19a2e6544389265e40ad23b49983d9620b199c111e20b2b9a5159458b519)
      */
-    public void deleteSavedObjects(Boolean deleteAll, JMWSServerIO.FetchType deletionType, String toDelete)
+    public void deleteSavedObjects(Boolean deleteAll, FetchType deletionType, String toDelete)
     {
         String deletionMessageConfirmationKey = "message.jmws.deletion_all_success";
 
-        if (deletionType == JMWSServerIO.FetchType.WAYPOINT) {
+        if (deletionType == FetchType.WAYPOINT) {
             Waypoint oldWp = ObjectIdentifierMap.getOldWaypoint(toDelete);
             if (deleteAll) {
                 deleteAllWaypoints();

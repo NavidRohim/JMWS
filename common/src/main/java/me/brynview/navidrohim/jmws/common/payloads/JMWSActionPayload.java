@@ -3,7 +3,7 @@ package me.brynview.navidrohim.jmws.common.payloads;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
+import me.brynview.navidrohim.jmws.common.enums.ObjectPayloadCommands;
 import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -19,7 +19,7 @@ public class  JMWSActionPayload
     public static final StreamCodec<FriendlyByteBuf, JMWSActionPayload> STREAM_CODEC = StreamCodec.ofMember(JMWSActionPayload::encode, JMWSActionPayload::new);
 
     public String rawData = null;
-    public WaypointPayloadCommand command = null;
+    public ObjectPayloadCommands command = null;
     public List<JsonElement> argumentList = null;
 
     public JMWSActionPayload(FriendlyByteBuf friendlyByteBuf)
@@ -46,11 +46,11 @@ public class  JMWSActionPayload
     {
         JsonObject jsonifyied = CommandHelper.getJsonObjectFromJsonString(rawData);
 
-        command = WaypointPayloadCommand.valueOf(jsonifyied.asMap().get("command").getAsString());
+        command = ObjectPayloadCommands.valueOf(jsonifyied.asMap().get("command").getAsString());
         argumentList = jsonifyied.asMap().get("arguments").getAsJsonArray().asList();
     }
 
-    public WaypointPayloadCommand command() {
+    public ObjectPayloadCommands command() {
         _setCommandAndArguments();
         return command;
     }
