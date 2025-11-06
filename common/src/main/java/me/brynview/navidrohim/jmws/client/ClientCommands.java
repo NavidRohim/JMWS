@@ -1,6 +1,8 @@
 package me.brynview.navidrohim.jmws.client;
 
+import com.mojang.brigadier.context.CommandContext;
 import commonnetwork.api.Dispatcher;
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
@@ -124,6 +126,7 @@ public class ClientCommands {
      */
     public static int sendObjectShareRequest(ServerPlayer player, String waypointUUID)
     {
+        Constants.getLogger().info("test");
         Dispatcher.sendToClient(new JMWSActionPayload(CommandHelper.makeObjectShareRequestForUser(ObjectIdentifierMap.getOldWaypoint(waypointUUID))), player);
         return 1;
     }
