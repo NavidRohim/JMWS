@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.objects.SavedWaypoint;
+import me.brynview.navidrohim.jmws.client.shared.ShareRequest;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.enums.ObjectPayloadCommands;
 
@@ -65,9 +66,9 @@ public class CommandHelper {
         return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.CLIENT_ALERT, message, overlay, isError);
     }
 
-    public static String makeObjectShareRequestForUser(String waypoint, UUID sender)
+    public static String makeObjectShareRequestForUser(String waypoint, UUID to, UUID from, ShareRequest.Direction direction)
     {
-        return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.OBJECT_SHARE, waypoint, sender, FetchType.WAYPOINT);
+        return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.OBJECT_SHARE, waypoint, to, from, FetchType.WAYPOINT, direction);
     }
 
     public static String makeObjectShareRequestForUser(WaypointGroup waypointGroup)

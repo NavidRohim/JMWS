@@ -32,11 +32,14 @@ public interface ClientCommandCallback {
             .then(ClientCommandManager.literal("sync").executes(context -> ClientCommands.sync()))
             .then(ClientCommandManager.literal("getSyncInterval").executes(intervalContext -> ClientCommands.getSyncInterval()))
             .then(ClientCommandManager.literal("nextSync").executes(updateDisplayContext -> ClientCommands.nextSync()))
-            .then(ClientCommandManager.literal("accept").executes(acceptingContext -> ClientCommands.accept()))
-            .then(ClientCommandManager.literal("decline").executes(acceptingContext -> ClientCommands.decline()))
+            .then(ClientCommandManager.literal("debugShare").executes(debug -> ClientCommands.debugSharing()))
             .then(ClientCommandManager.literal("clearAll")
                     .then(ClientCommandManager.literal("groups").executes(groupClearAllCtx -> ClientCommands.clearAllGroups()))
                     .then(ClientCommandManager.literal("waypoints").executes(waypointClearAllCtx -> ClientCommands.clearAllWaypoints())))
         );
+
+        fabricClientCommandSourceCommandDispatcher.register(ClientCommandManager.literal("accept_share").executes(acceptingContext -> ClientCommands.accept(null)));
+        fabricClientCommandSourceCommandDispatcher.register(ClientCommandManager.literal("decline_share").executes(acceptingContext -> ClientCommands.decline(null)));
+
     }
 }

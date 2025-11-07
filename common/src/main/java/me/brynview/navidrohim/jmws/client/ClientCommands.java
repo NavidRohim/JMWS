@@ -1,6 +1,8 @@
 package me.brynview.navidrohim.jmws.client;
 
 import commonnetwork.api.Dispatcher;
+import me.brynview.navidrohim.jmws.client.shared.IncomingShareRequests;
+import me.brynview.navidrohim.jmws.client.shared.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
@@ -8,6 +10,9 @@ import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 /**
  * Static class that holds methods which commands use.
@@ -114,23 +119,39 @@ public class ClientCommands {
         return 1;
     }
 
-    public static int accept()
+    public static int accept(@Nullable UUID from)
     {
         if (ClientVariables.shareRequest != null)
         {
-            ClientVariables.shareRequest.acceptShare();
-            PlayerHelper.sendUserAlert(Component.literal("shared."), true, false, JMWSMessageType.NEUTRAL);
+            if (from != null)
+            {
+                IncomingShareRequests.getIncomingRequest(from).acceptShare();
+                PlayerHelper.sendUserAlert(Component.literal("shared."), true, false, JMWSMessageType.NEUTRAL);
+            } else {
+                IncomingShareRequests.getFirstRequest().acceptShare();
+            }
         }
         return 1;
     }
 
-    public static int decline()
+    public static int decline(@Nullable UUID from)
     {
         if (ClientVariables.shareRequest != null)
         {
-            ClientVariables.shareRequest.declineShare();
-            PlayerHelper.sendUserAlert(Component.literal("not shared."), true, false, JMWSMessageType.NEUTRAL);
+            if (from != null)
+            {
+                IncomingShareRequests.getIncomingRequest(from).declineShare();
+                PlayerHelper.sendUserAlert(Component.literal("not shared."), true, false, JMWSMessageType.NEUTRAL);
+            } else {
+                IncomingShareRequests.getFirstRequest().declineShare();
+            }
         }
+        return 1;
+    }
+
+    public static int debugSharing()
+    {
+        PlayerHelper.sendUserAlert(Component.literal("Size of req hashmap > " + OutgoingShareRequests.getSize()), false, true, JMWSMessageType.FAILURE);
         return 1;
     }
 }

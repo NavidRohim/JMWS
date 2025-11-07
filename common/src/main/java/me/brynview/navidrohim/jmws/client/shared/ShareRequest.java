@@ -3,7 +3,6 @@ package me.brynview.navidrohim.jmws.client.shared;
 import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.ClientVariables;
 import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
@@ -15,15 +14,24 @@ import java.util.UUID;
 public class ShareRequest {
     @Nullable
     public UUID originalSender = null;
+
+    @Nullable
+    public UUID meantFor = null;
+
     @Nullable
     public Object currentSharedObject = null;
 
     private static final List<Class<?>> AcceptedObjects = List.of(Waypoint.class, WaypointGroup.class);
 
-    public ShareRequest(UUID uuid, Object waypointOrGroup) {
-        Constants.getLogger().info(String.valueOf(waypointOrGroup.getClass()));
+    public enum Direction
+    {
+        FOR_HOST,
+        FOR_CLIENT
+    }
 
+    public ShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, @Nullable Object waypointOrGroup) {
         this.originalSender = uuid;
+        this.meantFor = meantForPlayerUUID;
         this.currentSharedObject = waypointOrGroup;
 
     }
@@ -31,7 +39,7 @@ public class ShareRequest {
     public void declineShare()
     {
         Dispatcher.sendToServer(new JMWSActionPayload(CommandHelper.makeObjectShareRequestDecline(this.originalSender)));
-        ClientVariables.shareRequest = null;
+        IncomingShareRequests.removeIncomingRequest(this.originalSender);
     }
 
     public static void declareBusy(UUID originalSender)
@@ -42,6 +50,6 @@ public class ShareRequest {
     public void acceptShare()
     {
         Dispatcher.sendToServer(new JMWSActionPayload(CommandHelper.makeObjectShareRequestAccept(this.originalSender)));
-        ClientVariables.shareRequest = null;
+        IncomingShareRequests.removeIncomingRequest(this.originalSender);
     }
 }

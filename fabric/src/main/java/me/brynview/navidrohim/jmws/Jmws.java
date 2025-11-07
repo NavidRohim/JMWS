@@ -90,7 +90,7 @@ public class Jmws implements ModInitializer {
                 ServerPlayer player = EntityArgument.getPlayer(context1, "userID");
                 String waypointID = StringArgumentType.getString(context1, "objID");
 
-                return ServerCommands.share(player, waypointID);
+                return ServerCommands.share(context1.getSource().getPlayer(), player, waypointID);
             }))));
         });
     }

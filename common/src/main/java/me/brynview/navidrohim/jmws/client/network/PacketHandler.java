@@ -1,9 +1,14 @@
 package me.brynview.navidrohim.jmws.client.network;
 
+import com.google.gson.JsonElement;
 import commonnetwork.networking.data.PacketContext;
+import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import me.brynview.navidrohim.jmws.client.ClientVariables;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
+import me.brynview.navidrohim.jmws.client.shared.IncomingShareRequests;
+import me.brynview.navidrohim.jmws.client.shared.OutgoingShareRequest;
+import me.brynview.navidrohim.jmws.client.shared.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.client.shared.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
@@ -17,6 +22,7 @@ import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -33,6 +39,7 @@ public class PacketHandler {
      */
     public static void handlePacket(PacketContext<JMWSActionPayload> Context) {
         JMWSActionPayload waypointPayload = Context.message();
+        List<JsonElement> arguments = waypointPayload.arguments();
 
         // Check if command should be processed (must be a client of a server)
         if (CommonClass.getEnabledStatus()) {
@@ -92,26 +99,52 @@ public class PacketHandler {
 
                 case OBJECT_SHARE ->
                 {
-                    UUID originalSender = UUID.fromString(waypointPayload.arguments().get(1).getAsString());
-                    if (ClientVariables.shareRequest == null)
-                    {
-                        String waypointString = waypointPayload.arguments().getFirst().getAsString();
-                        ClientVariables.shareRequest = new ShareRequest(
-                                originalSender,
-                                WaypointFactory.fromWaypointJsonString(waypointString)
-                        );
+                    ShareRequest.Direction direction = ShareRequest.Direction.valueOf(arguments.getLast().getAsString());
+                    UUID us = UUID.fromString(arguments.get(1).getAsString());
+                    UUID from = UUID.fromString(arguments.get(2).getAsString());
+                    String waypointString = arguments.getFirst().getAsString();
+                    Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(waypointString);
 
-                        sendUserAlert(Component.literal("Sharing?"), false, true, JMWSMessageType.SUCCESS);
+                    if (direction.equals(ShareRequest.Direction.FOR_CLIENT))
+                    {
+                        if (!IncomingShareRequests.hasShareRequestFrom(from))
+                        {
+                            IncomingShareRequests.addIncomingRequest(from, new ShareRequest(
+                                    from,
+                                    us,
+                                    WaypointFactory.fromWaypointJsonString(waypointString)
+                            ));
+
+                            sendUserAlert(Component.literal("XX Has sent a sync request, accept? (/jmws accept / decline)"), false, true, JMWSMessageType.SUCCESS);
+                        } else {
+                            ShareRequest.declareBusy(from);
+                        }
                     } else {
-                        ShareRequest.declareBusy(originalSender);
+                        OutgoingShareRequests.addOutgoingRequest(from, new OutgoingShareRequest(from, us, waypointObj));
+                        PlayerHelper.sendUserAlert(Component.literal("Got > %s".formatted(OutgoingShareRequests.getSize())), true, false, JMWSMessageType.SUCCESS);
                     }
                 }
 
-                case REJECT_SHARE -> sendUserAlert(Component.literal("You were rejected :("), true, false, JMWSMessageType.FAILURE);
+                case REJECT_SHARE ->
+                {
+                    UUID from = UUID.fromString(arguments.getFirst().getAsString());
+                    OutgoingShareRequests.removeOutgoingRequest(from);
+                    sendUserAlert(Component.literal("You were rejected :("), true, false, JMWSMessageType.FAILURE);
+                }
 
-                case USER_ALREADY_PROCESSING_SHARE -> sendUserAlert(Component.literal("User is already processing a share!"), true, false, JMWSMessageType.WARNING);
+                case USER_ALREADY_PROCESSING_SHARE ->
+                {
+                    UUID from = UUID.fromString(arguments.getFirst().getAsString());
+                    OutgoingShareRequests.removeOutgoingRequest(from);
+                    sendUserAlert(Component.literal("User is a sharing request you sent!"), true, false, JMWSMessageType.WARNING);
+                }
 
-                case AFFIRM_SHARE -> sendUserAlert(Component.literal("Now sharing"), true, false, JMWSMessageType.SUCCESS);
+                case AFFIRM_SHARE ->
+                {
+                    UUID from = UUID.fromString(arguments.getFirst().getAsString());
+                    OutgoingShareRequests.removeOutgoingRequest(from);
+                    sendUserAlert(Component.literal("Now sharing"), true, false, JMWSMessageType.SUCCESS);
+                }
                 
                 default -> Constants.getLogger().warn("Unknown packet command -> " + waypointPayload.command());
              }
