@@ -1,9 +1,6 @@
 package me.brynview.navidrohim.jmws.client;
 
-import com.mojang.brigadier.context.CommandContext;
 import commonnetwork.api.Dispatcher;
-import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
@@ -11,7 +8,6 @@ import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 
 /**
  * Static class that holds methods which commands use.
@@ -118,16 +114,23 @@ public class ClientCommands {
         return 1;
     }
 
-    /**
-     * this function is a WIP and has not been tested and is likely not functional.
-     * @param player wip
-     * @param waypointUUID wip
-     * @return int -- If the command was successful. Will always be 1
-     */
-    public static int sendObjectShareRequest(ServerPlayer player, String waypointUUID)
+    public static int accept()
     {
-        Constants.getLogger().info("test");
-        Dispatcher.sendToClient(new JMWSActionPayload(CommandHelper.makeObjectShareRequestForUser(ObjectIdentifierMap.getOldWaypoint(waypointUUID))), player);
+        if (ClientVariables.shareRequest != null)
+        {
+            ClientVariables.shareRequest.acceptShare();
+            PlayerHelper.sendUserAlert(Component.literal("shared."), true, false, JMWSMessageType.NEUTRAL);
+        }
+        return 1;
+    }
+
+    public static int decline()
+    {
+        if (ClientVariables.shareRequest != null)
+        {
+            ClientVariables.shareRequest.declineShare();
+            PlayerHelper.sendUserAlert(Component.literal("not shared."), true, false, JMWSMessageType.NEUTRAL);
+        }
         return 1;
     }
 }

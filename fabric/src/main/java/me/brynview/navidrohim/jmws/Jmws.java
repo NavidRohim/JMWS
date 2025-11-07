@@ -1,13 +1,20 @@
 package me.brynview.navidrohim.jmws;
 
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import me.brynview.navidrohim.jmws.client.ClientVariables;
 import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.server.ServerCommands;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.VersionParsingException;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -60,11 +67,11 @@ public class Jmws implements ModInitializer {
                         int jarVersionString = Integer.parseInt(regexBetaVersionPatternJarMatcher.group(1));
                         int minVersionString = Integer.parseInt(regexBetaVersionPatternMinMatcher.group(1));
 
-                        CommonClass.clientJMVersion = versionString;
+                        ClientVariables.clientJMVersion = versionString;
 
                         if ((mcVersionMinor >= minMcVersionMinor && mcVersionPatch == minMcVersionPatch && jarVersionString >= minVersionString)) {
                             Constants.getLogger().info("Good to go. JMWS Version %s with JourneyMap Version %s on client-side.".formatted(Constants.VERSION, versionString));
-                            CommonClass.clientHasJM = true;
+                            ClientVariables.clientHasJM = true;
                             CommonClass.init();
                         }
                     }
@@ -77,6 +84,15 @@ public class Jmws implements ModInitializer {
         } catch (NoSuchElementException | VersionParsingException | IllegalStateException ignored) {
 
         }
+
+        CommandRegistrationCallback.EVENT.register((dispatcher, context, commandSelection) -> {
+            dispatcher.register(Commands.literal("share").then(Commands.argument("userID", EntityArgument.player()).then(Commands.argument("objID", StringArgumentType.greedyString()).executes(context1 -> {
+                ServerPlayer player = EntityArgument.getPlayer(context1, "userID");
+                String waypointID = StringArgumentType.getString(context1, "objID");
+
+                return ServerCommands.share(player, waypointID);
+            }))));
+        });
     }
 
 

@@ -1,7 +1,10 @@
 package me.brynview.navidrohim.jmws.client.network;
 
 import commonnetwork.networking.data.PacketContext;
+import journeymap.api.v2.common.waypoint.WaypointFactory;
+import me.brynview.navidrohim.jmws.client.ClientVariables;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
+import me.brynview.navidrohim.jmws.client.shared.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
@@ -11,11 +14,11 @@ import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import static me.brynview.navidrohim.jmws.client.helper.PlayerHelper.sendUserAlert;
 
@@ -87,8 +90,31 @@ public class PacketHandler {
                 // No outbound data
                 case COMMON_DISPLAY_NEXT_UPDATE -> sendUserAlert(Component.translatable("message.jmws.next_sync", (CommonClass.timeUntilNextSync())), true, false, JMWSMessageType.NEUTRAL);
 
+                case OBJECT_SHARE ->
+                {
+                    UUID originalSender = UUID.fromString(waypointPayload.arguments().get(1).getAsString());
+                    if (ClientVariables.shareRequest == null)
+                    {
+                        String waypointString = waypointPayload.arguments().getFirst().getAsString();
+                        ClientVariables.shareRequest = new ShareRequest(
+                                originalSender,
+                                WaypointFactory.fromWaypointJsonString(waypointString)
+                        );
+
+                        sendUserAlert(Component.literal("Sharing?"), false, true, JMWSMessageType.SUCCESS);
+                    } else {
+                        ShareRequest.declareBusy(originalSender);
+                    }
+                }
+
+                case REJECT_SHARE -> sendUserAlert(Component.literal("You were rejected :("), true, false, JMWSMessageType.FAILURE);
+
+                case USER_ALREADY_PROCESSING_SHARE -> sendUserAlert(Component.literal("User is already processing a share!"), true, false, JMWSMessageType.WARNING);
+
+                case AFFIRM_SHARE -> sendUserAlert(Component.literal("Now sharing"), true, false, JMWSMessageType.SUCCESS);
+                
                 default -> Constants.getLogger().warn("Unknown packet command -> " + waypointPayload.command());
-            }
+             }
         }
     }
 

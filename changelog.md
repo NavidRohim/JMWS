@@ -13,4 +13,4 @@ No new features.
 None!
 
 ### Other
-*Server version is 1.00, backwards compatible with 1.1.7*
+*Server version is 1.1, backwards compatible with 1.1.7*

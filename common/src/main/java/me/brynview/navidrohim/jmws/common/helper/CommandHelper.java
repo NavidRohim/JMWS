@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.client.objects.SavedWaypoint;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.enums.ObjectPayloadCommands;
 
@@ -64,14 +65,30 @@ public class CommandHelper {
         return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.CLIENT_ALERT, message, overlay, isError);
     }
 
-    public static String makeObjectShareRequestForUser(Waypoint waypoint)
+    public static String makeObjectShareRequestForUser(String waypoint, UUID sender)
     {
-        return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.OBJECT_SHARE, waypoint.toString(), FetchType.WAYPOINT);
+        return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.OBJECT_SHARE, waypoint, sender, FetchType.WAYPOINT);
     }
 
     public static String makeObjectShareRequestForUser(WaypointGroup waypointGroup)
     {
         return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.OBJECT_SHARE, waypointGroup.toString(), FetchType.GROUP);
+    }
+
+    public static String makeObjectShareRequestDecline(UUID originalSender)
+    {
+        return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.REJECT_SHARE, originalSender);
+
+    }
+
+    public static String makeObjectShareRequestUserBusy(UUID originalSender)
+    {
+        return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.USER_ALREADY_PROCESSING_SHARE, originalSender);
+    }
+
+    public static String makeObjectShareRequestAccept(UUID originalSender)
+    {
+        return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.AFFIRM_SHARE, originalSender);
     }
 
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {

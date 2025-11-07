@@ -16,8 +16,8 @@ public class Constants {
     }
 
     public static final String MODID = "jmws";
-    public static final String VERSION = "1.1.8-1.21.1"; // This is purely for display and is not needed
-    public static final double SERVER_VERSION = 1.00;
+    public static final String VERSION = "1.1.8-1.21.1-beta.1"; // This is purely for display and is not needed
+    public static final double SERVER_VERSION = 1.1;
 
     public static final List<String> forgeModLoaders = List.of("Forge", "NeoForge"); // Do not edit unless there is another fork of Forge (would not be surprised)
     public static final List<String> forbiddenGroups = List.of("journeymap_death", "journeymap_all", "journeymap_temp", "journeymap_default"); // (DO NOT EDIT, game will bug out)

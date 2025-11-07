@@ -24,7 +24,7 @@ import static me.brynview.navidrohim.jmws.common.helper.CommonHelper._getWaypoin
 public class JMWSServerIO {
 
     public static Boolean removeAllWaypointsFromGroup(UUID playerUUID, String groupID) {
-        List<String> objectList = getLocalWaypointsFromGroup(playerUUID, groupID);
+        List<Path> objectList = getLocalWaypointsFromGroup(playerUUID, groupID);
 
         if (objectList == null) {
             return false;
@@ -32,8 +32,8 @@ public class JMWSServerIO {
 
         List<Boolean> successArray = new ArrayList<>();
 
-        for (String objPath : objectList) {
-            successArray.add(CommonHelper.deleteFile(objPath));
+        for (Path objPath : objectList) {
+            successArray.add(CommonHelper.deleteFile(objPath.toString()));
         }
         return successArray.isEmpty() || successArray.stream().allMatch(successArray.getFirst()::equals);
     }
@@ -110,30 +110,29 @@ public class JMWSServerIO {
     public static boolean deleteAllUserObjects(UUID playerUUID, FetchType fetchType) {
         List<Boolean> deletionStatusList = new ArrayList<>();
 
-        for (String waypointPath : getFileObjects(playerUUID, fetchType)) {
-            deletionStatusList.add(CommonHelper.deleteFile(waypointPath));
+        for (Path waypointPath : getObjectsForUser(playerUUID, fetchType)) {
+            deletionStatusList.add(CommonHelper.deleteFile(waypointPath.toString()));
         }
 
         return deletionStatusList.isEmpty() || deletionStatusList.stream().allMatch(deletionStatusList.getFirst()::equals);
 
     }
 
-    public static List<String> getFileObjects(UUID uuid, FetchType fetchType) {
-
+    public static Stream<Path> getAllObjects(FetchType fetchType) throws IOException
+    {
         List<String> waypointFileList = new ArrayList<>();
-        String pathSearch;
+        String pathSearch = fetchType == FetchType.WAYPOINT ? "./jmws" : "./jmws/groups";
+        return Files.list(Path.of(pathSearch));
+    }
+    public static List<Path> getObjectsForUser(UUID uuid, FetchType fetchType) {
 
-        if (fetchType == FetchType.GROUP) {
-            pathSearch = "./jmws/groups";
-        } else {
-            pathSearch = "./jmws";
-        }
-
+        List<Path> waypointFileList = new ArrayList<>();
+        String pathSearch = fetchType == FetchType.WAYPOINT ? "./jmws" : "./jmws/groups";
 
         try (Stream<Path> files = Files.list(Path.of(pathSearch))) {
             files.filter(Files::isRegularFile).forEach(path -> {
                 if (path.toString().contains(uuid.toString())) {
-                    waypointFileList.add(path.toString());
+                    waypointFileList.add(path);
                 }
             });
         } catch (IOException err) {
@@ -142,11 +141,11 @@ public class JMWSServerIO {
         return waypointFileList;
     }
 
-    public static List<String> getLocalWaypointsFromGroup(UUID playerUUID, String groupID) { // note; should switch to database for this shit
-        List<String> userWaypointFilepaths = getFileObjects(playerUUID, FetchType.WAYPOINT);
-        List<String> groupWaypoints = new ArrayList<>();
+    public static List<Path> getLocalWaypointsFromGroup(UUID playerUUID, String groupID) { // note; should switch to database for this shit
+        List<Path> userWaypointFilepaths = getObjectsForUser(playerUUID, FetchType.WAYPOINT);
+        List<Path> groupWaypoints = new ArrayList<>();
 
-        for (String waypointPath : userWaypointFilepaths) {
+        for (Path waypointPath : userWaypointFilepaths) {
             SavedWaypoint savedWaypoint = getWaypointFromFile(waypointPath, playerUUID);
             if (savedWaypoint.getWaypointGroupId().equals(groupID)) {
                 groupWaypoints.add(waypointPath);
@@ -158,20 +157,48 @@ public class JMWSServerIO {
     }
 
     @Nullable
-    public static JsonObject getObjectDataFromDisk(String objPath) {
+    public static String readRaw(Path objPath)
+    {
         try {
-            return JsonParser.parseString(Files.readString(Path.of(objPath))).getAsJsonObject();
-        } catch (IOException ioException) {
+            return Files.readString(objPath);
+        } catch (IOException ioException)
+        {
             Constants.getLogger().error("Error retrieving saved object data -> " + ioException);
+        }
+        return null;
+    }
+    @Nullable
+    public static JsonObject getObjectDataFromDisk(Path objPath) {
+        String data = readRaw(objPath);
+        return data != null ? JsonParser.parseString(data).getAsJsonObject() : null;
+
+
+    }
+
+
+    @Nullable
+    public static SavedWaypoint getWaypointFromFile(Path waypointPath, UUID playerUUID) {
+        JsonObject waypointLocalData = getObjectDataFromDisk(waypointPath);
+        if (waypointLocalData != null) {
+            return new SavedWaypoint(waypointLocalData, playerUUID);
         }
         return null;
     }
 
     @Nullable
-    private static SavedWaypoint getWaypointFromFile(String waypointPath, UUID playerUUID) {
-        JsonObject waypointLocalData = getObjectDataFromDisk(waypointPath);
-        if (waypointLocalData != null) {
-            return new SavedWaypoint(waypointLocalData, playerUUID);
+    public static String getWaypointFromUniqueIdentifier(String identifier, UUID playerUUID)
+    {
+        try {
+            for (Path allWaypoints : getAllObjects(FetchType.WAYPOINT).toList())
+            {
+                if (allWaypoints.toString().contains(identifier))
+                {
+                    return readRaw(allWaypoints);
+                }
+            }
+        } catch (IOException ignored)
+        {
+            return null;
         }
         return null;
     }

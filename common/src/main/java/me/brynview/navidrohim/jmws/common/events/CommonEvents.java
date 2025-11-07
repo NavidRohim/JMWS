@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.common.events;
 
 import commonnetwork.api.Dispatcher;
+import me.brynview.navidrohim.jmws.client.ClientVariables;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 
@@ -28,7 +29,7 @@ public class CommonEvents {
 
         if (isInternal && CommonClass.minecraftClientInstance.player == null)
         {
-            if (sendWarningIfJMNotPresent && !CommonClass.clientHasJM) {
+            if (sendWarningIfJMNotPresent && !ClientVariables.clientHasJM) {
                 CommonClass.scheduler.schedule(() -> {PlayerHelper.sendUserAlert(Component.translatable("warning.jmws.jm_not_installed"), true, false, JMWSMessageType.NEUTRAL);}, 2, TimeUnit.SECONDS);
                 return;
             }

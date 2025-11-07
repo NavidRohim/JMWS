@@ -64,7 +64,7 @@ public class SavedWaypoint extends SavedObject {
         this.version = payload.get("version").getAsInt();
         this.name = payload.get("name").getAsString();
         this.colour = payload.get("color").getAsInt();
-        this.playerUUID = playerUUID.toString();
+        this.playerUUID = playerUUID.toString(); 
         this.modId = payload.get("modId").getAsString();
         this.groupId = payload.get("groupId").getAsString();
         this.origin = payload.get("origin").getAsString();

@@ -14,6 +14,7 @@ import me.brynview.navidrohim.jmws.client.ClientCommands;
 import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -31,15 +32,8 @@ public interface ClientCommandCallback {
             .then(ClientCommandManager.literal("sync").executes(context -> ClientCommands.sync()))
             .then(ClientCommandManager.literal("getSyncInterval").executes(intervalContext -> ClientCommands.getSyncInterval()))
             .then(ClientCommandManager.literal("nextSync").executes(updateDisplayContext -> ClientCommands.nextSync()))
-            .then(ClientCommandManager.literal("share").then(argument("userID", EntityArgument.player()).executes(d -> {
-                //ServerPlayer player = ((EntitySelector)d.getArgument("userID", EntitySelector.class)).findSinglePlayer(d.getSource());
-                //FabricClientCommandSource
-                        //return ClientCommands.sendObjectShareRequest(player, StringArgumentType.getString(d, "objID"));
-                Constants.getLogger().info(String.valueOf(d.getClass()));
-                return 1;
-
-                // Likely doesn't work due to client-side nature.
-            })))
+            .then(ClientCommandManager.literal("accept").executes(acceptingContext -> ClientCommands.accept()))
+            .then(ClientCommandManager.literal("decline").executes(acceptingContext -> ClientCommands.decline()))
             .then(ClientCommandManager.literal("clearAll")
                     .then(ClientCommandManager.literal("groups").executes(groupClearAllCtx -> ClientCommands.clearAllGroups()))
                     .then(ClientCommandManager.literal("waypoints").executes(waypointClearAllCtx -> ClientCommands.clearAllWaypoints())))

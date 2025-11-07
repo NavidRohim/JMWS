@@ -17,9 +17,11 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import static me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper.sendUserMessage;
 
@@ -34,21 +36,21 @@ public class ServerPacketHandler {
         if (ServerConfig.getConfig().serverEnabled())
         {
             try {
-                List<String> playerWaypoints = JMWSServerIO.getFileObjects(player.getUUID(), FetchType.WAYPOINT);
-                List<String> playerGroups = JMWSServerIO.getFileObjects(player.getUUID(), FetchType.GROUP);
+                List<Path> playerWaypoints = JMWSServerIO.getObjectsForUser(player.getUUID(), FetchType.WAYPOINT);
+                List<Path> playerGroups = JMWSServerIO.getObjectsForUser(player.getUUID(), FetchType.GROUP);
 
                 HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
                 HashMap<String, String> jsonGroupPayloadArray = new HashMap<>();
 
                 for (int i = 0 ; i < playerWaypoints.size() ; i++) {
-                    String waypointFilename = playerWaypoints.get(i);
-                    String jsonWaypointFileString = Files.readString(Paths.get(waypointFilename));
+                    Path waypointFilename = playerWaypoints.get(i);
+                    String jsonWaypointFileString = Files.readString(waypointFilename);
                     jsonWaypointPayloadArray.put(String.valueOf(i), jsonWaypointFileString);
                 }
 
                 for (int ix = 0 ; ix < playerGroups.size() ; ix++) {
-                    String groupFilename = playerGroups.get(ix);
-                    String jsonGroupFileString = Files.readString(Paths.get(groupFilename));
+                    Path groupFilename = playerGroups.get(ix);
+                    String jsonGroupFileString = Files.readString(groupFilename);
                     jsonGroupPayloadArray.put(String.valueOf(ix), jsonGroupFileString);
                 }
                 String jsonData = CommandHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert, isDeathSync);
@@ -65,6 +67,7 @@ public class ServerPacketHandler {
             }
         }
     }
+
     public static void handleIncomingActionCommand(PacketContext<JMWSActionPayload> Context, ServerPlayer player) {
         JMWSActionPayload waypointActionPayload = Context.message();
         ObjectPayloadCommands command = waypointActionPayload.command();
@@ -75,7 +78,6 @@ public class ServerPacketHandler {
             // Following two cases are for deleting waypoints and groups
             case ObjectPayloadCommands.COMMON_DELETE_GROUP -> {
 
-                String playerUUID = arguments.getFirst().getAsString();
                 String groupUniversalIdentifier = arguments.get(1).getAsString();
                 String groupGUID = arguments.get(2).getAsString();
                 boolean silent = arguments.get(3).getAsBoolean();
@@ -183,6 +185,12 @@ public class ServerPacketHandler {
                     boolean isDeathSync = arguments.getLast().getAsBoolean();
                     sendUserSync(player, sendAlert, isDeathSync);
                 }
+            }
+
+            case ObjectPayloadCommands.REJECT_SHARE, ObjectPayloadCommands.USER_ALREADY_PROCESSING_SHARE, ObjectPayloadCommands.AFFIRM_SHARE ->
+            {
+                UUID forUser = UUID.fromString(arguments.get(0).getAsString());
+                Dispatcher.sendToClient(Context.message(), player.server.getPlayerList().getPlayer(forUser));
             }
 
             default -> Constants.getLogger().warn("Unknown packet command -> {}", command);

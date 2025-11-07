@@ -6,6 +6,7 @@ import commonnetwork.api.Network;
 import commonnetwork.networking.data.PacketContext;
 import commonnetwork.networking.data.Side;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.ClientVariables;
 import me.brynview.navidrohim.jmws.client.SyncCounter;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
@@ -20,7 +21,6 @@ import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
-import org.jetbrains.annotations.Nullable;
 
 
 import java.io.File;
@@ -44,17 +44,11 @@ public class CommonClass {
     public static ClientSideServerConfigObject serverConfig = ClientSideServerConfigObject.empty();
 
     public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-
     public static SyncCounter syncCounter = null;
-    public static boolean serverHasMod = false;
-
-    @Nullable
-    public static String clientJMVersion = null;
-    public static boolean clientHasJM = false;
 
     public static void setServerModStatus(boolean serverModStatus)
     {
-        serverHasMod = serverModStatus;
+        ClientVariables.serverHasMod = serverModStatus;
 
         if (!serverModStatus)
         {
@@ -117,7 +111,7 @@ public class CommonClass {
 
 
     public static boolean  getEnabledStatus() {
-        return serverHasMod && config.enabled.get() && (config.uploadGroups.get() || config.uploadWaypoints.get()) && !minecraftClientInstance.isSingleplayer() && !isInternalServer();
+        return ClientVariables.serverHasMod && config.enabled.get() && (config.uploadGroups.get() || config.uploadWaypoints.get()) && !minecraftClientInstance.isSingleplayer() && !isInternalServer();
     }
 
     public static boolean isInternalServer() {
