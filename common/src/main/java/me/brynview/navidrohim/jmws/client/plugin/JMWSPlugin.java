@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import com.mojang.datafixers.kinds.Const;
 import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.client.IClientPlugin;
@@ -13,7 +12,6 @@ import journeymap.api.v2.client.event.*;
 import journeymap.api.v2.common.event.ClientEventRegistry;
 import journeymap.api.v2.common.event.CommonEventRegistry;
 import journeymap.api.v2.common.event.FullscreenEventRegistry;
-import journeymap.api.v2.common.event.common.TeleportEvent;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.event.common.WaypointGroupEvent;
 import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
@@ -25,19 +23,16 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
-import me.brynview.navidrohim.jmws.client.objects.SavedGroup;
-import me.brynview.navidrohim.jmws.client.objects.SavedWaypoint;
+import me.brynview.navidrohim.jmws.common.objects.SavedGroup;
+import me.brynview.navidrohim.jmws.common.objects.SavedWaypoint;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
-import net.minecraft.client.particle.SuspendedTownParticle;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.monster.Zombie;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -145,12 +140,7 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (CommonClass.serverConfig.waypointsEnabled()) // Check config
         {
-            if (oldWaypoint != null) { // oldWaypoint can be null if it's not found in the identifier map. Can happen if there's a corrupted waypoint
-                this.deleteAction(oldWaypoint, true);
-                jmAPI.removeWaypoint(oldWaypoint.getModId(), oldWaypoint);
-            }
-            this.createAction(waypoint, true, true);
-
+            Dispatcher.sendToServer(new JMWSActionPayload(CommandHelper.makeUpdateObjectRequest(waypoint.getCustomData(), waypoint)));
             PlayerHelper.sendUserAlert(Component.translatable("message.jmws.modified_waypoint_success"), true, false, JMWSMessageType.SUCCESS);
         } else {
             PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
@@ -164,10 +154,8 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void deleteAction(Waypoint waypoint, boolean silent) {
         if (CommonClass.serverConfig.waypointsEnabled()) { // Check if action is allowed by the server.
-            String waypointFilename = CommonHelper.getWaypointFilename(waypoint, CommonClass.minecraftClientInstance.player.getUUID());
-
             ObjectIdentifierMap.removeWaypointFromMap(waypoint);
-            String jsonPacketData = CommandHelper.makeDeleteRequestJson(waypointFilename, silent, false);
+            String jsonPacketData = CommandHelper.makeDeleteRequestJson(waypoint.getCustomData(), silent, false);
             JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
 
             // removedWaypoint is called here because, yes, we do listen for the deletion with the event (meaning, the waypoint should be already gone by the time the event is called)
@@ -279,11 +267,7 @@ public class JMWSPlugin implements IClientPlugin {
         if (CommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
         {
             // Internally, we just delete the old group and create a new one
-            if (oldWaypointGroup != null) {
-                this.groupDeletionHandler(oldWaypointGroup, player, true, false, true);
-            }
-            this.groupCreationHandler(waypointGroup, true, true);
-
+            Dispatcher.sendToServer(new JMWSActionPayload(CommandHelper.makeUpdateObjectRequest(waypointGroup.getCustomData(), waypointGroup)));
             // Send alert
             PlayerHelper.sendUserAlert(Component.translatable("message.jmws.modified_group_success"), true, false, JMWSMessageType.SUCCESS);
         } else {

@@ -6,7 +6,6 @@ import com.google.gson.JsonParser;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.client.objects.SavedWaypoint;
 import me.brynview.navidrohim.jmws.client.shared.ShareRequest;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.enums.ObjectPayloadCommands;
@@ -31,13 +30,12 @@ public class CommandHelper {
        return json.toJson(new PacketCommand(command, arguments));
     }
 
-    public static String makeDeleteRequestJson(String waypointFilename, boolean silent, boolean all) {
-        return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.COMMON_DELETE_WAYPOINT, waypointFilename, silent, all);
+    public static String makeDeleteRequestJson(String waypointIdentifier, boolean silent, boolean all) {
+        return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.COMMON_DELETE_WAYPOINT, waypointIdentifier, silent, all);
     }
 
     public static String makeDeleteGroupRequestJson(UUID playerUUID, String groupUniversalIdentifier, String groupGUID, boolean silent, boolean removeAllWaypointsInGroup, boolean removeGroupItself, boolean deleteAllGroups) {
         return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.COMMON_DELETE_GROUP,
-                playerUUID,
                 groupUniversalIdentifier,
                 groupGUID,
                 silent,
@@ -90,6 +88,16 @@ public class CommandHelper {
     public static String makeObjectShareRequestAccept(UUID originalSender)
     {
         return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.AFFIRM_SHARE, originalSender);
+    }
+
+    public static String makeUpdateObjectRequest(String objectIdentifier, Waypoint waypoint)
+    {
+        return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.UPDATE, objectIdentifier, FetchType.WAYPOINT, waypoint.toString());
+    }
+
+    public static String makeUpdateObjectRequest(String objectIdentifier, WaypointGroup group)
+    {
+        return CommandHelper.makeBaseJsonRequest(ObjectPayloadCommands.UPDATE, objectIdentifier, FetchType.GROUP, group.toString());
     }
 
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {

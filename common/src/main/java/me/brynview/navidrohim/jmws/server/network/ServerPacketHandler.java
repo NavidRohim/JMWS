@@ -15,6 +15,7 @@ import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,9 +36,10 @@ public class ServerPacketHandler {
     {
         if (ServerConfig.getConfig().serverEnabled())
         {
+            UUID playerUUID = player.getUUID();
             try {
-                List<Path> playerWaypoints = JMWSServerIO.getObjectsForUser(player.getUUID(), FetchType.WAYPOINT);
-                List<Path> playerGroups = JMWSServerIO.getObjectsForUser(player.getUUID(), FetchType.GROUP);
+                List<Path> playerWaypoints = JMWSServerIO.getObjectsForUser(playerUUID, FetchType.WAYPOINT);
+                List<Path> playerGroups = JMWSServerIO.getObjectsForUser(playerUUID, FetchType.GROUP);
 
                 HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
                 HashMap<String, String> jsonGroupPayloadArray = new HashMap<>();
@@ -46,13 +48,24 @@ public class ServerPacketHandler {
                     Path waypointFilename = playerWaypoints.get(i);
                     String jsonWaypointFileString = Files.readString(waypointFilename);
                     jsonWaypointPayloadArray.put(String.valueOf(i), jsonWaypointFileString);
+
+                    if (JMWSServerIO.transition(playerWaypoints.get(i), FetchType.WAYPOINT, playerUUID))
+                    {
+                        Constants.getLogger().error("Could not translate %s %s to new system path.".formatted(FetchType.WAYPOINT, playerWaypoints.get(i)));
+                    }
                 }
 
                 for (int ix = 0 ; ix < playerGroups.size() ; ix++) {
                     Path groupFilename = playerGroups.get(ix);
                     String jsonGroupFileString = Files.readString(groupFilename);
                     jsonGroupPayloadArray.put(String.valueOf(ix), jsonGroupFileString);
+
+                    if (JMWSServerIO.transition(playerGroups.get(ix), FetchType.GROUP, playerUUID))
+                    {
+                        Constants.getLogger().error("Could not translate %s %s to new system path.".formatted(FetchType.GROUP, playerWaypoints.get(ix)));
+                    }
                 }
+
                 String jsonData = CommandHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert, isDeathSync);
 
                 // 2000000 was (jsonData.getBytes().length >= SERVER_CONFIG.serverConfiguration.serverPacketLimit())
@@ -63,7 +76,7 @@ public class ServerPacketHandler {
                     Dispatcher.sendToClient(waypointPayloadOutbound, player);
                 }
             } catch (IOException ioe) {
-                Constants.getLogger().error("Error on server when trying to process sync from %s ERROR: %s".formatted(player.getUUID(), ioe.getMessage()));
+                Constants.getLogger().error("Error on server when trying to process sync from %s ERROR: %s".formatted(player.getUUID(), ioe.toString()));
             }
         }
     }
@@ -72,25 +85,25 @@ public class ServerPacketHandler {
         JMWSActionPayload waypointActionPayload = Context.message();
         ObjectPayloadCommands command = waypointActionPayload.command();
         List<JsonElement> arguments = waypointActionPayload.arguments();
+        UUID playerUUID = player.getUUID();
 
         switch (command) {
 
             // Following two cases are for deleting waypoints and groups
             case ObjectPayloadCommands.COMMON_DELETE_GROUP -> {
 
-                String groupUniversalIdentifier = arguments.get(1).getAsString();
-                String groupGUID = arguments.get(2).getAsString();
-                boolean silent = arguments.get(3).getAsBoolean();
-                boolean deleteAllWaypointsInGroup = arguments.get(4).getAsBoolean();
-                boolean removeGroupItself = arguments.get(5).getAsBoolean();
+                String groupUniversalIdentifier = arguments.getFirst().getAsString();
+                String groupGUID = arguments.get(1).getAsString();
+                boolean silent = arguments.get(2).getAsBoolean();
+                boolean deleteAllWaypointsInGroup = arguments.get(3).getAsBoolean();
+                boolean removeGroupItself = arguments.get(4).getAsBoolean();
                 boolean deleteAllObjects = arguments.getLast().getAsBoolean();
 
                 boolean result;
 
-                String fileName = JMWSServerIO.getGroupFilename(player.getUUID(), groupUniversalIdentifier);
-
-                if (deleteAllWaypointsInGroup) {
-                    result = JMWSServerIO.removeAllWaypointsFromGroup(player.getUUID(), groupGUID);
+                if (deleteAllWaypointsInGroup)
+                {
+                    result = JMWSServerIO.removeAllWaypointsFromGroup(playerUUID, groupGUID);
                     if (!removeGroupItself && result)
                     {
                         sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false);
@@ -99,9 +112,9 @@ public class ServerPacketHandler {
                 }
 
                 if (!deleteAllObjects) {
-                    result = CommonHelper.deleteFile(fileName);
+                    result = JMWSServerIO.deleteObject(groupUniversalIdentifier, playerUUID, FetchType.GROUP);
                 } else {
-                    result = JMWSServerIO.deleteAllUserObjects(player.getUUID(), FetchType.GROUP);
+                    result = JMWSServerIO.deleteAllUserObjects(playerUUID, FetchType.GROUP);
                 }
 
                 if (!silent) {
@@ -114,15 +127,15 @@ public class ServerPacketHandler {
             }
 
             case ObjectPayloadCommands.COMMON_DELETE_WAYPOINT -> {
-                String fileName = arguments.getFirst().getAsString().stripTrailing();
+                String waypointIdentifier = arguments.getFirst().getAsString().stripTrailing();
                 boolean silent = arguments.get(1).getAsBoolean();
                 boolean deleteAll = arguments.getLast().getAsBoolean();
                 boolean result;
 
                 if (!deleteAll) {
-                    result = CommonHelper.deleteFile(fileName);
+                    result = JMWSServerIO.deleteObject(waypointIdentifier, playerUUID, FetchType.WAYPOINT);
                 } else {
-                    result = JMWSServerIO.deleteAllUserObjects(player.getUUID(), FetchType.WAYPOINT);
+                    result = JMWSServerIO.deleteAllUserObjects(playerUUID, FetchType.WAYPOINT);
                 }
 
                 if (!silent) {
@@ -141,7 +154,7 @@ public class ServerPacketHandler {
                 if (serverEnabledJMWS() && (ServerConfig.getConfig().waypointsEnabled || isUpdateFromCreation)) {
                     JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
                     boolean silent = arguments.get(1).getAsBoolean();
-                    boolean waypointCreationSuccess = JMWSServerIO.createWaypoint(jsonCreationData, player.getUUID());
+                    boolean waypointCreationSuccess = JMWSServerIO.createWaypoint(jsonCreationData, playerUUID);
 
                     if (!silent) {
                         if (waypointCreationSuccess) {
@@ -162,7 +175,7 @@ public class ServerPacketHandler {
                 if (serverEnabledJMWS() && ( ServerConfig.getConfig().groupsEnabled || isUpdateFromCreation)) {
                     JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
                     boolean silent = arguments.get(1).getAsBoolean();
-                    boolean waypointCreationSuccess = JMWSServerIO.createGroup(jsonCreationData, player.getUUID());
+                    boolean waypointCreationSuccess = JMWSServerIO.createGroup(jsonCreationData, playerUUID);
 
                     if (!silent) {
                         if (waypointCreationSuccess) {
@@ -177,6 +190,26 @@ public class ServerPacketHandler {
                 }
             }
 
+            case UPDATE ->
+            {
+                String objectIdentifier = arguments.getFirst().getAsString();
+                FetchType modifyingType = FetchType.valueOf(arguments.get(1).getAsString());
+                String objectPath = JMWSServerIO.getNewObjectFilename(playerUUID, objectIdentifier, modifyingType);
+                String objectData = arguments.getLast().getAsString();
+
+                if (CommonHelper.fileExists(objectPath))
+                {
+                    try (FileWriter objWriter = new FileWriter(objectPath))
+                    {
+                        objWriter.write(objectData);
+                    } catch (IOException ioException)
+                    {
+                        Constants.getLogger().error("Error on server when trying to process %s from %s ERROR: %s".formatted(modifyingType, playerUUID, ioException.toString()));
+                    }
+                }
+
+            }
+
             // was "request"
             case ObjectPayloadCommands.SYNC -> {
                 if (player instanceof ServerPlayer)
@@ -189,7 +222,7 @@ public class ServerPacketHandler {
 
             case ObjectPayloadCommands.REJECT_SHARE, ObjectPayloadCommands.USER_ALREADY_PROCESSING_SHARE, ObjectPayloadCommands.AFFIRM_SHARE ->
             {
-                UUID forUser = UUID.fromString(arguments.get(0).getAsString());
+                UUID forUser = UUID.fromString(arguments.getFirst().getAsString());
                 Dispatcher.sendToClient(Context.message(), player.server.getPlayerList().getPlayer(forUser));
             }
 

@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.client.objects;
+package me.brynview.navidrohim.jmws.common.objects;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

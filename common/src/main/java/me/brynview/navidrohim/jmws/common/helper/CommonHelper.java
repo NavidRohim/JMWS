@@ -45,4 +45,9 @@ public class CommonHelper {
         File waypointFileObj = new File(filename);
         return waypointFileObj.delete();
     }
+
+    public static boolean fileExists(String filePath)
+    {
+        return new File(filePath).exists();
+    }
 }

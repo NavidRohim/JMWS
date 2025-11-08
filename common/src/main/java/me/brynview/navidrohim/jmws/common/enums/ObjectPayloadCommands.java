@@ -27,6 +27,8 @@ public enum ObjectPayloadCommands {
     REJECT_SHARE, // User doesnt want shared object.
 
     // Object sharing errors
-    USER_ALREADY_PROCESSING_SHARE // User is already processing another share request
+    USER_ALREADY_PROCESSING_SHARE, // User is already processing another share request
+
+    UPDATE
 
 }
