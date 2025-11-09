@@ -94,6 +94,7 @@ public class ServerPacketHandler {
 
                 String groupUniversalIdentifier = arguments.getFirst().getAsString();
                 String groupGUID = arguments.get(1).getAsString();
+
                 boolean silent = arguments.get(2).getAsBoolean();
                 boolean deleteAllWaypointsInGroup = arguments.get(3).getAsBoolean();
                 boolean removeGroupItself = arguments.get(4).getAsBoolean();

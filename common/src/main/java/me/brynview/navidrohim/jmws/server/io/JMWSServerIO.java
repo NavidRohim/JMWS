@@ -41,7 +41,20 @@ public class JMWSServerIO {
 
     public static String getPathLocationPrefix(FetchType objectType)
     {
-        return objectType.equals(FetchType.WAYPOINT) ? "./jmws/" : "./jmws/groups/";
+        switch (objectType) {
+            case SHARED -> {
+                return "./jmws/share/";
+            }
+            case GROUP -> {
+                return "./jmws/groups/";
+            }
+            case WAYPOINT -> {
+                return "./jmws/";
+            }
+            default -> {
+                throw new RuntimeException("Unrecognised FetchType %s".formatted(objectType));
+            }
+        }
     }
 
     public static String getNewObjectFilename(UUID playerOwner, String objectID, FetchType objectType) {
@@ -163,22 +176,23 @@ public class JMWSServerIO {
     }
 
     @Nullable
-    public static String readRaw(Path objPath)
+    public static String readRaw(Path objPath, boolean silentFail)
     {
         try {
             return Files.readString(objPath);
         } catch (IOException ioException)
         {
-            Constants.getLogger().error("Error retrieving saved object data -> " + ioException);
+            if (silentFail)
+            {
+                Constants.getLogger().error("Error retrieving saved object data -> " + ioException);
+            }
         }
         return null;
     }
     @Nullable
-    public static JsonObject getObjectDataFromDisk(Path objPath) {
-        String data = readRaw(objPath);
+    public static JsonObject getObjectDataFromDisk(Path objPath, boolean silentFail) {
+        String data = readRaw(objPath, silentFail);
         return data != null ? JsonParser.parseString(data).getAsJsonObject() : null;
-
-
     }
 
     @Nullable
@@ -189,7 +203,7 @@ public class JMWSServerIO {
             {
                 if (allWaypoints.toString().contains(identifier))
                 {
-                    return readRaw(allWaypoints);
+                    return readRaw(allWaypoints, false);
                 }
             }
         } catch (IOException ignored)
@@ -219,7 +233,7 @@ public class JMWSServerIO {
     @Nullable
     private static SavedObject getGroupFromFile(Path path, UUID player)
     {
-        JsonObject groupLocalServerData = getObjectDataFromDisk(path);
+        JsonObject groupLocalServerData = getObjectDataFromDisk(path, false);
         if (groupLocalServerData != null)
         {
             return new SavedGroup(groupLocalServerData);
@@ -230,7 +244,7 @@ public class JMWSServerIO {
     @Nullable
     public static SavedWaypoint getWaypointFromFile(Path waypointPath, UUID playerUUID)
     {
-        JsonObject waypointLocalData = getObjectDataFromDisk(waypointPath);
+        JsonObject waypointLocalData = getObjectDataFromDisk(waypointPath, false);
         if (waypointLocalData != null) {
             return new SavedWaypoint(waypointLocalData, playerUUID);
         }
