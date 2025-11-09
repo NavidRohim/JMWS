@@ -4,12 +4,11 @@ import com.google.gson.JsonElement;
 import commonnetwork.networking.data.PacketContext;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
-import me.brynview.navidrohim.jmws.client.ClientVariables;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
-import me.brynview.navidrohim.jmws.client.shared.IncomingShareRequests;
-import me.brynview.navidrohim.jmws.client.shared.OutgoingShareRequest;
-import me.brynview.navidrohim.jmws.client.shared.OutgoingShareRequests;
-import me.brynview.navidrohim.jmws.client.shared.ShareRequest;
+import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
+import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequest;
+import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
+import me.brynview.navidrohim.jmws.client.share.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
@@ -102,6 +101,7 @@ public class PacketHandler {
                     ShareRequest.Direction direction = ShareRequest.Direction.valueOf(arguments.getLast().getAsString());
                     UUID us = UUID.fromString(arguments.get(1).getAsString());
                     UUID from = UUID.fromString(arguments.get(2).getAsString());
+                    FetchType sharedObjectType = FetchType.valueOf(arguments.get(3).getAsString());
                     String waypointString = arguments.getFirst().getAsString();
                     Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(waypointString);
 
@@ -112,7 +112,9 @@ public class PacketHandler {
                             IncomingShareRequests.addIncomingRequest(from, new ShareRequest(
                                     from,
                                     us,
-                                    WaypointFactory.fromWaypointJsonString(waypointString)
+                                    waypointObj,
+                                    sharedObjectType,
+                                    waypointObj.getCustomData()
                             ));
 
                             sendUserAlert(Component.literal("XX Has sent a sync request, accept? (/jmws accept / decline)"), false, true, JMWSMessageType.SUCCESS);
@@ -120,7 +122,7 @@ public class PacketHandler {
                             ShareRequest.declareBusy(from);
                         }
                     } else {
-                        OutgoingShareRequests.addOutgoingRequest(from, new OutgoingShareRequest(from, us, waypointObj));
+                        OutgoingShareRequests.addOutgoingRequest(from, new OutgoingShareRequest(from, us, waypointObj, sharedObjectType, waypointObj.getCustomData()));
                         PlayerHelper.sendUserAlert(Component.literal("Got > %s".formatted(OutgoingShareRequests.getSize())), true, false, JMWSMessageType.SUCCESS);
                     }
                 }

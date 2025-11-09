@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.client.shared;
+package me.brynview.navidrohim.jmws.client.share;
 
 import java.util.HashMap;
 import java.util.UUID;

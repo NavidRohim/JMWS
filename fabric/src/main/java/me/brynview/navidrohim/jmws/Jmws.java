@@ -5,10 +5,9 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import me.brynview.navidrohim.jmws.client.ClientVariables;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
-import me.brynview.navidrohim.jmws.server.JMWSServer;
 import me.brynview.navidrohim.jmws.server.ServerCommands;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
-import me.brynview.navidrohim.jmws.server.io.ShareIO;
+import me.brynview.navidrohim.jmws.server.io.ServerShareIO;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -20,7 +19,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.nio.file.Path;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -99,8 +97,8 @@ public class Jmws implements ModInitializer {
             }))));
 
             dispatcher.register(Commands.literal("share_debug").executes(context1 -> {
-                try (ShareIO shareIO = new ShareIO(Path.of(JMWSServerIO.getNewObjectFilename(context1.getSource().getPlayer().getUUID(), "debug", FetchType.SHARED)))) {
-                    shareIO.addUserToSharedObject(context1.getSource().getPlayer().getUUID());
+                try (ServerShareIO shareIO = new ServerShareIO(JMWSServerIO.getNewObjectFilename(context1.getSource().getPlayer().getUUID(), "debug", FetchType.SHARED))) {
+                    shareIO.addToShared(context1.getSource().getPlayer().getStringUUID());
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

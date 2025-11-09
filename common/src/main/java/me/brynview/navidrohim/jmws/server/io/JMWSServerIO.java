@@ -138,7 +138,6 @@ public class JMWSServerIO {
 
     public static Stream<Path> getAllObjects(FetchType fetchType) throws IOException
     {
-        List<String> waypointFileList = new ArrayList<>();
         String pathSearch = fetchType == FetchType.WAYPOINT ? "./jmws" : "./jmws/groups";
         return Files.list(Path.of(pathSearch));
     }
@@ -182,7 +181,7 @@ public class JMWSServerIO {
             return Files.readString(objPath);
         } catch (IOException ioException)
         {
-            if (silentFail)
+            if (!silentFail)
             {
                 Constants.getLogger().error("Error retrieving saved object data -> " + ioException);
             }

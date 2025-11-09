@@ -1,6 +1,6 @@
 package me.brynview.navidrohim.jmws.client;
 
-import me.brynview.navidrohim.jmws.client.shared.ShareRequest;
+import me.brynview.navidrohim.jmws.client.share.ShareRequest;
 import org.jetbrains.annotations.Nullable;
 
 public class ClientVariables {

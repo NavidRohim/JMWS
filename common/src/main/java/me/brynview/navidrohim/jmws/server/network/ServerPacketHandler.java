@@ -7,19 +7,18 @@ import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
-import me.brynview.navidrohim.jmws.common.enums.ObjectPayloadCommands;
-import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
+import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
+import me.brynview.navidrohim.jmws.server.io.ServerShareIO;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -66,7 +65,7 @@ public class ServerPacketHandler {
                     }
                 }
 
-                String jsonData = CommandHelper.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert, isDeathSync);
+                String jsonData = CommandFactory.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert, isDeathSync);
 
                 // 2000000 was (jsonData.getBytes().length >= SERVER_CONFIG.serverConfiguration.serverPacketLimit())
                 if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit, but I got nowhere near.
@@ -83,14 +82,14 @@ public class ServerPacketHandler {
 
     public static void handleIncomingActionCommand(PacketContext<JMWSActionPayload> Context, ServerPlayer player) {
         JMWSActionPayload waypointActionPayload = Context.message();
-        ObjectPayloadCommands command = waypointActionPayload.command();
+        CommandFactory.Commands command = waypointActionPayload.command();
         List<JsonElement> arguments = waypointActionPayload.arguments();
         UUID playerUUID = player.getUUID();
 
         switch (command) {
 
             // Following two cases are for deleting waypoints and groups
-            case ObjectPayloadCommands.COMMON_DELETE_GROUP -> {
+            case CommandFactory.Commands.COMMON_DELETE_GROUP -> {
 
                 String groupUniversalIdentifier = arguments.getFirst().getAsString();
                 String groupGUID = arguments.get(1).getAsString();
@@ -127,7 +126,7 @@ public class ServerPacketHandler {
                 }
             }
 
-            case ObjectPayloadCommands.COMMON_DELETE_WAYPOINT -> {
+            case CommandFactory.Commands.COMMON_DELETE_WAYPOINT -> {
                 String waypointIdentifier = arguments.getFirst().getAsString().stripTrailing();
                 boolean silent = arguments.get(1).getAsBoolean();
                 boolean deleteAll = arguments.getLast().getAsBoolean();
@@ -149,7 +148,7 @@ public class ServerPacketHandler {
             }
 
             // Following two cases regarding creating groups and waypoints
-            case ObjectPayloadCommands.SERVER_CREATE -> {
+            case CommandFactory.Commands.SERVER_CREATE -> {
                 boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
 
                 if (serverEnabledJMWS() && (ServerConfig.getConfig().waypointsEnabled || isUpdateFromCreation)) {
@@ -170,7 +169,7 @@ public class ServerPacketHandler {
                 }
             }
 
-            case ObjectPayloadCommands.SERVER_CREATE_GROUP -> {
+            case CommandFactory.Commands.SERVER_CREATE_GROUP -> {
                 boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
 
                 if (serverEnabledJMWS() && ( ServerConfig.getConfig().groupsEnabled || isUpdateFromCreation)) {
@@ -212,7 +211,7 @@ public class ServerPacketHandler {
             }
 
             // was "request"
-            case ObjectPayloadCommands.SYNC -> {
+            case CommandFactory.Commands.SYNC -> {
                 if (player instanceof ServerPlayer)
                 {
                     boolean sendAlert = arguments.get(2).getAsBoolean();
@@ -221,13 +220,30 @@ public class ServerPacketHandler {
                 }
             }
 
-            case ObjectPayloadCommands.REJECT_SHARE, ObjectPayloadCommands.USER_ALREADY_PROCESSING_SHARE, ObjectPayloadCommands.AFFIRM_SHARE ->
+            case CommandFactory.Commands.USER_ALREADY_PROCESSING_SHARE, CommandFactory.Commands.REJECT_SHARE ->
             {
-                UUID forUser = UUID.fromString(arguments.getFirst().getAsString());
-                Dispatcher.sendToClient(Context.message(), player.server.getPlayerList().getPlayer(forUser));
+                echoPacket(Context);
+            }
+
+            case CommandFactory.Commands.AFFIRM_SHARE ->
+            {
+                UUID ownerUUID = UUID.fromString(arguments.getFirst().getAsString());
+                String objectIdentifier = arguments.get(1).getAsString();
+
+                try (ServerShareIO sharedIndex = new ServerShareIO(JMWSServerIO.getNewObjectFilename(ownerUUID, objectIdentifier, FetchType.SHARED))) {
+                    sharedIndex.addToShared(Context.sender().getStringUUID());
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             default -> Constants.getLogger().warn("Unknown packet command -> {}", command);
         }
+    }
+
+    private static void echoPacket(PacketContext<JMWSActionPayload> Context) {
+        UUID forUser = UUID.fromString(Context.message().arguments().getFirst().getAsString());
+        Dispatcher.sendToClient(Context.message(), Context.sender().server.getPlayerList().getPlayer(forUser));
     }
 }

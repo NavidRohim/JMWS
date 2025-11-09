@@ -1,11 +1,12 @@
 package me.brynview.navidrohim.jmws.client;
 
 import commonnetwork.api.Dispatcher;
-import me.brynview.navidrohim.jmws.client.shared.IncomingShareRequests;
-import me.brynview.navidrohim.jmws.client.shared.OutgoingShareRequests;
+import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
+import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
+import me.brynview.navidrohim.jmws.client.share.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
-import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
+import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
@@ -65,7 +66,7 @@ public class ClientCommands {
     public static int clearAllGroups()
     {
         if (!isInSingleplayer()) {
-            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandHelper.makeDeleteGroupRequestJson(
+            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandFactory.makeDeleteGroupRequestJson(
                     CommonClass.minecraftClientInstance.player.getUUID(),
                     "*",
                     "*",
@@ -91,7 +92,7 @@ public class ClientCommands {
     public static int clearAllWaypoints()
     {
         if (!isInSingleplayer()) {
-            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandHelper.makeDeleteRequestJson("*", false, true)); // * = all
+            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandFactory.makeDeleteRequestJson("*", false, true)); // * = all
             Dispatcher.sendToServer(deleteServerObjectPayload);
             JMWSPlugin.updateWaypoints(false);
         } else {
@@ -121,16 +122,9 @@ public class ClientCommands {
 
     public static int accept(@Nullable UUID from)
     {
-        if (ClientVariables.shareRequest != null)
-        {
-            if (from != null)
-            {
-                IncomingShareRequests.getIncomingRequest(from).acceptShare();
-                PlayerHelper.sendUserAlert(Component.literal("shared."), true, false, JMWSMessageType.NEUTRAL);
-            } else {
-                IncomingShareRequests.getFirstRequest().acceptShare();
-            }
-        }
+        ShareRequest specificedShare = from != null ? IncomingShareRequests.getIncomingRequest(from) : IncomingShareRequests.getFirstRequest();
+        specificedShare.acceptShare();
+        PlayerHelper.sendUserAlert(Component.literal("Shared."), true, false, JMWSMessageType.NEUTRAL);
         return 1;
     }
 
@@ -141,7 +135,7 @@ public class ClientCommands {
             if (from != null)
             {
                 IncomingShareRequests.getIncomingRequest(from).declineShare();
-                PlayerHelper.sendUserAlert(Component.literal("not shared."), true, false, JMWSMessageType.NEUTRAL);
+                PlayerHelper.sendUserAlert(Component.literal("Not shared."), true, false, JMWSMessageType.NEUTRAL);
             } else {
                 IncomingShareRequests.getFirstRequest().declineShare();
             }

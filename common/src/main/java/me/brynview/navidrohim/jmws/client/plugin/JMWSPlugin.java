@@ -26,9 +26,8 @@ import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
 import me.brynview.navidrohim.jmws.common.objects.SavedGroup;
 import me.brynview.navidrohim.jmws.common.objects.SavedWaypoint;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
-import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
+import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
-import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -124,7 +123,7 @@ public class JMWSPlugin implements IClientPlugin {
             ObjectIdentifierMap.addWaypointToMap(waypoint);
             waypoint.setPersistent(false); // Persistence must be false so it does not stay upon leaving. If it did, there would be duplicate waypoints
 
-            String creationData = CommandHelper.makeCreationRequestJson(waypoint, silent, isUpdate);
+            String creationData = CommandFactory.makeCreationRequestJson(waypoint, silent, isUpdate);
             Dispatcher.sendToServer(new JMWSActionPayload(creationData));
         } else {
             PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
@@ -140,7 +139,7 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (CommonClass.serverConfig.waypointsEnabled()) // Check config
         {
-            Dispatcher.sendToServer(new JMWSActionPayload(CommandHelper.makeUpdateObjectRequest(waypoint.getCustomData(), waypoint)));
+            Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(waypoint.getCustomData(), waypoint)));
             PlayerHelper.sendUserAlert(Component.translatable("message.jmws.modified_waypoint_success"), true, false, JMWSMessageType.SUCCESS);
         } else {
             PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
@@ -155,7 +154,7 @@ public class JMWSPlugin implements IClientPlugin {
     private void deleteAction(Waypoint waypoint, boolean silent) {
         if (CommonClass.serverConfig.waypointsEnabled()) { // Check if action is allowed by the server.
             ObjectIdentifierMap.removeWaypointFromMap(waypoint);
-            String jsonPacketData = CommandHelper.makeDeleteRequestJson(waypoint.getCustomData(), silent, false);
+            String jsonPacketData = CommandFactory.makeDeleteRequestJson(waypoint.getCustomData(), silent, false);
             JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
 
             // removedWaypoint is called here because, yes, we do listen for the deletion with the event (meaning, the waypoint should be already gone by the time the event is called)
@@ -240,7 +239,7 @@ public class JMWSPlugin implements IClientPlugin {
             ObjectIdentifierMap.removeGroupFromMap(waypointGroup); // Remove from identifier map
             String uID = waypointGroup.getCustomData() != null ? waypointGroup.getCustomData() : "null"; // This can be set to "null" but I cannot remember why.
 
-            String jsonPacketData = CommandHelper.makeDeleteGroupRequestJson(
+            String jsonPacketData = CommandFactory.makeDeleteGroupRequestJson(
                     player.getUUID(),
                     uID,
                     waypointGroup.getGuid(),
@@ -267,7 +266,7 @@ public class JMWSPlugin implements IClientPlugin {
         if (CommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
         {
             // Internally, we just delete the old group and create a new one
-            Dispatcher.sendToServer(new JMWSActionPayload(CommandHelper.makeUpdateObjectRequest(waypointGroup.getCustomData(), waypointGroup)));
+            Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(waypointGroup.getCustomData(), waypointGroup)));
             // Send alert
             PlayerHelper.sendUserAlert(Component.translatable("message.jmws.modified_group_success"), true, false, JMWSMessageType.SUCCESS);
         } else {
@@ -353,7 +352,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Sends "request" packet | New = "SYNC"
         if (CommonClass.getEnabledStatus()) {
-            Dispatcher.sendToServer(new JMWSActionPayload(CommandHelper.makeWaypointSyncRequestJson(sendAlert, fromDeathEvent)));
+            Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeWaypointSyncRequestJson(sendAlert, fromDeathEvent)));
         }
     }
 
@@ -378,7 +377,7 @@ public class JMWSPlugin implements IClientPlugin {
         if (CommonClass.serverConfig.groupsEnabled()) {
             ObjectIdentifierMap.addGroupToMap(waypointGroup);
             waypointGroup.setPersistent(false);
-            String creationData = CommandHelper.makeGroupCreationRequestJson(waypointGroup, silent, isUpdate);
+            String creationData = CommandFactory.makeGroupCreationRequestJson(waypointGroup, silent, isUpdate);
 
             Dispatcher.sendToServer(new JMWSActionPayload(creationData));
         } else {

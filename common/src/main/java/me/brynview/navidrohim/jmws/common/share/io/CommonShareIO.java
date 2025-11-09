@@ -1,34 +1,33 @@
-package me.brynview.navidrohim.jmws.server.io;
+package me.brynview.navidrohim.jmws.common.share.io;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
+import me.brynview.navidrohim.jmws.server.io.ServerShareIO;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-public class ShareIO implements AutoCloseable
-{
-
+public class CommonShareIO implements AutoCloseable {
     public static class SharedObjectUsers {
 
-        public List<UUID> userList;
+        public List<String> valueList;
 
-        public SharedObjectUsers(List<UUID> userUUIDs)
+        public SharedObjectUsers(List<String> sharedValues)
         {
-            this.userList = userUUIDs;
+            this.valueList = sharedValues;
         }
     }
 
-    private final List<UUID> data = new ArrayList<>();
+    private final List<String> data = new ArrayList<>();
 
     public final Path objectPath;
 
-    public ShareIO(Path sharedObjectFilePath) {
+    public CommonShareIO(Path sharedObjectFilePath) {
         this.objectPath = sharedObjectFilePath;
 
         try {
@@ -36,7 +35,7 @@ public class ShareIO implements AutoCloseable
 
             for (JsonElement elem : jsonElements)
             {
-                data.add(UUID.fromString(elem.getAsString()));
+                data.add(elem.getAsString());
             }
         } catch (NullPointerException MissingFile)
         {
@@ -44,10 +43,15 @@ public class ShareIO implements AutoCloseable
         }
     }
 
-    private void writeSharedList()
+    public CommonShareIO(String sharedObjectFilePath)
+    {
+        this(Path.of(sharedObjectFilePath));
+    }
+
+    protected void writeSharedList()
     {
         Gson gsonWriter = new Gson();
-        String permissionsJson = gsonWriter.toJson(new SharedObjectUsers(data));
+        String permissionsJson = gsonWriter.toJson(new ServerShareIO.SharedObjectUsers(data));
 
         try (FileWriter permissionsListFileWriter = new FileWriter(this.objectPath.toFile()))
         {
@@ -58,24 +62,23 @@ public class ShareIO implements AutoCloseable
         }
     }
 
-    public void addUserToSharedObject(UUID user)
+    public void addToShared(String sharedValue)
     {
-        data.add(user);
+        data.add(sharedValue);
     }
 
-    public void removeUserFromSharedObject(UUID user)
+    public void removeFromShared(String sharedValue)
     {
-        data.remove(user);
+        data.remove(sharedValue);
     }
 
-    public boolean userIsInSharedObject(UUID user)
+    public boolean isInShared(String sharedValue)
     {
-        return data.contains(user);
+        return data.contains(sharedValue);
     }
 
     @Override
-    public void close() throws Exception
-    {
+    public void close() {
         writeSharedList();
     }
 }
