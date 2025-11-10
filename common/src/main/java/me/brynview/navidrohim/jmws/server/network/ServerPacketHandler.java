@@ -14,6 +14,7 @@ import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.ServerShareIO;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -129,8 +130,29 @@ public class ServerPacketHandler {
             case CommandFactory.Commands.COMMON_DELETE_WAYPOINT -> {
                 String waypointIdentifier = arguments.getFirst().getAsString().stripTrailing();
                 boolean silent = arguments.get(1).getAsBoolean();
+                boolean isShared = arguments.get(2).getAsBoolean();
                 boolean deleteAll = arguments.getLast().getAsBoolean();
                 boolean result;
+
+                if (isShared)
+                {
+                    @Nullable Path pathForSharedObjectList = JMWSServerIO.getObjectPathFromUniqueIdentifier(waypointIdentifier, FetchType.SHARED);
+                    if (pathForSharedObjectList != null)
+                    {
+                        try (ServerShareIO sharedObject = new ServerShareIO(pathForSharedObjectList.toString()))
+                        {
+                            if (pathForSharedObjectList.toString().contains(player.getStringUUID())) // Check if command sender also owns the shared object
+                            {
+                                sharedObject.deleteSharedObject();
+                            }
+                            else {
+                                sharedObject.removeFromShared(player.getStringUUID());
+                                sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
+                                return;
+                            }
+                        }
+                    }
+                }
 
                 if (!deleteAll) {
                     result = JMWSServerIO.deleteObject(waypointIdentifier, playerUUID, FetchType.WAYPOINT);

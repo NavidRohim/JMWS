@@ -18,6 +18,9 @@ import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.client.ClientCommands;
+import me.brynview.navidrohim.jmws.client.share.io.ClientShareIO;
+import me.brynview.navidrohim.jmws.client.share.network.Sharing;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
@@ -153,8 +156,13 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void deleteAction(Waypoint waypoint, boolean silent) {
         if (CommonClass.serverConfig.waypointsEnabled()) { // Check if action is allowed by the server.
+            String waypointIdentifier = waypoint.getCustomData();
+
+            boolean identifierIsShared = ClientShareIO.isObjectInShareList(waypointIdentifier);
+            ClientShareIO.removeFromShareList(waypointIdentifier);
+
             ObjectIdentifierMap.removeWaypointFromMap(waypoint);
-            String jsonPacketData = CommandFactory.makeDeleteRequestJson(waypoint.getCustomData(), silent, false);
+            String jsonPacketData = CommandFactory.makeDeleteRequestJson(waypointIdentifier, silent, false, identifierIsShared);
             JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
 
             // removedWaypoint is called here because, yes, we do listen for the deletion with the event (meaning, the waypoint should be already gone by the time the event is called)
@@ -523,6 +531,8 @@ public class JMWSPlugin implements IClientPlugin {
                 hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject());
             }
 
+            Sharing.requestWaypointFromIdentifier(ClientShareIO.getSharedIdentifiers());
+
             // Send alerts if there were any local waypoints and or groups
             if (hasLocalGroup || hasLocalWaypoint) {
                 updateWaypoints(false);
@@ -555,5 +565,10 @@ public class JMWSPlugin implements IClientPlugin {
             PlayerHelper.sendUserAlert(Component.translatable("error.jmws.error_corrupted_waypoint"), true, false, JMWSMessageType.FAILURE);
             PlayerHelper.sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
         }
+    }
+
+    public void addWaypoint(Object currentSharedObject)
+    {
+        jmAPI.addWaypoint(Constants.MODID, (Waypoint) currentSharedObject);
     }
 }

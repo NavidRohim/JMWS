@@ -31,6 +31,9 @@
   "message.jmws.auto_sync_disabled": "Auto-Sync is disabled, enable it and try again.",
   "message.jmws.deleted_waypoints_in_group": "Deleted all waypoints in group.",
 
+  "__comment__": "Sharing language strings",
+  "sharing.jmws.no_longer_sharing": "This will no longer be shared.",
+
   "__comment__": "Config language strings",
   "text.config.jmws-config.title": "JourneyMap Waypoint Syncing (JMWS)",
 

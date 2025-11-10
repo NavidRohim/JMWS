@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.client.share;
 
 import commonnetwork.api.Dispatcher;
+import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.share.io.ClientShareIO;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
@@ -44,12 +45,10 @@ public class ShareRequest {
 
     public void acceptShare()
     {
-        try (ClientShareIO sharedFile = new ClientShareIO())
-        {
-            sharedFile.addToShared(this.requestIdentifier);
-        }
-
+        ClientShareIO.addToShareList(this.requestIdentifier);
         Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestAccept(this)));
+        JMWSPlugin.getInstance().addWaypoint(this.currentSharedObject);
+
         IncomingShareRequests.removeIncomingRequest(this.originalSender);
     }
 }

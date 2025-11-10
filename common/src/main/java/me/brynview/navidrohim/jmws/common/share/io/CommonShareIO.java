@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.common.share.io;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.ServerShareIO;
 
@@ -23,15 +24,14 @@ public class CommonShareIO implements AutoCloseable {
         }
     }
 
-    private final List<String> data = new ArrayList<>();
-
+    protected final List<String> data = new ArrayList<>();
     public final Path objectPath;
 
     public CommonShareIO(Path sharedObjectFilePath) {
         this.objectPath = sharedObjectFilePath;
 
         try {
-            JsonArray jsonElements = JMWSServerIO.getObjectDataFromDisk(sharedObjectFilePath, true).get("sharedWith").getAsJsonArray();
+            JsonArray jsonElements = JMWSServerIO.getObjectDataFromDisk(sharedObjectFilePath, true).get("valueList").getAsJsonArray();
 
             for (JsonElement elem : jsonElements)
             {
@@ -64,7 +64,10 @@ public class CommonShareIO implements AutoCloseable {
 
     public void addToShared(String sharedValue)
     {
-        data.add(sharedValue);
+        if (!isInShared(sharedValue))
+        {
+            data.add(sharedValue);
+        }
     }
 
     public void removeFromShared(String sharedValue)

@@ -4,12 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.share.ShareRequest;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -29,8 +31,8 @@ public class CommandFactory {
        return json.toJson(new PacketCommand(command, arguments));
     }
 
-    public static String makeDeleteRequestJson(String waypointIdentifier, boolean silent, boolean all) {
-        return CommandFactory.makeBaseJsonRequest(Commands.COMMON_DELETE_WAYPOINT, waypointIdentifier, silent, all);
+    public static String makeDeleteRequestJson(String waypointIdentifier, boolean silent, boolean all, boolean isFromShare) {
+        return CommandFactory.makeBaseJsonRequest(Commands.COMMON_DELETE_WAYPOINT, waypointIdentifier, silent, isFromShare, all);
     }
 
     public static String makeDeleteGroupRequestJson(UUID playerUUID, String groupUniversalIdentifier, String groupGUID, boolean silent, boolean removeAllWaypointsInGroup, boolean removeGroupItself, boolean deleteAllGroups) {
@@ -99,6 +101,11 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectIdentifier, FetchType.GROUP, group.toString());
     }
 
+    public static String makeWaypointFetchRequestFromIdentifier(List<String> identifiers)
+    {
+        return CommandFactory.makeBaseJsonRequest(Commands.REQUEST_OBJECT, identifiers);
+    }
+
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {
         return JsonParser.parseString(jsonString).getAsJsonObject();
     }
@@ -128,6 +135,7 @@ public class CommandFactory {
         OBJECT_SHARE, // Share waypoint / group
         AFFIRM_SHARE, // Confirm user wants shared object
         REJECT_SHARE, // User doesnt want shared object.
+        REQUEST_OBJECT,
 
         // Object sharing errors
         USER_ALREADY_PROCESSING_SHARE, // User is already processing another share request

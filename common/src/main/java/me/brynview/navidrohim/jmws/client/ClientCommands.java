@@ -92,7 +92,7 @@ public class ClientCommands {
     public static int clearAllWaypoints()
     {
         if (!isInSingleplayer()) {
-            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandFactory.makeDeleteRequestJson("*", false, true)); // * = all
+            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandFactory.makeDeleteRequestJson("*", false, true, false)); // * = all
             Dispatcher.sendToServer(deleteServerObjectPayload);
             JMWSPlugin.updateWaypoints(false);
         } else {

@@ -57,7 +57,7 @@ public class JMWSServerIO {
         }
     }
 
-    public static String getNewObjectFilename(UUID playerOwner, String objectID, FetchType objectType) {
+    public static String getNewObjectFilename(@Nullable UUID playerOwner, String objectID, FetchType objectType) {
         return getPathLocationPrefix(objectType) + objectID + "#" + playerOwner + ".json";
     }
 
@@ -138,14 +138,14 @@ public class JMWSServerIO {
 
     public static Stream<Path> getAllObjects(FetchType fetchType) throws IOException
     {
-        String pathSearch = fetchType == FetchType.WAYPOINT ? "./jmws" : "./jmws/groups";
+        String pathSearch = getPathLocationPrefix(fetchType);
         return Files.list(Path.of(pathSearch));
     }
 
     public static List<Path> getObjectsForUser(UUID uuid, FetchType fetchType) {
 
         List<Path> waypointFileList = new ArrayList<>();
-        String pathSearch = fetchType == FetchType.WAYPOINT ? "./jmws" : "./jmws/groups";
+        String pathSearch = getPathLocationPrefix(fetchType);
 
         try (Stream<Path> files = Files.list(Path.of(pathSearch))) {
             files.filter(Files::isRegularFile).forEach(path -> {
@@ -195,19 +195,30 @@ public class JMWSServerIO {
     }
 
     @Nullable
-    public static String getWaypointFromUniqueIdentifier(String identifier, UUID playerUUID)
+    public static Path getObjectPathFromUniqueIdentifier(String identifier, FetchType fetchType)
     {
         try {
-            for (Path allWaypoints : getAllObjects(FetchType.WAYPOINT).toList())
+            for (Path objectPath : getAllObjects(fetchType).toList())
             {
-                if (allWaypoints.toString().contains(identifier))
+                if (objectPath.toString().contains(identifier))
                 {
-                    return readRaw(allWaypoints, false);
+                    return objectPath;
                 }
             }
         } catch (IOException ignored)
         {
             return null;
+        }
+        return null;
+    }
+
+    @Nullable
+    public static String getObjectFromUniqueIdentifier(String identifier, UUID playerUUID, FetchType fetchType)
+    {
+        Path objectPath = getObjectPathFromUniqueIdentifier(identifier, fetchType);
+        if (objectPath != null)
+        {
+            return readRaw(objectPath, false);
         }
         return null;
     }
