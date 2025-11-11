@@ -18,8 +18,6 @@ import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.client.ClientCommands;
-import me.brynview.navidrohim.jmws.client.share.io.ClientShareIO;
 import me.brynview.navidrohim.jmws.client.share.network.Sharing;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;

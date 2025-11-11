@@ -5,7 +5,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
-import me.brynview.navidrohim.jmws.server.io.ServerShareIO;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommonShareIO implements AutoCloseable {
+
     public static class SharedObjectUsers {
 
         public List<String> valueList;
@@ -51,7 +51,7 @@ public class CommonShareIO implements AutoCloseable {
     protected void writeSharedList()
     {
         Gson gsonWriter = new Gson();
-        String permissionsJson = gsonWriter.toJson(new ServerShareIO.SharedObjectUsers(data));
+        String permissionsJson = gsonWriter.toJson(new SharedObjectUsers(data));
 
         try (FileWriter permissionsListFileWriter = new FileWriter(this.objectPath.toFile()))
         {

@@ -24,6 +24,19 @@ import java.util.stream.Stream;
 
 public class JMWSServerIO {
 
+    public static class Utils
+    {
+        public static Path getNewObjectFilename(@Nullable UUID playerOwner, String objectID, FetchType objectType) {
+            return Path.of(getPathLocationPrefix(objectType) + objectID + "#" + playerOwner + ".json");
+        }
+
+        public static SavedObject getObject(String objectIdentifier, UUID ownerUUID, FetchType objectType)
+        {
+            return ownerUUID == null ? JMWSServerIO.getWaypointFromFile(JMWSServerIO.getObjectPathFromUniqueIdentifier(objectIdentifier, objectType), null)
+                    : JMWSServerIO.getWaypointFromFile(JMWSServerIO.Utils.getNewObjectFilename(ownerUUID, objectIdentifier, objectType), ownerUUID);
+        }
+    }
+
     public static Boolean removeAllWaypointsFromGroup(UUID playerUUID, String groupID) {
         List<Path> objectList = getLocalWaypointsFromGroup(playerUUID, groupID);
 
@@ -43,7 +56,7 @@ public class JMWSServerIO {
     {
         switch (objectType) {
             case SHARED -> {
-                return "./jmws/share/";
+                return "./jmws/users/";
             }
             case GROUP -> {
                 return "./jmws/groups/";
@@ -57,16 +70,12 @@ public class JMWSServerIO {
         }
     }
 
-    public static String getNewObjectFilename(@Nullable UUID playerOwner, String objectID, FetchType objectType) {
-        return getPathLocationPrefix(objectType) + objectID + "#" + playerOwner + ".json";
-    }
-
     public static boolean createGroup(JsonObject jsonObject, UUID playerUUID)
     {
         String universalID = jsonObject.get("customData").getAsString();
         try
         {
-            String pathString = getNewObjectFilename(playerUUID, universalID, FetchType.GROUP);
+            String pathString = Utils.getNewObjectFilename(playerUUID, universalID, FetchType.GROUP);
             Path groupPathObj = Paths.get(pathString);
             Files.createFile(groupPathObj);
 
@@ -92,7 +101,7 @@ public class JMWSServerIO {
     }
 
     public static boolean createWaypoint(JsonObject jsonObject, UUID playerUUID) {
-        String waypointFilePath = getNewObjectFilename(playerUUID, jsonObject.get("customData").getAsString(), FetchType.WAYPOINT);
+        String waypointFilePath = Utils.getNewObjectFilename(playerUUID, jsonObject.get("customData").getAsString(), FetchType.WAYPOINT);
 
         try {
 
@@ -122,7 +131,7 @@ public class JMWSServerIO {
 
     public static boolean deleteObject(String objectIdentifier, UUID player, FetchType deletionType)
     {
-        return CommonHelper.deleteFile(getNewObjectFilename(player, objectIdentifier, deletionType));
+        return CommonHelper.deleteFile(Utils.getNewObjectFilename(player, objectIdentifier, deletionType));
     }
 
     public static boolean deleteAllUserObjects(UUID playerUUID, FetchType fetchType) {
@@ -228,11 +237,10 @@ public class JMWSServerIO {
 
         if (savedObject != null)
         {
-            String location = transitionType.equals(FetchType.WAYPOINT) ? "./jmws/" : "./jmws/groups/";
+            String location = getPathLocationPrefix(transitionType);
 
-            Constants.getLogger().info(savedObject.getUniversalIdentifier());
             File oldNameFile = new File(path.toString());
-            File newUUIDFile = new File(location + getNewObjectFilename(player, savedObject.getUniversalIdentifier(), transitionType));
+            File newUUIDFile = new File(location + Utils.getNewObjectFilename(player, savedObject.getCustomData(), transitionType));
 
             return oldNameFile.renameTo(newUUIDFile);
         } else {

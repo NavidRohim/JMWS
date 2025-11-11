@@ -12,7 +12,7 @@ import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
-import me.brynview.navidrohim.jmws.server.io.ServerShareIO;
+import me.brynview.navidrohim.jmws.server.utils.WaypointUtils;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -136,22 +136,7 @@ public class ServerPacketHandler {
 
                 if (isShared)
                 {
-                    @Nullable Path pathForSharedObjectList = JMWSServerIO.getObjectPathFromUniqueIdentifier(waypointIdentifier, FetchType.SHARED);
-                    if (pathForSharedObjectList != null)
-                    {
-                        try (ServerShareIO sharedObject = new ServerShareIO(pathForSharedObjectList.toString()))
-                        {
-                            if (pathForSharedObjectList.toString().contains(player.getStringUUID())) // Check if command sender also owns the shared object
-                            {
-                                sharedObject.deleteSharedObject();
-                            }
-                            else {
-                                sharedObject.removeFromShared(player.getStringUUID());
-                                sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
-                                return;
-                            }
-                        }
-                    }
+                    WaypointUtils.removeWaypointFromUsers(waypointIdentifier, playerUUID);
                 }
 
                 if (!deleteAll) {
@@ -216,12 +201,12 @@ public class ServerPacketHandler {
             {
                 String objectIdentifier = arguments.getFirst().getAsString();
                 FetchType modifyingType = FetchType.valueOf(arguments.get(1).getAsString());
-                String objectPath = JMWSServerIO.getNewObjectFilename(playerUUID, objectIdentifier, modifyingType);
+                Path objectPath = JMWSServerIO.Utils.getNewObjectFilename(playerUUID, objectIdentifier, modifyingType);
                 String objectData = arguments.getLast().getAsString();
 
-                if (CommonHelper.fileExists(objectPath))
+                if (CommonHelper.fileExists(objectPath.toString()))
                 {
-                    try (FileWriter objWriter = new FileWriter(objectPath))
+                    try (FileWriter objWriter = new FileWriter(objectPath.toFile()))
                     {
                         objWriter.write(objectData);
                     } catch (IOException ioException)
@@ -252,12 +237,8 @@ public class ServerPacketHandler {
                 UUID ownerUUID = UUID.fromString(arguments.getFirst().getAsString());
                 String objectIdentifier = arguments.get(1).getAsString();
 
-                try (ServerShareIO sharedIndex = new ServerShareIO(JMWSServerIO.getNewObjectFilename(ownerUUID, objectIdentifier, FetchType.SHARED))) {
-                    sharedIndex.addToShared(Context.sender().getStringUUID());
+                // Added to share file used to be here
 
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
             }
 
             default -> Constants.getLogger().warn("Unknown packet command -> {}", command);
