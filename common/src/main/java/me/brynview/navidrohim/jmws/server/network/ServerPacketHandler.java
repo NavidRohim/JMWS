@@ -8,15 +8,14 @@ import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
-import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import me.brynview.navidrohim.jmws.common.objects.SavedObject;
+import me.brynview.navidrohim.jmws.common.objects.SavedWaypoint;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
-import me.brynview.navidrohim.jmws.server.utils.WaypointUtils;
+import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.Nullable;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -130,35 +129,36 @@ public class ServerPacketHandler {
             case CommandFactory.Commands.COMMON_DELETE_WAYPOINT -> {
                 String waypointIdentifier = arguments.getFirst().getAsString().stripTrailing();
                 boolean silent = arguments.get(1).getAsBoolean();
-                boolean isShared = arguments.get(2).getAsBoolean();
                 boolean deleteAll = arguments.getLast().getAsBoolean();
                 boolean result;
 
-                if (isShared)
+                SavedWaypoint waypoint = JMWSServerIO.getWaypointFromFile(waypointIdentifier, playerUUID);
+
+                if (waypoint != null)
                 {
-                    WaypointUtils.removeWaypointFromUsers(waypointIdentifier, playerUUID);
-                }
+                    waypoint.removeWaypointFromUsers();
 
-                if (!deleteAll) {
-                    result = JMWSServerIO.deleteObject(waypointIdentifier, playerUUID, FetchType.WAYPOINT);
-                } else {
-                    result = JMWSServerIO.deleteAllUserObjects(playerUUID, FetchType.WAYPOINT);
-                }
-
-                if (!silent) {
-                    if (result) {
-                        sendUserMessage(player, "message.jmws.deletion_success", true, false);
+                    if (!deleteAll) {
+                        result = waypoint.delete();
                     } else {
-                        sendUserMessage(player, "message.jmws.deletion_failure", true, true);
+                        result = JMWSServerIO.deleteAllUserObjects(playerUUID, FetchType.WAYPOINT);
                     }
+
+                    if (!silent) {
+                        if (result) {
+                            sendUserMessage(player, "message.jmws.deletion_success", true, false);
+                        } else {
+                            sendUserMessage(player, "message.jmws.deletion_failure", true, true);
+                        }
+                    }
+                } else {
+                    sendUserMessage(player, "message.jmws.deletion_failure", true, true);
                 }
             }
 
             // Following two cases regarding creating groups and waypoints
             case CommandFactory.Commands.SERVER_CREATE -> {
-                boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
-
-                if (serverEnabledJMWS() && (ServerConfig.getConfig().waypointsEnabled || isUpdateFromCreation)) {
+                if (serverEnabledJMWS() && (ServerConfig.getConfig().waypointsEnabled)) {
                     JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
                     boolean silent = arguments.get(1).getAsBoolean();
                     boolean waypointCreationSuccess = JMWSServerIO.createWaypoint(jsonCreationData, playerUUID);
@@ -204,15 +204,10 @@ public class ServerPacketHandler {
                 Path objectPath = JMWSServerIO.Utils.getNewObjectFilename(playerUUID, objectIdentifier, modifyingType);
                 String objectData = arguments.getLast().getAsString();
 
-                if (CommonHelper.fileExists(objectPath.toString()))
+                SavedObject obj = JMWSServerIO.getObjectFromDisk(objectIdentifier, playerUUID, modifyingType.getObjectClass(), modifyingType);
+                if (obj != null)
                 {
-                    try (FileWriter objWriter = new FileWriter(objectPath.toFile()))
-                    {
-                        objWriter.write(objectData);
-                    } catch (IOException ioException)
-                    {
-                        Constants.getLogger().error("Error on server when trying to process %s from %s ERROR: %s".formatted(modifyingType, playerUUID, ioException.toString()));
-                    }
+                    obj.update(objectData);
                 }
 
             }
@@ -236,8 +231,22 @@ public class ServerPacketHandler {
             {
                 UUID ownerUUID = UUID.fromString(arguments.getFirst().getAsString());
                 String objectIdentifier = arguments.get(1).getAsString();
+                SavedWaypoint sharedWp = JMWSServerIO.getWaypointFromFile(objectIdentifier, ownerUUID);
 
-                // Added to share file used to be here
+                // Add waypoint ID to users share list.
+                try (UserSharingFile usf = new UserSharingFile(playerUUID))
+                {
+                    usf.addToShared(objectIdentifier);
+                }
+
+                // Add users UUID to waypoints share list.
+                if (sharedWp != null)
+                {
+                    sharedWp.syncing.addUserToShare(playerUUID);
+                } else {
+                    sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
+                }
+
 
             }
 

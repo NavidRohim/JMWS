@@ -13,4 +13,4 @@ You can now share waypoints globally with /share
 None!
 
 ### Other
-*Server version is 1.1*
+*Server version is 1.1, massive server changes from 1.0. Update server and client immediately.*

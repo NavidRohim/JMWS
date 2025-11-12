@@ -31,8 +31,8 @@ public class CommandFactory {
        return json.toJson(new PacketCommand(command, arguments));
     }
 
-    public static String makeDeleteRequestJson(String waypointIdentifier, boolean silent, boolean all, boolean isFromShare) {
-        return CommandFactory.makeBaseJsonRequest(Commands.COMMON_DELETE_WAYPOINT, waypointIdentifier, silent, isFromShare, all);
+    public static String makeDeleteRequestJson(String waypointIdentifier, boolean silent, boolean all) {
+        return CommandFactory.makeBaseJsonRequest(Commands.COMMON_DELETE_WAYPOINT, waypointIdentifier, silent, all);
     }
 
     public static String makeDeleteGroupRequestJson(UUID playerUUID, String groupUniversalIdentifier, String groupGUID, boolean silent, boolean removeAllWaypointsInGroup, boolean removeGroupItself, boolean deleteAllGroups) {
@@ -49,8 +49,8 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.SYNC, Map.of(), Map.of(), sendAlert, isForDeathSync);
     }
 
-    public static String makeCreationRequestJson(Waypoint waypoint, boolean silent, boolean isUpdate) {
-        return CommandFactory.makeBaseJsonRequest(Commands.SERVER_CREATE, waypoint.toString(), silent, isUpdate);
+    public static String makeCreationRequestJson(Waypoint waypoint, boolean silent) {
+        return CommandFactory.makeBaseJsonRequest(Commands.SERVER_CREATE, waypoint.toString(), silent);
     }
 
     public static String makeGroupCreationRequestJson(WaypointGroup waypointGroup, boolean silent, boolean isUpdate) {

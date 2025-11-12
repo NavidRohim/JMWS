@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.common.objects;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 
 import java.util.List;
@@ -14,38 +15,32 @@ import java.util.stream.StreamSupport;
  * Dataclass that holds a synced waypoint from the server. Contains data to make a local waypoint.
  */
 public class SavedWaypoint extends SavedObject {
-
-    // Packet information
-    String rawPacketData;
-
     // Main defining information
     String groupId;
 
     // Identifier (used for code)
-    String universalIdentifier;
 
     // location data
     Integer ix;
     Integer iy;
     Integer iz;
-
     // User settings
-    public UserSharingFile sharing;
+
+    public static FetchType objectType = FetchType.WAYPOINT;
 
     public SavedWaypoint(JsonObject payload, UUID playerUUID) {
+        super(payload, playerUUID);
 
         JsonObject pos = payload.get("pos").getAsJsonObject();
         JsonObject userSettings = payload.get("settings").getAsJsonObject();
         JsonObject iconSettings = payload.get("icon").getAsJsonObject();
 
         // Packet information
-        this.rawPacketData = payload.toString();
 
         // Main defining information
         this.groupId = payload.get("groupId").getAsString();
 
         // Identifier (used for code)
-        this.universalIdentifier = payload.get("customData").getAsString();
         this.groupIdentifier = payload.get("guid").getAsString();
 
         // location data
@@ -53,13 +48,9 @@ public class SavedWaypoint extends SavedObject {
         this.iy = (int) pos.get("y").getAsDouble();
         this.iz = (int) pos.get("z").getAsDouble();
 
-        // User settings
-        this.sharing = new UserSharingFile(playerUUID);
     }
 
-    public String getCustomData() { return this.universalIdentifier; }
     public String getWaypointGroupId() { return this.groupId; }
-    public String getRawPacketData() { return this.rawPacketData; }
 
     // Locations
     public Integer getWaypointX() {
@@ -71,4 +62,11 @@ public class SavedWaypoint extends SavedObject {
     public Integer getWaypointZ() {
         return this.iz;
     }
+
+    @Override
+    public FetchType getObjectType()
+    {
+        return objectType;
+    }
+
 }

@@ -5,6 +5,7 @@ import net.minecraft.network.chat.Component;
 import org.joml.Vector3d;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -41,13 +42,13 @@ public class CommonHelper {
                 .collect(Collectors.joining());
     }
 
-    public static boolean deleteFile(String filename) {
-        File waypointFileObj = new File(filename);
+    public static boolean deleteFile(Path filename) {
+        File waypointFileObj = new File(filename.toUri());
         return waypointFileObj.delete();
     }
 
-    public static boolean fileExists(String filePath)
+    public static boolean fileExists(Path filePath)
     {
-        return new File(filePath).exists();
+        return new File(filePath.toUri()).exists();
     }
 }

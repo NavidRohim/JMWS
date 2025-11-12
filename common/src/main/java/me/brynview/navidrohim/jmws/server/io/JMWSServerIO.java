@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.server.io;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -16,6 +17,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +35,8 @@ public class JMWSServerIO {
 
         public static SavedObject getObject(String objectIdentifier, UUID ownerUUID, FetchType objectType)
         {
-            return ownerUUID == null ? JMWSServerIO.getWaypointFromFile(JMWSServerIO.getObjectPathFromUniqueIdentifier(objectIdentifier, objectType), null)
-                    : JMWSServerIO.getWaypointFromFile(JMWSServerIO.Utils.getNewObjectFilename(ownerUUID, objectIdentifier, objectType), ownerUUID);
+            return ownerUUID == null ? JMWSServerIO.getWaypointFromFile(objectIdentifier, null)
+                    : JMWSServerIO.getWaypointFromFile(objectIdentifier, ownerUUID);
         }
     }
 
@@ -47,7 +50,7 @@ public class JMWSServerIO {
         List<Boolean> successArray = new ArrayList<>();
 
         for (Path objPath : objectList) {
-            successArray.add(CommonHelper.deleteFile(objPath.toString()));
+            successArray.add(CommonHelper.deleteFile(objPath));
         }
         return successArray.isEmpty() || successArray.stream().allMatch(successArray.getFirst()::equals);
     }
@@ -72,61 +75,14 @@ public class JMWSServerIO {
 
     public static boolean createGroup(JsonObject jsonObject, UUID playerUUID)
     {
-        String universalID = jsonObject.get("customData").getAsString();
-        try
-        {
-            String pathString = Utils.getNewObjectFilename(playerUUID, universalID, FetchType.GROUP);
-            Path groupPathObj = Paths.get(pathString);
-            Files.createFile(groupPathObj);
-
-            FileWriter waypointFileWriter = new FileWriter(pathString);
-            waypointFileWriter.write(jsonObject.toString());
-            waypointFileWriter.close();
-
-            return true;
-
-        } catch (NoSuchFileException noSuchFileException) {
-            CommonClass._createServerResources();
-            Constants.getLogger().warn("`jmws` folder was not found so another was made. All server waypoints and groups have been wiped. (group error)" + noSuchFileException.toString());
-            return createGroup(jsonObject, playerUUID);
-
-        } catch (FileSystemException missingPerms) {
-            Constants.getLogger().error("JMWS is missing write permissions to \"jmws\" folder. (group error)");
-            return false;
-
-        } catch (IOException genericIOError) {
-            Constants.getLogger().error("Got exception trying to make group -> " + genericIOError);
-            return false;
-        }
+        SavedGroup gp = new SavedGroup(jsonObject, playerUUID);
+        return gp.create();
     }
 
-    public static boolean createWaypoint(JsonObject jsonObject, UUID playerUUID) {
-        String waypointFilePath = Utils.getNewObjectFilename(playerUUID, jsonObject.get("customData").getAsString(), FetchType.WAYPOINT);
-
-        try {
-
-            Path waypointPathObj = Paths.get(waypointFilePath);
-
-            Files.createFile(waypointPathObj);
-            FileWriter waypointFileWriter = new FileWriter(waypointFilePath);
-            waypointFileWriter.write(jsonObject.toString());
-            waypointFileWriter.close();
-
-            return true;
-
-        } catch (NoSuchFileException noSuchFileException) {
-            CommonClass._createServerResources();
-            Constants.getLogger().warn("`jmws` folder was not found so another was made. All server waypoints and groups have been wiped. (waypoint error)");
-            return createWaypoint(jsonObject, playerUUID);
-
-        } catch (FileSystemException missingPerms) {
-            Constants.getLogger().error("JMWS is missing write permissions to \"jmws\" folder. (waypoint error)");
-            return false;
-
-        } catch (IOException genericIOError) {
-            Constants.getLogger().error("Got exception trying to make waypoint -> " + genericIOError);
-            return false;
-        }
+    public static boolean createWaypoint(JsonObject jsonObject, UUID playerUUID)
+    {
+        SavedWaypoint wp = new SavedWaypoint(jsonObject, playerUUID);
+        return wp.create();
     }
 
     public static boolean deleteObject(String objectIdentifier, UUID player, FetchType deletionType)
@@ -138,7 +94,7 @@ public class JMWSServerIO {
         List<Boolean> deletionStatusList = new ArrayList<>();
 
         for (Path waypointPath : getObjectsForUser(playerUUID, fetchType)) {
-            deletionStatusList.add(CommonHelper.deleteFile(waypointPath.toString()));
+            deletionStatusList.add(CommonHelper.deleteFile(waypointPath));
         }
 
         return deletionStatusList.isEmpty() || deletionStatusList.stream().allMatch(deletionStatusList.getFirst()::equals);
@@ -197,10 +153,28 @@ public class JMWSServerIO {
         }
         return null;
     }
+
     @Nullable
     public static JsonObject getObjectDataFromDisk(Path objPath, boolean silentFail) {
         String data = readRaw(objPath, silentFail);
         return data != null ? JsonParser.parseString(data).getAsJsonObject() : null;
+    }
+
+    @Nullable
+    public static <T extends SavedObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, Class<T> objectClass, FetchType objectType) {
+        try {
+            @Nullable JsonObject data = getObjectDataFromDisk(Utils.getNewObjectFilename(ownerUUID, objectIdentifier, objectType), false);
+            if (data != null)
+            {
+                Constructor<T> constructor = objectClass.getConstructor(JsonObject.class, UUID.class);
+                return constructor.newInstance(data, ownerUUID);
+            } else {
+                return null;
+            }
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException initExc)
+        {
+            throw new RuntimeException("Cannot pass %s to getObjectFromDisk TODO");
+        }
     }
 
     @Nullable
@@ -240,7 +214,7 @@ public class JMWSServerIO {
             String location = getPathLocationPrefix(transitionType);
 
             File oldNameFile = new File(path.toString());
-            File newUUIDFile = new File(location + Utils.getNewObjectFilename(player, savedObject.getCustomData(), transitionType));
+            File newUUIDFile = new File(location + Utils.getNewObjectFilename(player, savedObject.syncing.objectIdentifier, transitionType));
 
             return oldNameFile.renameTo(newUUIDFile);
         } else {
@@ -254,7 +228,17 @@ public class JMWSServerIO {
         JsonObject groupLocalServerData = getObjectDataFromDisk(path, false);
         if (groupLocalServerData != null)
         {
-            return new SavedGroup(groupLocalServerData);
+            return new SavedGroup(groupLocalServerData, player);
+        }
+        return null;
+    }
+
+    @Nullable
+    public static SavedWaypoint getWaypointFromFile(String waypointIdentifier, UUID playerUUID)
+    {
+        JsonObject waypointLocalData = getObjectDataFromDisk(Utils.getNewObjectFilename(playerUUID, waypointIdentifier, FetchType.WAYPOINT), false);
+        if (waypointLocalData != null) {
+            return new SavedWaypoint(waypointLocalData, playerUUID);
         }
         return null;
     }

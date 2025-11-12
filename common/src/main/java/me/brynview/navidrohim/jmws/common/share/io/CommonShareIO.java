@@ -14,7 +14,7 @@ import java.util.List;
 
 public class CommonShareIO implements AutoCloseable {
 
-    public static class SharedObjectUsers {
+    private static class SharedObjectUsers {
 
         public List<String> valueList;
 
@@ -80,6 +80,10 @@ public class CommonShareIO implements AutoCloseable {
         return data.contains(sharedValue);
     }
 
+    public List<String> getSharedList()
+    {
+        return data;
+    }
     @Override
     public void close() {
         writeSharedList();

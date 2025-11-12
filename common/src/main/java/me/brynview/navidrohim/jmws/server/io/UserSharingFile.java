@@ -24,4 +24,12 @@ public class UserSharingFile extends CommonShareIO {
         super.removeFromShared(sharedValue);
         writeSharedList();
     }
+
+    public static void removeObjectFromUser(UUID playerUUID, String objectIdentifier)
+    {
+        try (UserSharingFile usf = new UserSharingFile(playerUUID))
+        {
+            usf.removeFromShared(objectIdentifier);
+        }
+    }
 }

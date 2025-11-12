@@ -21,6 +21,7 @@ import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.server.MinecraftServer;
 
 
 import java.io.File;
@@ -45,6 +46,7 @@ public class CommonClass {
 
     public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     public static SyncCounter syncCounter = null;
+    public static MinecraftServer minecraftServerInstance;
 
     public static void setServerModStatus(boolean serverModStatus)
     {

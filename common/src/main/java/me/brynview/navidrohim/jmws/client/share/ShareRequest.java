@@ -44,7 +44,6 @@ public class ShareRequest {
 
     public void acceptShare()
     {
-        ClientShareIO.addToShareList(this.requestIdentifier);
         Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestAccept(this)));
         JMWSPlugin.getInstance().addWaypoint(this.currentSharedObject);
 

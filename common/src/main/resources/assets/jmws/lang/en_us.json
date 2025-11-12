@@ -33,6 +33,7 @@
 
   "__comment__": "Sharing language strings",
   "sharing.jmws.no_longer_sharing": "This will no longer be shared.",
+  "sharing.jmws.object_no_longer_exists": "Shared request is no longer valid!",
 
   "__comment__": "Config language strings",
   "text.config.jmws-config.title": "JourneyMap Waypoint Syncing (JMWS)",
@@ -99,6 +100,8 @@
   "error.jmws.error_corrupted_waypoint": "One or more waypoints or groups are corrupted. Contact administration for details.",
   "error.jmws.jmws_not_installed": "Server does not have JMWS installed. JMWS will be disabled.",
   "error.jmws.screen.needing_got": "Need: %s or newer. Got: %s",
+
+  "fatal.jmws.server_mismatch": "You must update to the latest version of JMWS!",
 
   "warning.jmws.server.disabled_jmws": "Server has JMWS, but has been disabled on server.",
   "warning.jmws.server.disabled_group": "Server has JMWS, but group syncing has been disabled.",
