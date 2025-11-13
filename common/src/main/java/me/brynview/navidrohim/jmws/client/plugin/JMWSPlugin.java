@@ -158,7 +158,7 @@ public class JMWSPlugin implements IClientPlugin {
     private void deleteAction(Waypoint waypoint) {
         if (CommonClass.serverConfig.waypointsEnabled()) { // Check if action is allowed by the server.
             String waypointIdentifier = ObjectUtils.getIdentifier(waypoint);
-
+            Constants.getLogger().info(waypointIdentifier);
             ObjectIdentifierMap.removeWaypointFromMap(waypoint);
             String jsonPacketData = CommandFactory.makeDeleteRequestJson(waypointIdentifier, false, false);
             JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
@@ -401,12 +401,12 @@ public class JMWSPlugin implements IClientPlugin {
      * @throws JsonSyntaxException If waypoint is malformed or does not parse.
      * @throws IllegalStateException Cannot remember why this can be thrown.
      */
-    private static Set<SavedWaypoint> getSavedWaypoints(JsonObject jsonData, UUID playerUUID) throws JsonSyntaxException, IllegalStateException {
-        Set<SavedWaypoint> waypoints = new HashSet<>();
+    private static Set<Waypoint> getSavedWaypoints(JsonObject jsonData, UUID playerUUID) throws JsonSyntaxException, IllegalStateException {
+        Set<Waypoint> waypoints = new HashSet<>();
 
         for (Map.Entry<String, JsonElement> entry : jsonData.entrySet()) {
-            JsonObject json = JsonParser.parseString(entry.getValue().getAsString()).getAsJsonObject();
-            waypoints.add(new SavedWaypoint(json, playerUUID));
+            String json = entry.getValue().getAsString();
+            waypoints.add(WaypointFactory.fromWaypointJsonString(json));
         }
 
         return waypoints;
@@ -482,16 +482,16 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Get existing waypoints (local) and get waypoint objects saved on server
         List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
-        Set<SavedWaypoint> savedWaypoints = JMWSPlugin.getSavedWaypoints(jsonWaypoints.deepCopy(), CommonClass.minecraftClientInstance.player.getUUID());
+        Set<Waypoint> savedWaypoints = JMWSPlugin.getSavedWaypoints(jsonWaypoints.deepCopy(), CommonClass.minecraftClientInstance.player.getUUID());
 
         // Get an identifier of every waypoint (BlockPos, location), used to detect if the waypoint already exists
         Set<BlockPos> remoteWaypointPositions = savedWaypoints.stream()
-                .map(w -> new BlockPos(w.getWaypointX(), w.getWaypointY(), w.getWaypointZ()))
+                .map(w -> new BlockPos(w.getX(), w.getY(), w.getZ()))
                 .collect(Collectors.toSet());
 
         deleteAllWaypoints();
 
-        // Test if any existing waypoints (persistent, usually death waypoints) have already been added to the server, if not, add them
+        // Test if any existing waypoints (persistent, usually death waypoints or 3rd party waypoints from another add-on) have already been added to the server, if not, add them
         for (Waypoint existing : existingWaypoints) {
             if (!remoteWaypointPositions.contains(existing.getBlockPos()) && existing.isPersistent()) {
                 existing.setPersistent(false);
@@ -501,11 +501,10 @@ public class JMWSPlugin implements IClientPlugin {
         }
 
         // Add server waypoints to the client
-        for (SavedWaypoint savedWaypoint : savedWaypoints) {
-            Waypoint wp = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawString());
-            ObjectIdentifierMap.addWaypointToMap(wp);
+        for (Waypoint savedWaypoint : savedWaypoints) {
+            ObjectIdentifierMap.addWaypointToMap(savedWaypoint);
 
-            getInstance().jmAPI.addWaypoint(wp.getModId(), wp);
+            getInstance().jmAPI.addWaypoint(savedWaypoint.getModId(), savedWaypoint);
         }
 
         return hasLocalWaypoint;

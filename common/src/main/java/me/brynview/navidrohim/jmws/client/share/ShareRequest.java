@@ -31,18 +31,18 @@ public class ShareRequest {
         this.requestIdentifier = requestIdentifier;
     }
 
-    public void declineShare()
+    public void decline()
     {
         Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestDecline(this.originalSender)));
         IncomingShareRequests.removeIncomingRequest(this.originalSender);
     }
 
-    public static void declareBusy(UUID originalSender)
+    public static void busy(UUID originalSender)
     {
         Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestUserBusy(originalSender)));
     }
 
-    public void acceptShare()
+    public void accept()
     {
         Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestAccept(this)));
         JMWSPlugin.getInstance().addWaypoint(this.currentSharedObject);

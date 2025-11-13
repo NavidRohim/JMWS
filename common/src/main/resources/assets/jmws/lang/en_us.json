@@ -100,6 +100,7 @@
   "error.jmws.error_corrupted_waypoint": "One or more waypoints or groups are corrupted. Contact administration for details.",
   "error.jmws.jmws_not_installed": "Server does not have JMWS installed. JMWS will be disabled.",
   "error.jmws.screen.needing_got": "Need: %s or newer. Got: %s",
+  "error.jmws.invalid_name": "Invalid name!",
 
   "fatal.jmws.server_mismatch": "You must update to the latest version of JMWS!",
 

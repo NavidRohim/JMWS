@@ -2,12 +2,13 @@ package me.brynview.navidrohim.jmws.server.io;
 
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.share.io.CommonShareIO;
+import me.brynview.navidrohim.jmws.server.exceptions.OutdatedClientException;
 
 import java.util.List;
 import java.util.UUID;
 
 public class UserSharingFile extends CommonShareIO {
-    public UserSharingFile(UUID userUUID) {
+    public  UserSharingFile(UUID userUUID) {
         super(JMWSServerIO.Utils.getNewObjectFilename(userUUID, "", FetchType.SHARED));
     }
 

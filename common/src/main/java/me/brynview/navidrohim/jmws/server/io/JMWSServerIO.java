@@ -11,6 +11,8 @@ import me.brynview.navidrohim.jmws.common.objects.SavedObject;
 import me.brynview.navidrohim.jmws.common.objects.SavedWaypoint;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import me.brynview.navidrohim.jmws.server.exceptions.OutdatedClientException;
+import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -29,15 +31,23 @@ public class JMWSServerIO {
 
     public static class Utils
     {
+        @Nullable
         public static Path getNewObjectFilename(@Nullable UUID playerOwner, String objectID, FetchType objectType) {
-            return Path.of(getPathLocationPrefix(objectType) + objectID + "#" + playerOwner + ".json");
+            try
+            {
+                return Path.of(getPathLocationPrefix(objectType) + objectID + "#" + playerOwner + ".json");
+            } catch (InvalidPathException oldVersion)
+            {
+                Constants.getLogger().error("Client has older version than server expected. %s".formatted(playerOwner));
+                return null;
+            }
         }
-
+        /*
         public static SavedObject getObject(String objectIdentifier, UUID ownerUUID, FetchType objectType)
         {
             return ownerUUID == null ? JMWSServerIO.getWaypointFromFile(objectIdentifier, null)
                     : JMWSServerIO.getWaypointFromFile(objectIdentifier, ownerUUID);
-        }
+        }*/
     }
 
     public static Boolean removeAllWaypointsFromGroup(UUID playerUUID, String groupID) {
@@ -236,9 +246,13 @@ public class JMWSServerIO {
     @Nullable
     public static SavedWaypoint getWaypointFromFile(String waypointIdentifier, UUID playerUUID)
     {
-        JsonObject waypointLocalData = getObjectDataFromDisk(Utils.getNewObjectFilename(playerUUID, waypointIdentifier, FetchType.WAYPOINT), false);
-        if (waypointLocalData != null) {
-            return new SavedWaypoint(waypointLocalData, playerUUID);
+        Path waypointFilename = Utils.getNewObjectFilename(playerUUID, waypointIdentifier, FetchType.WAYPOINT);
+        if (waypointFilename != null)
+        {
+            JsonObject waypointLocalData = getObjectDataFromDisk(waypointFilename, false);
+            if (waypointLocalData != null) {
+                return new SavedWaypoint(waypointLocalData, playerUUID);
+            }
         }
         return null;
     }

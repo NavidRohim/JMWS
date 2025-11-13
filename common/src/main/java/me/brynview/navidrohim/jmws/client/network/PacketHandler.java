@@ -16,6 +16,7 @@ import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
+import me.brynview.navidrohim.jmws.common.objects.SavedObject;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.minecraft.network.chat.Component;
@@ -104,6 +105,7 @@ public class PacketHandler {
                     FetchType sharedObjectType = FetchType.valueOf(arguments.get(3).getAsString());
                     String waypointString = arguments.getFirst().getAsString();
                     Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(waypointString);
+                    String objectIdentifier = SavedObject.SyncingInformation.getSyncingInfo(waypointObj.getCustomData()).objectIdentifier;
 
                     if (direction.equals(ShareRequest.Direction.FOR_CLIENT))
                     {
@@ -114,15 +116,15 @@ public class PacketHandler {
                                     us,
                                     waypointObj,
                                     sharedObjectType,
-                                    waypointObj.getCustomData()
+                                    objectIdentifier
                             ));
 
                             sendUserAlert(Component.literal("XX Has sent a sync request, accept? (/jmws accept / decline)"), false, true, JMWSMessageType.SUCCESS);
                         } else {
-                            ShareRequest.declareBusy(from);
+                            ShareRequest.busy(from);
                         }
                     } else {
-                        OutgoingShareRequests.addOutgoingRequest(from, new OutgoingShareRequest(from, us, waypointObj, sharedObjectType, waypointObj.getCustomData()));
+                        OutgoingShareRequests.addOutgoingRequest(from, new OutgoingShareRequest(from, us, waypointObj, sharedObjectType, objectIdentifier));
                         PlayerHelper.sendUserAlert(Component.literal("Got > %s".formatted(OutgoingShareRequests.getSize())), true, false, JMWSMessageType.SUCCESS);
                     }
                 }

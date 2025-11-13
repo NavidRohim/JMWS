@@ -122,30 +122,27 @@ public class ClientCommands {
 
     public static int accept(@Nullable UUID from)
     {
-        ShareRequest specificedShare = from != null ? IncomingShareRequests.getIncomingRequest(from) : IncomingShareRequests.getFirstRequest();
-        specificedShare.acceptShare();
-        PlayerHelper.sendUserAlert(Component.literal("Shared."), true, false, JMWSMessageType.NEUTRAL);
+        ShareRequest specifiedShare = from != null ? IncomingShareRequests.getIncomingRequest(from) : IncomingShareRequests.getFirstRequest();
+        if (specifiedShare != null)
+        {
+            specifiedShare.accept();
+            PlayerHelper.sendUserAlert(Component.literal("Shared."), true, false, JMWSMessageType.NEUTRAL);
+        } else {
+            PlayerHelper.sendUserAlert(Component.literal("You don't have any share requests."), true, false, JMWSMessageType.NEUTRAL);
+        }
         return 1;
     }
 
     public static int decline(@Nullable UUID from)
     {
-        if (ClientVariables.shareRequest != null)
+        ShareRequest specifiedShare = from != null ? IncomingShareRequests.getIncomingRequest(from) : IncomingShareRequests.getFirstRequest();
+        if (specifiedShare != null)
         {
-            if (from != null)
-            {
-                IncomingShareRequests.getIncomingRequest(from).declineShare();
-                PlayerHelper.sendUserAlert(Component.literal("Not shared."), true, false, JMWSMessageType.NEUTRAL);
-            } else {
-                IncomingShareRequests.getFirstRequest().declineShare();
-            }
+            specifiedShare.decline();
+            PlayerHelper.sendUserAlert(Component.literal("Not shared."), true, false, JMWSMessageType.NEUTRAL);
+        } else {
+            PlayerHelper.sendUserAlert(Component.literal("You don't have any share requests."), true, false, JMWSMessageType.NEUTRAL);
         }
-        return 1;
-    }
-
-    public static int debugSharing()
-    {
-        PlayerHelper.sendUserAlert(Component.literal("Size of req hashmap > " + OutgoingShareRequests.getSize()), false, true, JMWSMessageType.FAILURE);
         return 1;
     }
 }

@@ -1,5 +1,7 @@
 package me.brynview.navidrohim.jmws.client.share;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -21,6 +23,7 @@ public class IncomingShareRequests {
         incomingShareRequestList.remove(from);
     }
 
+    @Nullable
     public static ShareRequest getIncomingRequest(UUID from)
     {
         return incomingShareRequestList.get(from);

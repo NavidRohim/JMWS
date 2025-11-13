@@ -18,6 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +38,8 @@ public class ServerPacketHandler {
         {
             UUID playerUUID = player.getUUID();
             try {
+                int lastIter = 0;
+
                 List<Path> playerWaypoints = JMWSServerIO.getObjectsForUser(playerUUID, FetchType.WAYPOINT);
                 List<Path> playerGroups = JMWSServerIO.getObjectsForUser(playerUUID, FetchType.GROUP);
 
@@ -52,6 +55,7 @@ public class ServerPacketHandler {
                     {
                         Constants.getLogger().error("Could not translate %s %s to new system path.".formatted(FetchType.WAYPOINT, playerWaypoints.get(i)));
                     }
+                    lastIter = i;
                 }
 
                 for (int ix = 0 ; ix < playerGroups.size() ; ix++) {
@@ -65,6 +69,22 @@ public class ServerPacketHandler {
                     }
                 }
 
+                // waypoint only.
+                try (UserSharingFile userSharingFile = new UserSharingFile(playerUUID))
+                {
+                    for (String shared : userSharingFile.getSharedList())
+                    {
+                        lastIter++;
+                        String waypointData = JMWSServerIO.getObjectFromUniqueIdentifier(shared, null, FetchType.WAYPOINT);
+                        if (waypointData != null)
+                        {
+                            jsonWaypointPayloadArray.put(String.valueOf(lastIter), waypointData);
+                        }
+                        else {
+                            userSharingFile.removeFromShared(shared);
+                        }
+                    }
+                }
                 String jsonData = CommandFactory.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert, isDeathSync);
 
                 // 2000000 was (jsonData.getBytes().length >= SERVER_CONFIG.serverConfiguration.serverPacketLimit())
@@ -127,6 +147,7 @@ public class ServerPacketHandler {
             }
 
             case CommandFactory.Commands.COMMON_DELETE_WAYPOINT -> {
+
                 String waypointIdentifier = arguments.getFirst().getAsString().stripTrailing();
                 boolean silent = arguments.get(1).getAsBoolean();
                 boolean deleteAll = arguments.getLast().getAsBoolean();
@@ -224,7 +245,8 @@ public class ServerPacketHandler {
 
             case CommandFactory.Commands.USER_ALREADY_PROCESSING_SHARE, CommandFactory.Commands.REJECT_SHARE ->
             {
-                echoPacket(Context);
+                UUID forUser = UUID.fromString(Context.message().arguments().getFirst().getAsString());
+                Dispatcher.sendToClient(Context.message(), Context.sender().server.getPlayerList().getPlayer(forUser));
             }
 
             case CommandFactory.Commands.AFFIRM_SHARE ->
@@ -246,16 +268,9 @@ public class ServerPacketHandler {
                 } else {
                     sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
                 }
-
-
             }
 
             default -> Constants.getLogger().warn("Unknown packet command -> {}", command);
         }
-    }
-
-    private static void echoPacket(PacketContext<JMWSActionPayload> Context) {
-        UUID forUser = UUID.fromString(Context.message().arguments().getFirst().getAsString());
-        Dispatcher.sendToClient(Context.message(), Context.sender().server.getPlayerList().getPlayer(forUser));
     }
 }

@@ -1,13 +1,12 @@
 package me.brynview.navidrohim.jmws.common.objects;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
+import com.google.gson.annotations.Expose;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import me.brynview.navidrohim.jmws.server.exceptions.OutdatedClientException;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
@@ -29,7 +28,11 @@ public class SavedObject implements PossessesIdentifier {
 
     public static class SyncingInformation
     {
+
+        @Expose
         public String objectIdentifier;
+
+        @Expose
         protected List<UUID> sharedTo;
 
         @Nullable
@@ -49,7 +52,7 @@ public class SavedObject implements PossessesIdentifier {
                 syncingInformation.parentObject = object;
 
                 return syncingInformation;
-            } catch (IllegalStateException | JsonSyntaxException readerr)
+            } catch (IllegalStateException | JsonSyntaxException reader)
             {
                 return transition(object); // if old waypoint is present
                 //PlayerNetworkingHelper.sendUserMessage(object.ownerUUID, "fatal.jmws.server_mismatch", false, true);
@@ -97,14 +100,12 @@ public class SavedObject implements PossessesIdentifier {
         {
             if (this.parentObject != null)
             {
-                Gson gson = new Gson();
-                String jsonString = gson.toJson(this, SyncingInformation.class);
-                JsonObject customData = this.parentObject.getRawJson().getAsJsonObject("customData");
+                Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+                JsonElement jsonString = gson.toJsonTree(this, SyncingInformation.class);
+                this.parentObject.getRawJson().remove("customData");
+                this.parentObject.getRawJson().add("customData", jsonString);
 
-                customData.remove("sharedTo");
-                customData.add("sharedTo", gson.toJsonTree(sharedTo, JsonArray.class));
-
-                this.parentObject.update(this.parentObject.getRawJson().getAsString());
+                this.parentObject.update(this.parentObject.getRawJson().getAsJsonObject().toString()); // TODO: bug test more. This seems very janky and not done right. Will test more
             }
             else {
                 throw new RuntimeException("Cannot update object from dataclass instance of SyncingInformation. Get instance of SyncingInformation from child of SavedObject. (SavedObject.syncing.update())");
@@ -122,15 +123,21 @@ public class SavedObject implements PossessesIdentifier {
     public SyncingInformation syncing;
     public static FetchType objectType = FetchType.GENERIC;
 
+    @Nullable
+    public Path objectPath;
+
     UUID ownerUUID;
 
     public SavedObject(JsonObject payload, UUID playerUUID)
     {
+
         this.payload = payload;
         this.customData = payload.get("customData").getAsString();
         this.ownerSharing = new UserSharingFile(playerUUID);
         this.syncing = SyncingInformation.getSyncingInfo(this);
         this.ownerUUID = playerUUID;
+        this.objectPath = JMWSServerIO.Utils.getNewObjectFilename(this.ownerUUID, this.syncing.objectIdentifier, getObjectType());
+
     }
 
     public String getName() { return this.name; }
@@ -145,7 +152,15 @@ public class SavedObject implements PossessesIdentifier {
         return objectType;
     }
 
-    public Path getObjectPath() { return JMWSServerIO.Utils.getNewObjectFilename(this.ownerUUID, this.syncing.objectIdentifier, getObjectType());}
+    @Nullable
+    public Path getObjectPath() {
+        return objectPath;
+    }
+
+    public Boolean hasFile()
+    {
+        return this.getObjectPath() != null && CommonHelper.fileExists(this.getObjectPath());
+    }
 
     public static void removeWaypointFromUser(UUID playerUUID, String objectIdentifier)
     {
@@ -165,12 +180,16 @@ public class SavedObject implements PossessesIdentifier {
 
     public boolean delete()
     {
-        return CommonHelper.deleteFile(JMWSServerIO.Utils.getNewObjectFilename(this.ownerUUID, this.syncing.objectIdentifier, this.getObjectType()));
+        if (this.objectPath != null)
+        {
+            return CommonHelper.deleteFile(this.objectPath);
+        }
+        return false;
     }
 
     public void update(String data)
     {
-        if (CommonHelper.fileExists(this.getObjectPath()))
+        if (this.hasFile())
         {
             try (FileWriter objWriter = new FileWriter(this.getObjectPath().toFile()))
             {
@@ -184,28 +203,39 @@ public class SavedObject implements PossessesIdentifier {
 
     public boolean create()
     {
-        Path waypointFilePath = JMWSServerIO.Utils.getNewObjectFilename(ownerUUID, this.syncing.objectIdentifier, this.getObjectType());
 
-        try {
-            Files.createFile(waypointFilePath);
-            FileWriter waypointFileWriter = new FileWriter(waypointFilePath.toFile());
-            waypointFileWriter.write(this.getRawString());
-            waypointFileWriter.close();
+        if (!this.hasFile())
+        {
+            try {
+                Path waypointFilePath = this.getObjectPath();
 
-            return true;
+                if (waypointFilePath != null)
+                {
+                    Files.createFile(waypointFilePath);
+                    FileWriter waypointFileWriter = new FileWriter(waypointFilePath.toFile());
+                    waypointFileWriter.write(this.getRawString());
+                    waypointFileWriter.close();
 
-        } catch (NoSuchFileException noSuchFileException) {
-            CommonClass._createServerResources();
-            Constants.getLogger().warn("`jmws` folder was not found so another was made (%s error)".formatted(getObjectType()));
-            return create();
+                    return true;
+                } else {
+                    PlayerNetworkingHelper.sendUserMessage(this.ownerUUID, "error.jmws.invalid_name", false, true);
+                    return false;
+                }
 
-        } catch (FileSystemException missingPerms) {
-            Constants.getLogger().error("JMWS is missing write permissions to \"jmws\" folder. (%s error)".formatted(getObjectType()));
-            return false;
+            } catch (NoSuchFileException noSuchFileException) {
+                CommonClass._createServerResources();
+                Constants.getLogger().warn("`jmws` folder was not found so another was made (%s error)".formatted(getObjectType()));
+                return create();
 
-        } catch (IOException genericIOError) {
-            Constants.getLogger().error("Got exception trying to make %s -> ".formatted(getObjectType()) + genericIOError);
-            return false;
+            } catch (FileSystemException missingPerms) {
+                Constants.getLogger().error("JMWS is missing write permissions to \"jmws\" folder. (%s error)".formatted(getObjectType()));
+                return false;
+
+            } catch (IOException genericIOError) {
+                Constants.getLogger().error("Got exception trying to make %s -> ".formatted(getObjectType()) + genericIOError);
+                return false;
+            }
         }
+        return false;
     }
 }
