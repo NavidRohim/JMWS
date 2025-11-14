@@ -8,8 +8,8 @@ import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
-import me.brynview.navidrohim.jmws.common.objects.SavedObject;
-import me.brynview.navidrohim.jmws.common.objects.SavedWaypoint;
+import me.brynview.navidrohim.jmws.server.objects.ServerObject;
+import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
@@ -18,7 +18,6 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +31,7 @@ public class ServerPacketHandler {
         return ServerConfig.getConfig().jmwsEnabled && (ServerConfig.getConfig().groupsEnabled || ServerConfig.getConfig().waypointsEnabled);
     }
 
-    public static void sendUserSync(ServerPlayer player, boolean sendAlert, boolean isDeathSync)
+    public static void sendUserSync(ServerPlayer player, boolean sendAlert, boolean isDeathSync, boolean onlySyncShared)
     {
         if (ServerConfig.getConfig().serverEnabled())
         {
@@ -46,26 +45,29 @@ public class ServerPacketHandler {
                 HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
                 HashMap<String, String> jsonGroupPayloadArray = new HashMap<>();
 
-                for (int i = 0 ; i < playerWaypoints.size() ; i++) {
-                    Path waypointFilename = playerWaypoints.get(i);
-                    String jsonWaypointFileString = Files.readString(waypointFilename);
-                    jsonWaypointPayloadArray.put(String.valueOf(i), jsonWaypointFileString);
+                if (!onlySyncShared)
+                {
+                    for (int i = 0 ; i < playerWaypoints.size() ; i++) {
+                        Path waypointFilename = playerWaypoints.get(i);
+                        String jsonWaypointFileString = Files.readString(waypointFilename);
+                        jsonWaypointPayloadArray.put(String.valueOf(i), jsonWaypointFileString);
 
-                    if (JMWSServerIO.transition(playerWaypoints.get(i), FetchType.WAYPOINT, playerUUID))
-                    {
-                        Constants.getLogger().error("Could not translate %s %s to new system path.".formatted(FetchType.WAYPOINT, playerWaypoints.get(i)));
+                        if (JMWSServerIO.transition(playerWaypoints.get(i), FetchType.WAYPOINT, playerUUID))
+                        {
+                            Constants.getLogger().error("Could not translate %s %s to new system path.".formatted(FetchType.WAYPOINT, playerWaypoints.get(i)));
+                        }
+                        lastIter = i;
                     }
-                    lastIter = i;
-                }
 
-                for (int ix = 0 ; ix < playerGroups.size() ; ix++) {
-                    Path groupFilename = playerGroups.get(ix);
-                    String jsonGroupFileString = Files.readString(groupFilename);
-                    jsonGroupPayloadArray.put(String.valueOf(ix), jsonGroupFileString);
+                    for (int ix = 0 ; ix < playerGroups.size() ; ix++) {
+                        Path groupFilename = playerGroups.get(ix);
+                        String jsonGroupFileString = Files.readString(groupFilename);
+                        jsonGroupPayloadArray.put(String.valueOf(ix), jsonGroupFileString);
 
-                    if (JMWSServerIO.transition(playerGroups.get(ix), FetchType.GROUP, playerUUID))
-                    {
-                        Constants.getLogger().error("Could not translate %s %s to new system path.".formatted(FetchType.GROUP, playerWaypoints.get(ix)));
+                        if (JMWSServerIO.transition(playerGroups.get(ix), FetchType.GROUP, playerUUID))
+                        {
+                            Constants.getLogger().error("Could not translate %s %s to new system path.".formatted(FetchType.GROUP, playerWaypoints.get(ix)));
+                        }
                     }
                 }
 
@@ -153,7 +155,7 @@ public class ServerPacketHandler {
                 boolean deleteAll = arguments.getLast().getAsBoolean();
                 boolean result;
 
-                SavedWaypoint waypoint = JMWSServerIO.getWaypointFromFile(waypointIdentifier, playerUUID);
+                ServerWaypoint waypoint = JMWSServerIO.getWaypointFromFile(waypointIdentifier, playerUUID);
 
                 if (waypoint != null)
                 {
@@ -218,17 +220,18 @@ public class ServerPacketHandler {
                 }
             }
 
-            case UPDATE ->
+            case UPDATE -> // Bug here, after updating, the user share list is cleared and the objects server identifier is changed.
             {
                 String objectIdentifier = arguments.getFirst().getAsString();
                 FetchType modifyingType = FetchType.valueOf(arguments.get(1).getAsString());
                 Path objectPath = JMWSServerIO.Utils.getNewObjectFilename(playerUUID, objectIdentifier, modifyingType);
-                String objectData = arguments.getLast().getAsString();
+                String objectData = arguments.getLast().getAsString(); // Bug originates here (from client)
 
-                SavedObject obj = JMWSServerIO.getObjectFromDisk(objectIdentifier, playerUUID, modifyingType.getObjectClass(), modifyingType);
+                ServerObject obj = JMWSServerIO.getObjectFromDisk(objectIdentifier, playerUUID, modifyingType.getObjectClass(), modifyingType);
                 if (obj != null)
                 {
                     obj.update(objectData);
+                    obj.syncing.syncToUsers();
                 }
 
             }
@@ -239,7 +242,7 @@ public class ServerPacketHandler {
                 {
                     boolean sendAlert = arguments.get(2).getAsBoolean();
                     boolean isDeathSync = arguments.getLast().getAsBoolean();
-                    sendUserSync(player, sendAlert, isDeathSync);
+                    sendUserSync(player, sendAlert, isDeathSync, false);
                 }
             }
 
@@ -253,7 +256,7 @@ public class ServerPacketHandler {
             {
                 UUID ownerUUID = UUID.fromString(arguments.getFirst().getAsString());
                 String objectIdentifier = arguments.get(1).getAsString();
-                SavedWaypoint sharedWp = JMWSServerIO.getWaypointFromFile(objectIdentifier, ownerUUID);
+                ServerWaypoint sharedWp = JMWSServerIO.getWaypointFromFile(objectIdentifier, ownerUUID);
 
                 // Add waypoint ID to users share list.
                 try (UserSharingFile usf = new UserSharingFile(playerUUID))

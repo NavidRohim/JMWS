@@ -2,7 +2,6 @@ package me.brynview.navidrohim.jmws.client.plugin;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.client.IClientAPI;
@@ -24,9 +23,7 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
-import me.brynview.navidrohim.jmws.common.objects.SavedGroup;
-import me.brynview.navidrohim.jmws.common.objects.SavedObject;
-import me.brynview.navidrohim.jmws.common.objects.SavedWaypoint;
+import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
@@ -141,7 +138,7 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (CommonClass.serverConfig.waypointsEnabled()) // Check config
         {
-            SavedObject.SyncingInformation syncingInformation = SavedObject.SyncingInformation.getSyncingInfo(waypoint.getCustomData());
+            ServerObject.SyncingInformation syncingInformation = ServerObject.SyncingInformation.getSyncingInfo(waypoint.getCustomData());
 
             Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncingInformation.objectIdentifier, waypoint)));
             PlayerHelper.sendUserAlert(Component.translatable("message.jmws.modified_waypoint_success"), true, false, JMWSMessageType.SUCCESS);
@@ -242,7 +239,7 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (CommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
         {
-            SavedObject.SyncingInformation gsi = SavedObject.SyncingInformation.getSyncingInfo(waypointGroup.getCustomData());
+            ServerObject.SyncingInformation gsi = ServerObject.SyncingInformation.getSyncingInfo(waypointGroup.getCustomData());
 
             ObjectIdentifierMap.removeGroupFromMap(waypointGroup); // Remove from identifier map
             String uID = gsi.objectIdentifier != null ? gsi.objectIdentifier : "null"; // This can be set to "null" but I cannot remember why.
@@ -273,7 +270,7 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (CommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
         {
-            SavedObject.SyncingInformation syncingInformation = SavedObject.SyncingInformation.getSyncingInfo(waypointGroup.getCustomData());
+            ServerObject.SyncingInformation syncingInformation = ServerObject.SyncingInformation.getSyncingInfo(waypointGroup.getCustomData());
             // Internally, we just delete the old group and create a new one
             Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncingInformation.objectIdentifier, waypointGroup)));
             // Send alert
@@ -420,12 +417,12 @@ public class JMWSPlugin implements IClientPlugin {
      * @throws JsonSyntaxException If group is malformed or does not parse.
      * @throws IllegalStateException Cannot remember why this can be thrown.
      */
-    private static Set<SavedGroup> getSavedGroups(JsonObject jsonData) throws JsonSyntaxException, IllegalStateException {
-        Set<SavedGroup> groups = new HashSet<>();
+    private static Set<WaypointGroup> getSavedGroups(JsonObject jsonData) throws JsonSyntaxException, IllegalStateException {
+        Set<WaypointGroup> groups = new HashSet<>();
 
         for (Map.Entry<String, JsonElement> entry : jsonData.entrySet()) {
-            JsonObject json = JsonParser.parseString(entry.getValue().getAsString()).getAsJsonObject();
-            groups.add(new SavedGroup(json, minecraftClientInstance.player.getUUID()));
+            String json = entry.getValue().getAsString();
+            groups.add(WaypointFactory.fromGroupJsonString(json));
         }
 
         return groups;
@@ -443,11 +440,11 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Get existing groups (local) and get group objects saved on server
         List<? extends WaypointGroup> existingGroups = getInstance().jmAPI.getAllWaypointGroups();
-        Set<SavedGroup> savedGroups = JMWSPlugin.getSavedGroups(jsonGroupsRaw.deepCopy());
+        Set<WaypointGroup> savedGroups = JMWSPlugin.getSavedGroups(jsonGroupsRaw.deepCopy());
 
         // Get an identifier of every group, used to detect if the group already exists
         Set<String> remoteGroupKeys = savedGroups.stream()
-                .map(g -> g.getName() + g.getGroupIdentifier())
+                .map(g -> g.getName() + g.getGuid())
                 .collect(Collectors.toSet());
 
         // Test if any existing groups (persistent) have already been added to the server, if not, add them
@@ -461,10 +458,9 @@ public class JMWSPlugin implements IClientPlugin {
         }
 
         // Add server groups to the client
-        for (SavedGroup savedGroup : savedGroups) {
-            WaypointGroup group = WaypointFactory.fromGroupJsonString(savedGroup.getRawString());
-            ObjectIdentifierMap.addGroupToMap(group);
-            getInstance().jmAPI.addWaypointGroup(group);
+        for (WaypointGroup savedGroup : savedGroups) {
+            ObjectIdentifierMap.addGroupToMap(savedGroup);
+            getInstance().jmAPI.addWaypointGroup(savedGroup);
         }
 
         // return this because need to give an alert

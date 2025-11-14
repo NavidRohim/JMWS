@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.common.objects;
+package me.brynview.navidrohim.jmws.server.objects;
 
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 

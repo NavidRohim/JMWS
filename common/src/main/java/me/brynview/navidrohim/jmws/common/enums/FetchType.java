@@ -1,12 +1,11 @@
 package me.brynview.navidrohim.jmws.common.enums;
 
-import me.brynview.navidrohim.jmws.common.objects.SavedGroup;
-import me.brynview.navidrohim.jmws.common.objects.SavedObject;
-import me.brynview.navidrohim.jmws.common.objects.SavedWaypoint;
+import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
+import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
 
 public enum FetchType {
-    WAYPOINT(SavedWaypoint.class),
-    GROUP(SavedGroup.class),
+    WAYPOINT(ServerWaypoint.class),
+    GROUP(ServerGroup.class),
     SHARED(null),
     GENERIC(null);
 

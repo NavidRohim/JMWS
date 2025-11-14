@@ -2,7 +2,7 @@ package me.brynview.navidrohim.jmws.client.plugin;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.common.objects.SavedObject;
+import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.HashMap;
@@ -85,7 +85,7 @@ public class ObjectIdentifierMap {
     {
         String waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypoint.getGuid(), waypoint.getName());
         waypointIdentifierMap.put(waypointIdentifier, waypoint);
-        waypoint.setCustomData(SavedObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier));
+        waypoint.setCustomData(ServerObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier));
 
     }
 
@@ -97,7 +97,7 @@ public class ObjectIdentifierMap {
     {
         String waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypointGroup.getGuid(), waypointGroup.getName());
         groupIdentifierMap.put(waypointIdentifier, waypointGroup);
-        waypointGroup.setCustomData(SavedObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier));
+        waypointGroup.setCustomData(ServerObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier));
     }
 
     /**

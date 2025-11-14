@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.common.objects;
+package me.brynview.navidrohim.jmws.server.objects;
 
 import com.google.gson.*;
 import com.google.gson.annotations.Expose;
@@ -6,10 +6,11 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
-import me.brynview.navidrohim.jmws.server.exceptions.OutdatedClientException;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
+import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.FileWriter;
@@ -24,7 +25,7 @@ import java.util.UUID;
 /**
  * Dataclass to hold groups and waypoints from server. This is old code, so I wouldn't mess with it.
  */
-public class SavedObject implements PossessesIdentifier {
+public class ServerObject implements PossessesIdentifier {
 
     public static class SyncingInformation
     {
@@ -36,7 +37,7 @@ public class SavedObject implements PossessesIdentifier {
         protected List<UUID> sharedTo;
 
         @Nullable
-        protected SavedObject parentObject = null;
+        protected ServerObject parentObject = null;
 
         public SyncingInformation(List<UUID> sharedTo, String identifier)
         {
@@ -44,7 +45,7 @@ public class SavedObject implements PossessesIdentifier {
             this.sharedTo = sharedTo;
         }
 
-        public static SavedObject.SyncingInformation getSyncingInfo(SavedObject object)
+        public static ServerObject.SyncingInformation getSyncingInfo(ServerObject object)
         {
             try {
                 Gson gson = new Gson();
@@ -59,14 +60,14 @@ public class SavedObject implements PossessesIdentifier {
             }
         }
 
-        private static SyncingInformation transition(SavedObject object)
+        private static SyncingInformation transition(ServerObject object)
         {
             // TODO transition to new customDataField
             object.customData = SyncingInformation.getEmptySyncingInfoString(object.getCustomData());
             return getSyncingInfo(object);
         }
 
-        public static SavedObject.SyncingInformation getSyncingInfo(String customDataField)
+        public static ServerObject.SyncingInformation getSyncingInfo(String customDataField)
         {
             try
             {
@@ -110,6 +111,19 @@ public class SavedObject implements PossessesIdentifier {
                 throw new RuntimeException("Cannot update object from dataclass instance of SyncingInformation. Get instance of SyncingInformation from child of SavedObject. (SavedObject.syncing.update())");
             }
         }
+
+        public void syncToUsers()
+        {
+            for (UUID playerUUID : this.sharedTo)
+            {
+                ServerPlayer sharedUser = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
+
+                if (sharedUser != null)
+                {
+                    ServerPacketHandler.sendUserSync(sharedUser, true, false, false);
+                }
+            }
+        }
     }
 
     String rawPacketData;
@@ -127,7 +141,7 @@ public class SavedObject implements PossessesIdentifier {
 
     UUID ownerUUID;
 
-    public SavedObject(JsonObject payload, UUID playerUUID)
+    public ServerObject(JsonObject payload, UUID playerUUID)
     {
 
         this.payload = payload;
