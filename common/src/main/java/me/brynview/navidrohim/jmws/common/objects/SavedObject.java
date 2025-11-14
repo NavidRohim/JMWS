@@ -101,9 +101,8 @@ public class SavedObject implements PossessesIdentifier {
             if (this.parentObject != null)
             {
                 Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-                JsonElement jsonString = gson.toJsonTree(this, SyncingInformation.class);
-                this.parentObject.getRawJson().remove("customData");
-                this.parentObject.getRawJson().add("customData", jsonString);
+                String jsonString = gson.toJson(this, SyncingInformation.class);
+                this.parentObject.getRawJson().add("customData", new JsonPrimitive(jsonString));
 
                 this.parentObject.update(this.parentObject.getRawJson().getAsJsonObject().toString()); // TODO: bug test more. This seems very janky and not done right. Will test more
             }
@@ -132,7 +131,7 @@ public class SavedObject implements PossessesIdentifier {
     {
 
         this.payload = payload;
-        this.customData = payload.get("customData").getAsString();
+        this.customData = payload.get("customData").getAsString(); // bug with json formatting
         this.ownerSharing = new UserSharingFile(playerUUID);
         this.syncing = SyncingInformation.getSyncingInfo(this);
         this.ownerUUID = playerUUID;
