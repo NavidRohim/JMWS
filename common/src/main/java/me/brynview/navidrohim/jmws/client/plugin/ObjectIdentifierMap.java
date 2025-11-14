@@ -43,8 +43,12 @@ public class ObjectIdentifierMap {
      * @return Waypoint -- The old waypoint before update.
      */
     public static Waypoint getOldWaypoint(Waypoint newWaypoint) {
-        String persistentWaypointID = newWaypoint.getCustomData();
-        return waypointIdentifierMap.get(persistentWaypointID);
+        ServerObject.SyncingInformation persistentWaypointID = ServerObject.SyncingInformation.getSyncingInfo(newWaypoint.getCustomData());
+        if (persistentWaypointID != null)
+        {
+            return waypointIdentifierMap.get(persistentWaypointID.objectIdentifier);
+        }
+        return null;
     }
 
     /**
@@ -64,7 +68,7 @@ public class ObjectIdentifierMap {
      */
     public static WaypointGroup getOldGroup(WaypointGroup newWaypointGroup)
     {
-        return groupIdentifierMap.get(newWaypointGroup.getCustomData());
+        return groupIdentifierMap.get(ServerObject.SyncingInformation.getSyncingInfo(newWaypointGroup.getCustomData()).objectIdentifier);
     }
 
     /**
@@ -83,7 +87,8 @@ public class ObjectIdentifierMap {
      */
     public static void addWaypointToMap(Waypoint waypoint)
     {
-        String waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypoint.getGuid(), waypoint.getName());
+        ServerObject.SyncingInformation waypointSyncInfo = ServerObject.SyncingInformation.getSyncingInfo(waypoint.getCustomData());
+        String waypointIdentifier = waypointSyncInfo == null ? makeWaypointHash(minecraftClientInstance.player.getUUID(), waypoint.getGuid(), waypoint.getName()) : waypointSyncInfo.objectIdentifier;
         waypointIdentifierMap.put(waypointIdentifier, waypoint);
         waypoint.setCustomData(ServerObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier));
 
@@ -106,7 +111,7 @@ public class ObjectIdentifierMap {
      */
     public static void removeWaypointFromMap(Waypoint waypoint)
     {
-        waypointIdentifierMap.remove(waypoint.getCustomData());
+        waypointIdentifierMap.remove(ServerObject.SyncingInformation.getSyncingInfo(waypoint.getCustomData()).objectIdentifier);
     }
 
     /**
@@ -115,6 +120,6 @@ public class ObjectIdentifierMap {
      */
     public static void removeGroupFromMap(WaypointGroup group)
     {
-        groupIdentifierMap.remove(group.getCustomData());
+        groupIdentifierMap.remove(ServerObject.SyncingInformation.getSyncingInfo(group.getCustomData()).objectIdentifier);
     }
 }

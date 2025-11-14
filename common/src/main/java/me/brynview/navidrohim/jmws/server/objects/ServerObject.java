@@ -2,10 +2,13 @@ package me.brynview.navidrohim.jmws.server.objects;
 
 import com.google.gson.*;
 import com.google.gson.annotations.Expose;
+import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
+import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
@@ -105,7 +108,7 @@ public class ServerObject implements PossessesIdentifier {
                 String jsonString = gson.toJson(this, SyncingInformation.class);
                 this.parentObject.getRawJson().add("customData", new JsonPrimitive(jsonString));
 
-                this.parentObject.update(this.parentObject.getRawJson().getAsJsonObject().toString()); // TODO: bug test more. This seems very janky and not done right. Will test more
+                this.parentObject.update(this.parentObject.getRawJson().getAsJsonObject().toString(), true); // TODO: bug test more. This seems very janky and not done right. Will test more
             }
             else {
                 throw new RuntimeException("Cannot update object from dataclass instance of SyncingInformation. Get instance of SyncingInformation from child of SavedObject. (SavedObject.syncing.update())");
@@ -131,6 +134,7 @@ public class ServerObject implements PossessesIdentifier {
     String customData;
     String groupIdentifier;
     JsonObject payload;
+    boolean dataclass;
 
     public UserSharingFile ownerSharing;
     public SyncingInformation syncing;
@@ -141,20 +145,31 @@ public class ServerObject implements PossessesIdentifier {
 
     UUID ownerUUID;
 
-    public ServerObject(JsonObject payload, UUID playerUUID)
+    public ServerObject(JsonObject payload, UUID playerUUID, boolean dataclass)
     {
-
+        this.dataclass = dataclass;
         this.payload = payload;
         this.customData = payload.get("customData").getAsString(); // bug with json formatting
-        this.ownerSharing = new UserSharingFile(playerUUID);
         this.syncing = SyncingInformation.getSyncingInfo(this);
         this.ownerUUID = playerUUID;
-        this.objectPath = JMWSServerIO.Utils.getNewObjectFilename(this.ownerUUID, this.syncing.objectIdentifier, getObjectType());
 
+        this.ownerSharing = !dataclass ? new UserSharingFile(playerUUID) : null;
+        this.objectPath = !dataclass ? JMWSServerIO.Utils.getNewObjectFilename(this.ownerUUID, this.syncing.objectIdentifier, getObjectType()) : null;
+    }
+
+    public ServerObject(JsonObject payload, UUID playerUUID)
+    {
+        this(payload, playerUUID, false);
     }
 
     public String getName() { return this.name; }
     public String getCustomData() { return this.customData; }
+    public void setCustomData(String data)
+    {
+        this.customData = data;
+        this.payload.add("customData", new JsonPrimitive(data));
+    }
+
     public String getGroupIdentifier() { return this.groupIdentifier; }
 
     public String getRawString() { return this.payload.toString();}
@@ -166,7 +181,8 @@ public class ServerObject implements PossessesIdentifier {
     }
 
     @Nullable
-    public Path getObjectPath() {
+    public Path getObjectPath()
+    {
         return objectPath;
     }
 
@@ -178,11 +194,9 @@ public class ServerObject implements PossessesIdentifier {
     public static void removeWaypointFromUser(UUID playerUUID, String objectIdentifier)
     {
         UserSharingFile.removeObjectFromUser(playerUUID, objectIdentifier);
+        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteRequestJson(objectIdentifier, true, false)), CommonClass.minecraftServerInstance.getPlayerList().getPlayer(playerUUID));
     }
 
-    /**
-     * TO NOTE; SERVER SIDE ONLY
-     */
     public void removeWaypointFromUsers()
     {
         for (UUID userUUID : this.syncing.sharedTo)
@@ -193,16 +207,22 @@ public class ServerObject implements PossessesIdentifier {
 
     public boolean delete()
     {
-        if (this.objectPath != null)
+        if (this.objectPath != null && !dataclass)
         {
             return CommonHelper.deleteFile(this.objectPath);
         }
         return false;
     }
 
-    public void update(String data)
+    public void update(String data, boolean updateSyncInfo)
     {
-        if (this.hasFile())
+        if (!updateSyncInfo) {
+            ServerObject newChange = new ServerObject(JsonParser.parseString(data).getAsJsonObject(), this.ownerUUID, true);
+            newChange.setCustomData(this.getCustomData());
+            data = newChange.toString();
+        }
+
+        if (this.hasFile() && !dataclass)
         {
             try (FileWriter objWriter = new FileWriter(this.getObjectPath().toFile()))
             {
@@ -217,7 +237,7 @@ public class ServerObject implements PossessesIdentifier {
     public boolean create()
     {
 
-        if (!this.hasFile())
+        if (!this.hasFile() && !dataclass)
         {
             try {
                 Path waypointFilePath = this.getObjectPath();
@@ -250,5 +270,11 @@ public class ServerObject implements PossessesIdentifier {
             }
         }
         return false;
+    }
+
+    @Override
+    public String toString()
+    {
+        return payload.toString();
     }
 }

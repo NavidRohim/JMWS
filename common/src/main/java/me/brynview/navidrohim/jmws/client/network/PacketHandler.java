@@ -83,13 +83,13 @@ public class PacketHandler {
                 // No outbound data
                 case COMMON_DELETE_WAYPOINT ->
                 {
-                    String firstArgument = waypointPayload.arguments().getFirst().getAsString();
+                    String waypointIdentifier = waypointPayload.arguments().getFirst().getAsString();
+                    boolean silent = arguments.get(1).getAsBoolean();
 
-                    // firstArgument can be "*" to delete all waypoints / groups, deleteAll must be `true` for this to happen still.
                     JMWSPlugin.getInstance().deleteSavedObjects(
-                            Objects.equals(firstArgument, "*"),
-                            FetchType.valueOf(waypointPayload.arguments().get(1).getAsString()),
-                            firstArgument
+                        silent,
+                        FetchType.WAYPOINT,
+                        waypointIdentifier
                     );
                 }
 

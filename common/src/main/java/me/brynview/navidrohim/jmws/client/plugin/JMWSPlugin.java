@@ -138,7 +138,7 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (CommonClass.serverConfig.waypointsEnabled()) // Check config
         {
-            ServerObject.SyncingInformation syncingInformation = ServerObject.SyncingInformation.getSyncingInfo(waypoint.getCustomData());
+            ServerObject.SyncingInformation syncingInformation = ServerObject.SyncingInformation.getSyncingInfo(oldWaypoint.getCustomData());
 
             Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncingInformation.objectIdentifier, waypoint)));
             PlayerHelper.sendUserAlert(Component.translatable("message.jmws.modified_waypoint_success"), true, false, JMWSMessageType.SUCCESS);
@@ -177,8 +177,6 @@ public class JMWSPlugin implements IClientPlugin {
 
         if (CommonClass.getEnabledStatus() && config.waypointsEnabled() && serverConfig.waypointsEnabled()) { // Check that user is in physical server, user config allows event, and server config allows event.
             // Get old waypoint if context is UPDATE (needed because server needs reference to waypoint before it was updated so it can be deleted on the server)
-            Waypoint oldWaypoint = ObjectIdentifierMap.getOldWaypoint(waypointEvent.waypoint);
-
             switch (waypointEvent.getContext()) {
                 case CREATE ->
                     // Sends "create" packet | new = "SERVER_CREATE"
@@ -187,8 +185,10 @@ public class JMWSPlugin implements IClientPlugin {
                     // Sends "delete" packet | new = "COMMON_SERVER_DELETE"
                         this.deleteAction(waypointEvent.waypoint);
                 case UPDATE ->
-                    // Sends both "delete" and "create" packet in respective order and respective enums.
-                        this.updateAction(waypointEvent.waypoint, oldWaypoint);
+                {
+                    Waypoint oldWaypoint = ObjectIdentifierMap.getOldWaypoint(waypointEvent.waypoint);
+                    this.updateAction(waypointEvent.waypoint, oldWaypoint);
+                }
             }
         }
     }
@@ -322,31 +322,24 @@ public class JMWSPlugin implements IClientPlugin {
 
     /**
      * Delete a synced object (waypoint or group). This method is only called by COMMON_DELETE_WAYPOINT in the packet handler on the client-side.
-     * @param deleteAll -- If to delete all the specified deletionType.
      * @param deletionType -- What saved object to delete (waypoint or group)
      * @param toDelete -- ObjectIdentifierMap ID, this is stored on the server only in the "customData" field (example; 38ab19a2e6544389265e40ad23b49983d9620b199c111e20b2b9a5159458b519)
      */
-    public void deleteSavedObjects(Boolean deleteAll, FetchType deletionType, String toDelete)
+    public void deleteSavedObjects(boolean silent, FetchType deletionType, String toDelete)
     {
         String deletionMessageConfirmationKey = "message.jmws.deletion_all_success";
 
         if (deletionType == FetchType.WAYPOINT) {
             Waypoint oldWp = ObjectIdentifierMap.getOldWaypoint(toDelete);
-            if (deleteAll) {
-                deleteAllWaypoints();
-            } else {
-                INSTANCE.jmAPI.removeWaypoint(oldWp.getModId(), oldWp);
-            }
-
+            INSTANCE.jmAPI.removeWaypoint(oldWp.getModId(), oldWp);
         } else {
             deletionMessageConfirmationKey = "message.jmws.deletion_group_all_success";
-            if (deleteAll) {
-                JMWSPlugin.deleteAllGroups();
-            } else {
-                JMWSPlugin.getInstance().jmAPI.removeWaypointGroup(ObjectIdentifierMap.getOldGroup(toDelete), false);
-            }
+            JMWSPlugin.getInstance().jmAPI.removeWaypointGroup(ObjectIdentifierMap.getOldGroup(toDelete), false);
         }
-        PlayerHelper.sendUserAlert(Component.translatable(deletionMessageConfirmationKey), true, false, JMWSMessageType.NEUTRAL);
+        if (!silent)
+        {
+            PlayerHelper.sendUserAlert(Component.translatable(deletionMessageConfirmationKey), true, false, JMWSMessageType.NEUTRAL);
+        }
     }
 
     /**
@@ -499,7 +492,6 @@ public class JMWSPlugin implements IClientPlugin {
         // Add server waypoints to the client
         for (Waypoint savedWaypoint : savedWaypoints) {
             ObjectIdentifierMap.addWaypointToMap(savedWaypoint);
-
             getInstance().jmAPI.addWaypoint(savedWaypoint.getModId(), savedWaypoint);
         }
 

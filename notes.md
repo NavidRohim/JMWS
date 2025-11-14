@@ -17,6 +17,6 @@
 # bugs
 - ~~/decline_share doesnt give text feedback~~ Resolved
 - ~~Deleting a shared waypoint doesn't delete the shared user index file~~ Issue no longer valid. Resolved
-- ~Syncing just doesn't work.~~ Resolved
+- ~~Syncing just doesn't work.~~ Resolved
 - Updates only work once then shared user list is erased
-- Object UUID changes when user leaves.
+- ~~Object UUID changes when user leaves.~~ Resolved

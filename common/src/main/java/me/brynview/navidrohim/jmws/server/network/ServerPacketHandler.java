@@ -220,17 +220,17 @@ public class ServerPacketHandler {
                 }
             }
 
-            case UPDATE -> // Bug here, after updating, the user share list is cleared and the objects server identifier is changed.
+            case UPDATE -> // Bug here, after updating, the user share list is cleared
             {
                 String objectIdentifier = arguments.getFirst().getAsString();
                 FetchType modifyingType = FetchType.valueOf(arguments.get(1).getAsString());
                 Path objectPath = JMWSServerIO.Utils.getNewObjectFilename(playerUUID, objectIdentifier, modifyingType);
-                String objectData = arguments.getLast().getAsString(); // Bug originates here (from client)
+                String objectData = arguments.getLast().getAsString();
 
                 ServerObject obj = JMWSServerIO.getObjectFromDisk(objectIdentifier, playerUUID, modifyingType.getObjectClass(), modifyingType);
                 if (obj != null)
                 {
-                    obj.update(objectData);
+                    obj.update(objectData, false);
                     obj.syncing.syncToUsers();
                 }
 
