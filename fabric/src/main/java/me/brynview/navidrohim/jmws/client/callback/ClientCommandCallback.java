@@ -23,8 +23,8 @@ public interface ClientCommandCallback {
                     .then(ClientCommandManager.literal("waypoints").executes(waypointClearAllCtx -> ClientCommands.clearAllWaypoints())))
         );
 
-        fabricClientCommandSourceCommandDispatcher.register(ClientCommandManager.literal("accept_share").executes(acceptingContext -> ClientCommands.accept(null)));
-        fabricClientCommandSourceCommandDispatcher.register(ClientCommandManager.literal("decline_share").executes(acceptingContext -> ClientCommands.decline(null)));
+        fabricClientCommandSourceCommandDispatcher.register(ClientCommandManager.literal("share_accept").executes(acceptingContext -> ClientCommands.accept(null)));
+        fabricClientCommandSourceCommandDispatcher.register(ClientCommandManager.literal("share_decline").executes(acceptingContext -> ClientCommands.decline(null)));
 
     }
 }

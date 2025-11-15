@@ -2,7 +2,6 @@ package me.brynview.navidrohim.jmws.client;
 
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
-import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
@@ -122,26 +121,26 @@ public class ClientCommands {
 
     public static int accept(@Nullable UUID from)
     {
-        ShareRequest specifiedShare = from != null ? IncomingShareRequests.getIncomingRequest(from) : IncomingShareRequests.getFirstRequest();
+        ShareRequest specifiedShare = from != null ? IncomingShareRequests.getRequest(from) : IncomingShareRequests.getFirstRequest();
         if (specifiedShare != null)
         {
             specifiedShare.accept();
-            PlayerHelper.sendUserAlert(Component.literal("Shared."), true, false, JMWSMessageType.NEUTRAL);
+            PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.sharing"), true, false, JMWSMessageType.NEUTRAL);
         } else {
-            PlayerHelper.sendUserAlert(Component.literal("You don't have any share requests."), true, false, JMWSMessageType.NEUTRAL);
+            PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.no_requests"), true, false, JMWSMessageType.NEUTRAL);
         }
         return 1;
     }
 
     public static int decline(@Nullable UUID from)
     {
-        ShareRequest specifiedShare = from != null ? IncomingShareRequests.getIncomingRequest(from) : IncomingShareRequests.getFirstRequest();
+        ShareRequest specifiedShare = from != null ? IncomingShareRequests.getRequest(from) : IncomingShareRequests.getFirstRequest();
         if (specifiedShare != null)
         {
             specifiedShare.decline();
-            PlayerHelper.sendUserAlert(Component.literal("Not shared."), true, false, JMWSMessageType.NEUTRAL);
+            PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.decline"), true, false, JMWSMessageType.NEUTRAL);
         } else {
-            PlayerHelper.sendUserAlert(Component.literal("You don't have any share requests."), true, false, JMWSMessageType.NEUTRAL);
+            PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.no_requests"), true, false, JMWSMessageType.NEUTRAL);
         }
         return 1;
     }

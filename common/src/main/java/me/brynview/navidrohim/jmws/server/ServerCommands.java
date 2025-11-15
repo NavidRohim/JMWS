@@ -7,20 +7,22 @@ import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
+import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import net.minecraft.server.level.ServerPlayer;
 
 public class ServerCommands {
     public static int share(ServerPlayer sender, ServerPlayer player, String waypointID) {
-        try {
+        if (sender.equals(player))
+        {
+            PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.cannot_share", true, false);
+        } else {
             String waypointStringJson = JMWSServerIO.getObjectFromUniqueIdentifier(waypointID, player.getUUID(), FetchType.WAYPOINT);
             Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(waypointStringJson, player.getUUID(), sender.getUUID(), ShareRequest.Direction.FOR_CLIENT)), player); // Send share request to player
 
             // Send information of the share to the sender. This is needed because this command is server-side only and the client will have no knowledge of the shared obj.
             Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(waypointStringJson, player.getUUID(), sender.getUUID(), ShareRequest.Direction.FOR_HOST)), sender);
-        } catch (Exception e)
-        {
-            Constants.getLogger().info(e.toString());
         }
+
         return 1;
     }
 }

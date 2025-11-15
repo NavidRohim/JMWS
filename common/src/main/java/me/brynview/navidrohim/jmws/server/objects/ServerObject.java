@@ -194,7 +194,11 @@ public class ServerObject implements PossessesIdentifier {
     public static void removeWaypointFromUser(UUID playerUUID, String objectIdentifier)
     {
         UserSharingFile.removeObjectFromUser(playerUUID, objectIdentifier);
-        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteRequestJson(objectIdentifier, true, false)), CommonClass.minecraftServerInstance.getPlayerList().getPlayer(playerUUID));
+        ServerPlayer sharedPlayer = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
+        if (sharedPlayer != null)
+        {
+            Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteRequestJson(objectIdentifier, true, false)), sharedPlayer);
+        }
     }
 
     public void removeWaypointFromUsers()

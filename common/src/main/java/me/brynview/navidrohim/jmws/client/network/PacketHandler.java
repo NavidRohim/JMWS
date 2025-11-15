@@ -20,10 +20,10 @@ import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 import static me.brynview.navidrohim.jmws.client.helper.PlayerHelper.sendUserAlert;
@@ -107,11 +107,13 @@ public class PacketHandler {
                     Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(waypointString);
                     String objectIdentifier = ServerObject.SyncingInformation.getSyncingInfo(waypointObj.getCustomData()).objectIdentifier;
 
+                    Player fromUser = CommonClass.minecraftClientInstance.player.getCommandSenderWorld().getPlayerByUUID(from);
+
                     if (direction.equals(ShareRequest.Direction.FOR_CLIENT))
                     {
                         if (!IncomingShareRequests.hasShareRequestFrom(from))
                         {
-                            IncomingShareRequests.addIncomingRequest(from, new ShareRequest(
+                            IncomingShareRequests.addRequest(from, new ShareRequest(
                                     from,
                                     us,
                                     waypointObj,
@@ -119,35 +121,38 @@ public class PacketHandler {
                                     objectIdentifier
                             ));
 
-                            sendUserAlert(Component.literal("XX Has sent a sync request, accept? (/jmws accept / decline)"), false, true, JMWSMessageType.SUCCESS);
+                            sendUserAlert(Component.translatable("sharing.jmws.share_request", fromUser.getName().getString()), false, true, JMWSMessageType.SUCCESS);
                         } else {
                             ShareRequest.busy(from);
                         }
                     } else {
-                        OutgoingShareRequests.addOutgoingRequest(from, new OutgoingShareRequest(from, us, waypointObj, sharedObjectType, objectIdentifier));
-                        PlayerHelper.sendUserAlert(Component.literal("Got > %s".formatted(OutgoingShareRequests.getSize())), true, false, JMWSMessageType.SUCCESS);
+                        OutgoingShareRequests.addRequest(from, new OutgoingShareRequest(from, us, waypointObj, sharedObjectType, objectIdentifier));
+                        PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.share_sent"), true, false, JMWSMessageType.SUCCESS);
                     }
                 }
 
                 case REJECT_SHARE ->
                 {
                     UUID from = UUID.fromString(arguments.getFirst().getAsString());
-                    OutgoingShareRequests.removeOutgoingRequest(from);
-                    sendUserAlert(Component.literal("You were rejected :("), true, false, JMWSMessageType.FAILURE);
+                    OutgoingShareRequests.removeRequest(from);
+                    sendUserAlert(Component.translatable("sharing.jmws.share_request"), true, false, JMWSMessageType.FAILURE);
                 }
 
                 case USER_ALREADY_PROCESSING_SHARE ->
                 {
                     UUID from = UUID.fromString(arguments.getFirst().getAsString());
-                    OutgoingShareRequests.removeOutgoingRequest(from);
-                    sendUserAlert(Component.literal("User is a sharing request you sent!"), true, false, JMWSMessageType.WARNING);
+                    OutgoingShareRequests.removeRequest(from);
+                    sendUserAlert(Component.translatable("sharing.jmws.share_busy"), true, false, JMWSMessageType.WARNING);
                 }
 
                 case AFFIRM_SHARE ->
                 {
                     UUID from = UUID.fromString(arguments.getFirst().getAsString());
-                    OutgoingShareRequests.removeOutgoingRequest(from);
-                    sendUserAlert(Component.literal("Now sharing"), true, false, JMWSMessageType.SUCCESS);
+                    if (OutgoingShareRequests.hasShareRequestFor(from))
+                    {
+                        OutgoingShareRequests.getRequest(from).resolve();
+                        sendUserAlert(Component.translatable("sharing.jmws.sharing"), true, false, JMWSMessageType.SUCCESS);
+                    }
                 }
                 
                 default -> Constants.getLogger().warn("Unknown packet command -> " + waypointPayload.command());

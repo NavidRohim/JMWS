@@ -1,6 +1,9 @@
 package me.brynview.navidrohim.jmws.client.share;
 
+import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
+import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -11,5 +14,22 @@ public class OutgoingShareRequest extends ShareRequest {
 
     public OutgoingShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, Object waypointOrGroup, FetchType sharedObjectType, String requestIdentifier) {
         super(uuid, meantForPlayerUUID, waypointOrGroup, sharedObjectType, requestIdentifier);
+    }
+
+    public void resolve()
+    {
+        this.finishRequest();
+    }
+
+    @Override
+    protected void timeout()
+    {
+        OutgoingShareRequests.removeRequest(this.originalSender);
+        PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.request_timeout"), true, false, JMWSMessageType.WARNING);
+    }
+    private void finishRequest()
+    {
+        IncomingShareRequests.removeRequest(this.originalSender);
+        this.timeout.cancel(true);
     }
 }
