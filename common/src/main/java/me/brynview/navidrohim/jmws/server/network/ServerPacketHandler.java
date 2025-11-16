@@ -73,25 +73,27 @@ public class ServerPacketHandler {
                     }
                 }
 
-                // waypoint only.
-                try (UserSharingFile userSharingFile = new UserSharingFile(playerUUID))
+                // waypoint only (limiter)
+                if (ServerConfig.serverConfig.sharingEnabled)
                 {
-                    for (String shared : userSharingFile.getSharedList())
+                    try (UserSharingFile userSharingFile = new UserSharingFile(playerUUID))
                     {
-                        lastIter++;
-                        String waypointData = JMWSServerIO.getObjectFromUniqueIdentifier(shared, null, FetchType.WAYPOINT);
-                        if (waypointData != null)
+                        for (String shared : userSharingFile.getSharedList())
                         {
-                            jsonWaypointPayloadArray.put(String.valueOf(lastIter), waypointData);
-                        }
-                        else {
-                            userSharingFile.removeFromShared(shared);
+                            lastIter++;
+                            String waypointData = JMWSServerIO.getObjectFromUniqueIdentifier(shared, null, FetchType.WAYPOINT);
+                            if (waypointData != null)
+                            {
+                                jsonWaypointPayloadArray.put(String.valueOf(lastIter), waypointData);
+                            }
+                            else {
+                                userSharingFile.removeFromShared(shared);
+                            }
                         }
                     }
                 }
-                String jsonData = CommandFactory.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert, isDeathSync);
 
-                // 2000000 was (jsonData.getBytes().length >= SERVER_CONFIG.serverConfiguration.serverPacketLimit())
+                String jsonData = CommandFactory.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert, isDeathSync);
                 if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit, but I got nowhere near.
                     sendUserMessage(player, "error.jmws.error_packet_size", false, true);
                 } else {

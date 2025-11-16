@@ -16,6 +16,9 @@
 - ~~Option to disable share requests in config~~
 - Test on LAN
 - Implement server config for sharing
+- Add group syncing
+- Change name of /share as it is quite common
+- Add server-wide object sharing (Admins can set up waypoints that are added to all clients)
 
 # bugs
 - ~~/decline_share doesn't give text feedback~~ Resolved

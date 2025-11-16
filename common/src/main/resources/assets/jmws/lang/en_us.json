@@ -47,6 +47,7 @@
   "sharing.jmws.local_only": "To note; you can only update locally.",
   "sharing.jmws.disabled": "%s has share requests disabled.",
   "sharing.jmws.no_matching_object": "No waypoint matching that name.",
+  "sharing.jmws.no_server_sharing": "You cannot share on this server.",
 
   "__comment__": "Config language strings",
   "text.config.jmws-config.title": "JourneyMap Waypoint Syncing (JMWS)",
