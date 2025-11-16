@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import me.brynview.navidrohim.jmws.client.ClientVariables;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
+import me.brynview.navidrohim.jmws.server.Server;
 import me.brynview.navidrohim.jmws.server.ServerCommands;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.fabricmc.api.EnvType;
@@ -88,7 +89,7 @@ public class Jmws implements ModInitializer {
         }
 
         CommandRegistrationCallback.EVENT.register((dispatcher, context, commandSelection) -> {
-            dispatcher.register(Commands.literal("share").then(Commands.argument("userID", EntityArgument.player()).then(Commands.argument("objID", StringArgumentType.greedyString()).executes(context1 -> {
+            dispatcher.register(Commands.literal("share").then(Commands.argument("userID", EntityArgument.player()).then(Commands.argument("objID", StringArgumentType.greedyString()).suggests(Server.WAYPOINT_SUGGESTER) .executes(context1 -> {
                 ServerPlayer player = EntityArgument.getPlayer(context1, "userID");
                 String waypointID = StringArgumentType.getString(context1, "objID");
 

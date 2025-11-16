@@ -138,10 +138,8 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (CommonClass.serverConfig.waypointsEnabled()) // Check config
         {
-            ServerObject.SyncingInformation syncingInformation = ServerObject.SyncingInformation.getSyncingInfo(oldWaypoint.getCustomData());
-
+            ServerObject.SyncingInformation syncingInformation = ServerObject.SyncingInformation.getSyncingInfo(waypoint.getCustomData());
             Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncingInformation.objectIdentifier, waypoint)));
-            PlayerHelper.sendUserAlert(Component.translatable("message.jmws.modified_waypoint_success"), true, false, JMWSMessageType.SUCCESS);
         } else {
             PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
         }
@@ -242,7 +240,7 @@ public class JMWSPlugin implements IClientPlugin {
             ServerObject.SyncingInformation gsi = ServerObject.SyncingInformation.getSyncingInfo(waypointGroup.getCustomData());
 
             ObjectIdentifierMap.removeGroupFromMap(waypointGroup); // Remove from identifier map
-            String uID = gsi.objectIdentifier != null ? gsi.objectIdentifier : "null"; // This can be set to "null" but I cannot remember why.
+            String uID = gsi != null && gsi.objectIdentifier != null ? gsi.objectIdentifier : "null"; // This can be set to "null" but I cannot remember why.
 
             String jsonPacketData = CommandFactory.makeDeleteGroupRequestJson(
                     player.getUUID(),

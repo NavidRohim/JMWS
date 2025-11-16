@@ -4,6 +4,7 @@ import com.google.gson.*;
 import com.google.gson.annotations.Expose;
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
@@ -37,15 +38,19 @@ public class ServerObject implements PossessesIdentifier {
         public String objectIdentifier;
 
         @Expose
-        protected List<UUID> sharedTo;
+        protected List<String> sharedTo;
+
+        @Expose
+        protected UUID owner;
 
         @Nullable
         protected ServerObject parentObject = null;
 
-        public SyncingInformation(List<UUID> sharedTo, String identifier)
+        public SyncingInformation(List<String> sharedTo, String identifier, UUID owner)
         {
             this.objectIdentifier = identifier;
             this.sharedTo = sharedTo;
+            this.owner = owner;
         }
 
         public static ServerObject.SyncingInformation getSyncingInfo(ServerObject object)
@@ -66,7 +71,7 @@ public class ServerObject implements PossessesIdentifier {
         private static SyncingInformation transition(ServerObject object)
         {
             // TODO transition to new customDataField
-            object.customData = SyncingInformation.getEmptySyncingInfoString(object.getCustomData());
+            object.customData = SyncingInformation.getEmptySyncingInfoString(object.getCustomData(), object.ownerUUID);
             return getSyncingInfo(object);
         }
 
@@ -78,26 +83,32 @@ public class ServerObject implements PossessesIdentifier {
                 return gson.fromJson(customDataField, SyncingInformation.class);
             } catch (JsonSyntaxException syntaxException) // will throw if object hasn't been ported.
             {
-                return getSyncingInfo(getEmptySyncingInfoString(customDataField));
+                UUID owner = CommonClass.minecraftClientInstance.player.getUUID();
+                return getSyncingInfo(getEmptySyncingInfoString(customDataField, owner));
             }
         }
 
-        public static String getEmptySyncingInfoString(String objectIdentifier)
+        public static String getEmptySyncingInfoString(String objectIdentifier, UUID owner)
         {
             Gson gson = new Gson();
-            return gson.toJson(new SyncingInformation(List.of(), objectIdentifier));
+            return gson.toJson(new SyncingInformation(List.of(), objectIdentifier, owner));
         }
 
         public void addUserToShare(UUID playerUUID)
         {
-            this.sharedTo.add(playerUUID);
+            this.sharedTo.add(playerUUID.toString());
             this.update();
         }
 
-        public void removeUserFromShare(UUID playerUUID)
+        public void removeUserFromShare(String playerUUID)
         {
             this.sharedTo.remove(playerUUID);
             this.update();
+        }
+
+        public boolean isOwner(UUID supposedOwner)
+        {
+            return this.owner.equals(supposedOwner);
         }
 
         private void update()
@@ -117,13 +128,13 @@ public class ServerObject implements PossessesIdentifier {
 
         public void syncToUsers()
         {
-            for (UUID playerUUID : this.sharedTo)
+            for (String playerUUID : this.sharedTo)
             {
-                ServerPlayer sharedUser = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
+                ServerPlayer sharedUser = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(UUID.fromString(playerUUID));
 
                 if (sharedUser != null)
                 {
-                    ServerPacketHandler.sendUserSync(sharedUser, true, false, false);
+                    ServerPacketHandler.sendUserSync(sharedUser, false, false, false);
                 }
             }
         }
@@ -136,7 +147,7 @@ public class ServerObject implements PossessesIdentifier {
     JsonObject payload;
     boolean dataclass;
 
-    public UserSharingFile ownerSharing;
+    public UserSharingFile accessorSharing;
     public SyncingInformation syncing;
     public static FetchType objectType = FetchType.GENERIC;
 
@@ -152,9 +163,10 @@ public class ServerObject implements PossessesIdentifier {
         this.customData = payload.get("customData").getAsString(); // bug with json formatting
         this.syncing = SyncingInformation.getSyncingInfo(this);
         this.ownerUUID = playerUUID;
+        this.name = payload.get("name").getAsString();
 
-        this.ownerSharing = !dataclass ? new UserSharingFile(playerUUID) : null;
-        this.objectPath = !dataclass ? JMWSServerIO.Utils.getNewObjectFilename(this.ownerUUID, this.syncing.objectIdentifier, getObjectType()) : null;
+        this.accessorSharing = !dataclass ? new UserSharingFile(playerUUID) : null;
+        this.objectPath = !dataclass ? JMWSServerIO.Utils.getNewObjectFilename(this.syncing.owner, this.syncing.objectIdentifier, getObjectType()) : null;
     }
 
     public ServerObject(JsonObject payload, UUID playerUUID)
@@ -164,6 +176,7 @@ public class ServerObject implements PossessesIdentifier {
 
     public String getName() { return this.name; }
     public String getCustomData() { return this.customData; }
+
     public void setCustomData(String data)
     {
         this.customData = data;
@@ -191,21 +204,13 @@ public class ServerObject implements PossessesIdentifier {
         return this.getObjectPath() != null && CommonHelper.fileExists(this.getObjectPath());
     }
 
-    public static void removeWaypointFromUser(UUID playerUUID, String objectIdentifier)
+    public void removeWaypointFromUser(UUID playerUUID, String objectIdentifier)
     {
         UserSharingFile.removeObjectFromUser(playerUUID, objectIdentifier);
         ServerPlayer sharedPlayer = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
         if (sharedPlayer != null)
         {
             Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteRequestJson(objectIdentifier, true, false)), sharedPlayer);
-        }
-    }
-
-    public void removeWaypointFromUsers()
-    {
-        for (UUID userUUID : this.syncing.sharedTo)
-        {
-            removeWaypointFromUser(userUUID, this.syncing.objectIdentifier);
         }
     }
 
@@ -255,7 +260,7 @@ public class ServerObject implements PossessesIdentifier {
 
                     return true;
                 } else {
-                    PlayerNetworkingHelper.sendUserMessage(this.ownerUUID, "error.jmws.invalid_name", false, true);
+                    PlayerNetworkingHelper.sendUserMessage(this.ownerUUID, "error.jmws.invalid_name", false, JMWSMessageType.FAILURE);
                     return false;
                 }
 
@@ -274,6 +279,20 @@ public class ServerObject implements PossessesIdentifier {
             }
         }
         return false;
+    }
+
+    public void stopSharing(UUID user)
+    {
+        this.syncing.removeUserFromShare(String.valueOf(user));
+        this.accessorSharing.removeFromShared(this.syncing.objectIdentifier);
+    }
+
+    public void stopSharing()
+    {
+        for (String userUUID : this.syncing.sharedTo)
+        {
+            removeWaypointFromUser(UUID.fromString(userUUID), this.syncing.objectIdentifier);
+        }
     }
 
     @Override

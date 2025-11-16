@@ -10,7 +10,7 @@ public class ServerConfigObject {
     public Boolean jmwsEnabled;
     public Boolean waypointsEnabled;
     public Boolean groupsEnabled;
-
+    public Boolean sharingEnabled;
 
     /**
      * Only use this constructor in its raw form on the server side. For the client side, use Gson().fromJson() with the raw packet data and specify this class.
@@ -18,10 +18,11 @@ public class ServerConfigObject {
      * @param waypointsEnabled If waypoints are allowed to be synced.
      * @param groupsEnabled If groups are allowed to be synced.
      */
-    public ServerConfigObject(boolean jmwsEnabled, boolean waypointsEnabled, boolean groupsEnabled) {
+    public ServerConfigObject(boolean jmwsEnabled, boolean waypointsEnabled, boolean groupsEnabled, boolean sharingEnabled) {
         this.jmwsEnabled = jmwsEnabled;
         this.waypointsEnabled = waypointsEnabled;
         this.groupsEnabled = groupsEnabled;
+        this.sharingEnabled = sharingEnabled;
     }
 
     /**
@@ -57,6 +58,6 @@ public class ServerConfigObject {
      */
     public boolean allEnabled()
     {
-        return (jmwsEnabled && waypointsEnabled && groupsEnabled);
+        return (jmwsEnabled && waypointsEnabled && groupsEnabled && sharingEnabled);
     }
 }

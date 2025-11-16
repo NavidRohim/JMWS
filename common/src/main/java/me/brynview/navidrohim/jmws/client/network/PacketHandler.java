@@ -68,11 +68,9 @@ public class PacketHandler {
                 // This might be useless. Found out recently there is a way to do this with vanilla code without defining a custom packet.
                 case CLIENT_ALERT -> {
                     String firstArgument = waypointPayload.arguments().getFirst().getAsString();
-                    boolean isError = waypointPayload.arguments().getLast().getAsBoolean();
-                    JMWSMessageType messageType = JMWSMessageType.NEUTRAL;
+                    JMWSMessageType messageType = JMWSMessageType.valueOf(waypointPayload.arguments().getLast().getAsString());
 
-                    if (isError) {
-                        messageType = JMWSMessageType.FAILURE;
+                    if (messageType.equals(JMWSMessageType.FAILURE)) {
                         PlayerHelper.sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
                     }
 
@@ -111,7 +109,11 @@ public class PacketHandler {
 
                     if (direction.equals(ShareRequest.Direction.FOR_CLIENT))
                     {
-                        if (!IncomingShareRequests.hasShareRequestFrom(from))
+                        if (!CommonClass.config.enableSharing.get())
+                        {
+                            ShareRequest.disabled(from);
+                        }
+                        else if (!IncomingShareRequests.hasShareRequestFrom(from))
                         {
                             IncomingShareRequests.addRequest(from, new ShareRequest(
                                     from,
@@ -133,24 +135,28 @@ public class PacketHandler {
 
                 case REJECT_SHARE ->
                 {
-                    UUID from = UUID.fromString(arguments.getFirst().getAsString());
-                    OutgoingShareRequests.removeRequest(from);
-                    sendUserAlert(Component.translatable("sharing.jmws.share_request"), true, false, JMWSMessageType.FAILURE);
+                    UUID toUser = UUID.fromString(arguments.getFirst().getAsString());
+                    OutgoingShareRequests.getRequest(toUser).resolve();
+                    sendUserAlert(Component.translatable("sharing.jmws.share_rejected"), true, false, JMWSMessageType.FAILURE);
                 }
 
                 case USER_ALREADY_PROCESSING_SHARE ->
                 {
-                    UUID from = UUID.fromString(arguments.getFirst().getAsString());
-                    OutgoingShareRequests.removeRequest(from);
-                    sendUserAlert(Component.translatable("sharing.jmws.share_busy"), true, false, JMWSMessageType.WARNING);
+                    UUID shareUserID = UUID.fromString(arguments.get(1).getAsString());
+                    String declineMessage = arguments.getLast().getAsString();
+
+                    Player shareUser = PlayerHelper.getUserFromUUID(shareUserID);
+
+                    OutgoingShareRequests.getRequest(shareUserID).resolve();
+                    sendUserAlert(Component.translatable(declineMessage, shareUser.getName().getString()), true, false, JMWSMessageType.WARNING);
                 }
 
                 case AFFIRM_SHARE ->
                 {
-                    UUID from = UUID.fromString(arguments.getFirst().getAsString());
-                    if (OutgoingShareRequests.hasShareRequestFor(from))
+                    UUID shareUserID = UUID.fromString(arguments.getFirst().getAsString());
+                    if (OutgoingShareRequests.hasShareRequestFor(shareUserID))
                     {
-                        OutgoingShareRequests.getRequest(from).resolve();
+                        OutgoingShareRequests.getRequest(shareUserID).resolve();
                         sendUserAlert(Component.translatable("sharing.jmws.sharing"), true, false, JMWSMessageType.SUCCESS);
                     }
                 }

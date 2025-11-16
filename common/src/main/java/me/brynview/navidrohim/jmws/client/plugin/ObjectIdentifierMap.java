@@ -4,6 +4,7 @@ import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -90,7 +91,7 @@ public class ObjectIdentifierMap {
         ServerObject.SyncingInformation waypointSyncInfo = ServerObject.SyncingInformation.getSyncingInfo(waypoint.getCustomData());
         String waypointIdentifier = waypointSyncInfo == null ? makeWaypointHash(minecraftClientInstance.player.getUUID(), waypoint.getGuid(), waypoint.getName()) : waypointSyncInfo.objectIdentifier;
         waypointIdentifierMap.put(waypointIdentifier, waypoint);
-        waypoint.setCustomData(ServerObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier));
+        waypoint.setCustomData(ServerObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID()));
 
     }
 
@@ -102,7 +103,7 @@ public class ObjectIdentifierMap {
     {
         String waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypointGroup.getGuid(), waypointGroup.getName());
         groupIdentifierMap.put(waypointIdentifier, waypointGroup);
-        waypointGroup.setCustomData(ServerObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier));
+        waypointGroup.setCustomData(ServerObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID()));
     }
 
     /**
@@ -120,6 +121,8 @@ public class ObjectIdentifierMap {
      */
     public static void removeGroupFromMap(WaypointGroup group)
     {
-        groupIdentifierMap.remove(ServerObject.SyncingInformation.getSyncingInfo(group.getCustomData()).objectIdentifier);
+        @Nullable ServerObject.SyncingInformation groupSyncInfo = ServerObject.SyncingInformation.getSyncingInfo(group.getCustomData());
+        if (groupSyncInfo != null)
+            groupIdentifierMap.remove(groupSyncInfo.objectIdentifier);
     }
 }

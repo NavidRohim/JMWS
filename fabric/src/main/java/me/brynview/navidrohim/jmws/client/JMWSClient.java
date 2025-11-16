@@ -9,6 +9,7 @@ import me.brynview.navidrohim.jmws.client.callback.ClientCommandCallback;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
@@ -16,6 +17,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
+
+import java.util.Collection;
+import java.util.List;
 
 
 public class JMWSClient implements ClientModInitializer {
@@ -31,9 +35,9 @@ public class JMWSClient implements ClientModInitializer {
             CommonEvents.handleJoin(handler.player, true, true);
         }));
         ScreenEvents.AFTER_INIT.register(this::waitForStartScreenRegister);
-        /*ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
+        ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
             CommonEvents.clearCache();
-        }));*/
+        }));
     }
 
     private void waitForStartScreenRegister(Minecraft minecraft, Screen screen, int i, int i1) {

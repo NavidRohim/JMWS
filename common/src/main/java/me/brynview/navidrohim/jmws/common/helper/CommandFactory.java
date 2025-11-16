@@ -4,9 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
+import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.share.ShareRequest;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 
@@ -61,8 +62,8 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.SYNC, jsonArray, jsonGroupArray, sendAlert, isDeathSync);
     }
 
-    public static String makeClientAlertRequestJson(String message, boolean overlay, boolean isError) {
-        return CommandFactory.makeBaseJsonRequest(Commands.CLIENT_ALERT, message, overlay, isError);
+    public static String makeClientAlertRequestJson(String message, boolean overlay, JMWSMessageType messageType) {
+        return CommandFactory.makeBaseJsonRequest(Commands.CLIENT_ALERT, message, overlay, messageType);
     }
 
     public static String makeObjectShareRequestForUser(String waypoint, UUID to, UUID from, ShareRequest.Direction direction)
@@ -78,12 +79,11 @@ public class CommandFactory {
     public static String makeObjectShareRequestDecline(UUID originalSender)
     {
         return CommandFactory.makeBaseJsonRequest(Commands.REJECT_SHARE, originalSender);
-
     }
 
-    public static String makeObjectShareRequestUserBusy(UUID originalSender)
+    public static String makeObjectShareRequestDeclineWithMessage(UUID originalSender, String messageKey)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.USER_ALREADY_PROCESSING_SHARE, originalSender);
+        return CommandFactory.makeBaseJsonRequest(Commands.USER_ALREADY_PROCESSING_SHARE, originalSender, PlayerHelper.ourUUID(), messageKey);
     }
 
     public static String makeObjectShareRequestAccept(ShareRequest shareRequest)
@@ -99,11 +99,6 @@ public class CommandFactory {
     public static String makeUpdateObjectRequest(String objectIdentifier, WaypointGroup group)
     {
         return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectIdentifier, FetchType.GROUP, group.toString());
-    }
-
-    public static String makeWaypointFetchRequestFromIdentifier(List<String> identifiers)
-    {
-        return CommandFactory.makeBaseJsonRequest(Commands.REQUEST_OBJECT, identifiers);
     }
 
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {
@@ -135,7 +130,6 @@ public class CommandFactory {
         OBJECT_SHARE, // Share waypoint / group
         AFFIRM_SHARE, // Confirm user wants shared object
         REJECT_SHARE, // User doesnt want shared object.
-        REQUEST_OBJECT,
 
         // Object sharing errors
         USER_ALREADY_PROCESSING_SHARE, // User is already processing another share request

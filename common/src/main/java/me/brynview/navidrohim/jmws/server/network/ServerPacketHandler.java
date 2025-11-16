@@ -6,6 +6,8 @@ import com.google.gson.JsonParser;
 import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.FetchType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -39,8 +41,8 @@ public class ServerPacketHandler {
             try {
                 int lastIter = 0;
 
-                List<Path> playerWaypoints = JMWSServerIO.getObjectsForUser(playerUUID, FetchType.WAYPOINT);
-                List<Path> playerGroups = JMWSServerIO.getObjectsForUser(playerUUID, FetchType.GROUP);
+                List<Path> playerWaypoints = JMWSServerIO.getObjectPathsForUser(playerUUID, FetchType.WAYPOINT);
+                List<Path> playerGroups = JMWSServerIO.getObjectPathsForUser(playerUUID, FetchType.GROUP);
 
                 HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
                 HashMap<String, String> jsonGroupPayloadArray = new HashMap<>();
@@ -155,24 +157,31 @@ public class ServerPacketHandler {
                 boolean deleteAll = arguments.getLast().getAsBoolean();
                 boolean result;
 
-                ServerWaypoint waypoint = JMWSServerIO.getWaypointFromFile(waypointIdentifier, playerUUID);
+                ServerWaypoint waypoint = JMWSServerIO.getWaypointFromUniqueIdentifier(waypointIdentifier, playerUUID);
 
                 if (waypoint != null)
                 {
-                    waypoint.removeWaypointFromUsers();
 
-                    if (!deleteAll) {
-                        result = waypoint.delete();
-                    } else {
-                        result = JMWSServerIO.deleteAllUserObjects(playerUUID, FetchType.WAYPOINT);
-                    }
+                    if (waypoint.syncing.isOwner(playerUUID))
+                    {
+                        waypoint.stopSharing();
 
-                    if (!silent) {
-                        if (result) {
-                            sendUserMessage(player, "message.jmws.deletion_success", true, false);
+                        if (!deleteAll) {
+                            result = waypoint.delete();
                         } else {
-                            sendUserMessage(player, "message.jmws.deletion_failure", true, true);
+                            result = JMWSServerIO.deleteAllUserObjects(playerUUID, FetchType.WAYPOINT);
                         }
+
+                        if (!silent) {
+                            if (result) {
+                                sendUserMessage(player, "message.jmws.deletion_success", true, false);
+                            } else {
+                                sendUserMessage(player, "message.jmws.deletion_failure", true, true);
+                            }
+                        }
+                    } else {
+                        waypoint.stopSharing(playerUUID);
+                        sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
                     }
                 } else {
                     sendUserMessage(player, "message.jmws.deletion_failure", true, true);
@@ -230,8 +239,15 @@ public class ServerPacketHandler {
                 ServerObject obj = JMWSServerIO.getObjectFromDisk(objectIdentifier, playerUUID, modifyingType.getObjectClass(), modifyingType);
                 if (obj != null)
                 {
-                    obj.update(objectData, false);
-                    obj.syncing.syncToUsers();
+                    if (obj.syncing.isOwner(playerUUID))
+                    {
+                        obj.update(objectData, false);
+                        obj.syncing.syncToUsers();
+
+                        PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_waypoint_success", true, JMWSMessageType.SUCCESS);
+                    } else {
+                        sendUserMessage(player, "sharing.jmws.local_only", true, JMWSMessageType.ONE_TIME_WARNING);
+                    }
                 }
 
             }
@@ -268,6 +284,7 @@ public class ServerPacketHandler {
                 if (sharedWp != null)
                 {
                     sharedWp.syncing.addUserToShare(playerUUID);
+                    Dispatcher.sendToClient(waypointActionPayload, CommonClass.minecraftServerInstance.getPlayerList().getPlayer(ownerUUID));
                 } else {
                     sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
                 }

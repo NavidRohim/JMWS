@@ -5,10 +5,13 @@ import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Random player functions that play sounds or sends action bar alerts.
@@ -69,4 +72,16 @@ public class PlayerHelper {
             CommonClass.minecraftClientInstance.player.playSound(sound, 0.09f, 1f); // Lower volume so it becomes background noise
         }
     }
+
+    @Nullable
+    public static Player getUserFromUUID(UUID user)
+    {
+        return CommonClass.minecraftClientInstance.player.getCommandSenderWorld().getPlayerByUUID(user);
+    }
+
+    public static UUID ourUUID()
+    {
+        return CommonClass.minecraftClientInstance.player.getUUID();
+    }
+
 }

@@ -24,8 +24,6 @@ public class ShareRequest {
 
     protected final ScheduledFuture<?> timeout;
 
-
-
     public enum Direction
     {
         FOR_HOST,
@@ -48,11 +46,14 @@ public class ShareRequest {
         this.finishRequest();
     }
 
-    public static void busy(UUID originalSender)
+    public static void  busy(UUID originalSender)
     {
-        Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestUserBusy(originalSender)));
+        Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestDeclineWithMessage(originalSender, "sharing.jmws.share_busy")));
     }
 
+    public static void disabled(UUID originalSender) {
+        Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestDeclineWithMessage(originalSender, "sharing.jmws.disabled")));
+    }
     public void accept()
     {
         Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestAccept(this)));

@@ -6,19 +6,24 @@
 
 - ~~Sync waypoint when updated~~
 - ~~Delete waypoint when deleted by owner~~
-- Make command object selection argument type
+- ~~Make command object selection argument type~~
 - ~~Make temp strings into translation strings~~
 - ~~Add sharing request timeout (20 seconds)~~
 - Add command hooks to both Forges
-- Check shared user permissions when deleting, modifying, etc (can user delete this? can the user update this?)
-    - Currently, an error is thrown.
-- Quilt?
-- Option to disable share requests in config
+- ~~Check shared user permissions when deleting, modifying, etc (can user delete this? can the user update this?)~~
+    - ~~Currently, an error is thrown.~~
+- ~~Quilt?~~ No. I have a feeling it will die soon.
+- ~~Option to disable share requests in config~~
+- Test on LAN
+- Implement server config for sharing
 
 # bugs
-- ~~/decline_share doesnt give text feedback~~ Resolved
+- ~~/decline_share doesn't give text feedback~~ Resolved
 - ~~Deleting a shared waypoint doesn't delete the shared user index file~~ Issue no longer valid. Resolved
 - ~~Syncing just doesn't work.~~ Resolved
 - ~~Updates only work once then shared user list is erased~~ Resolved
 - ~~Object UUID changes when user leaves.~~ Resolved
-- Game crashes when player deletes all waypoints from in-built group
+- ~~Game crashes when player deletes all waypoints from in-built group~~ Resolved
+- ~~Bug where outgoing share request just stays forever~~ Resolved
+- Elusive bug where a NullPointerException is thrown while trying to delete shared waypoint on shared user client.
+- When making group, client crashes. 

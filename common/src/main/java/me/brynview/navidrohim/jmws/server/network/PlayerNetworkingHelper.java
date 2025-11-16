@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.server.network;
 
 import com.mojang.authlib.minecraft.client.MinecraftClient;
 import commonnetwork.api.Dispatcher;
+import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
@@ -13,12 +14,17 @@ import java.util.UUID;
 
 public class PlayerNetworkingHelper {
     public static void sendUserMessage(ServerPlayer player, String messageKey, Boolean overlay, boolean isError) {
-        JMWSActionPayload messagePayload = new JMWSActionPayload(CommandFactory.makeClientAlertRequestJson(messageKey, overlay, isError));
+        JMWSActionPayload messagePayload = new JMWSActionPayload(CommandFactory.makeClientAlertRequestJson(messageKey, overlay, isError ? JMWSMessageType.FAILURE : JMWSMessageType.NEUTRAL));
         Dispatcher.sendToClient(messagePayload, player);
     }
 
-    public static void sendUserMessage(UUID player, String messageKey, Boolean overlay, boolean isError) {
-        JMWSActionPayload messagePayload = new JMWSActionPayload(CommandFactory.makeClientAlertRequestJson(messageKey, overlay, isError));
+    public static void sendUserMessage(ServerPlayer player, String messageKey, Boolean overlay, JMWSMessageType messageType) {
+        JMWSActionPayload messagePayload = new JMWSActionPayload(CommandFactory.makeClientAlertRequestJson(messageKey, overlay, messageType));
+        Dispatcher.sendToClient(messagePayload, player);
+    }
+
+    public static void sendUserMessage(UUID player, String messageKey, Boolean overlay, JMWSMessageType messageType) {
+        JMWSActionPayload messagePayload = new JMWSActionPayload(CommandFactory.makeClientAlertRequestJson(messageKey, overlay, messageType));
         Dispatcher.sendToClient(messagePayload, CommonClass.minecraftServerInstance.getPlayerList().getPlayer(player));
     }
 

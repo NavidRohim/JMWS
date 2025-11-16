@@ -19,8 +19,8 @@ public class ClientSideServerConfigObject extends ServerConfigObject {
      * @param groupsEnabled If groups are allowed to be synced.
      * @param serverVersion The remote servers JMWS server version
      */
-    public ClientSideServerConfigObject(boolean jmwsEnabled, boolean waypointsEnabled, boolean groupsEnabled, @Nullable Double serverVersion) {
-        super(jmwsEnabled, waypointsEnabled, groupsEnabled);
+    public ClientSideServerConfigObject(boolean jmwsEnabled, boolean waypointsEnabled, boolean groupsEnabled, boolean sharingEnabled, @Nullable Double serverVersion) {
+        super(jmwsEnabled, waypointsEnabled, groupsEnabled, sharingEnabled);
         this.serverVersion = serverVersion;
     }
 
@@ -40,7 +40,7 @@ public class ClientSideServerConfigObject extends ServerConfigObject {
      */
     public static ClientSideServerConfigObject empty()
     {
-        return new ClientSideServerConfigObject(false, false, false, Constants.SERVER_VERSION);
+        return new ClientSideServerConfigObject(false, false, false, false, Constants.SERVER_VERSION);
     }
 
     /**
@@ -49,6 +49,6 @@ public class ClientSideServerConfigObject extends ServerConfigObject {
      */
     public static ClientSideServerConfigObject serverOwner()
     {
-        return new ClientSideServerConfigObject(true, true, true, Constants.SERVER_VERSION);
+        return new ClientSideServerConfigObject(true, true, true, true, Constants.SERVER_VERSION);
     }
 }

@@ -17,7 +17,6 @@ public class ServerGroup extends ServerObject {
 
         this.rawPacketData = payload.toString();
         this.groupIdentifier = payload.get("guid").getAsString();
-        this.name = payload.get("name").getAsString();
     }
 
     @Override
