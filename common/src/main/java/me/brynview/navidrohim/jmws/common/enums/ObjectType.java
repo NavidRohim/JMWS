@@ -3,7 +3,7 @@ package me.brynview.navidrohim.jmws.common.enums;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
 
-public enum FetchType {
+public enum ObjectType {
     WAYPOINT(ServerWaypoint.class),
     GROUP(ServerGroup.class),
     SHARED(null),
@@ -11,7 +11,7 @@ public enum FetchType {
 
     private final Class savedClass;
 
-    FetchType(final Class savedClass) {
+    ObjectType(final Class savedClass) {
         this.savedClass = savedClass;
     }
 

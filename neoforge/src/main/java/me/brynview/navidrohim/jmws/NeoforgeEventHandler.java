@@ -1,7 +1,7 @@
 package me.brynview.navidrohim.jmws;
 
 import com.mojang.brigadier.CommandDispatcher;
-import me.brynview.navidrohim.jmws.client.ClientCommands;
+import me.brynview.navidrohim.jmws.client.commands.ClientCommands;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.events.CommonEvents;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;

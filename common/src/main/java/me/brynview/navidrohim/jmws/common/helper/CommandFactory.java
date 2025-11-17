@@ -9,10 +9,9 @@ import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.share.ShareRequest;
-import me.brynview.navidrohim.jmws.common.enums.FetchType;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -36,7 +35,7 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.COMMON_DELETE_WAYPOINT, waypointIdentifier, silent, all);
     }
 
-    public static String makeDeleteGroupRequestJson(UUID playerUUID, String groupUniversalIdentifier, String groupGUID, boolean silent, boolean removeAllWaypointsInGroup, boolean removeGroupItself, boolean deleteAllGroups) {
+    public static String makeDeleteGroupRequestJson(String groupUniversalIdentifier, String groupGUID, boolean silent, boolean removeAllWaypointsInGroup, boolean removeGroupItself, boolean deleteAllGroups) {
         return CommandFactory.makeBaseJsonRequest(Commands.COMMON_DELETE_GROUP,
                 groupUniversalIdentifier,
                 groupGUID,
@@ -66,14 +65,14 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.CLIENT_ALERT, message, overlay, messageType);
     }
 
-    public static String makeObjectShareRequestForUser(String waypoint, UUID to, UUID from, ShareRequest.Direction direction)
+    public static String makeObjectShareRequestForUser(String waypoint, UUID to, UUID from, ShareRequest.Direction direction, ObjectType objectType)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.OBJECT_SHARE, waypoint, to, from, FetchType.WAYPOINT, direction);
+        return CommandFactory.makeBaseJsonRequest(Commands.OBJECT_SHARE, waypoint, to, from, objectType, direction);
     }
 
     public static String makeObjectShareRequestForUser(WaypointGroup waypointGroup)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.OBJECT_SHARE, waypointGroup.toString(), FetchType.GROUP);
+        return CommandFactory.makeBaseJsonRequest(Commands.OBJECT_SHARE, waypointGroup.toString(), ObjectType.GROUP);
     }
 
     public static String makeObjectShareRequestDecline(UUID originalSender)
@@ -88,17 +87,17 @@ public class CommandFactory {
 
     public static String makeObjectShareRequestAccept(ShareRequest shareRequest)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.AFFIRM_SHARE, shareRequest.originalSender, shareRequest.requestIdentifier);
+        return CommandFactory.makeBaseJsonRequest(Commands.AFFIRM_SHARE, shareRequest.originalSender, shareRequest.requestIdentifier, shareRequest.sharedObjectType);
     }
 
     public static String makeUpdateObjectRequest(String objectIdentifier, Waypoint waypoint)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectIdentifier, FetchType.WAYPOINT, waypoint.toString());
+        return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectIdentifier, ObjectType.WAYPOINT, waypoint.toString());
     }
 
     public static String makeUpdateObjectRequest(String objectIdentifier, WaypointGroup group)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectIdentifier, FetchType.GROUP, group.toString());
+        return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectIdentifier, ObjectType.GROUP, group.toString());
     }
 
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {

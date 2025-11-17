@@ -4,7 +4,7 @@ import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
-import me.brynview.navidrohim.jmws.common.enums.FetchType;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.minecraft.network.chat.Component;
@@ -19,7 +19,7 @@ public class ShareRequest {
     public UUID originalSender;
     public UUID meantFor;
     public Object currentSharedObject;
-    public FetchType sharedObjectType;
+    public ObjectType sharedObjectType;
     public String requestIdentifier;
 
     protected final ScheduledFuture<?> timeout;
@@ -30,7 +30,7 @@ public class ShareRequest {
         FOR_CLIENT
     }
 
-    public ShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, @Nullable Object waypointOrGroup, FetchType sharedObjectType, String requestIdentifier) {
+    public ShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, @Nullable Object waypointOrGroup, ObjectType sharedObjectType, String requestIdentifier) {
         this.originalSender = uuid;
         this.meantFor = meantForPlayerUUID;
         this.currentSharedObject = waypointOrGroup;
@@ -46,7 +46,7 @@ public class ShareRequest {
         this.finishRequest();
     }
 
-    public static void  busy(UUID originalSender)
+    public static void busy(UUID originalSender)
     {
         Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestDeclineWithMessage(originalSender, "sharing.jmws.share_busy")));
     }
@@ -54,10 +54,11 @@ public class ShareRequest {
     public static void disabled(UUID originalSender) {
         Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestDeclineWithMessage(originalSender, "sharing.jmws.disabled")));
     }
+
     public void accept()
     {
         Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestAccept(this)));
-        JMWSPlugin.getInstance().addWaypoint(this.currentSharedObject);
+        JMWSPlugin.getInstance().addObjectFromRequest(this);
 
         this.finishRequest();
     }

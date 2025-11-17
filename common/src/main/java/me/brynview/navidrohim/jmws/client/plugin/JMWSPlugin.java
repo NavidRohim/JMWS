@@ -17,6 +17,7 @@ import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.client.share.ShareRequest;
 import me.brynview.navidrohim.jmws.client.utils.ObjectUtils;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
@@ -24,7 +25,7 @@ import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
-import me.brynview.navidrohim.jmws.common.enums.FetchType;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
@@ -214,12 +215,14 @@ public class JMWSPlugin implements IClientPlugin {
                 }
 
                 // Get old group if context is UPDATE (needed because server needs reference to group before it was updated so it can be deleted on the server)
-                WaypointGroup oldWaypointGroup = ObjectIdentifierMap.getOldGroup(waypointGroup);
 
                 switch (waypointGroupEvent.getContext()) {
                     case CREATE -> this.groupCreationHandler(waypointGroup, false, false);
                     case DELETED -> this.groupDeletionHandler(waypointGroup, player, false, waypointGroupEvent.deleteWaypoints(), true);
-                    case UPDATE -> this.groupUpdateHandler(waypointGroup, oldWaypointGroup, player);
+                    case UPDATE -> {
+                        WaypointGroup oldWaypointGroup = ObjectIdentifierMap.getOldGroup(waypointGroup);
+                        this.groupUpdateHandler(waypointGroup, oldWaypointGroup, player);
+                    }
                 }
             }
         }
@@ -243,7 +246,6 @@ public class JMWSPlugin implements IClientPlugin {
             String uID = gsi != null && gsi.objectIdentifier != null ? gsi.objectIdentifier : "null"; // This can be set to "null" but I cannot remember why.
 
             String jsonPacketData = CommandFactory.makeDeleteGroupRequestJson(
-                    player.getUUID(),
                     uID,
                     waypointGroup.getGuid(),
                     silent,
@@ -323,16 +325,17 @@ public class JMWSPlugin implements IClientPlugin {
      * @param deletionType -- What saved object to delete (waypoint or group)
      * @param toDelete -- ObjectIdentifierMap ID, this is stored on the server only in the "customData" field (example; 38ab19a2e6544389265e40ad23b49983d9620b199c111e20b2b9a5159458b519)
      */
-    public void deleteSavedObjects(boolean silent, FetchType deletionType, String toDelete)
+    public void deleteSavedObjects(boolean silent, ObjectType deletionType, String toDelete)
     {
         String deletionMessageConfirmationKey = "message.jmws.deletion_all_success";
 
-        if (deletionType == FetchType.WAYPOINT) {
+        if (deletionType == ObjectType.WAYPOINT) {
             Waypoint oldWp = ObjectIdentifierMap.getOldWaypoint(toDelete);
             INSTANCE.jmAPI.removeWaypoint(oldWp.getModId(), oldWp);
         } else {
             deletionMessageConfirmationKey = "message.jmws.deletion_group_all_success";
-            JMWSPlugin.getInstance().jmAPI.removeWaypointGroup(ObjectIdentifierMap.getOldGroup(toDelete), false);
+            WaypointGroup oldGp = ObjectIdentifierMap.getOldGroup(toDelete);
+            JMWSPlugin.getInstance().jmAPI.removeWaypointGroup(oldGp, false);
         }
         if (!silent)
         {
@@ -450,8 +453,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Add server groups to the client
         for (WaypointGroup savedGroup : savedGroups) {
-            ObjectIdentifierMap.addGroupToMap(savedGroup);
-            getInstance().jmAPI.addWaypointGroup(savedGroup);
+            addGroup(savedGroup);
         }
 
         // return this because need to give an alert
@@ -489,8 +491,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Add server waypoints to the client
         for (Waypoint savedWaypoint : savedWaypoints) {
-            ObjectIdentifierMap.addWaypointToMap(savedWaypoint);
-            getInstance().jmAPI.addWaypoint(savedWaypoint.getModId(), savedWaypoint);
+            addWaypoint(savedWaypoint);
         }
 
         return hasLocalWaypoint;
@@ -551,8 +552,26 @@ public class JMWSPlugin implements IClientPlugin {
         }
     }
 
-    public void addWaypoint(Object currentSharedObject)
+    public static void addWaypoint(Waypoint waypoint)
     {
-        jmAPI.addWaypoint(Constants.MODID, (Waypoint) currentSharedObject);
+        getInstance().jmAPI.addWaypoint(waypoint.getModId(), waypoint);
+        ObjectIdentifierMap.addWaypointToMap(waypoint);
+
+    }
+
+    public static void addGroup(WaypointGroup waypointGroup)
+    {
+        getInstance().jmAPI.addWaypointGroup(waypointGroup);
+        ObjectIdentifierMap.addGroupToMap(waypointGroup);
+    }
+
+    public void addObjectFromRequest(ShareRequest request)
+    {
+        if (request.sharedObjectType == ObjectType.WAYPOINT)
+        {
+            addWaypoint((Waypoint) request.currentSharedObject);
+        } else {
+            addGroup((WaypointGroup) request.currentSharedObject);
+        }
     }
 }

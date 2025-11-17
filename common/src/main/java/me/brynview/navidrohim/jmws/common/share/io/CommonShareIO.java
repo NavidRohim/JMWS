@@ -3,7 +3,7 @@ package me.brynview.navidrohim.jmws.common.share.io;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 
 import java.io.FileWriter;
@@ -16,26 +16,35 @@ public class CommonShareIO implements AutoCloseable {
 
     private static class SharedObjectUsers {
 
-        public List<String> valueList;
+        public List<String> sharedWaypoints;
+        public List<String> sharedGroups;
 
-        public SharedObjectUsers(List<String> sharedValues)
+        public SharedObjectUsers(List<String> sharedWaypoints, List<String> sharedGroups)
         {
-            this.valueList = sharedValues;
+            this.sharedWaypoints = sharedWaypoints;
+            this.sharedGroups = sharedGroups;
         }
     }
 
-    protected final List<String> data = new ArrayList<>();
+    protected final List<String> WpData = new ArrayList<>();
+    protected final List<String> GpData = new ArrayList<>();
+
     public final Path objectPath;
 
     public CommonShareIO(Path sharedObjectFilePath) {
         this.objectPath = sharedObjectFilePath;
 
         try {
-            JsonArray jsonElements = JMWSServerIO.getObjectDataFromDisk(sharedObjectFilePath, true).get("valueList").getAsJsonArray();
+            JsonArray jsonElements = JMWSServerIO.getObjectDataFromDisk(sharedObjectFilePath, true).get("sharedWaypoints").getAsJsonArray();
+            JsonArray jsonElementsGps = JMWSServerIO.getObjectDataFromDisk(sharedObjectFilePath, true).get("sharedGroups").getAsJsonArray();
 
             for (JsonElement elem : jsonElements)
             {
-                data.add(elem.getAsString());
+                WpData.add(elem.getAsString());
+            }
+            for (JsonElement elemGp : jsonElementsGps)
+            {
+                GpData.add(elemGp.getAsString());
             }
         } catch (NullPointerException MissingFile)
         {
@@ -51,7 +60,7 @@ public class CommonShareIO implements AutoCloseable {
     protected void writeSharedList()
     {
         Gson gsonWriter = new Gson();
-        String permissionsJson = gsonWriter.toJson(new SharedObjectUsers(data));
+        String permissionsJson = gsonWriter.toJson(new SharedObjectUsers(WpData, GpData));
 
         try (FileWriter permissionsListFileWriter = new FileWriter(this.objectPath.toFile()))
         {
@@ -62,28 +71,30 @@ public class CommonShareIO implements AutoCloseable {
         }
     }
 
-    public void addToShared(String sharedValue)
+    public boolean addToShared(String sharedValue, ObjectType sharedObjectType)
     {
-        if (!isInShared(sharedValue))
+        if (!isInShared(sharedValue, sharedObjectType))
         {
-            data.add(sharedValue);
+            return sharedObjectType == ObjectType.WAYPOINT ? WpData.add(sharedValue) : GpData.add(sharedValue);
         }
+        return false;
     }
 
-    public void removeFromShared(String sharedValue)
+    public boolean removeFromShared(String sharedValue, ObjectType sharedObjectType)
     {
-        data.remove(sharedValue);
+        return sharedObjectType == ObjectType.WAYPOINT ? WpData.remove(sharedValue) : GpData.remove(sharedValue);
     }
 
-    public boolean isInShared(String sharedValue)
+    public boolean isInShared(String sharedValue, ObjectType sharedObjectType)
     {
-        return data.contains(sharedValue);
+        return sharedObjectType == ObjectType.WAYPOINT ? WpData.contains(sharedValue) : GpData.contains(sharedValue);
     }
 
-    public List<String> getSharedList()
+    public List<String> getSharedList(ObjectType sharedObjectType)
     {
-        return data;
+        return sharedObjectType == ObjectType.WAYPOINT ? WpData : GpData;
     }
+
     @Override
     public void close() {
         writeSharedList();

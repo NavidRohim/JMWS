@@ -2,8 +2,7 @@
 - ~~Get prototype of actual shared waypoint on client~~
 - ~~Add tamper-proofing (validate that the clients requested shared waypoints are in the SUI file)~~ *Resolved due to rework*
 - ~~Get user shared objs file on server to work.~~
-- ~~Make transitioning from old objs to new objs~~ Implemented, need to test more. 
-
+- ~~Make transitioning from old objs to new objs~~ Implemented, need to test more.
 - ~~Sync waypoint when updated~~
 - ~~Delete waypoint when deleted by owner~~
 - ~~Make command object selection argument type~~
@@ -15,9 +14,9 @@
 - ~~Quilt?~~ No. I have a feeling it will die soon.
 - ~~Option to disable share requests in config~~
 - Test on LAN
-- Implement server config for sharing
-- Add group syncing
-- Change name of /share as it is quite common
+- ~~Implement server config for sharing~~
+- ~~Add group syncing~~
+- ~~Change name of /share as it is quite common and to avoid confusion~~
 - Add server-wide object sharing (Admins can set up waypoints that are added to all clients)
 
 # bugs
@@ -29,4 +28,5 @@
 - ~~Game crashes when player deletes all waypoints from in-built group~~ Resolved
 - ~~Bug where outgoing share request just stays forever~~ Resolved
 - Elusive bug where a NullPointerException is thrown while trying to delete shared waypoint on shared user client.
-- When making group, client crashes. 
+- ~~When making group, client crashes.~~
+- When deleting group and not deleting child waypoints, if its shared with anyone they will get a notification saying they cannot edit the group. (Nothing should be sent)

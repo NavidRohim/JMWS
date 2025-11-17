@@ -6,7 +6,7 @@ import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
-import me.brynview.navidrohim.jmws.common.enums.FetchType;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
@@ -23,6 +23,7 @@ import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -68,13 +69,6 @@ public class ServerObject implements PossessesIdentifier {
             }
         }
 
-        private static SyncingInformation transition(ServerObject object)
-        {
-            // TODO transition to new customDataField
-            object.customData = SyncingInformation.getEmptySyncingInfoString(object.getCustomData(), object.ownerUUID);
-            return getSyncingInfo(object);
-        }
-
         public static ServerObject.SyncingInformation getSyncingInfo(String customDataField)
         {
             try
@@ -86,6 +80,13 @@ public class ServerObject implements PossessesIdentifier {
                 UUID owner = CommonClass.minecraftClientInstance.player.getUUID();
                 return getSyncingInfo(getEmptySyncingInfoString(customDataField, owner));
             }
+        }
+
+        private static SyncingInformation transition(ServerObject object)
+        {
+            // TODO transition to new customDataField
+            object.customData = SyncingInformation.getEmptySyncingInfoString(object.getCustomData(), object.ownerUUID);
+            return getSyncingInfo(object);
         }
 
         public static String getEmptySyncingInfoString(String objectIdentifier, UUID owner)
@@ -149,7 +150,7 @@ public class ServerObject implements PossessesIdentifier {
 
     public UserSharingFile accessorSharing;
     public SyncingInformation syncing;
-    public static FetchType objectType = FetchType.GENERIC;
+    public static ObjectType objectType = ObjectType.GENERIC;
 
     @Nullable
     public Path objectPath;
@@ -188,7 +189,7 @@ public class ServerObject implements PossessesIdentifier {
     public String getRawString() { return this.payload.toString();}
     public JsonObject getRawJson() { return this.payload;}
 
-    public FetchType getObjectType()
+    public ObjectType getObjectType()
     {
         return objectType;
     }
@@ -204,23 +205,40 @@ public class ServerObject implements PossessesIdentifier {
         return this.getObjectPath() != null && CommonHelper.fileExists(this.getObjectPath());
     }
 
-    public void removeWaypointFromUser(UUID playerUUID, String objectIdentifier)
+    public void removeObjectFromUser(UUID playerUUID, String objectIdentifier)
     {
-        UserSharingFile.removeObjectFromUser(playerUUID, objectIdentifier);
+        UserSharingFile.removeObjectFromUser(playerUUID, objectIdentifier, getObjectType());
         ServerPlayer sharedPlayer = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
         if (sharedPlayer != null)
         {
-            Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteRequestJson(objectIdentifier, true, false)), sharedPlayer);
+            if (this.getObjectType() == ObjectType.WAYPOINT)
+            {
+                Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteRequestJson(objectIdentifier, true, false)), sharedPlayer);
+            } else {
+                Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteGroupRequestJson(this.syncing.objectIdentifier, null, true, true, true, false)), sharedPlayer);
+            }
         }
     }
 
-    public boolean delete()
+    public boolean delete(boolean stopSharing)
     {
         if (this.objectPath != null && !dataclass)
         {
+            if (stopSharing) {this.stopSharing();}
             return CommonHelper.deleteFile(this.objectPath);
         }
         return false;
+    }
+
+    public boolean deleteAll()
+    {
+        List<Boolean> deletionStatusList = new ArrayList<>();
+
+        for (Path waypointPath : JMWSServerIO.getObjectPathsForUser(this.ownerUUID, getObjectType())) {
+            deletionStatusList.add(JMWSServerIO.getObjectFromFile(waypointPath, this.ownerUUID, getObjectType()).delete(true));
+        }
+
+        return deletionStatusList.isEmpty() || deletionStatusList.stream().allMatch(deletionStatusList.getFirst()::equals);
     }
 
     public void update(String data, boolean updateSyncInfo)
@@ -284,14 +302,14 @@ public class ServerObject implements PossessesIdentifier {
     public void stopSharing(UUID user)
     {
         this.syncing.removeUserFromShare(String.valueOf(user));
-        this.accessorSharing.removeFromShared(this.syncing.objectIdentifier);
+        this.accessorSharing.removeFromShared(this.syncing.objectIdentifier, getObjectType());
     }
 
     public void stopSharing()
     {
         for (String userUUID : this.syncing.sharedTo)
         {
-            removeWaypointFromUser(UUID.fromString(userUUID), this.syncing.objectIdentifier);
+            removeObjectFromUser(UUID.fromString(userUUID), this.syncing.objectIdentifier);
         }
     }
 

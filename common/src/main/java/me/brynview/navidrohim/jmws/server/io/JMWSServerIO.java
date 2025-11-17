@@ -8,7 +8,7 @@ import me.brynview.navidrohim.jmws.server.exceptions.ObjectError;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
-import me.brynview.navidrohim.jmws.common.enums.FetchType;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,7 +29,7 @@ public class JMWSServerIO {
     public static class Utils
     {
         @Nullable
-        public static Path getNewObjectFilename(@Nullable UUID playerOwner, String objectID, FetchType objectType) {
+        public static Path getNewObjectFilename(@Nullable UUID playerOwner, String objectID, ObjectType objectType) {
             try
             {
                 return Path.of(getPathLocationPrefix(objectType) + objectID + "#" + playerOwner + ".json");
@@ -60,22 +60,7 @@ public class JMWSServerIO {
         }*/
     }
 
-    public static Boolean removeAllWaypointsFromGroup(UUID playerUUID, String groupID) {
-        List<Path> objectList = getLocalWaypointsFromGroup(playerUUID, groupID);
-
-        if (objectList == null) {
-            return false;
-        }
-
-        List<Boolean> successArray = new ArrayList<>();
-
-        for (Path objPath : objectList) {
-            successArray.add(CommonHelper.deleteFile(objPath));
-        }
-        return successArray.isEmpty() || successArray.stream().allMatch(successArray.getFirst()::equals);
-    }
-
-    public static String getPathLocationPrefix(FetchType objectType)
+    public static String getPathLocationPrefix(ObjectType objectType)
     {
         switch (objectType) {
             case SHARED -> {
@@ -105,15 +90,15 @@ public class JMWSServerIO {
         return wp.create();
     }
 
-    public static boolean deleteObject(String objectIdentifier, UUID player, FetchType deletionType)
+    public static boolean deleteObject(String objectIdentifier, UUID player, ObjectType deletionType)
     {
         return CommonHelper.deleteFile(Utils.getNewObjectFilename(player, objectIdentifier, deletionType));
     }
 
-    public static boolean deleteAllUserObjects(UUID playerUUID, FetchType fetchType) {
+    public static boolean deleteAllUserObjects(UUID playerUUID, ObjectType objectType) {
         List<Boolean> deletionStatusList = new ArrayList<>();
 
-        for (Path waypointPath : getObjectPathsForUser(playerUUID, fetchType)) {
+        for (Path waypointPath : getObjectPathsForUser(playerUUID, objectType)) {
             deletionStatusList.add(CommonHelper.deleteFile(waypointPath));
         }
 
@@ -121,16 +106,16 @@ public class JMWSServerIO {
 
     }
 
-    public static Stream<Path> getAllObjects(FetchType fetchType) throws IOException
+    public static Stream<Path> getAllObjects(ObjectType objectType) throws IOException
     {
-        String pathSearch = getPathLocationPrefix(fetchType);
+        String pathSearch = getPathLocationPrefix(objectType);
         return Files.list(Path.of(pathSearch));
     }
 
-    public static List<Path> getObjectPathsForUser(UUID uuid, FetchType fetchType) {
+    public static List<Path> getObjectPathsForUser(UUID uuid, ObjectType objectType) {
 
         List<Path> waypointFileList = new ArrayList<>();
-        String pathSearch = getPathLocationPrefix(fetchType);
+        String pathSearch = getPathLocationPrefix(objectType);
 
         try (Stream<Path> files = Files.list(Path.of(pathSearch))) {
             files.filter(Files::isRegularFile).forEach(path -> {
@@ -144,23 +129,40 @@ public class JMWSServerIO {
         return waypointFileList;
     }
 
-    public static <T extends ServerObject> List<T> getObjectsForUser(UUID user, FetchType objectType)
+    public static <T extends ServerObject> List<T> getObjectsForUser(UUID user, ObjectType objectType)
     {
         List<T> list = new ArrayList<>();
 
         for (Path objPath : getObjectPathsForUser(user, objectType))
         {
-            list.add((T) getWaypointFromFile(objPath, user));
+            list.add((T) getObjectFromFile(objPath, user, objectType));
         }
 
 
         return list;
     }
 
-    public static HashMap<String, Path> getNameHashmapLookup(UUID user, FetchType fetchType)
+    public static <T extends ServerObject> T getObjectFromFile(Path objPath, UUID user, ObjectType objectType)
+    {
+        try {
+            @Nullable JsonObject data = getObjectDataFromDisk(objPath, false);
+            if (data != null && objPath != null)
+            {
+                Constructor<T> constructor = objectType.getObjectClass().getConstructor(JsonObject.class, UUID.class);
+                return constructor.newInstance(data, JMWSServerIO.Utils.getUUIDFromPath(objPath));
+            } else {
+                return null;
+            }
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException initExc)
+        {
+            throw new RuntimeException("Cannot pass %s to getObjectFromDisk TODO");
+        }
+    }
+
+    public static HashMap<String, Path> getNameHashmapLookup(UUID user, ObjectType objectType)
     {
         HashMap<String, Path> map = new HashMap<>();
-        for (ServerObject obj : getObjectsForUser(user, fetchType))
+        for (ServerObject obj : getObjectsForUser(user, objectType))
         {
             map.put(obj.getName(), obj.getObjectPath());
         }
@@ -169,7 +171,7 @@ public class JMWSServerIO {
     }
 
     public static List<Path> getLocalWaypointsFromGroup(UUID playerUUID, String groupID) { // note; should switch to database for this shit
-        List<Path> userWaypointFilepaths = getObjectPathsForUser(playerUUID, FetchType.WAYPOINT);
+        List<Path> userWaypointFilepaths = getObjectPathsForUser(playerUUID, ObjectType.WAYPOINT);
         List<Path> groupWaypoints = new ArrayList<>();
 
         for (Path waypointPath : userWaypointFilepaths) {
@@ -205,28 +207,20 @@ public class JMWSServerIO {
     }
 
     @Nullable
-    public static <T extends ServerObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, Class<T> objectClass, FetchType objectType) {
-        try {
-            Path objPath = getObjectPathFromUniqueIdentifier(objectIdentifier, objectType);
-            @Nullable JsonObject data = getObjectDataFromDisk(objPath, false);
-            if (data != null && objPath != null)
-            {
-                Constructor<T> constructor = objectClass.getConstructor(JsonObject.class, UUID.class);
-                return constructor.newInstance(data, JMWSServerIO.Utils.getUUIDFromPath(objPath));
-            } else {
-                return null;
-            }
-        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException initExc)
+    public static <T extends ServerObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, ObjectType objectType) {
+        Path objPath = getObjectPathFromUniqueIdentifier(objectIdentifier, objectType);
+        if (objPath != null)
         {
-            throw new RuntimeException("Cannot pass %s to getObjectFromDisk TODO");
+            return getObjectFromFile(objPath, ownerUUID, objectType);
         }
+        return null;
     }
 
     @Nullable
-    public static Path getObjectPathFromUniqueIdentifier(String identifier, FetchType fetchType)
+    public static Path getObjectPathFromUniqueIdentifier(String identifier, ObjectType objectType)
     {
         try {
-            for (Path objectPath : getAllObjects(fetchType).toList())
+            for (Path objectPath : getAllObjects(objectType).toList())
             {
                 if (objectPath.toString().contains(identifier))
                 {
@@ -235,15 +229,16 @@ public class JMWSServerIO {
             }
         } catch (IOException ignored)
         {
+            Constants.getLogger().info(String.valueOf(ignored));
             return null;
         }
         return null;
     }
 
     @Nullable
-    public static String getObjectFromUniqueIdentifier(String identifier, UUID playerUUID, FetchType fetchType)
+    public static String getObjectFromUniqueIdentifier(String identifier, UUID playerUUID, ObjectType objectType)
     {
-        Path objectPath = getObjectPathFromUniqueIdentifier(identifier, fetchType);
+        Path objectPath = getObjectPathFromUniqueIdentifier(identifier, objectType);
         if (objectPath != null)
         {
             return readRaw(objectPath, false);
@@ -251,8 +246,8 @@ public class JMWSServerIO {
         return null;
     }
 
-    public static boolean transition(Path path, FetchType transitionType, UUID player) throws FileNotFoundException {
-        ServerObject serverObject = transitionType.equals(FetchType.WAYPOINT) ? JMWSServerIO.getWaypointFromFile(path, player) : JMWSServerIO.getGroupFromFile(path, player);
+    public static boolean transition(Path path, ObjectType transitionType, UUID player) throws FileNotFoundException {
+        ServerObject serverObject = transitionType.equals(ObjectType.WAYPOINT) ? JMWSServerIO.getWaypointFromFile(path, player) : JMWSServerIO.getGroupFromFile(path, player);
 
         if (serverObject != null)
         {
@@ -279,20 +274,6 @@ public class JMWSServerIO {
     }
 
     @Nullable
-    public static ServerWaypoint getWaypointFromFile(String waypointIdentifier, UUID playerUUID)
-    {
-        Path waypointFilename = Utils.getNewObjectFilename(playerUUID, waypointIdentifier, FetchType.WAYPOINT);
-        if (waypointFilename != null)
-        {
-            JsonObject waypointLocalData = getObjectDataFromDisk(waypointFilename, false);
-            if (waypointLocalData != null) {
-                return new ServerWaypoint(waypointLocalData, playerUUID);
-            }
-        }
-        return null;
-    }
-
-    @Nullable
     public static ServerWaypoint getWaypointFromFile(Path waypointPath, UUID playerUUID)
     {
         JsonObject waypointLocalData = getObjectDataFromDisk(waypointPath, false);
@@ -305,7 +286,7 @@ public class JMWSServerIO {
     @Nullable
     public static ServerWaypoint getWaypointFromUniqueIdentifier(String waypointIdentifier, UUID user)
     {
-        Path objPath = getObjectPathFromUniqueIdentifier(waypointIdentifier, FetchType.WAYPOINT);
+        Path objPath = getObjectPathFromUniqueIdentifier(waypointIdentifier, ObjectType.WAYPOINT);
         return getWaypointFromFile(objPath, user);
     }
 }

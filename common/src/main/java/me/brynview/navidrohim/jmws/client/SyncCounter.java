@@ -1,6 +1,8 @@
 package me.brynview.navidrohim.jmws.client;
 
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
+import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.minecraft.client.multiplayer.ClientLevel;
 
@@ -66,7 +68,6 @@ public class SyncCounter {
                 // Set counter to 0 here, if we reach this state this means we have either switched dimension or have just joined a server.
                 tickCounter = 0;
             } else {
-
                 tickCounter++;
                 if (tickCounter >= tickCounterUpdateThreshold) { // Check if we have reached auto-sync threshold
 

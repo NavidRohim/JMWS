@@ -1,8 +1,11 @@
 package me.brynview.navidrohim.jmws.server.objects;
 
 import com.google.gson.JsonObject;
-import me.brynview.navidrohim.jmws.common.enums.FetchType;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
+import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 
+import java.nio.file.Path;
 import java.util.UUID;
 
 /**
@@ -12,7 +15,7 @@ public class ServerWaypoint extends ServerObject {
     // Main defining information
     String groupId;
 
-    public static FetchType objectType = FetchType.WAYPOINT;
+    public static ObjectType objectType = ObjectType.WAYPOINT;
 
     public ServerWaypoint(JsonObject payload, UUID playerUUID) {
         super(payload, playerUUID);
@@ -28,10 +31,15 @@ public class ServerWaypoint extends ServerObject {
         this.groupIdentifier = payload.get("guid").getAsString();
     }
 
+    public static ServerWaypoint getFromPath(Path waypointPath, UUID ownerUUID)
+    {
+        return JMWSServerIO.getWaypointFromFile(waypointPath, ownerUUID);
+    }
+
     public String getWaypointGroupId() { return this.groupId; }
 
     @Override
-    public FetchType getObjectType()
+    public ObjectType getObjectType()
     {
         return objectType;
     }

@@ -1,22 +1,34 @@
 package me.brynview.navidrohim.jmws.server;
 
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import me.brynview.navidrohim.jmws.common.enums.FetchType;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class Server {
-    public static final SuggestionProvider<CommandSourceStack> WAYPOINT_SUGGESTER =
-            (context, builder) -> {
-                List<String> names = JMWSServerIO.getObjectsForUser(context.getSource().getPlayer().getUUID(), FetchType.WAYPOINT)
-                        .stream()
-                        .map(ServerObject::getName)
-                        .toList();
+    private static CompletableFuture<Suggestions> suggestObject(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder, ObjectType objectType)
+    {
+        List<String> names = JMWSServerIO.getObjectsForUser(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType)
+                .stream()
+                .map(ServerObject::getName)
+                .toList();
 
-                return SharedSuggestionProvider.suggest(names, builder);
-            };
+        return SharedSuggestionProvider.suggest(names, suggestionsBuilder);
+    }
+
+    public static CompletableFuture<Suggestions> suggestWaypoints(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
+        return suggestObject(commandSourceStackCommandContext, suggestionsBuilder, ObjectType.WAYPOINT);
+    }
+
+    public static CompletableFuture<Suggestions> suggestGroups(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
+        return suggestObject(commandSourceStackCommandContext, suggestionsBuilder, ObjectType.GROUP);
+    }
 }

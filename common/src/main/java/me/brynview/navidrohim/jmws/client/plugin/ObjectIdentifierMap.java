@@ -92,7 +92,6 @@ public class ObjectIdentifierMap {
         String waypointIdentifier = waypointSyncInfo == null ? makeWaypointHash(minecraftClientInstance.player.getUUID(), waypoint.getGuid(), waypoint.getName()) : waypointSyncInfo.objectIdentifier;
         waypointIdentifierMap.put(waypointIdentifier, waypoint);
         waypoint.setCustomData(ServerObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID()));
-
     }
 
     /**
@@ -101,7 +100,8 @@ public class ObjectIdentifierMap {
      */
     public static void addGroupToMap(WaypointGroup waypointGroup)
     {
-        String waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypointGroup.getGuid(), waypointGroup.getName());
+        ServerObject.SyncingInformation groupSyncInfo = ServerObject.SyncingInformation.getSyncingInfo(waypointGroup.getCustomData());
+        String waypointIdentifier = groupSyncInfo == null ? makeWaypointHash(minecraftClientInstance.player.getUUID(), waypointGroup.getGuid(), waypointGroup.getName()) : groupSyncInfo.objectIdentifier;
         groupIdentifierMap.put(waypointIdentifier, waypointGroup);
         waypointGroup.setCustomData(ServerObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID()));
     }

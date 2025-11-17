@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.client;
+package me.brynview.navidrohim.jmws.client.commands;
 
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
@@ -66,7 +66,6 @@ public class ClientCommands {
     {
         if (!isInSingleplayer()) {
             JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandFactory.makeDeleteGroupRequestJson(
-                    CommonClass.minecraftClientInstance.player.getUUID(),
                     "*",
                     "*",
                     false,

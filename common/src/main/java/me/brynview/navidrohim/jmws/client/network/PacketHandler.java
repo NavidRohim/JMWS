@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import commonnetwork.networking.data.PacketContext;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
+import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequest;
@@ -15,7 +16,7 @@ import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
-import me.brynview.navidrohim.jmws.common.enums.FetchType;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
@@ -86,8 +87,19 @@ public class PacketHandler {
 
                     JMWSPlugin.getInstance().deleteSavedObjects(
                         silent,
-                        FetchType.WAYPOINT,
+                        ObjectType.WAYPOINT,
                         waypointIdentifier
+                    );
+                }
+                case COMMON_DELETE_GROUP ->
+                {
+                    String groupIdentifier = waypointPayload.arguments().getFirst().getAsString();
+                    boolean silent = arguments.get(2).getAsBoolean();
+
+                    JMWSPlugin.getInstance().deleteSavedObjects(
+                            silent,
+                            ObjectType.GROUP,
+                            groupIdentifier
                     );
                 }
 
@@ -100,10 +112,22 @@ public class PacketHandler {
                     ShareRequest.Direction direction = ShareRequest.Direction.valueOf(arguments.getLast().getAsString());
                     UUID us = UUID.fromString(arguments.get(1).getAsString());
                     UUID from = UUID.fromString(arguments.get(2).getAsString());
-                    FetchType sharedObjectType = FetchType.valueOf(arguments.get(3).getAsString());
-                    String waypointString = arguments.getFirst().getAsString();
-                    Waypoint waypointObj = WaypointFactory.fromWaypointJsonString(waypointString);
-                    String objectIdentifier = ServerObject.SyncingInformation.getSyncingInfo(waypointObj.getCustomData()).objectIdentifier;
+
+                    ObjectType sharedObjectType = ObjectType.valueOf(arguments.get(3).getAsString());
+                    String objectString = arguments.getFirst().getAsString();
+
+                    Object object;
+                    String objectIdentifier;
+                    if (sharedObjectType == ObjectType.WAYPOINT)
+                    {
+                        Waypoint objectWp = WaypointFactory.fromWaypointJsonString(objectString);
+                        objectIdentifier = ServerObject.SyncingInformation.getSyncingInfo(objectWp.getCustomData()).objectIdentifier;
+                        object = objectWp;
+                    } else {
+                        WaypointGroup objectGp = WaypointFactory.fromGroupJsonString(objectString);
+                        objectIdentifier = ServerObject.SyncingInformation.getSyncingInfo(objectGp.getCustomData()).objectIdentifier;
+                        object = objectGp;
+                    }
 
                     Player fromUser = CommonClass.minecraftClientInstance.player.getCommandSenderWorld().getPlayerByUUID(from);
 
@@ -118,7 +142,7 @@ public class PacketHandler {
                             IncomingShareRequests.addRequest(from, new ShareRequest(
                                     from,
                                     us,
-                                    waypointObj,
+                                    object,
                                     sharedObjectType,
                                     objectIdentifier
                             ));
@@ -128,7 +152,7 @@ public class PacketHandler {
                             ShareRequest.busy(from);
                         }
                     } else {
-                        OutgoingShareRequests.addRequest(from, new OutgoingShareRequest(from, us, waypointObj, sharedObjectType, objectIdentifier));
+                        OutgoingShareRequests.addRequest(from, new OutgoingShareRequest(from, us, object, sharedObjectType, objectIdentifier));
                         PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.share_sent"), true, false, JMWSMessageType.SUCCESS);
                     }
                 }

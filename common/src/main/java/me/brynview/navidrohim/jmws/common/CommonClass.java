@@ -109,7 +109,7 @@ public class CommonClass {
     public static void _createServerResources() {
         new File("./jmws").mkdir();
         new File("./jmws/groups").mkdir();
-        new File("./jmws/share").mkdir();
+        new File("./jmws/users").mkdir();
     }
 
 

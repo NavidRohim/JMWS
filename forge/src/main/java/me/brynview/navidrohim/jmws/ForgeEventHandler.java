@@ -1,21 +1,16 @@
 package me.brynview.navidrohim.jmws;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.datafixers.kinds.Const;
-import me.brynview.navidrohim.jmws.client.ClientCommands;
+import me.brynview.navidrohim.jmws.client.commands.ClientCommands;
 import me.brynview.navidrohim.jmws.common.events.CommonEvents;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;

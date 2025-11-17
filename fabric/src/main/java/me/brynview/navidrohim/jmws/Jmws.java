@@ -2,15 +2,13 @@ package me.brynview.navidrohim.jmws;
 
 
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.brynview.navidrohim.jmws.client.ClientVariables;
-import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
-import me.brynview.navidrohim.jmws.common.enums.FetchType;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.server.Server;
 import me.brynview.navidrohim.jmws.server.ServerCommands;
-import me.brynview.navidrohim.jmws.server.config.ServerConfig;
-import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
-import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -18,9 +16,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.VersionParsingException;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.NoSuchElementException;
@@ -29,6 +27,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Jmws implements ModInitializer {
+
+    private static int doShareWaypoint(CommandContext<CommandSourceStack> context1) throws CommandSyntaxException {
+        ServerPlayer player = EntityArgument.getPlayer(context1, "username");
+        String waypointID = StringArgumentType.getString(context1, "waypointName");
+
+        return ServerCommands.share(context1.getSource().getPlayer(), player, waypointID, ObjectType.WAYPOINT);
+    }
+    private static int doShareGroup(CommandContext<CommandSourceStack> commandSourceStackCommandContext) throws CommandSyntaxException {
+        ServerPlayer player = EntityArgument.getPlayer(commandSourceStackCommandContext, "username");
+        String groupName = StringArgumentType.getString(commandSourceStackCommandContext, "groupName");
+
+        return ServerCommands.share(commandSourceStackCommandContext.getSource().getPlayer(), player, groupName, ObjectType.GROUP);
+    }
 
     @Override
     public void onInitialize() {
@@ -93,15 +104,12 @@ public class Jmws implements ModInitializer {
         }
 
         CommandRegistrationCallback.EVENT.register((dispatcher, context, commandSelection) -> {
-            dispatcher.register(Commands.literal("share").then(Commands.argument("userID", EntityArgument.player()).then(Commands.argument("objID", StringArgumentType.greedyString()).suggests(Server.WAYPOINT_SUGGESTER) .executes(context1 -> {
-                ServerPlayer player = EntityArgument.getPlayer(context1, "userID");
-                String waypointID = StringArgumentType.getString(context1, "objID");
-
-                return ServerCommands.share(context1.getSource().getPlayer(), player, waypointID);
-            }))));
+            dispatcher.register(Commands.literal("share_waypoint")
+                    .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("waypointName", StringArgumentType.greedyString()).suggests(Server::suggestWaypoints).executes(Jmws::doShareWaypoint)))
+            );
+            dispatcher.register(Commands.literal("share_group")
+                    .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("groupName", StringArgumentType.greedyString()).suggests(Server::suggestGroups).executes(Jmws::doShareGroup)))
+            );
         });
     }
-
-
-
 }
