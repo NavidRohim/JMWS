@@ -3,7 +3,6 @@ package me.brynview.navidrohim.jmws.client.callback;
 
 import com.mojang.brigadier.CommandDispatcher;
 
-import me.brynview.navidrohim.jmws.client.commands.ClientAdminCommands;
 import me.brynview.navidrohim.jmws.client.commands.ClientCommands;
 
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -26,10 +25,5 @@ public interface ClientCommandCallback {
 
         fabricClientCommandSourceCommandDispatcher.register(ClientCommandManager.literal("share_accept").executes(acceptingContext -> ClientCommands.accept(null)));
         fabricClientCommandSourceCommandDispatcher.register(ClientCommandManager.literal("share_decline").executes(acceptingContext -> ClientCommands.decline(null)));
-
-        fabricClientCommandSourceCommandDispatcher.register(ClientCommandManager.literal("jmws_admin")
-                .then(ClientCommandManager.literal("create_global_waypoint").executes(adminContext -> ClientAdminCommands.createGlobalWaypoint()))
-                .then(ClientCommandManager.literal("create_global_group").executes(adminContext -> ClientAdminCommands.createGlobalGroup()))
-        );
     }
 }

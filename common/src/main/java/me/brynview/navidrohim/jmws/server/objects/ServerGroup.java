@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.server.objects;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
@@ -24,6 +25,18 @@ public class ServerGroup extends ServerObject {
         this.groupIdentifier = payload.get("guid").getAsString();
     }
 
+    public static List<Path> getGlobalGroups() {
+        List<Path> gp = new ArrayList<>();
+        for (Path path : JMWSServerIO.getAllObjects(ObjectType.GROUP).toList())
+        {
+            if (path.toString().contains("SERVER"))
+            {
+                gp.add(path);
+            }
+        }
+        return gp;
+    }
+
     public boolean deleteWaypoints()
     {
         return ServerGroup.deleteWaypoints(this.ownerUUID, this.groupIdentifier);
@@ -44,6 +57,24 @@ public class ServerGroup extends ServerObject {
         }
 
         return successArray.isEmpty() || successArray.stream().allMatch(successArray.getFirst()::equals);
+    }
+
+    private void setLocked(boolean locked)
+    {
+        this.getRawJson().get("settings").getAsJsonObject().add("locked", new JsonPrimitive(locked));
+        this.update(this.getRawJson().toString(), true);
+    }
+
+    private boolean getLocked()
+    {
+        return this.getRawJson().get("settings").getAsJsonObject().get("locked").getAsBoolean();
+    }
+
+    @Override
+    public void makeGlobal()
+    {
+        super.makeGlobal();
+        this.setLocked(true);
     }
 
     @Override

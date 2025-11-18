@@ -8,5 +8,4 @@ public interface PossessesIdentifier {
     public String getCustomData();
     public String getGroupIdentifier();
     public ObjectType getObjectType();
-
 }

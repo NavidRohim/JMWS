@@ -17,6 +17,7 @@ import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.FileSystemException;
@@ -44,14 +45,18 @@ public class ServerObject implements PossessesIdentifier {
         @Expose
         protected UUID owner;
 
+        @Expose
+        protected boolean isGlobal;
+
         @Nullable
         protected ServerObject parentObject = null;
 
-        public SyncingInformation(List<String> sharedTo, String identifier, UUID owner)
+        public SyncingInformation(List<String> sharedTo, String identifier, UUID owner, boolean isGlobal)
         {
             this.objectIdentifier = identifier;
             this.sharedTo = sharedTo;
             this.owner = owner;
+            this.isGlobal = isGlobal;
         }
 
         public static ServerObject.SyncingInformation getSyncingInfo(ServerObject object)
@@ -69,7 +74,7 @@ public class ServerObject implements PossessesIdentifier {
             }
         }
 
-        public static ServerObject.SyncingInformation getSyncingInfo(String customDataField)
+        public static ServerObject.SyncingInformation getSyncingInfo(String customDataField, boolean returnNullIfError)
         {
             try
             {
@@ -77,22 +82,31 @@ public class ServerObject implements PossessesIdentifier {
                 return gson.fromJson(customDataField, SyncingInformation.class);
             } catch (JsonSyntaxException syntaxException) // will throw if object hasn't been ported.
             {
-                UUID owner = CommonClass.minecraftClientInstance.player.getUUID();
-                return getSyncingInfo(getEmptySyncingInfoString(customDataField, owner));
+                if (!returnNullIfError)
+                {
+                    UUID owner = CommonClass.minecraftClientInstance.player.getUUID();
+                    return getSyncingInfo(getEmptySyncingInfoString(customDataField, owner, false));
+                }
+                return null;
             }
+        }
+
+        public static ServerObject.SyncingInformation getSyncingInfo(String customDataField)
+        {
+            return getSyncingInfo(customDataField, false);
         }
 
         private static SyncingInformation transition(ServerObject object)
         {
             // TODO transition to new customDataField
-            object.customData = SyncingInformation.getEmptySyncingInfoString(object.getCustomData(), object.ownerUUID);
+            object.customData = SyncingInformation.getEmptySyncingInfoString(object.getCustomData(), object.ownerUUID, false);
             return getSyncingInfo(object);
         }
 
-        public static String getEmptySyncingInfoString(String objectIdentifier, UUID owner)
+        public static String getEmptySyncingInfoString(String objectIdentifier, UUID owner, boolean isGlobal)
         {
             Gson gson = new Gson();
-            return gson.toJson(new SyncingInformation(List.of(), objectIdentifier, owner));
+            return gson.toJson(new SyncingInformation(List.of(), objectIdentifier, owner, isGlobal));
         }
 
         public void addUserToShare(UUID playerUUID)
@@ -110,6 +124,14 @@ public class ServerObject implements PossessesIdentifier {
         public boolean isOwner(UUID supposedOwner)
         {
             return this.owner.equals(supposedOwner);
+        }
+
+        public boolean isGlobal() { return this.isGlobal; }
+
+        public void setGlobal(boolean global)
+        {
+            this.isGlobal = global;
+            update();
         }
 
         private void update()
@@ -135,7 +157,7 @@ public class ServerObject implements PossessesIdentifier {
 
                 if (sharedUser != null)
                 {
-                    ServerPacketHandler.sendUserSync(sharedUser, false, false, false);
+                    ServerPacketHandler.sendUserSync(sharedUser, false, false, true);
                 }
             }
         }
@@ -145,15 +167,20 @@ public class ServerObject implements PossessesIdentifier {
     String name;
     String customData;
     String groupIdentifier;
-    JsonObject payload;
-    boolean dataclass;
+
+    private final JsonObject payload;
 
     public UserSharingFile accessorSharing;
     public SyncingInformation syncing;
+
+    boolean dataclass;
     public static ObjectType objectType = ObjectType.GENERIC;
 
     @Nullable
-    public Path objectPath;
+    private Path objectPath;
+
+    @Nullable
+    public Path globalObjectPath;
 
     UUID ownerUUID;
 
@@ -167,7 +194,11 @@ public class ServerObject implements PossessesIdentifier {
         this.name = payload.get("name").getAsString();
 
         this.accessorSharing = !dataclass ? new UserSharingFile(playerUUID) : null;
-        this.objectPath = !dataclass ? JMWSServerIO.Utils.getNewObjectFilename(this.syncing.owner, this.syncing.objectIdentifier, getObjectType()) : null;
+        this.globalObjectPath = !dataclass ? Path.of(JMWSServerIO.getPathLocationPrefix(this.getObjectType()) + "SERVER_%s".formatted(JMWSServerIO.Utils.makeFilename(this.syncing.objectIdentifier, this.ownerUUID))) : null;
+        if (!dataclass)
+        {
+            this.objectPath = !syncing.isGlobal ? JMWSServerIO.Utils.getNewObjectFilename(this.syncing.owner, this.syncing.objectIdentifier, getObjectType()) : this.globalObjectPath;
+        }
     }
 
     public ServerObject(JsonObject payload, UUID playerUUID)
@@ -184,7 +215,7 @@ public class ServerObject implements PossessesIdentifier {
         this.payload.add("customData", new JsonPrimitive(data));
     }
 
-    public String getGroupIdentifier() { return this.groupIdentifier; }
+    public String getGroupIdentifier() { return this.groupIdentifier; } // No usages but may be used elsewhere like with generics not sure
 
     public String getRawString() { return this.payload.toString();}
     public JsonObject getRawJson() { return this.payload;}
@@ -198,6 +229,12 @@ public class ServerObject implements PossessesIdentifier {
     public Path getObjectPath()
     {
         return objectPath;
+    }
+
+    @Nullable
+    public Path getGlobalObjectPath()
+    {
+        return globalObjectPath;
     }
 
     public Boolean hasFile()
@@ -218,6 +255,18 @@ public class ServerObject implements PossessesIdentifier {
                 Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteGroupRequestJson(this.syncing.objectIdentifier, null, true, true, true, false)), sharedPlayer);
             }
         }
+    }
+
+
+
+    public void makeGlobal()
+    {
+        File oldNameFile =  new File(this.getObjectPath().toString());
+        File newFileName = new File(this.getGlobalObjectPath().toString());
+        oldNameFile.renameTo(newFileName);
+
+        this.syncing.setGlobal(true);
+        objectPath = getGlobalObjectPath();
     }
 
     public boolean delete(boolean stopSharing)

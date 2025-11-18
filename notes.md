@@ -28,5 +28,10 @@
 - ~~Game crashes when player deletes all waypoints from in-built group~~ Resolved
 - ~~Bug where outgoing share request just stays forever~~ Resolved
 - Elusive bug where a NullPointerException is thrown while trying to delete shared waypoint on shared user client.
-- ~~When making group, client crashes.~~
-- When deleting group and not deleting child waypoints, if its shared with anyone they will get a notification saying they cannot edit the group. (Nothing should be sent)
+- ~~When making group, client crashes.~~ Resolved
+- ~~When deleting group and not deleting child waypoints, if its shared with anyone they will get a notification saying they cannot edit the group. (Nothing should be sent)~~ Resolved?
+- Another elusive bug where another NullPointerException is thrown. Not sure of cause maybe something to do with global objects
+- When the owner of a global waypoint (admin) tries to delete one, the check for owner fails.
+
+# Fixed bugs
+- Fixed bug where a shared users waypoints would not be deleted if the owner deleted the waypoint via /jmws clearAll

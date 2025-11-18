@@ -9,7 +9,10 @@ import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
+import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
+import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -38,6 +41,22 @@ public class ServerCommands {
             }
         } else {
             PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.no_server_sharing", true, JMWSMessageType.FAILURE);
+        }
+        return 1;
+    }
+
+    public static int globalShare(String objectName, ServerPlayer player, ObjectType objectType)
+    {
+        HashMap<String, Path> userObjs = JMWSServerIO.getNameHashmapLookup(player.getUUID(), objectType);
+        @Nullable Path specifiedObject = userObjs.get(objectName);
+        ServerObject globalObject = JMWSServerIO.getObjectFromFile(specifiedObject, player.getUUID(), objectType);
+
+        if (specifiedObject != null && globalObject != null)
+        {
+            globalObject.makeGlobal();
+            ServerPacketHandler.sendUserSync(player, false, false, true);
+        } else {
+            PlayerNetworkingHelper.sendUserMessage(player, "sharing.jmws.no_matching_object", true, JMWSMessageType.FAILURE);
         }
         return 1;
     }

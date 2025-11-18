@@ -83,5 +83,4 @@ public class PlayerHelper {
     {
         return CommonClass.minecraftClientInstance.player.getUUID();
     }
-
 }

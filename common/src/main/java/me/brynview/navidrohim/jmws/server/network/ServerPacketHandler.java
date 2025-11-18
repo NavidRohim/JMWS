@@ -78,6 +78,18 @@ public class ServerPacketHandler {
                     }
                 }
 
+                for (Path globalWpPath : ServerWaypoint.getGlobalWaypoints())
+                {
+                    lastIterWp++;
+                    jsonWaypointPayloadArray.put(String.valueOf(lastIterWp), Files.readString(globalWpPath));
+                }
+
+                for (Path globalGpPath : ServerGroup.getGlobalGroups())
+                {
+                    lastIterGp++;
+                    jsonGroupPayloadArray.put(String.valueOf(lastIterGp), Files.readString(globalGpPath));
+                }
+
                 // Shared objects
                 if (ServerConfig.serverConfig.sharingEnabled)
                 {
@@ -188,7 +200,6 @@ public class ServerPacketHandler {
 
                 if (waypoint != null)
                 {
-
                     if (waypoint.syncing.isOwner(playerUUID))
                     {
                         waypoint.stopSharing();
@@ -271,12 +282,16 @@ public class ServerPacketHandler {
                         obj.update(objectData, false);
                         obj.syncing.syncToUsers();
 
-                        PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_waypoint_success", true, JMWSMessageType.SUCCESS);
+                        if (modifyingType == ObjectType.WAYPOINT)
+                        {
+                            PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_waypoint_success", true, JMWSMessageType.NEUTRAL);
+                        } else {
+                            PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_group_success", true, JMWSMessageType.NEUTRAL);
+                        }
                     } else {
                         sendUserMessage(player, "sharing.jmws.local_only", true, JMWSMessageType.ONE_TIME_WARNING);
                     }
                 }
-
             }
 
             // was "request"

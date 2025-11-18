@@ -6,6 +6,8 @@ import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -37,6 +39,19 @@ public class ServerWaypoint extends ServerObject {
     }
 
     public String getWaypointGroupId() { return this.groupId; }
+
+    public static List<Path> getGlobalWaypoints()
+    {
+        List<Path> wp = new ArrayList<>();
+        for (Path path : JMWSServerIO.getAllObjects(ObjectType.WAYPOINT).toList())
+        {
+            if (path.toString().contains("SERVER"))
+            {
+                wp.add(path);
+            }
+        }
+        return wp;
+    }
 
     @Override
     public ObjectType getObjectType()

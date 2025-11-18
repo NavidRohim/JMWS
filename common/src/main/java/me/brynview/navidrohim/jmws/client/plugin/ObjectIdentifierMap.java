@@ -88,10 +88,17 @@ public class ObjectIdentifierMap {
      */
     public static void addWaypointToMap(Waypoint waypoint)
     {
-        ServerObject.SyncingInformation waypointSyncInfo = ServerObject.SyncingInformation.getSyncingInfo(waypoint.getCustomData());
-        String waypointIdentifier = waypointSyncInfo == null ? makeWaypointHash(minecraftClientInstance.player.getUUID(), waypoint.getGuid(), waypoint.getName()) : waypointSyncInfo.objectIdentifier;
+        String waypointIdentifier;
+        @Nullable ServerObject.SyncingInformation waypointSyncInfo = ServerObject.SyncingInformation.getSyncingInfo(waypoint.getCustomData(), true);
+        if (waypointSyncInfo != null)
+        {
+            waypointIdentifier = waypointSyncInfo.objectIdentifier;
+        } else {
+            waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypoint.getGuid(), waypoint.getName());
+            waypoint.setCustomData(ServerObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID(), false));
+        }
+
         waypointIdentifierMap.put(waypointIdentifier, waypoint);
-        waypoint.setCustomData(ServerObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID()));
     }
 
     /**
@@ -100,10 +107,17 @@ public class ObjectIdentifierMap {
      */
     public static void addGroupToMap(WaypointGroup waypointGroup)
     {
-        ServerObject.SyncingInformation groupSyncInfo = ServerObject.SyncingInformation.getSyncingInfo(waypointGroup.getCustomData());
-        String waypointIdentifier = groupSyncInfo == null ? makeWaypointHash(minecraftClientInstance.player.getUUID(), waypointGroup.getGuid(), waypointGroup.getName()) : groupSyncInfo.objectIdentifier;
+        String waypointIdentifier;
+        @Nullable ServerObject.SyncingInformation waypointSyncInfo = ServerObject.SyncingInformation.getSyncingInfo(waypointGroup.getCustomData(), true);
+        if (waypointSyncInfo != null)
+        {
+            waypointIdentifier = waypointSyncInfo.objectIdentifier;
+        } else {
+            waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypointGroup.getGuid(), waypointGroup.getName());
+            waypointGroup.setCustomData(ServerObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID(), false));
+        }
+
         groupIdentifierMap.put(waypointIdentifier, waypointGroup);
-        waypointGroup.setCustomData(ServerObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID()));
     }
 
     /**

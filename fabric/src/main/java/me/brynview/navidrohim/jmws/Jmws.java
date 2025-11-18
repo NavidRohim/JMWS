@@ -28,19 +28,6 @@ import java.util.regex.Pattern;
 
 public class Jmws implements ModInitializer {
 
-    private static int doShareWaypoint(CommandContext<CommandSourceStack> context1) throws CommandSyntaxException {
-        ServerPlayer player = EntityArgument.getPlayer(context1, "username");
-        String waypointID = StringArgumentType.getString(context1, "waypointName");
-
-        return ServerCommands.share(context1.getSource().getPlayer(), player, waypointID, ObjectType.WAYPOINT);
-    }
-    private static int doShareGroup(CommandContext<CommandSourceStack> commandSourceStackCommandContext) throws CommandSyntaxException {
-        ServerPlayer player = EntityArgument.getPlayer(commandSourceStackCommandContext, "username");
-        String groupName = StringArgumentType.getString(commandSourceStackCommandContext, "groupName");
-
-        return ServerCommands.share(commandSourceStackCommandContext.getSource().getPlayer(), player, groupName, ObjectType.GROUP);
-    }
-
     @Override
     public void onInitialize() {
 
@@ -110,6 +97,41 @@ public class Jmws implements ModInitializer {
             dispatcher.register(Commands.literal("share_group")
                     .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("groupName", StringArgumentType.greedyString()).suggests(Server::suggestGroups).executes(Jmws::doShareGroup)))
             );
+            dispatcher.register(Commands.literal("jmws_admin")
+                    .requires(src -> src.hasPermission(2))
+                    .then(Commands.literal("create_global_waypoint")
+                            .then(Commands.argument("waypointName", StringArgumentType.greedyString())
+                                    .suggests(Server::suggestWaypoints)
+                                    .executes(Jmws::createServerWp)))
+                    .then(Commands.literal("create_global_group")
+                            .then(Commands.argument("groupName", StringArgumentType.greedyString())
+                                    .suggests(Server::suggestGroups)
+                                    .executes(Jmws::createServerGp)))
+            );
         });
+    }
+
+    private static int doShareWaypoint(CommandContext<CommandSourceStack> context1) throws CommandSyntaxException {
+        ServerPlayer player = EntityArgument.getPlayer(context1, "username");
+        String waypointID = StringArgumentType.getString(context1, "waypointName");
+
+        return ServerCommands.share(context1.getSource().getPlayer(), player, waypointID, ObjectType.WAYPOINT);
+    }
+
+    private static int doShareGroup(CommandContext<CommandSourceStack> commandSourceStackCommandContext) throws CommandSyntaxException {
+        ServerPlayer player = EntityArgument.getPlayer(commandSourceStackCommandContext, "username");
+        String groupName = StringArgumentType.getString(commandSourceStackCommandContext, "groupName");
+
+        return ServerCommands.share(commandSourceStackCommandContext.getSource().getPlayer(), player, groupName, ObjectType.GROUP);
+    }
+
+    private static int createServerWp(CommandContext<CommandSourceStack> commandSourceStackCommandContext) {
+        String waypointName = StringArgumentType.getString(commandSourceStackCommandContext, "waypointName");
+        return ServerCommands.globalShare(waypointName, commandSourceStackCommandContext.getSource().getPlayer(), ObjectType.WAYPOINT);
+    }
+
+    private static int createServerGp(CommandContext<CommandSourceStack> commandSourceStackCommandContext) {
+        String groupName = StringArgumentType.getString(commandSourceStackCommandContext, "groupName");
+        return ServerCommands.globalShare(groupName, commandSourceStackCommandContext.getSource().getPlayer(), ObjectType.GROUP);
     }
 }

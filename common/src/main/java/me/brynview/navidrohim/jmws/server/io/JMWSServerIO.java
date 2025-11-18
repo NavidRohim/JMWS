@@ -28,11 +28,16 @@ public class JMWSServerIO {
 
     public static class Utils
     {
+        public static String makeFilename(String objectID, UUID playerOwner)
+        {
+            return "%s#%s.json".formatted(objectID, playerOwner);
+        }
+
         @Nullable
         public static Path getNewObjectFilename(@Nullable UUID playerOwner, String objectID, ObjectType objectType) {
             try
             {
-                return Path.of(getPathLocationPrefix(objectType) + objectID + "#" + playerOwner + ".json");
+                return Path.of(getPathLocationPrefix(objectType) + makeFilename(objectID, playerOwner));
             } catch (InvalidPathException oldVersion)
             {
                 Constants.getLogger().error("Client has older version than server expected. %s".formatted(playerOwner));
@@ -52,30 +57,11 @@ public class JMWSServerIO {
                 throw new ObjectError("UUID is malformed. UUID: %s From String: %s".formatted(uuidString, pathString));
             }
         }
-        /*
-        public static SavedObject getObject(String objectIdentifier, UUID ownerUUID, FetchType objectType)
-        {
-            return ownerUUID == null ? JMWSServerIO.getWaypointFromFile(objectIdentifier, null)
-                    : JMWSServerIO.getWaypointFromFile(objectIdentifier, ownerUUID);
-        }*/
     }
 
     public static String getPathLocationPrefix(ObjectType objectType)
     {
-        switch (objectType) {
-            case SHARED -> {
-                return "./jmws/users/";
-            }
-            case GROUP -> {
-                return "./jmws/groups/";
-            }
-            case WAYPOINT -> {
-                return "./jmws/";
-            }
-            default -> {
-                throw new RuntimeException("Unrecognised FetchType %s".formatted(objectType));
-            }
-        }
+        return objectType.getObjectPathPrefix();
     }
 
     public static boolean createGroup(JsonObject jsonObject, UUID playerUUID)
@@ -90,26 +76,16 @@ public class JMWSServerIO {
         return wp.create();
     }
 
-    public static boolean deleteObject(String objectIdentifier, UUID player, ObjectType deletionType)
-    {
-        return CommonHelper.deleteFile(Utils.getNewObjectFilename(player, objectIdentifier, deletionType));
-    }
-
-    public static boolean deleteAllUserObjects(UUID playerUUID, ObjectType objectType) {
-        List<Boolean> deletionStatusList = new ArrayList<>();
-
-        for (Path waypointPath : getObjectPathsForUser(playerUUID, objectType)) {
-            deletionStatusList.add(CommonHelper.deleteFile(waypointPath));
-        }
-
-        return deletionStatusList.isEmpty() || deletionStatusList.stream().allMatch(deletionStatusList.getFirst()::equals);
-
-    }
-
-    public static Stream<Path> getAllObjects(ObjectType objectType) throws IOException
+    public static Stream<Path> getAllObjects(ObjectType objectType)
     {
         String pathSearch = getPathLocationPrefix(objectType);
-        return Files.list(Path.of(pathSearch));
+        try {
+            return Files.list(Path.of(pathSearch));
+        } catch (SecurityException e)
+        {
+            Constants.getLogger().error("FATAL: Missing permissions! cannot read from %s".formatted(pathSearch));
+        } catch (IOException ignored) {}
+        return Stream.of();
     }
 
     public static List<Path> getObjectPathsForUser(UUID uuid, ObjectType objectType) {
@@ -148,8 +124,8 @@ public class JMWSServerIO {
             @Nullable JsonObject data = getObjectDataFromDisk(objPath, false);
             if (data != null && objPath != null)
             {
-                Constructor<T> constructor = objectType.getObjectClass().getConstructor(JsonObject.class, UUID.class);
-                return constructor.newInstance(data, JMWSServerIO.Utils.getUUIDFromPath(objPath));
+                Constructor<? extends ServerObject> constructor = objectType.getObjectClass().getConstructor(JsonObject.class, UUID.class);
+                return (T) constructor.newInstance(data, Utils.getUUIDFromPath(objPath));
             } else {
                 return null;
             }
@@ -190,7 +166,7 @@ public class JMWSServerIO {
     {
         try {
             return Files.readString(objPath);
-        } catch (IOException ioException)
+        } catch (IOException | NullPointerException ioException)
         {
             if (!silentFail)
             {
@@ -219,18 +195,12 @@ public class JMWSServerIO {
     @Nullable
     public static Path getObjectPathFromUniqueIdentifier(String identifier, ObjectType objectType)
     {
-        try {
-            for (Path objectPath : getAllObjects(objectType).toList())
-            {
-                if (objectPath.toString().contains(identifier))
-                {
-                    return objectPath;
-                }
-            }
-        } catch (IOException ignored)
+        for (Path objectPath : getAllObjects(objectType).toList())
         {
-            Constants.getLogger().info(String.valueOf(ignored));
-            return null;
+            if (objectPath.toString().contains(identifier))
+            {
+                return objectPath;
+            }
         }
         return null;
     }
@@ -247,7 +217,7 @@ public class JMWSServerIO {
     }
 
     public static boolean transition(Path path, ObjectType transitionType, UUID player) throws FileNotFoundException {
-        ServerObject serverObject = transitionType.equals(ObjectType.WAYPOINT) ? JMWSServerIO.getWaypointFromFile(path, player) : JMWSServerIO.getGroupFromFile(path, player);
+        ServerObject serverObject = transitionType.equals(ObjectType.WAYPOINT) ? JMWSServerIO.getWaypointFromFile(path, player) : JMWSServerIO. getGroupFromFile(path, player);
 
         if (serverObject != null)
         {
@@ -263,7 +233,7 @@ public class JMWSServerIO {
     }
 
     @Nullable
-    private static ServerObject getGroupFromFile(Path path, UUID player)
+    private static ServerGroup getGroupFromFile(Path path, UUID player)
     {
         JsonObject groupLocalServerData = getObjectDataFromDisk(path, false);
         if (groupLocalServerData != null)
