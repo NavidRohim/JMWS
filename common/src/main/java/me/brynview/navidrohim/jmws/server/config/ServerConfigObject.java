@@ -24,7 +24,6 @@ public class ServerConfigObject {
     @Expose
     public Boolean sharingEnabled;
 
-    public List<Boolean> valueList;
     /**
      * Only use this constructor in its raw form on the server side. For the client side, use Gson().fromJson() with the raw packet data and specify this class.
      * @param jmwsEnabled If JMWS is enabled.
@@ -36,9 +35,6 @@ public class ServerConfigObject {
         this.waypointsEnabled = waypointsEnabled;
         this.groupsEnabled = groupsEnabled;
         this.sharingEnabled = sharingEnabled;
-
-        
-        this.valueList = List.of(jmwsEnabled, waypointsEnabled, groupsEnabled, sharingEnabled);
     }
 
     /**

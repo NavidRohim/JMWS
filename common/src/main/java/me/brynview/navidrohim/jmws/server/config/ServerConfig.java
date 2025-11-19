@@ -12,13 +12,16 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ServerConfig {
 
     private static final Path configPath = Path.of("./config/jmws-server.json");
 
-    public static final String rawServerConfigData = getConfigJson();
-    public static final ServerConfigObject serverConfig = new Gson().fromJson(rawServerConfigData, ServerConfigObject.class);
+    public static String rawServerConfigData;
+    public static ServerConfigObject serverConfig;
 
     public static void ensureExistence()
     {
@@ -43,13 +46,25 @@ public class ServerConfig {
                 FileWriter configFileWritableObj = new FileWriter(configPath.toFile());
                 configFileWritableObj.write(configJsonString);
                 configFileWritableObj.close();
+                ensureExistence();
 
+            } else {
+                rawServerConfigData = getConfigJson();
+                serverConfig = new Gson().fromJson(rawServerConfigData, ServerConfigObject.class);
+                List<Boolean> valueList = Arrays.asList(serverConfig.groupsEnabled, serverConfig.sharingEnabled, serverConfig.waypointsEnabled, serverConfig.jmwsEnabled);
+
+                if (valueList.contains(null))
+                {
+                    deleteConfig();
+                    ensureExistence();
+                    Constants.getLogger().error("JMWS config was corrupted or from an older version. Created new config, so you may have to set your old config values.");
+                }
             }
 
         } catch (SecurityException securityException) {
             throw new ServerConfigurationException("Could not create configuration file! There are no write permissions.");
         } catch (IOException ioException) {
-            Constants.getLogger().error("JMWS Server got error when creating configuration file; {}", String.valueOf(ioException));
+            Constants.getLogger().error("JMWS Server got error when creating configuration file: {}", String.valueOf(ioException));
         }
     }
 
@@ -60,7 +75,6 @@ public class ServerConfig {
 
     public static String getConfigJson()
     {
-        ensureExistence();
         String content;
         try {
             content = Files.readString(configPath, StandardCharsets.UTF_8);

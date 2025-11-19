@@ -35,7 +35,8 @@
 - Elusive bug where a NullPointerException is thrown while trying to delete shared waypoint on shared user client.
 
 ### LAN bugs
-- Handshake fails due to new config value
+- ~~Handshake fails due to new config value~~ Resolved. Update old config with new
+- Players cant receive share requests.
 
 # Fixed bugs
 - Fixed bug where a shared users waypoints would not be deleted if the owner deleted the waypoint via /jmws clearAll

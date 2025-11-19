@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.server;
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.share.ShareRequest;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
@@ -21,7 +22,7 @@ public class ServerCommands {
     public static int share(ServerPlayer sender, ServerPlayer player, String waypointID, ObjectType objectType) {
         if (ServerConfig.serverConfig.sharingEnabled)
         {
-            if (sender.equals(player))
+            if (sender.equals(player) || (CommonClass.isInternalServer() && player.server.getSingleplayerProfile().getId().equals(player.getUUID())))
             {
                 PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.cannot_share", true, false);
             } else {

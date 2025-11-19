@@ -42,7 +42,7 @@
   "sharing.jmws.sharing": "Now sharing",
   "sharing.jmws.no_requests": "You don't have any share requests.",
   "sharing.jmws.decline": "Declined",
-  "sharing.jmws.cannot_share": "You cannot share with yourself.",
+  "sharing.jmws.cannot_share": "You cannot share with yourself or the owner of a LAN server.",
   "sharing.jmws.request_timeout": "Timeout, sharing request has been declined.",
   "sharing.jmws.local_only": "To note; you can only update admin / shared waypoints or groups locally and your changes will be overwritten.",
   "sharing.jmws.disabled": "%s has share requests disabled.",

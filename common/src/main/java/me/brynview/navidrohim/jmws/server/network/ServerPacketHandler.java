@@ -135,6 +135,7 @@ public class ServerPacketHandler {
     }
 
     public static void handleIncomingActionCommand(PacketContext<JMWSActionPayload> Context, ServerPlayer player) {
+
         JMWSActionPayload waypointActionPayload = Context.message();
         CommandFactory.Commands command = waypointActionPayload.command();
         List<JsonElement> arguments = waypointActionPayload.arguments();
