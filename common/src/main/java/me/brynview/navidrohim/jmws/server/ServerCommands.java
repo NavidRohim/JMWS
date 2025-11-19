@@ -30,7 +30,7 @@ public class ServerCommands {
                 if (specifiedObj != null)
                 {
                     String waypointStringJson = JMWSServerIO.getObjectDataFromDisk(specifiedObj, false).toString();
-                    Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(waypointStringJson, player.getUUID(), sender.getUUID(), ShareRequest.Direction.FOR_CLIENT, objectType)), player); // Send share request to player
+                    Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(waypointStringJson, sender.getUUID(), player.getUUID(), ShareRequest.Direction.FOR_CLIENT, objectType)), player); // Send share request to player
 
                     // Send information of the share to the sender. This is needed because this command is server-side only and the client will have no knowledge of the shared obj.
                     Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(waypointStringJson, player.getUUID(), sender.getUUID(), ShareRequest.Direction.FOR_HOST, objectType)), sender);
@@ -54,7 +54,7 @@ public class ServerCommands {
         if (specifiedObject != null && globalObject != null)
         {
             globalObject.makeGlobal();
-            ServerPacketHandler.sendUserSync(player, false, false, true);
+            PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.made_global", true, JMWSMessageType.NEUTRAL);
         } else {
             PlayerNetworkingHelper.sendUserMessage(player, "sharing.jmws.no_matching_object", true, JMWSMessageType.FAILURE);
         }

@@ -6,6 +6,8 @@ import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
+import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
@@ -22,6 +24,9 @@ public class CommonEvents {
         CommonClass.setServerModStatus(false);
         CommonClass.serverConfig = ClientSideServerConfigObject.empty();
         PlayerHelper.clearWarningAlertCache();
+
+        IncomingShareRequests.clear();
+        OutgoingShareRequests.clear();
     }
 
     public static void handleJoin(ServerPlayer serverPlayer, boolean isInternal, boolean sendWarningIfJMNotPresent)

@@ -8,16 +8,17 @@
 - ~~Make command object selection argument type~~
 - ~~Make temp strings into translation strings~~
 - ~~Add sharing request timeout (20 seconds)~~
-- Add command hooks to both Forges
 - ~~Check shared user permissions when deleting, modifying, etc (can user delete this? can the user update this?)~~
     - ~~Currently, an error is thrown.~~
 - ~~Quilt?~~ No. I have a feeling it will die soon.
 - ~~Option to disable share requests in config~~
-- Test on LAN
 - ~~Implement server config for sharing~~
 - ~~Add group syncing~~
 - ~~Change name of /share as it is quite common and to avoid confusion~~
-- Add server-wide object sharing (Admins can set up waypoints that are added to all clients)
+- ~~Add server-wide object sharing (Admins can set up waypoints that are added to all clients)~~
+- Add specific player request accepting, since player can recieve multiple requests.
+- Test on LAN
+- Add command hooks to both Forges
 
 # bugs
 - ~~/decline_share doesn't give text feedback~~ Resolved
@@ -27,11 +28,17 @@
 - ~~Object UUID changes when user leaves.~~ Resolved
 - ~~Game crashes when player deletes all waypoints from in-built group~~ Resolved
 - ~~Bug where outgoing share request just stays forever~~ Resolved
-- Elusive bug where a NullPointerException is thrown while trying to delete shared waypoint on shared user client.
 - ~~When making group, client crashes.~~ Resolved
 - ~~When deleting group and not deleting child waypoints, if its shared with anyone they will get a notification saying they cannot edit the group. (Nothing should be sent)~~ Resolved?
-- Another elusive bug where another NullPointerException is thrown. Not sure of cause maybe something to do with global objects
-- When the owner of a global waypoint (admin) tries to delete one, the check for owner fails.
+- ~~When the owner of a global waypoint (admin) tries to delete one, the check for owner fails.~~
+- ~~Another elusive bug where another NullPointerException is thrown. Not sure of cause maybe something to do with global objects~~ Was due to share request list using wrong UUIDs
+- Elusive bug where a NullPointerException is thrown while trying to delete shared waypoint on shared user client.
+
+### LAN bugs
+- Handshake fails due to new config value
 
 # Fixed bugs
 - Fixed bug where a shared users waypoints would not be deleted if the owner deleted the waypoint via /jmws clearAll
+
+# Bug testing
+- Test if user can receive multiple requests

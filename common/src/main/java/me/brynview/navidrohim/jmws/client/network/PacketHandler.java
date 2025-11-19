@@ -110,8 +110,6 @@ public class PacketHandler {
                 case OBJECT_SHARE ->
                 {
                     ShareRequest.Direction direction = ShareRequest.Direction.valueOf(arguments.getLast().getAsString());
-                    UUID us = UUID.fromString(arguments.get(1).getAsString());
-                    UUID from = UUID.fromString(arguments.get(2).getAsString());
 
                     ObjectType sharedObjectType = ObjectType.valueOf(arguments.get(3).getAsString());
                     String objectString = arguments.getFirst().getAsString();
@@ -129,58 +127,58 @@ public class PacketHandler {
                         object = objectGp;
                     }
 
-                    Player fromUser = CommonClass.minecraftClientInstance.player.getCommandSenderWorld().getPlayerByUUID(from);
-
                     if (direction.equals(ShareRequest.Direction.FOR_CLIENT))
                     {
+                        UUID sender = UUID.fromString(arguments.get(1).getAsString());
                         if (!CommonClass.config.enableSharing.get())
                         {
-                            ShareRequest.disabled(from);
+                            ShareRequest.disabled(sender);
                         }
-                        else if (!IncomingShareRequests.hasShareRequestFrom(from))
+                        else if (!IncomingShareRequests.hasShareRequestFrom(sender))
                         {
-                            IncomingShareRequests.addRequest(from, new ShareRequest(
-                                    from,
-                                    us,
+                            IncomingShareRequests.addRequest(sender, new ShareRequest(
+                                    sender,
+                                    PlayerHelper.ourUUID(),
                                     object,
                                     sharedObjectType,
                                     objectIdentifier
                             ));
-
-                            sendUserAlert(Component.translatable("sharing.jmws.share_request", fromUser.getName().getString()), false, true, JMWSMessageType.SUCCESS);
+                            Player incomingUser = CommonClass.minecraftClientInstance.player.getCommandSenderWorld().getPlayerByUUID(sender);
+                            sendUserAlert(Component.translatable("sharing.jmws.share_request", incomingUser.getName().getString()), false, true, JMWSMessageType.SUCCESS);
                         } else {
-                            ShareRequest.busy(from);
+                            ShareRequest.busy(sender);
                         }
                     } else {
-                        OutgoingShareRequests.addRequest(from, new OutgoingShareRequest(from, us, object, sharedObjectType, objectIdentifier));
+                        UUID incoming = UUID.fromString(arguments.get(2).getAsString());
+                        OutgoingShareRequests.addRequest(incoming, new OutgoingShareRequest(PlayerHelper.ourUUID(), incoming, object, sharedObjectType, objectIdentifier));
                         PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.share_sent"), true, false, JMWSMessageType.SUCCESS);
                     }
                 }
 
                 case REJECT_SHARE ->
                 {
-                    UUID toUser = UUID.fromString(arguments.getFirst().getAsString());
-                    OutgoingShareRequests.getRequest(toUser).resolve();
+                    UUID incoming = UUID.fromString(arguments.getFirst().getAsString());
+                    OutgoingShareRequests.getRequest(incoming).resolve();
                     sendUserAlert(Component.translatable("sharing.jmws.share_rejected"), true, false, JMWSMessageType.FAILURE);
                 }
 
                 case USER_ALREADY_PROCESSING_SHARE ->
                 {
-                    UUID shareUserID = UUID.fromString(arguments.get(1).getAsString());
+                    UUID incoming = UUID.fromString(arguments.get(0).getAsString());
                     String declineMessage = arguments.getLast().getAsString();
 
-                    Player shareUser = PlayerHelper.getUserFromUUID(shareUserID);
+                    Player shareUser = PlayerHelper.getUserFromUUID(incoming);
 
-                    OutgoingShareRequests.getRequest(shareUserID).resolve();
+                    OutgoingShareRequests.getRequest(incoming).resolve();
                     sendUserAlert(Component.translatable(declineMessage, shareUser.getName().getString()), true, false, JMWSMessageType.WARNING);
                 }
 
                 case AFFIRM_SHARE ->
                 {
-                    UUID shareUserID = UUID.fromString(arguments.getFirst().getAsString());
-                    if (OutgoingShareRequests.hasShareRequestFor(shareUserID))
+                    UUID incoming = UUID.fromString(arguments.getFirst().getAsString());
+                    if (OutgoingShareRequests.hasShareRequestFor(incoming))
                     {
-                        OutgoingShareRequests.getRequest(shareUserID).resolve();
+                        OutgoingShareRequests.getRequest(incoming).resolve();
                         sendUserAlert(Component.translatable("sharing.jmws.sharing"), true, false, JMWSMessageType.SUCCESS);
                     }
                 }

@@ -1,5 +1,10 @@
 package me.brynview.navidrohim.jmws.server.config;
 
+import com.google.gson.annotations.Expose;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
 * An initialised subclass of this class (ClientSideServerConfigObject) is sent to every client that joins.
 * The server has certain permissions of what is and is not allowed + the JMWS server version and that is sent in this class.
@@ -7,11 +12,19 @@ package me.brynview.navidrohim.jmws.server.config;
  */
 public class ServerConfigObject {
 
+    @Expose
     public Boolean jmwsEnabled;
+
+    @Expose
     public Boolean waypointsEnabled;
+
+    @Expose
     public Boolean groupsEnabled;
+
+    @Expose
     public Boolean sharingEnabled;
 
+    public List<Boolean> valueList;
     /**
      * Only use this constructor in its raw form on the server side. For the client side, use Gson().fromJson() with the raw packet data and specify this class.
      * @param jmwsEnabled If JMWS is enabled.
@@ -23,6 +36,9 @@ public class ServerConfigObject {
         this.waypointsEnabled = waypointsEnabled;
         this.groupsEnabled = groupsEnabled;
         this.sharingEnabled = sharingEnabled;
+
+        
+        this.valueList = List.of(jmwsEnabled, waypointsEnabled, groupsEnabled, sharingEnabled);
     }
 
     /**

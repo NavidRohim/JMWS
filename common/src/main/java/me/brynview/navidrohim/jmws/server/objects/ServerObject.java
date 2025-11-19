@@ -125,13 +125,17 @@ public class ServerObject implements PossessesIdentifier {
         {
             return this.owner.equals(supposedOwner);
         }
+        public UUID getOwner()
+        {
+            return this.owner;
+        }
 
         public boolean isGlobal() { return this.isGlobal; }
 
         public void setGlobal(boolean global)
         {
             this.isGlobal = global;
-            update();
+            this.update();
         }
 
         private void update()
@@ -264,9 +268,8 @@ public class ServerObject implements PossessesIdentifier {
         File oldNameFile =  new File(this.getObjectPath().toString());
         File newFileName = new File(this.getGlobalObjectPath().toString());
         oldNameFile.renameTo(newFileName);
-
-        this.syncing.setGlobal(true);
         objectPath = getGlobalObjectPath();
+        this.syncing.setGlobal(true);
     }
 
     public boolean delete(boolean stopSharing)
@@ -292,6 +295,8 @@ public class ServerObject implements PossessesIdentifier {
 
     public void update(String data, boolean updateSyncInfo)
     {
+        Constants.getLogger().info(data);
+
         if (!updateSyncInfo) {
             ServerObject newChange = new ServerObject(JsonParser.parseString(data).getAsJsonObject(), this.ownerUUID, true);
             newChange.setCustomData(this.getCustomData());

@@ -1,10 +1,9 @@
 package me.brynview.navidrohim.jmws.client.share;
 
+import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.NoSuchElementException;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -43,5 +42,25 @@ public class IncomingShareRequests {
         {
             return null;
         }
+    }
+
+    public static void clear()
+    {
+        incomingShareRequestList.clear();
+    }
+
+    public static HashMap<UUID, ShareRequest> getAll()
+    {
+        return incomingShareRequestList;
+    }
+
+    public static HashMap<String, ShareRequest> getAllUserKey()
+    {
+        HashMap<String, ShareRequest> r = new HashMap<>();
+        for (Map.Entry<UUID, ShareRequest> s : getAll().entrySet())
+        {
+            r.put(PlayerHelper.getUserFromUUID(s.getKey()).getDisplayName().getString(), s.getValue());
+        }
+        return r;
     }
 }

@@ -155,6 +155,7 @@ public class ServerPacketHandler {
 
                 boolean result;
                 @Nullable ServerGroup group = JMWSServerIO.getObjectFromDisk(groupUniversalIdentifier, playerUUID, ObjectType.GROUP);
+
                 if (group != null)
                 {
                     if (deleteAllWaypointsInGroup)
@@ -182,7 +183,13 @@ public class ServerPacketHandler {
                                 sendUserMessage(player, "message.jmws.deletion_group_failure", true, true);
                             }
                         }
+                    } else if (group.syncing.isGlobal()) {
+                        sendUserMessage(player, "global.jmws.cannot_delete_global", true, JMWSMessageType.ONE_TIME_WARNING);
+                    } else {
+                        group.stopSharing(playerUUID);
+                        sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
                     }
+
                 } else if (deleteAllWaypointsInGroup)
                 {
                     ServerGroup.deleteWaypoints(playerUUID, groupGUID);
@@ -217,7 +224,11 @@ public class ServerPacketHandler {
                                 sendUserMessage(player, "message.jmws.deletion_failure", true, true);
                             }
                         }
-                    } else {
+                    } else if (waypoint.syncing.isGlobal())
+                    {
+                        sendUserMessage(player, "global.jmws.cannot_delete_global", true, JMWSMessageType.ONE_TIME_WARNING);
+                    }
+                     else {
                         waypoint.stopSharing(playerUUID);
                         sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
                     }
@@ -289,7 +300,7 @@ public class ServerPacketHandler {
                             PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_group_success", true, JMWSMessageType.NEUTRAL);
                         }
                     } else {
-                        sendUserMessage(player, "sharing.jmws.local_only", true, JMWSMessageType.ONE_TIME_WARNING);
+                        sendUserMessage(player, "sharing.jmws.local_only", false, JMWSMessageType.ONE_TIME_WARNING);
                     }
                 }
             }

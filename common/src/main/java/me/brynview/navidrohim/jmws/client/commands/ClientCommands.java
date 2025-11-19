@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.client.commands;
 
 import commonnetwork.api.Dispatcher;
+import it.unimi.dsi.fastutil.Hash;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
@@ -12,6 +13,7 @@ import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -118,9 +120,8 @@ public class ClientCommands {
         return 1;
     }
 
-    public static int accept(@Nullable UUID from)
+    public static int accept(@Nullable ShareRequest specifiedShare)
     {
-        ShareRequest specifiedShare = from != null ? IncomingShareRequests.getRequest(from) : IncomingShareRequests.getFirstRequest();
         if (specifiedShare != null)
         {
             specifiedShare.accept();
@@ -131,16 +132,28 @@ public class ClientCommands {
         return 1;
     }
 
-    public static int decline(@Nullable UUID from)
+    public static int accept(@Nullable String name)
     {
-        ShareRequest specifiedShare = from != null ? IncomingShareRequests.getRequest(from) : IncomingShareRequests.getFirstRequest();
-        if (specifiedShare != null)
+        @Nullable ShareRequest request = IncomingShareRequests.getAllUserKey().get(name);
+        return accept(request);
+    }
+
+    public static int decline(@Nullable ShareRequest request)
+    {
+        if (request != null)
         {
-            specifiedShare.decline();
+            request.decline();
             PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.decline"), true, false, JMWSMessageType.NEUTRAL);
         } else {
             PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.no_requests"), true, false, JMWSMessageType.NEUTRAL);
         }
         return 1;
+    }
+
+    public static int decline(@Nullable String from)
+    {
+
+        @Nullable ShareRequest request = IncomingShareRequests.getAllUserKey().get(from);
+        return decline(request);
     }
 }
