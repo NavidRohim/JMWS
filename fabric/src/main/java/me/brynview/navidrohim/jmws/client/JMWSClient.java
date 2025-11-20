@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
 
@@ -38,6 +39,9 @@ public class JMWSClient implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
             CommonEvents.clearCache();
         }));
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            CommonClass.minecraftServerInstance = server;
+        });
     }
 
     private void waitForStartScreenRegister(Minecraft minecraft, Screen screen, int i, int i1) {

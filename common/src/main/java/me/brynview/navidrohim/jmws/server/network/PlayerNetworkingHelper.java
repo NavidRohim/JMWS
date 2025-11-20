@@ -25,15 +25,6 @@ public class PlayerNetworkingHelper {
 
     public static void sendUserMessage(UUID player, String messageKey, Boolean overlay, JMWSMessageType messageType) {
         JMWSActionPayload messagePayload = new JMWSActionPayload(CommandFactory.makeClientAlertRequestJson(messageKey, overlay, messageType));
-        Dispatcher.sendToClient(messagePayload, CommonClass.minecraftServerInstance.getPlayerList().getPlayer(player));
-    }
-
-    public static void sendOldClientWarning(ServerPlayer player)
-    {
-        PlayerNetworkingHelper.sendUserMessage(player, "fatal.jmws.server_mismatch", false, true);
-    }
-    public static void sendOldClientWarning(UUID player)
-    {
-        PlayerNetworkingHelper.sendUserMessage(CommonClass.minecraftServerInstance.getPlayerList().getPlayer(player), "fatal.jmws.server_mismatch", false, true);
+        Dispatcher.sendToClient(messagePayload, CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(player));
     }
 }

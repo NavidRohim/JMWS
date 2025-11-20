@@ -70,11 +70,6 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.OBJECT_SHARE, waypoint, to, from, objectType, direction);
     }
 
-    public static String makeObjectShareRequestForUser(WaypointGroup waypointGroup)
-    {
-        return CommandFactory.makeBaseJsonRequest(Commands.OBJECT_SHARE, waypointGroup.toString(), ObjectType.GROUP);
-    }
-
     public static String makeObjectShareRequestDecline(UUID originalSender)
     {
         return CommandFactory.makeBaseJsonRequest(Commands.REJECT_SHARE, originalSender);

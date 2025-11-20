@@ -327,19 +327,18 @@ public class ServerPacketHandler {
                 UUID ownerUUID = UUID.fromString(arguments.getFirst().getAsString());
                 String objectIdentifier = arguments.get(1).getAsString();
                 ObjectType objType = ObjectType.valueOf(arguments.getLast().getAsString());
+                Constants.getLogger().info(objectIdentifier);
+                Constants.getLogger().info(String.valueOf(objType));
                 ServerObject sharedWp = JMWSServerIO.getObjectFromDisk(objectIdentifier, ownerUUID, objType);
 
-                // Add waypoint ID to users share list.
-                try (UserSharingFile usf = new UserSharingFile(playerUUID))
-                {
-                    usf.addToShared(objectIdentifier, objType);
-                }
-
-                // Add users UUID to waypoints share list.
                 if (sharedWp != null)
                 {
+                    try (UserSharingFile usf = new UserSharingFile(playerUUID))
+                    {
+                        usf.addToShared(objectIdentifier, objType);
+                    }
                     sharedWp.syncing.addUserToShare(playerUUID);
-                    Dispatcher.sendToClient(waypointActionPayload, CommonClass.minecraftServerInstance.getPlayerList().getPlayer(ownerUUID));
+                    Dispatcher.sendToClient(waypointActionPayload, CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(ownerUUID));
                 } else {
                     sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
                 }

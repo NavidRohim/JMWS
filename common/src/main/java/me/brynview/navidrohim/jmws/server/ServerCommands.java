@@ -30,11 +30,8 @@ public class ServerCommands {
                 Path specifiedObj = userObjs.get(waypointID);
                 if (specifiedObj != null)
                 {
-                    String waypointStringJson = JMWSServerIO.getObjectDataFromDisk(specifiedObj, false).toString();
-                    Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(waypointStringJson, sender.getUUID(), player.getUUID(), ShareRequest.Direction.FOR_CLIENT, objectType)), player); // Send share request to player
-
-                    // Send information of the share to the sender. This is needed because this command is server-side only and the client will have no knowledge of the shared obj.
-                    Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(waypointStringJson, player.getUUID(), sender.getUUID(), ShareRequest.Direction.FOR_HOST, objectType)), sender);
+                    ServerObject objIns = JMWSServerIO.getObjectFromFile(specifiedObj, sender.getUUID(), objectType);
+                    objIns.share(sender, player);
                 }
                 else {
                     PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.no_matching_object", true, JMWSMessageType.FAILURE);
@@ -46,7 +43,23 @@ public class ServerCommands {
         return 1;
     }
 
-    public static int globalShare(String objectName, ServerPlayer player, ObjectType objectType)
+    public static int removeShare(ServerPlayer sender, String waypointID, ObjectType objectType) {
+        HashMap<String, Path> userObjPaths = JMWSServerIO.getNameHashmapLookup(sender.getUUID(), objectType);
+        Path specifiedObj = userObjPaths.get(waypointID);
+
+        if (specifiedObj != null)
+        {
+            ServerObject objIns = JMWSServerIO.getObjectFromFile(specifiedObj, sender.getUUID(), objectType);
+            objIns.stopSharing();
+        }
+        else {
+            PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.no_matching_object", true, JMWSMessageType.FAILURE);
+        }
+
+        return 1;
+    }
+
+    public static int globalShare(String objectName, ServerPlayer player, ObjectType objectType, boolean make)
     {
         HashMap<String, Path> userObjs = JMWSServerIO.getNameHashmapLookup(player.getUUID(), objectType);
         @Nullable Path specifiedObject = userObjs.get(objectName);
@@ -54,8 +67,19 @@ public class ServerCommands {
 
         if (specifiedObject != null && globalObject != null)
         {
-            globalObject.makeGlobal();
-            PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.made_global", true, JMWSMessageType.NEUTRAL);
+            if (make)
+            {
+                globalObject.makeGlobal();
+                PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.made_global", true, JMWSMessageType.NEUTRAL);
+            } else {
+                if (globalObject.syncing.isGlobal())
+                {
+                    globalObject.removeGlobal();
+                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.remove_global", true, JMWSMessageType.NEUTRAL);
+                } else {
+                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.not_global", true, JMWSMessageType.NEUTRAL);
+                }
+            }
         } else {
             PlayerNetworkingHelper.sendUserMessage(player, "sharing.jmws.no_matching_object", true, JMWSMessageType.FAILURE);
         }

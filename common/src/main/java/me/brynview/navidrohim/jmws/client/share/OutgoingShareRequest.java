@@ -12,13 +12,14 @@ public class OutgoingShareRequest extends ShareRequest {
 
     public static final boolean isOutgoing = true; // kinda useless
 
-    public OutgoingShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, Object waypointOrGroup, ObjectType sharedObjectType, String requestIdentifier) {
-        super(uuid, meantForPlayerUUID, waypointOrGroup, sharedObjectType, requestIdentifier);
+    public OutgoingShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, Object waypointOrGroup, ObjectType sharedObjectType, String requestIdentifier, String objectDisplayName) {
+        super(uuid, meantForPlayerUUID, waypointOrGroup, sharedObjectType, requestIdentifier, objectDisplayName);
     }
 
-    public void resolve()
+    public OutgoingShareRequest resolve()
     {
         this.finishRequest();
+        return this;
     }
 
     @Override
@@ -27,6 +28,7 @@ public class OutgoingShareRequest extends ShareRequest {
         OutgoingShareRequests.removeRequest(this.originalSender);
         PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.request_timeout"), true, false, JMWSMessageType.WARNING);
     }
+
     private void finishRequest()
     {
         IncomingShareRequests.removeRequest(this.originalSender);

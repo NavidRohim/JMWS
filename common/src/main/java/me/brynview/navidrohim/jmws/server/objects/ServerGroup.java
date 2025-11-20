@@ -20,8 +20,6 @@ public class ServerGroup extends ServerObject {
 
     public ServerGroup(JsonObject payload, UUID playerUUID) {
         super(payload, playerUUID);
-
-        this.rawPacketData = payload.toString();
         this.groupIdentifier = payload.get("guid").getAsString();
     }
 

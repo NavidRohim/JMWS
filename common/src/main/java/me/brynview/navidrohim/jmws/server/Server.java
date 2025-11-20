@@ -14,9 +14,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class Server {
+
     private static CompletableFuture<Suggestions> suggestObject(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder, ObjectType objectType)
     {
-        List<String> names = JMWSServerIO.getObjectsForUser(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType)
+        List<String> names = JMWSServerIO.getObjectsForUser(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, false)
                 .stream()
                 .map(ServerObject::getName)
                 .toList();
@@ -24,11 +25,31 @@ public class Server {
         return SharedSuggestionProvider.suggest(names, suggestionsBuilder);
     }
 
+    private static CompletableFuture<Suggestions> suggestGlobalObject(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder, ObjectType objectType)
+    {
+        List<String> names = JMWSServerIO.getObjectsForUser(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, true)
+                .stream()
+                .map(ServerObject::getName)
+                .toList();
+
+        return SharedSuggestionProvider.suggest(names, suggestionsBuilder);
+    }
+
+
+
     public static CompletableFuture<Suggestions> suggestWaypoints(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
         return suggestObject(commandSourceStackCommandContext, suggestionsBuilder, ObjectType.WAYPOINT);
     }
 
     public static CompletableFuture<Suggestions> suggestGroups(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
         return suggestObject(commandSourceStackCommandContext, suggestionsBuilder, ObjectType.GROUP);
+    }
+
+    public static CompletableFuture<Suggestions> suggestGlobalGroups(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
+        return suggestGlobalObject(commandSourceStackCommandContext, suggestionsBuilder, ObjectType.GROUP);
+    }
+
+    public static CompletableFuture<Suggestions> suggestGlobalWaypoints(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
+        return suggestGlobalObject(commandSourceStackCommandContext, suggestionsBuilder, ObjectType.WAYPOINT);
     }
 }

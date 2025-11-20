@@ -1,7 +1,7 @@
 package me.brynview.navidrohim.jmws.client.commands;
 
 import commonnetwork.api.Dispatcher;
-import it.unimi.dsi.fastutil.Hash;
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
@@ -12,9 +12,6 @@ import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.HashMap;
-import java.util.UUID;
 
 /**
  * Static class that holds methods which commands use.
@@ -124,8 +121,9 @@ public class ClientCommands {
     {
         if (specifiedShare != null)
         {
+            Constants.getLogger().info(String.valueOf(specifiedShare.sharedObjectType));
             specifiedShare.accept();
-            PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.sharing"), true, false, JMWSMessageType.NEUTRAL);
+            PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.sharing_child"), true, false, JMWSMessageType.NEUTRAL);
         } else {
             PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.no_requests"), true, false, JMWSMessageType.NEUTRAL);
         }

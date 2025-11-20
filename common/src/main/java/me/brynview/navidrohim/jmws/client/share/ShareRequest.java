@@ -8,6 +8,7 @@ import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -21,6 +22,10 @@ public class ShareRequest {
     public Object currentSharedObject;
     public ObjectType sharedObjectType;
     public String requestIdentifier;
+    public String objectDisplayName;
+
+    public Player sender;
+    public Player to;
 
     protected final ScheduledFuture<?> timeout;
 
@@ -30,13 +35,16 @@ public class ShareRequest {
         FOR_CLIENT
     }
 
-    public ShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, @Nullable Object waypointOrGroup, ObjectType sharedObjectType, String requestIdentifier) {
+    public ShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, @Nullable Object waypointOrGroup, ObjectType sharedObjectType, String requestIdentifier, String objectDisplayName) {
         this.originalSender = uuid;
         this.meantFor = meantForPlayerUUID;
         this.currentSharedObject = waypointOrGroup;
         this.sharedObjectType = sharedObjectType;
         this.requestIdentifier = requestIdentifier;
+        this.objectDisplayName = objectDisplayName;
 
+        this.sender = PlayerHelper.getUserFromUUID(uuid);
+        this.to = PlayerHelper.getUserFromUUID(meantForPlayerUUID);
         this.timeout = IncomingShareRequests.requestScheduler.schedule(this::timeout, 20, TimeUnit.SECONDS);
     }
 

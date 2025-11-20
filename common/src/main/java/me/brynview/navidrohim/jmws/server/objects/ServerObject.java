@@ -5,6 +5,7 @@ import com.google.gson.annotations.Expose;
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
+import me.brynview.navidrohim.jmws.client.share.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
@@ -32,6 +33,14 @@ import java.util.UUID;
  * Dataclass to hold groups and waypoints from server. This is old code, so I wouldn't mess with it.
  */
 public class ServerObject implements PossessesIdentifier {
+
+
+    public void share(ServerPlayer us, ServerPlayer player) {
+        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, this.ownerUUID, player.getUUID(), ShareRequest.Direction.FOR_CLIENT, getObjectType())), player); // Send share request to player
+
+        // Send information of the share to the sender. This is needed because this command is server-side only and the client will have no knowledge of the shared obj.
+        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, player.getUUID(), this.ownerUUID, ShareRequest.Direction.FOR_HOST, getObjectType())), us);
+    }
 
     public static class SyncingInformation
     {
@@ -157,7 +166,7 @@ public class ServerObject implements PossessesIdentifier {
         {
             for (String playerUUID : this.sharedTo)
             {
-                ServerPlayer sharedUser = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(UUID.fromString(playerUUID));
+                ServerPlayer sharedUser = CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(UUID.fromString(playerUUID));
 
                 if (sharedUser != null)
                 {
@@ -181,10 +190,13 @@ public class ServerObject implements PossessesIdentifier {
     public static ObjectType objectType = ObjectType.GENERIC;
 
     @Nullable
-    private Path objectPath;
+    private Path currentObjectPath;
 
     @Nullable
-    public Path globalObjectPath;
+    public final Path globalObjectPath;
+
+    @Nullable
+    private final Path normalObjectPath;
 
     UUID ownerUUID;
 
@@ -192,17 +204,21 @@ public class ServerObject implements PossessesIdentifier {
     {
         this.dataclass = dataclass;
         this.payload = payload;
+        this.rawPacketData = payload.toString();
+
         this.customData = payload.get("customData").getAsString(); // bug with json formatting
         this.syncing = SyncingInformation.getSyncingInfo(this);
         this.ownerUUID = playerUUID;
         this.name = payload.get("name").getAsString();
-
         this.accessorSharing = !dataclass ? new UserSharingFile(playerUUID) : null;
         this.globalObjectPath = !dataclass ? Path.of(JMWSServerIO.getPathLocationPrefix(this.getObjectType()) + "SERVER_%s".formatted(JMWSServerIO.Utils.makeFilename(this.syncing.objectIdentifier, this.ownerUUID))) : null;
+        this.normalObjectPath = !dataclass ? JMWSServerIO.Utils.getNewObjectFilename(this.syncing.owner, this.syncing.objectIdentifier, getObjectType()) : null;
+
         if (!dataclass)
         {
-            this.objectPath = !syncing.isGlobal ? JMWSServerIO.Utils.getNewObjectFilename(this.syncing.owner, this.syncing.objectIdentifier, getObjectType()) : this.globalObjectPath;
+            this.currentObjectPath = !syncing.isGlobal ? normalObjectPath : this.globalObjectPath;
         }
+        Constants.getLogger().info("Test" + String.valueOf(this.currentObjectPath));
     }
 
     public ServerObject(JsonObject payload, UUID playerUUID)
@@ -230,9 +246,9 @@ public class ServerObject implements PossessesIdentifier {
     }
 
     @Nullable
-    public Path getObjectPath()
+    public Path getCurrentObjectPath()
     {
-        return objectPath;
+        return this.currentObjectPath;
     }
 
     @Nullable
@@ -241,15 +257,21 @@ public class ServerObject implements PossessesIdentifier {
         return globalObjectPath;
     }
 
+    @Nullable
+    public Path getNormalObjectPath()
+    {
+        return normalObjectPath;
+    }
+
     public Boolean hasFile()
     {
-        return this.getObjectPath() != null && CommonHelper.fileExists(this.getObjectPath());
+        return this.getCurrentObjectPath() != null && CommonHelper.fileExists(this.getCurrentObjectPath());
     }
 
     public void removeObjectFromUser(UUID playerUUID, String objectIdentifier)
     {
         UserSharingFile.removeObjectFromUser(playerUUID, objectIdentifier, getObjectType());
-        ServerPlayer sharedPlayer = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
+        ServerPlayer sharedPlayer = CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(playerUUID);
         if (sharedPlayer != null)
         {
             if (this.getObjectType() == ObjectType.WAYPOINT)
@@ -265,19 +287,31 @@ public class ServerObject implements PossessesIdentifier {
 
     public void makeGlobal()
     {
-        File oldNameFile =  new File(this.getObjectPath().toString());
+        File oldNameFile =  new File(this.getCurrentObjectPath().toString());
         File newFileName = new File(this.getGlobalObjectPath().toString());
         oldNameFile.renameTo(newFileName);
-        objectPath = getGlobalObjectPath();
+
+        this.currentObjectPath = getGlobalObjectPath();
         this.syncing.setGlobal(true);
     }
 
+    public void removeGlobal()
+    {
+        File oldNameFile = new File(this.getCurrentObjectPath().toString());
+        File newFileName = new File(this.getNormalObjectPath().toString());
+        this.currentObjectPath = getNormalObjectPath();
+
+        oldNameFile.renameTo(newFileName);
+        this.syncing.setGlobal(false);
+    }
+
+
     public boolean delete(boolean stopSharing)
     {
-        if (this.objectPath != null && !dataclass)
+        if (this.currentObjectPath != null && !dataclass)
         {
             if (stopSharing) {this.stopSharing();}
-            return CommonHelper.deleteFile(this.objectPath);
+            return CommonHelper.deleteFile(this.getCurrentObjectPath());
         }
         return false;
     }
@@ -305,7 +339,7 @@ public class ServerObject implements PossessesIdentifier {
 
         if (this.hasFile() && !dataclass)
         {
-            try (FileWriter objWriter = new FileWriter(this.getObjectPath().toFile()))
+            try (FileWriter objWriter = new FileWriter(this.getCurrentObjectPath().toFile()))
             {
                 objWriter.write(data);
             } catch (IOException ioException)
@@ -321,7 +355,7 @@ public class ServerObject implements PossessesIdentifier {
         if (!this.hasFile() && !dataclass)
         {
             try {
-                Path waypointFilePath = this.getObjectPath();
+                Path waypointFilePath = this.getCurrentObjectPath();
 
                 if (waypointFilePath != null)
                 {

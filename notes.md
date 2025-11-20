@@ -16,7 +16,7 @@
 - ~~Add group syncing~~
 - ~~Change name of /share as it is quite common and to avoid confusion~~
 - ~~Add server-wide object sharing (Admins can set up waypoints that are added to all clients)~~
-- Add specific player request accepting, since player can recieve multiple requests.
+- ~~Add specific player request accepting, since player can receive multiple requests.~~
 - Test on LAN
 - Add command hooks to both Forges
 
@@ -36,10 +36,15 @@
 
 ### LAN bugs
 - ~~Handshake fails due to new config value~~ Resolved. Update old config with new
-- Players cant receive share requests.
+- ~~Host cant receive share requests.~~ Resolved. 
+
+# Bug testing
+- ~~Test if user can receive multiple requests~~ Yes
+- ~~Test if clients aside from host can receive sharing requests~~ Yes
+- ~~Test if host can share waypoints to clients~~ No. 
+  - Due to the way waypoints are stored on the server.
+  - Hosts waypoints are not handled by JMWS
+  - I.E. Hosts waypoints arent stored on server which means cannot make global or share.
 
 # Fixed bugs
 - Fixed bug where a shared users waypoints would not be deleted if the owner deleted the waypoint via /jmws clearAll
-
-# Bug testing
-- Test if user can receive multiple requests

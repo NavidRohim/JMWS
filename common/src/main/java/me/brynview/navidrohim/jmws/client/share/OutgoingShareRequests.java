@@ -26,8 +26,6 @@ public class OutgoingShareRequests {
     @Nullable
     public static OutgoingShareRequest getRequest(UUID from)
     {
-        Constants.getLogger().info(outgoingShareRequestList.toString());
-        Constants.getLogger().info(String.valueOf(from));
         return outgoingShareRequestList.get(from);
     }
 

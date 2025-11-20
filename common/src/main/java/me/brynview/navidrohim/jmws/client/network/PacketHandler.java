@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
+import static me.brynview.navidrohim.jmws.client.helper.PlayerHelper.getUserFromUUID;
 import static me.brynview.navidrohim.jmws.client.helper.PlayerHelper.sendUserAlert;
 
 /**
@@ -115,16 +116,20 @@ public class PacketHandler {
                     String objectString = arguments.getFirst().getAsString();
 
                     Object object;
+                    String objName;
                     String objectIdentifier;
+
                     if (sharedObjectType == ObjectType.WAYPOINT)
                     {
                         Waypoint objectWp = WaypointFactory.fromWaypointJsonString(objectString);
                         objectIdentifier = ServerObject.SyncingInformation.getSyncingInfo(objectWp.getCustomData()).objectIdentifier;
                         object = objectWp;
+                        objName = objectWp.getName();
                     } else {
                         WaypointGroup objectGp = WaypointFactory.fromGroupJsonString(objectString);
                         objectIdentifier = ServerObject.SyncingInformation.getSyncingInfo(objectGp.getCustomData()).objectIdentifier;
                         object = objectGp;
+                        objName = objectGp.getName();
                     }
 
                     if (direction.equals(ShareRequest.Direction.FOR_CLIENT))
@@ -136,21 +141,24 @@ public class PacketHandler {
                         }
                         else if (!IncomingShareRequests.hasShareRequestFrom(sender))
                         {
-                            IncomingShareRequests.addRequest(sender, new ShareRequest(
+                            Constants.getLogger().info(String.valueOf(sharedObjectType));
+                            ShareRequest request = new ShareRequest(
                                     sender,
                                     PlayerHelper.ourUUID(),
                                     object,
                                     sharedObjectType,
-                                    objectIdentifier
-                            ));
-                            Player incomingUser = CommonClass.minecraftClientInstance.player.getCommandSenderWorld().getPlayerByUUID(sender);
-                            sendUserAlert(Component.translatable("sharing.jmws.share_request", incomingUser.getName().getString()), false, true, JMWSMessageType.SUCCESS);
+                                    objectIdentifier,
+                                    objName
+                            );
+
+                            IncomingShareRequests.addRequest(sender, request);
+                            sendUserAlert(Component.translatable("sharing.jmws.share_request", request.sender.getName().getString()), false, true, JMWSMessageType.SUCCESS);
                         } else {
                             ShareRequest.busy(sender);
                         }
                     } else {
                         UUID incoming = UUID.fromString(arguments.get(2).getAsString());
-                        OutgoingShareRequests.addRequest(incoming, new OutgoingShareRequest(PlayerHelper.ourUUID(), incoming, object, sharedObjectType, objectIdentifier));
+                        OutgoingShareRequests.addRequest(incoming, new OutgoingShareRequest(PlayerHelper.ourUUID(), incoming, object, sharedObjectType, objectIdentifier, objName));
                         PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.share_sent"), true, false, JMWSMessageType.SUCCESS);
                     }
                 }
@@ -158,8 +166,10 @@ public class PacketHandler {
                 case REJECT_SHARE ->
                 {
                     UUID incoming = UUID.fromString(arguments.getFirst().getAsString());
-                    OutgoingShareRequests.getRequest(incoming).resolve();
-                    sendUserAlert(Component.translatable("sharing.jmws.share_rejected"), true, false, JMWSMessageType.FAILURE);
+                    OutgoingShareRequest request = OutgoingShareRequests.getRequest(incoming);
+
+                    request.resolve();
+                    sendUserAlert(Component.translatable("sharing.jmws.share_rejected", request.to.getDisplayName().getString()), true, false, JMWSMessageType.FAILURE);
                 }
 
                 case USER_ALREADY_PROCESSING_SHARE ->
@@ -178,8 +188,11 @@ public class PacketHandler {
                     UUID incoming = UUID.fromString(arguments.getFirst().getAsString());
                     if (OutgoingShareRequests.hasShareRequestFor(incoming))
                     {
-                        OutgoingShareRequests.getRequest(incoming).resolve();
-                        sendUserAlert(Component.translatable("sharing.jmws.sharing"), true, false, JMWSMessageType.SUCCESS);
+                        OutgoingShareRequest request = OutgoingShareRequests.getRequest(incoming).resolve();
+                        Constants.getLogger().info(String.valueOf(request.meantFor));
+                        sendUserAlert(Component.translatable("sharing.jmws.sharing_host", request.objectDisplayName, getUserFromUUID(incoming)), true, false, JMWSMessageType.SUCCESS);
+                    } else {
+                        sendUserAlert(Component.literal("debug > %s".formatted(incoming)), true, true, JMWSMessageType.SUCCESS);
                     }
                 }
                 

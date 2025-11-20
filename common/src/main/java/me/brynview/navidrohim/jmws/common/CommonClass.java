@@ -48,6 +48,11 @@ public class CommonClass {
     public static SyncCounter syncCounter = null;
     public static MinecraftServer minecraftServerInstance;
 
+    public static MinecraftServer getMinecraftServerInstance()
+    {
+        return minecraftServerInstance;
+    }
+
     public static void setServerModStatus(boolean serverModStatus)
     {
         ClientVariables.serverHasMod = serverModStatus;

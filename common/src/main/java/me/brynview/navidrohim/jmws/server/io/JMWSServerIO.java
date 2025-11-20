@@ -9,7 +9,6 @@ import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -88,14 +87,15 @@ public class JMWSServerIO {
         return Stream.of();
     }
 
-    public static List<Path> getObjectPathsForUser(UUID uuid, ObjectType objectType) {
+    public static List<Path> getObjectPathsForUser(UUID uuid, ObjectType objectType, boolean global) {
 
         List<Path> waypointFileList = new ArrayList<>();
         String pathSearch = getPathLocationPrefix(objectType);
+        String globalPrefix = global ? "SERVER_" : "";
 
         try (Stream<Path> files = Files.list(Path.of(pathSearch))) {
             files.filter(Files::isRegularFile).forEach(path -> {
-                if (path.toString().contains(uuid.toString())) {
+                if (path.toString().contains(uuid.toString()) && path.toString().startsWith(globalPrefix)) {
                     waypointFileList.add(path);
                 }
             });
@@ -105,11 +105,15 @@ public class JMWSServerIO {
         return waypointFileList;
     }
 
-    public static <T extends ServerObject> List<T> getObjectsForUser(UUID user, ObjectType objectType)
+    public static List<Path> getObjectPathsForUser(UUID uuid, ObjectType objectType) {
+        return getObjectPathsForUser(uuid, objectType, false);
+    }
+
+    public static <T extends ServerObject> List<T> getObjectsForUser(UUID user, ObjectType objectType, boolean global)
     {
         List<T> list = new ArrayList<>();
 
-        for (Path objPath : getObjectPathsForUser(user, objectType))
+        for (Path objPath : getObjectPathsForUser(user, objectType, global))
         {
             list.add((T) getObjectFromFile(objPath, user, objectType));
         }
@@ -138,9 +142,9 @@ public class JMWSServerIO {
     public static HashMap<String, Path> getNameHashmapLookup(UUID user, ObjectType objectType)
     {
         HashMap<String, Path> map = new HashMap<>();
-        for (ServerObject obj : getObjectsForUser(user, objectType))
+        for (ServerObject obj : getObjectsForUser(user, objectType, false))
         {
-            map.put(obj.getName(), obj.getObjectPath());
+            map.put(obj.getName(), obj.getCurrentObjectPath());
         }
 
         return map;
@@ -184,7 +188,8 @@ public class JMWSServerIO {
 
     @Nullable
     public static <T extends ServerObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, ObjectType objectType) {
-        Path objPath = getObjectPathFromUniqueIdentifier(objectIdentifier, objectType);
+        Path objPath = Utils.getNewObjectFilename(ownerUUID, objectIdentifier, objectType);
+        Constants.getLogger().info(">> > "+objPath.toString());
         if (objPath != null)
         {
             return getObjectFromFile(objPath, ownerUUID, objectType);
