@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.client.callback;
 
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -11,6 +12,7 @@ import me.brynview.navidrohim.jmws.client.commands.ClientCommands;
 
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
+import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -19,6 +21,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -62,7 +65,11 @@ public interface ClientCommandCallback {
         List<String> names = new ArrayList<>();
         for (UUID user : IncomingShareRequests.getAll().keySet())
         {
-            names.add(PlayerHelper.getUserFromUUID(user).getDisplayName().getString());
+            String username = PlayerHelper.getUsernameFromUUID(user);
+            if (!username.equals(CommonHelper.unknownUser))
+            {
+                names.add(username);
+            }
         }
 
         return SharedSuggestionProvider.suggest(names, suggestionsBuilder);

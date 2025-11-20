@@ -20,7 +20,6 @@ public class ServerGroup extends ServerObject {
 
     public ServerGroup(JsonObject payload, UUID playerUUID) {
         super(payload, playerUUID);
-        this.groupIdentifier = payload.get("guid").getAsString();
     }
 
     public static List<Path> getGlobalGroups() {
@@ -73,6 +72,13 @@ public class ServerGroup extends ServerObject {
     {
         super.makeGlobal();
         this.setLocked(true);
+    }
+
+    @Override
+    public void removeGlobal()
+    {
+        super.removeGlobal();
+        this.setLocked(false);
     }
 
     @Override

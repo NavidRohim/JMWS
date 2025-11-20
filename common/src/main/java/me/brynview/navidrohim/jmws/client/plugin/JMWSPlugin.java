@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.client.plugin;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.mojang.authlib.GameProfile;
 import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.client.IClientPlugin;
@@ -18,6 +19,7 @@ import journeymap.api.v2.common.event.impl.JourneyMapEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.client.ClientVariables;
 import me.brynview.navidrohim.jmws.client.share.ShareRequest;
 import me.brynview.navidrohim.jmws.client.utils.ObjectUtils;
 import me.brynview.navidrohim.jmws.common.CommonClass;
@@ -25,6 +27,7 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
+import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
@@ -33,6 +36,7 @@ import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -467,10 +471,11 @@ public class JMWSPlugin implements IClientPlugin {
             ServerObject.SyncingInformation gpSync = ServerObject.SyncingInformation.getSyncingInfo(savedGroup.getCustomData());
             if (gpSync.isGlobal())
             {
-                savedGroup.setName(savedGroup.getName() + "(Global)");
+                savedGroup.setName(savedGroup.getName() + " (%s)".formatted(CommonHelper.globalStringTag));
             } else if (!gpSync.isOwner(PlayerHelper.ourUUID()))
             {
-                savedGroup.setName(savedGroup.getName() + "(%s)".formatted(PlayerHelper.getUserFromUUID(gpSync.getOwner())));
+                String ownerUser = PlayerHelper.getUsernameFromUUID(gpSync.getOwner());
+                savedGroup.setName(savedGroup.getName() + " (%s)".formatted(ownerUser));
             }
             addGroup(savedGroup);
         }
@@ -513,10 +518,11 @@ public class JMWSPlugin implements IClientPlugin {
             ServerObject.SyncingInformation wpSync = ServerObject.SyncingInformation.getSyncingInfo(savedWaypoint.getCustomData());
             if (wpSync.isGlobal())
             {
-                savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(Component.translatable("global.jmws.global_tag").getString()));
+                savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(CommonHelper.globalStringTag));
             } else if (!wpSync.isOwner(PlayerHelper.ourUUID()))
             {
-                savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(PlayerHelper.getUserFromUUID(wpSync.getOwner()).getDisplayName().getString()));
+                String ownerUser = PlayerHelper.getUsernameFromUUID(wpSync.getOwner());
+                savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(ownerUser));
             }
             addWaypoint(savedWaypoint);
         }

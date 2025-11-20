@@ -9,6 +9,7 @@ import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.share.ShareRequest;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 
 import java.util.HashMap;
@@ -27,8 +28,7 @@ public class CommandFactory {
     }
 
     public static String makeBaseJsonRequest(Commands command, Object... arguments) {
-        Gson json = new Gson();
-       return json.toJson(new PacketCommand(command, arguments));
+       return CommonClass.gson.toJson(new PacketCommand(command, arguments));
     }
 
     public static String makeDeleteRequestJson(String waypointIdentifier, boolean silent, boolean all) {
@@ -82,7 +82,7 @@ public class CommandFactory {
 
     public static String makeObjectShareRequestAccept(ShareRequest shareRequest)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.AFFIRM_SHARE, shareRequest.originalSender, shareRequest.requestIdentifier, shareRequest.sharedObjectType);
+        return CommandFactory.makeBaseJsonRequest(Commands.AFFIRM_SHARE, shareRequest.originalSender, shareRequest.requestIdentifier, shareRequest.sharedObjectType, shareRequest.meantFor);
     }
 
     public static String makeUpdateObjectRequest(String objectIdentifier, Waypoint waypoint)

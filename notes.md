@@ -33,6 +33,11 @@
 - ~~When the owner of a global waypoint (admin) tries to delete one, the check for owner fails.~~
 - ~~Another elusive bug where another NullPointerException is thrown. Not sure of cause maybe something to do with global objects~~ Was due to share request list using wrong UUIDs
 - Elusive bug where a NullPointerException is thrown while trying to delete shared waypoint on shared user client.
+- ~~No space when creating global group (Test)~~ Resolved
+- ~~Global group doesnt remove when removed from server~~ Resolved
+- ~~Global group stays locked after being localised.~~ Resolve
+- ~~Global command suggestions don't work. (waypoints and groups)~~
+- ~~Offline users name doesn't appear when sharing an object~~ Resolved
 
 ### LAN bugs
 - ~~Handshake fails due to new config value~~ Resolved. Update old config with new

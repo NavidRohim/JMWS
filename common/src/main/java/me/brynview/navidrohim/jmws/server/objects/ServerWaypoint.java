@@ -28,9 +28,6 @@ public class ServerWaypoint extends ServerObject {
 
         // Main defining information
         this.groupId = payload.get("groupId").getAsString();
-
-        // Identifier (used for code)
-        this.groupIdentifier = payload.get("guid").getAsString();
     }
 
     public static ServerWaypoint getFromPath(Path waypointPath, UUID ownerUUID)

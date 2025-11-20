@@ -326,7 +326,7 @@ public class ServerPacketHandler {
             {
                 UUID ownerUUID = UUID.fromString(arguments.getFirst().getAsString());
                 String objectIdentifier = arguments.get(1).getAsString();
-                ObjectType objType = ObjectType.valueOf(arguments.getLast().getAsString());
+                ObjectType objType = ObjectType.valueOf(arguments.get(2).getAsString());
                 Constants.getLogger().info(objectIdentifier);
                 Constants.getLogger().info(String.valueOf(objType));
                 ServerObject sharedWp = JMWSServerIO.getObjectFromDisk(objectIdentifier, ownerUUID, objType);

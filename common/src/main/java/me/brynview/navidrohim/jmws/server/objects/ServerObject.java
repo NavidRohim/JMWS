@@ -71,8 +71,7 @@ public class ServerObject implements PossessesIdentifier {
         public static ServerObject.SyncingInformation getSyncingInfo(ServerObject object)
         {
             try {
-                Gson gson = new Gson();
-                SyncingInformation syncingInformation = gson.fromJson(object.getCustomData(), SyncingInformation.class);
+                SyncingInformation syncingInformation = CommonClass.gson.fromJson(object.getCustomData(), SyncingInformation.class);
                 syncingInformation.parentObject = object;
 
                 return syncingInformation;
@@ -87,8 +86,7 @@ public class ServerObject implements PossessesIdentifier {
         {
             try
             {
-                Gson gson = new Gson();
-                return gson.fromJson(customDataField, SyncingInformation.class);
+                return CommonClass.gson.fromJson(customDataField, SyncingInformation.class);
             } catch (JsonSyntaxException syntaxException) // will throw if object hasn't been ported.
             {
                 if (!returnNullIfError)
@@ -114,8 +112,7 @@ public class ServerObject implements PossessesIdentifier {
 
         public static String getEmptySyncingInfoString(String objectIdentifier, UUID owner, boolean isGlobal)
         {
-            Gson gson = new Gson();
-            return gson.toJson(new SyncingInformation(List.of(), objectIdentifier, owner, isGlobal));
+            return CommonClass.gson.toJson(new SyncingInformation(List.of(), objectIdentifier, owner, isGlobal));
         }
 
         public void addUserToShare(UUID playerUUID)
@@ -151,8 +148,7 @@ public class ServerObject implements PossessesIdentifier {
         {
             if (this.parentObject != null)
             {
-                Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-                String jsonString = gson.toJson(this, SyncingInformation.class);
+                String jsonString = CommonClass.gsonExcludeNoExpose.toJson(this, SyncingInformation.class);
                 this.parentObject.getRawJson().add("customData", new JsonPrimitive(jsonString));
 
                 this.parentObject.update(this.parentObject.getRawJson().getAsJsonObject().toString(), true); // TODO: bug test more. This seems very janky and not done right. Will test more
@@ -176,12 +172,12 @@ public class ServerObject implements PossessesIdentifier {
         }
     }
 
-    String rawPacketData;
-    String name;
-    String customData;
-    String groupIdentifier;
-
     private final JsonObject payload;
+    private final String rawPacketData;
+
+    String name;
+    String groupIdentifier;
+    private String customData;
 
     public UserSharingFile accessorSharing;
     public SyncingInformation syncing;
@@ -198,7 +194,7 @@ public class ServerObject implements PossessesIdentifier {
     @Nullable
     private final Path normalObjectPath;
 
-    UUID ownerUUID;
+    protected final UUID ownerUUID;
 
     public ServerObject(JsonObject payload, UUID playerUUID, boolean dataclass)
     {
@@ -211,14 +207,14 @@ public class ServerObject implements PossessesIdentifier {
         this.ownerUUID = playerUUID;
         this.name = payload.get("name").getAsString();
         this.accessorSharing = !dataclass ? new UserSharingFile(playerUUID) : null;
-        this.globalObjectPath = !dataclass ? Path.of(JMWSServerIO.getPathLocationPrefix(this.getObjectType()) + "SERVER_%s".formatted(JMWSServerIO.Utils.makeFilename(this.syncing.objectIdentifier, this.ownerUUID))) : null;
+        this.globalObjectPath = !dataclass ? Path.of(JMWSServerIO.getPathLocationPrefix(this.getObjectType()) + JMWSServerIO.globalObjPrefix + JMWSServerIO.Utils.makeFilename(this.syncing.objectIdentifier, this.ownerUUID)) : null;
         this.normalObjectPath = !dataclass ? JMWSServerIO.Utils.getNewObjectFilename(this.syncing.owner, this.syncing.objectIdentifier, getObjectType()) : null;
+        this.groupIdentifier = payload.get("guid").getAsString();
 
         if (!dataclass)
         {
             this.currentObjectPath = !syncing.isGlobal ? normalObjectPath : this.globalObjectPath;
         }
-        Constants.getLogger().info("Test" + String.valueOf(this.currentObjectPath));
     }
 
     public ServerObject(JsonObject payload, UUID playerUUID)

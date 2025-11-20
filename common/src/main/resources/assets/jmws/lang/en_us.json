@@ -33,7 +33,7 @@
 
   "__comment__": "Sharing language strings",
   "sharing.jmws.no_longer_sharing": "This will no longer be shared.",
-  "sharing.jmws.object_no_longer_exists": "Shared request is no longer valid!",
+  "sharing.jmws.no_longer_valid": "Shared request is no longer valid!",
   "sharing.jmws.share_request": " %s has sent a sync request, accept? (/share_accept, /share_decline)",
   "sharing.jmws.share_sent": "Sent request",
   "sharing.jmws.share_rejected": "Your share request to %s was rejected.",
@@ -48,6 +48,7 @@
   "sharing.jmws.disabled": "%s has share requests disabled.",
   "sharing.jmws.no_matching_object": "No waypoint / group matching that name.",
   "sharing.jmws.no_server_sharing": "You cannot share on this server.",
+  "sharing.jmws.unknown_player": "Unknown Soldier",
 
   "__comment__": "Global object language strings",
   "global.jmws.cannot_edit_global": "You cannot edit waypoints / groups made by admins.",

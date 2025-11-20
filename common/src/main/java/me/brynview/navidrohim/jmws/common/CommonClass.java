@@ -1,5 +1,7 @@
 package me.brynview.navidrohim.jmws.common;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import commonnetwork.api.Dispatcher;
 import commonnetwork.api.Network;
 
@@ -21,6 +23,8 @@ import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 
 
@@ -40,13 +44,17 @@ public class CommonClass {
     // code that gets invoked by the entry point of the loader specific projects.
 
     public static Minecraft minecraftClientInstance = null;
+    public static MinecraftServer minecraftServerInstance;
 
     public static ConfigInterface config = null;
     public static ClientSideServerConfigObject serverConfig = ClientSideServerConfigObject.empty();
 
     public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
+    public static final Gson gson = new Gson();
+    public static final Gson gsonExcludeNoExpose = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+
     public static SyncCounter syncCounter = null;
-    public static MinecraftServer minecraftServerInstance;
 
     public static MinecraftServer getMinecraftServerInstance()
     {
@@ -142,7 +150,6 @@ public class CommonClass {
         Constants.getLogger().info("Creating server resources..");
         ServerConfig.ensureExistence();
         _createServerResources();
-
 
         // It is common for all supported loaders to provide a similar feature that can not be used directly in the
         // common code. A popular way to get around this is using Java's built-in service loader feature to create

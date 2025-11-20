@@ -1,18 +1,14 @@
 package me.brynview.navidrohim.jmws.server.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.server.exceptions.ServerConfigurationException;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,8 +30,7 @@ public class ServerConfig {
 
             if (didCreateNew)
             {
-                Gson configJson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-                String configJsonString = configJson.toJson(new ServerConfigObject(
+                String configJsonString = CommonClass.gsonExcludeNoExpose.toJson(new ServerConfigObject(
                                 true,
                                 true,
                                 true,
@@ -50,7 +45,7 @@ public class ServerConfig {
 
             } else {
                 rawServerConfigData = getConfigJson();
-                serverConfig = new Gson().fromJson(rawServerConfigData, ServerConfigObject.class);
+                serverConfig = CommonClass.gson.fromJson(rawServerConfigData, ServerConfigObject.class);
                 List<Boolean> valueList = Arrays.asList(serverConfig.groupsEnabled, serverConfig.sharingEnabled, serverConfig.waypointsEnabled, serverConfig.jmwsEnabled);
 
                 if (valueList.contains(null))

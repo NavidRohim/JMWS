@@ -34,8 +34,7 @@ public class JMWSHandshakePayload
             try
             {
                 serverConfigDataJson = friendlyByteBuf.readUtf(512);
-                Gson configJsonObj = new Gson();
-                serverConfigData = configJsonObj.fromJson(serverConfigDataJson, ClientSideServerConfigObject.class);
+                serverConfigData = CommonClass.gson.fromJson(serverConfigDataJson, ClientSideServerConfigObject.class);
             }
             catch (IndexOutOfBoundsException | JsonSyntaxException malformed) {
                 Constants.getLogger().error("Missing or corrupted server data! Usually means a server version mismatch.");

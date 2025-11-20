@@ -59,7 +59,7 @@ public class IncomingShareRequests {
         HashMap<String, ShareRequest> r = new HashMap<>();
         for (Map.Entry<UUID, ShareRequest> s : getAll().entrySet())
         {
-            r.put(PlayerHelper.getUserFromUUID(s.getKey()).getDisplayName().getString(), s.getValue());
+            r.put(PlayerHelper.getUsernameFromUUID(s.getKey()), s.getValue());
         }
         return r;
     }

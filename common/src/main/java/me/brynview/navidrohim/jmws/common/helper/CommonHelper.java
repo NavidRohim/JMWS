@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 
 public class CommonHelper {
     // This is kinda just a "put whatever here that is used everywhere" class
+    public static final String unknownUser = "Unknown Soldier";
+    public static final String globalStringTag = "Global";
 
     public static String getWaypointFilename(Waypoint waypoint, UUID uuID) {
         Vector3d waypointLocationVector = new Vector3d(waypoint.getBlockPos().getX(), waypoint.getBlockPos().getY(), waypoint.getBlockPos().getZ());

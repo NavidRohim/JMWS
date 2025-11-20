@@ -1,16 +1,19 @@
 package me.brynview.navidrohim.jmws.client.share;
 
+import com.mojang.authlib.GameProfile;
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
+import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -19,13 +22,17 @@ public class ShareRequest {
 
     public UUID originalSender;
     public UUID meantFor;
+
+    public String originalSenderName;
+    public String recipientName;
+
     public Object currentSharedObject;
     public ObjectType sharedObjectType;
     public String requestIdentifier;
     public String objectDisplayName;
 
-    public Player sender;
-    public Player to;
+    @Nullable public GameProfile sender;
+    @Nullable public GameProfile to;
 
     protected final ScheduledFuture<?> timeout;
 
@@ -43,8 +50,9 @@ public class ShareRequest {
         this.requestIdentifier = requestIdentifier;
         this.objectDisplayName = objectDisplayName;
 
-        this.sender = PlayerHelper.getUserFromUUID(uuid);
-        this.to = PlayerHelper.getUserFromUUID(meantForPlayerUUID);
+        PlayerHelper.getUserFromUUID(uuid).ifPresentOrElse(p -> {this.sender = p;}, () -> {this.sender = null;});
+        PlayerHelper.getUserFromUUID(meantForPlayerUUID).ifPresentOrElse(pFor -> {this.to = pFor;}, () -> {this.sender = null;});
+
         this.timeout = IncomingShareRequests.requestScheduler.schedule(this::timeout, 20, TimeUnit.SECONDS);
     }
 
@@ -82,4 +90,15 @@ public class ShareRequest {
         IncomingShareRequests.removeRequest(this.originalSender);
         this.timeout.cancel(true);
     }
+
+    public String getSenderName()
+    {
+        return sender != null ? sender.getName() : CommonHelper.unknownUser;
+    }
+
+    public String getRecipientName()
+    {
+    return to != null ? to.getName() : CommonHelper.unknownUser;
+    }
 }
+

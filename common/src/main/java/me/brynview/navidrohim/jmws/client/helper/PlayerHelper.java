@@ -1,17 +1,18 @@
 package me.brynview.navidrohim.jmws.client.helper;
 
+import com.mojang.authlib.GameProfile;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
+import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.ClientboundPacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Random player functions that play sounds or sends action bar alerts.
@@ -73,10 +74,22 @@ public class PlayerHelper {
         }
     }
 
-    @Nullable
-    public static Player getUserFromUUID(UUID user)
+    public static Optional<GameProfile> getUserFromUUID(UUID user)
     {
-        return CommonClass.minecraftClientInstance.player.getCommandSenderWorld().getPlayerByUUID(user);
+        ClientPacketListener clientPacketListener = Objects.requireNonNull(CommonClass.minecraftClientInstance.getConnection());
+        @Nullable PlayerInfo playerInfo = clientPacketListener.getPlayerInfo(user);
+
+        if (playerInfo != null)
+        {
+            return Optional.of(playerInfo.getProfile());
+        }
+        return Optional.empty();
+    }
+
+    public static String getUsernameFromUUID(UUID user)
+    {
+        Optional<GameProfile> profile = getUserFromUUID(user);
+        return profile.isPresent() ? profile.get().getName() : CommonHelper.unknownUser;
     }
 
     public static UUID ourUUID()
