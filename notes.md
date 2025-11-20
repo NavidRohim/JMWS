@@ -38,12 +38,16 @@
 - ~~Global group stays locked after being localised.~~ Resolve
 - ~~Global command suggestions don't work. (waypoints and groups)~~
 - ~~Offline users name doesn't appear when sharing an object~~ Resolved
+- Offline users shared objects don't say who they are shared from when syncing
+    - This is because the user is offline and their name cannot be resolved. (grabbed from server)
+    - This might be fixable, but I will likely leave it
+    - Could fix by accessing Mojang servers but this may not age well.
 
 ### LAN bugs
 - ~~Handshake fails due to new config value~~ Resolved. Update old config with new
 - ~~Host cant receive share requests.~~ Resolved. 
 
-# Bug testing
+### Bug testing
 - ~~Test if user can receive multiple requests~~ Yes
 - ~~Test if clients aside from host can receive sharing requests~~ Yes
 - ~~Test if host can share waypoints to clients~~ No. 
@@ -51,5 +55,18 @@
   - Hosts waypoints are not handled by JMWS
   - I.E. Hosts waypoints arent stored on server which means cannot make global or share.
 
-# Fixed bugs
+### Fixed bugs
 - Fixed bug where a shared users waypoints would not be deleted if the owner deleted the waypoint via /jmws clearAll
+
+# Forges
+- Add server and client commands
+  - This includes command argument suggestions for waypoints and groups
+- Server started listener
+
+# Testing
+- Global waypoints (adding, removing)
+- Sharing (Sharing, unsharing(?), adding share requests with multiple people)
+    - How do shared objects work when owner is offline?
+    - How does a shared object behave when it's turned into a global object and vice versa?
+- Test `/share_waypoint_stop` and group eq.
+- Test possible bug where rejection doesn't stop timeout counter.

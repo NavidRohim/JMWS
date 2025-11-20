@@ -83,7 +83,7 @@ public class Jmws implements ModInitializer {
                 }
 
             } else {
-                Constants.getLogger().info("JourneyMap is not needed on the server-side. If you get a warning about it on the server, you can safely ignore it.");
+                Constants.getLogger().info("JourneyMap is optional on the server. If you get a warning about it, you can safely ignore it.");
                 CommonClass.init();
             }
         } catch (NoSuchElementException | VersionParsingException | IllegalStateException ignored) {
@@ -102,7 +102,7 @@ public class Jmws implements ModInitializer {
                     .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("groupName", StringArgumentType.greedyString()).suggests(Server::suggestGroups).executes(Jmws::doRemoveShareGroup)))
             );
             dispatcher.register(Commands.literal("share_waypoint_stop")
-                    .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("groupName", StringArgumentType.greedyString()).suggests(Server::suggestGroups).executes(Jmws::doRemoveShareWaypoint)))
+                    .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("waypointName", StringArgumentType.greedyString()).suggests(Server::suggestGroups).executes(Jmws::doRemoveShareWaypoint)))
             );
 
             dispatcher.register(Commands.literal("jmws_admin")
