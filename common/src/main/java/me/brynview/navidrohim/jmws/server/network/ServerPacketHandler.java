@@ -10,6 +10,7 @@ import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
+import me.brynview.navidrohim.jmws.server.Server;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
@@ -98,10 +99,13 @@ public class ServerPacketHandler {
                         for (String shared : userSharingFile.getSharedList(ObjectType.WAYPOINT))
                         {
                             lastIterWp++;
-                            String waypointData = JMWSServerIO.getObjectFromUniqueIdentifier(shared, null, ObjectType.WAYPOINT);
-                            if (waypointData != null)
+                            ServerWaypoint wp = JMWSServerIO.getWaypointFromUniqueIdentifier(shared, playerUUID);
+                            if (wp != null)
                             {
-                                jsonWaypointPayloadArray.put(String.valueOf(lastIterWp), waypointData);
+                                if (!wp.syncing.isGlobal())
+                                {
+                                    jsonWaypointPayloadArray.put(String.valueOf(lastIterWp), wp.getRawString());
+                                }
                             }
                             else {
                                 userSharingFile.removeFromShared(shared, ObjectType.WAYPOINT);
@@ -110,10 +114,13 @@ public class ServerPacketHandler {
                         for (String sharedGpString : userSharingFile.getSharedList(ObjectType.GROUP))
                         {
                             lastIterGp++;
-                            String groupData = JMWSServerIO.getObjectFromUniqueIdentifier(sharedGpString, null, ObjectType.GROUP);
-                            if (groupData != null)
+                            ServerGroup gp = JMWSServerIO.getGroupFromUniqueIdentifier(sharedGpString, playerUUID);
+                            if (gp != null)
                             {
-                                jsonGroupPayloadArray.put(String.valueOf(lastIterGp), groupData);
+                                if (!gp.syncing.isGlobal())
+                                {
+                                    jsonGroupPayloadArray.put(String.valueOf(lastIterGp), gp.getRawString());
+                                }
                             } else {
                                 userSharingFile.removeFromShared(sharedGpString, ObjectType.GROUP);
                             }

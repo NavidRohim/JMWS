@@ -31,7 +31,12 @@ public class ServerCommands {
                 if (specifiedObj != null)
                 {
                     ServerObject objIns = JMWSServerIO.getObjectFromFile(specifiedObj, sender.getUUID(), objectType);
-                    objIns.share(sender, player);
+                    if (!objIns.syncing.isGlobal())
+                    {
+                        objIns.share(sender, player);
+                    } else {
+                        PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.cannot_share_global", true, JMWSMessageType.WARNING);
+                    }
                 }
                 else {
                     PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.no_matching_object", true, JMWSMessageType.FAILURE);

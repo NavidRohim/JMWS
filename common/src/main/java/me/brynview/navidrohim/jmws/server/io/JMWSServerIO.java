@@ -268,5 +268,11 @@ public class JMWSServerIO {
         Path objPath = getObjectPathFromUniqueIdentifier(waypointIdentifier, ObjectType.WAYPOINT);
         return getWaypointFromFile(objPath, user);
     }
+
+    @Nullable
+    public static ServerGroup getGroupFromUniqueIdentifier(String groupIdentifier, UUID user)
+    {
+        return getGroupFromFile(getObjectPathFromUniqueIdentifier(groupIdentifier, ObjectType.GROUP), user);
+    }
 }
 

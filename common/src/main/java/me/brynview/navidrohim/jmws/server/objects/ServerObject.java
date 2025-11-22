@@ -36,8 +36,8 @@ public class ServerObject implements PossessesIdentifier {
 
 
     public void share(ServerPlayer us, ServerPlayer player) {
-        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, this.ownerUUID, player.getUUID(), ShareRequest.Direction.FOR_CLIENT, getObjectType())), player); // Send share request to player
 
+        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, this.ownerUUID, player.getUUID(), ShareRequest.Direction.FOR_CLIENT, getObjectType())), player); // Send share request to player
         // Send information of the share to the sender. This is needed because this command is server-side only and the client will have no knowledge of the shared obj.
         Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, player.getUUID(), this.ownerUUID, ShareRequest.Direction.FOR_HOST, getObjectType())), us);
     }

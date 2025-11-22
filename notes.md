@@ -67,6 +67,6 @@
 - Global waypoints (adding, removing)
 - Sharing (Sharing, unsharing(?), adding share requests with multiple people)
     - How do shared objects work when owner is offline?
-    - How does a shared object behave when it's turned into a global object and vice versa?
+    - How does an already shared object behave when it's turned into a global object and vice versa?
 - Test `/share_waypoint_stop` and group eq.
 - Test possible bug where rejection doesn't stop timeout counter.
