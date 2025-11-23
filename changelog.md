@@ -1,4 +1,4 @@
-# 1.1.7 Changelog
+# 1.1.8 Changelog
 
 ## New
 
@@ -6,16 +6,13 @@ No new features.
 
 ## Bug fixes / Changes
 
-- The servers JMWS configuration is now visible to the client in the Addon Options screen
-  - This may be helpful if you find you cannot create waypoints or groups.
-- When JourneyMap is not installed on the client side, a screen is now shown instead of an overly-verbose crash report.
-- Added server version checking. This is to make debugging easier.
-- Added JavaDocs to GitHub
-- Couldn't delete waypoints in nether when in dimension other than nether (and vice versa)
+- Fixed bug where users with large amount of waypoints / groups would disconnect due to default size limit of 32k bytes.
+    - Now fixed by increasing the limit to 2MB (2,097,000)
+    - This is technically possible to reach but, I just refuse to believe anyone has that amount.
 
 ## Bugs that I am aware of
 
 None!
 
 ### Other
-*Server version is 1.00*
+*Server version is 1.01, fully backwards compatible with 1.00 granting you don't have a lot of waypoints / groups (100+)*
