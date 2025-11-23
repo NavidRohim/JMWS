@@ -13,10 +13,12 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.List;
 
 
-public class  JMWSActionPayload
+public class JMWSActionPayload
 {
     public static final ResourceLocation CHANNEL = ResourceLocation.fromNamespaceAndPath(Constants.MODID, "action_command");
     public static final StreamCodec<FriendlyByteBuf, JMWSActionPayload> STREAM_CODEC = StreamCodec.ofMember(JMWSActionPayload::encode, JMWSActionPayload::new);
+
+    public static final int PACKET_SIZE = 2_097_000; // 2MB
 
     public String rawData = null;
     public WaypointPayloadCommand command = null;
@@ -24,12 +26,17 @@ public class  JMWSActionPayload
 
     public JMWSActionPayload(FriendlyByteBuf friendlyByteBuf)
     {
-        rawData = friendlyByteBuf.readUtf();
+        rawData = friendlyByteBuf.readUtf(PACKET_SIZE);
     }
 
     public JMWSActionPayload(String jsonData)
     {
-        rawData = jsonData;
+        if (PACKET_SIZE >= jsonData.getBytes().length)
+            rawData = jsonData;
+        else {
+            Constants.getLogger().error("Packet too big! User may have too many waypoints and or groups!");
+            rawData = CommandHelper.makeClientAlertRequestJson("error.jmws.error_packet_size", true, true);
+        }
     }
 
     public static CustomPacketPayload.Type<CustomPacketPayload> type()
@@ -39,7 +46,7 @@ public class  JMWSActionPayload
 
     public void encode(FriendlyByteBuf buf)
     {
-        buf.writeUtf(rawData);
+        buf.writeUtf(rawData, PACKET_SIZE);
     }
 
     private void _setCommandAndArguments()
