@@ -10,6 +10,8 @@ No new features.
     - Now fixed by increasing the limit to 2MB (2,097,000)
     - This is technically possible to reach but, I just refuse to believe anyone has that amount.
 
+This fix is courtesy of isHaack on GitHub (resolves https://github.com/NavidRohim/JMWS/issues/4)
+
 ## Bugs that I am aware of
 
 None!
