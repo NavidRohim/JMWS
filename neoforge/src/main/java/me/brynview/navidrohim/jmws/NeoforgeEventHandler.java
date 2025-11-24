@@ -1,7 +1,13 @@
 package me.brynview.navidrohim.jmws;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import me.brynview.navidrohim.jmws.client.commands.ClientCommands;
+import me.brynview.navidrohim.jmws.client.commands.CommonClientPlatformCommands;
+import me.brynview.navidrohim.jmws.client.commands.ShareSuggestions;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.events.CommonEvents;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
@@ -14,6 +20,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+
+import java.util.concurrent.CompletableFuture;
 
 @EventBusSubscriber(Dist.CLIENT)
 public class NeoforgeEventHandler
@@ -48,5 +56,23 @@ public class NeoforgeEventHandler
                                 .then(Commands.literal("groups").executes(groupClearAllCtx -> ClientCommands.clearAllGroups()))
                                 .then(Commands.literal("waypoints").executes(waypointClearAllCtx -> ClientCommands.clearAllWaypoints())))
         );
+        dispatcher.register(Commands.literal("share_accept")
+                .then(Commands.argument("sender", StringArgumentType.greedyString())
+                        .suggests(NeoforgeEventHandler::getShareRequestSuggestionsForge)
+                        .executes(CommonClientPlatformCommands::accept)));
+
+        dispatcher.register(Commands.literal("share_decline")
+                .then(Commands.argument("sender", StringArgumentType.greedyString())
+                        .suggests(NeoforgeEventHandler::getShareRequestSuggestionsForge)
+                        .executes(CommonClientPlatformCommands::decline)));
+    }
+
+    private static CompletableFuture<Suggestions> getShareRequestSuggestionsForge(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder)
+    {
+        for (String suggestion : ShareSuggestions.getIncomingShareRequestNames())
+        {
+            suggestionsBuilder.suggest(suggestion);
+        }
+        return suggestionsBuilder.buildFuture();
     }
 }

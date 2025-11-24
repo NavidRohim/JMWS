@@ -26,7 +26,7 @@ public class  JMWSActionPayload
 
     public JMWSActionPayload(FriendlyByteBuf friendlyByteBuf)
     {
-        rawData = friendlyByteBuf.readUtf();
+        rawData = friendlyByteBuf.readUtf(PACKET_SIZE);
     }
 
     public JMWSActionPayload(String jsonData)

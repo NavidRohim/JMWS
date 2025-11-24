@@ -2,7 +2,6 @@
 - ~~Get prototype of actual shared waypoint on client~~
 - ~~Add tamper-proofing (validate that the clients requested shared waypoints are in the SUI file)~~ *Resolved due to rework*
 - ~~Get user shared objs file on server to work.~~
-- ~~Make transitioning from old objs to new objs~~ Implemented, need to test more.
 - ~~Sync waypoint when updated~~
 - ~~Delete waypoint when deleted by owner~~
 - ~~Make command object selection argument type~~
@@ -18,8 +17,8 @@
 - ~~Add server-wide object sharing (Admins can set up waypoints that are added to all clients)~~
 - ~~Add specific player request accepting, since player can receive multiple requests.~~
 - Test on LAN
-- Add command hooks to both Forges
-
+- ~~Add command hooks to both Forges~~
+- Make transitioning from old objs to new objs
 # bugs
 - ~~/decline_share doesn't give text feedback~~ Resolved
 - ~~Deleting a shared waypoint doesn't delete the shared user index file~~ Issue no longer valid. Resolved
@@ -59,9 +58,9 @@
 - Fixed bug where a shared users waypoints would not be deleted if the owner deleted the waypoint via /jmws clearAll
 
 # Forges
-- Add server and client commands
-  - This includes command argument suggestions for waypoints and groups
-- Server started listener
+- ~~Add server and client commands~~
+  - ~~This includes command argument suggestions for waypoints and groups~~
+- ~~Server started listener~~
 
 # Testing
 - Global waypoints (adding, removing)
