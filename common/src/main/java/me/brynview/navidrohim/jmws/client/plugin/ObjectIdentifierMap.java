@@ -2,6 +2,9 @@ package me.brynview.navidrohim.jmws.client.plugin;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.client.utils.ObjectUtils;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.Nullable;
@@ -38,6 +41,20 @@ public class ObjectIdentifierMap {
         return DigestUtils.sha256Hex(playerUUID.toString() + waypointGUID + objectName);
     }
 
+    private static boolean isLegacyDataField(@Nullable String field) {
+
+        if (field != null)
+        {
+            for (int i = 0; i < field.length(); i++) {
+                char c = field.charAt(i);
+                if (!Character.isLetterOrDigit(c))
+                    return false;
+            }
+
+            return field.length() == 64;
+        }
+        return true;
+    }
     /**
      * Get an old waypoint from a new waypoint (unique identifier)
      * @param newWaypoint -- The new waypoint being updated.
@@ -88,8 +105,14 @@ public class ObjectIdentifierMap {
      */
     public static void addWaypointToMap(Waypoint waypoint)
     {
+        String customDataField = waypoint.getCustomData();
+        if (isLegacyDataField(customDataField))
+        {
+            ObjectUtils.transitionObject(customDataField, PlayerHelper.ourUUID(), ObjectType.WAYPOINT);
+        }
+
         String waypointIdentifier;
-        @Nullable ServerObject.SyncingInformation waypointSyncInfo = ServerObject.SyncingInformation.getSyncingInfo(waypoint.getCustomData(), true);
+        @Nullable ServerObject.SyncingInformation waypointSyncInfo = ServerObject.SyncingInformation.getSyncingInfo(customDataField, true);
         if (waypointSyncInfo != null)
         {
             waypointIdentifier = waypointSyncInfo.objectIdentifier;

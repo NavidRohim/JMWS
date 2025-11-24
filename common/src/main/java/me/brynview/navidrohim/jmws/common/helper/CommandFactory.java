@@ -95,6 +95,11 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectIdentifier, ObjectType.GROUP, group.toString());
     }
 
+    public static String makeTransitionObjectRequest(String objectIdentifier, UUID playerOwner, ObjectType transitionType)
+    {
+        return CommandFactory.makeBaseJsonRequest(Commands.TRANSITION, objectIdentifier, playerOwner, transitionType);
+    }
+
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {
         return JsonParser.parseString(jsonString).getAsJsonObject();
     }
@@ -128,7 +133,7 @@ public class CommandFactory {
         // Object sharing errors
         USER_ALREADY_PROCESSING_SHARE, // User is already processing another share request
 
-        UPDATE
-
+        UPDATE,
+        TRANSITION
     }
 }

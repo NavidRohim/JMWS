@@ -18,7 +18,7 @@
 - ~~Add specific player request accepting, since player can receive multiple requests.~~
 - Test on LAN
 - ~~Add command hooks to both Forges~~
-- Make transitioning from old objs to new objs
+- Make transitioning from old objs to new objs (reminder for tomorrow, do server TRANSITION packet tomorrow)
 # bugs
 - ~~/decline_share doesn't give text feedback~~ Resolved
 - ~~Deleting a shared waypoint doesn't delete the shared user index file~~ Issue no longer valid. Resolved

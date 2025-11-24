@@ -516,10 +516,10 @@ public class JMWSPlugin implements IClientPlugin {
         // Add server waypoints to the client
         for (Waypoint savedWaypoint : savedWaypoints) {
             ServerObject.SyncingInformation wpSync = ServerObject.SyncingInformation.getSyncingInfo(savedWaypoint.getCustomData());
-            if (wpSync.isGlobal())
+            if (wpSync.isGlobal()) // Global
             {
                 savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(CommonHelper.globalStringTag));
-            } else if (!wpSync.isOwner(PlayerHelper.ourUUID()))
+            } else if (!wpSync.isOwner(PlayerHelper.ourUUID())) // Shared
             {
                 String ownerUser = PlayerHelper.getUsernameFromUUID(wpSync.getOwner());
                 savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(ownerUser));
