@@ -158,7 +158,7 @@ public class JMWSServerIO {
         HashMap<String, Path> map = new HashMap<>();
         for (ServerObject obj : getObjectsForUser(user, objectType, false))
         {
-            map.put(obj.getName(), obj.getCurrentObjectPath());
+            map.put(obj.getObjectNonDuplicateIdentifier(), obj.getCurrentObjectPath());
         }
 
         return map;

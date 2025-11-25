@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class CommonHelper {
     // This is kinda just a "put whatever here that is used everywhere" class
     public static final String unknownUser = "Unknown Soldier";
-    public static final String globalStringTag = "Global";
+    public static final String globalStringTag = "G";
 
     public static String _getWaypointFromRaw(Vector3d coordVector, String waypointName, UUID playerUUID) {
         Set<Character> charsToRemove = new HashSet<>(Arrays.asList('<', '>', ':', '*', '"', '\\', '|', '?', '/'));

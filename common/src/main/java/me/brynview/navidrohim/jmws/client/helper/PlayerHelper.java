@@ -92,6 +92,12 @@ public class PlayerHelper {
         return profile.isPresent() ? profile.get().getName() : CommonHelper.unknownUser;
     }
 
+    public static String getUsernameFromUUID(UUID user, boolean withTag)
+    {
+        Optional<GameProfile> profile = getUserFromUUID(user);
+        return profile.isPresent() ? profile.get().getName() : "S";
+    }
+
     public static UUID ourUUID()
     {
         return CommonClass.minecraftClientInstance.player.getUUID();

@@ -47,6 +47,7 @@ public class ServerDispatcher {
                                 .executes(ServerDispatcher::removeServerWp)))
         );
     }
+
     private static int doRemoveShareWaypoint(CommandContext<CommandSourceStack> context1) throws CommandSyntaxException {
         String waypointID = StringArgumentType.getString(context1, "waypointName");
 

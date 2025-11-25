@@ -57,7 +57,6 @@
   "global.jmws.made_global": "Made waypoint / group global.",
   "global.jmws.remove_global": "Removed waypoint / group from being global.",
   "global.jmws.not_global": "Cannot make not global as it's already not global.",
-  "global.jmws.global_tag": "Global",
 
   "__comment__": "Config language strings",
   "text.config.jmws-config.title": "JourneyMap Waypoint Syncing (JMWS)",

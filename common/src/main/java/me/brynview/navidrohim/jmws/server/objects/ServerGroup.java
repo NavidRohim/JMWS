@@ -67,6 +67,11 @@ public class ServerGroup extends ServerObject {
         return this.getRawJson().get("settings").getAsJsonObject().get("locked").getAsBoolean();
     }
 
+    public String getDifferentiator()
+    {
+        return getGroupIdentifier().substring(0, 5);
+    }
+
     @Override
     public void makeGlobal()
     {

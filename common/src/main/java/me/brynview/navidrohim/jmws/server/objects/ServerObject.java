@@ -3,7 +3,7 @@ package me.brynview.navidrohim.jmws.server.objects;
 import com.google.gson.*;
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
+import me.brynview.navidrohim.jmws.client.enums .JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.share.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
@@ -106,6 +106,9 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
     {
         return normalObjectPath;
     }
+
+    @Nullable
+    public String getDifferentiator() { return "Object"; }
 
     public Boolean hasFile()
     {
@@ -258,5 +261,10 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
     public String toString()
     {
         return payload.toString();
+    }
+
+    public String getObjectNonDuplicateIdentifier()
+    {
+        return "%s (%s)".formatted(this.getName(), this.getDifferentiator());
     }
 }

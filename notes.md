@@ -42,8 +42,9 @@
     - This is because the user is offline and their name cannot be resolved. (grabbed from server)
     - This might be fixable, but I will likely leave it
     - Could fix by accessing Mojang servers but this may not age well.
-- If objects haven't been transitioned to 1.2.0 system and player tries to use any new commands (global or sharing) a UUID error is thrown.
-- 
+- ~~If objects haven't been transitioned to 1.2.0 system and player tries to use any new commands (global or sharing) a UUID error is thrown.~~
+- ~~Waypoints / groups with duplicate names aren't shown in the object suggestion (differentiate by adding coordinates and dimension)~~
+
 ### LAN bugs
 - ~~Handshake fails due to new config value~~ Resolved. Update old config with new
 - ~~Host cant receive share requests.~~ Resolved. 

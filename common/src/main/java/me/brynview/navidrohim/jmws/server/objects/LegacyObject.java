@@ -77,4 +77,9 @@ public class LegacyObject
         }
         return false;
     }
+
+    public String getDifferentiator()
+    {
+        return ObjectType.GENERIC.toString();
+    }
 }

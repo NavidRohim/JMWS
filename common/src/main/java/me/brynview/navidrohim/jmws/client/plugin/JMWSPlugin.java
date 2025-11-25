@@ -516,7 +516,7 @@ public class JMWSPlugin implements IClientPlugin {
                 savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(CommonHelper.globalStringTag));
             } else if (!wpSync.isOwner(PlayerHelper.ourUUID())) // Shared
             {
-                String ownerUser = PlayerHelper.getUsernameFromUUID(wpSync.getOwner());
+                String ownerUser = PlayerHelper.getUsernameFromUUID(wpSync.getOwner(), true);
                 savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(ownerUser));
             }
             addWaypoint(savedWaypoint);
