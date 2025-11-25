@@ -18,7 +18,7 @@
 - ~~Add specific player request accepting, since player can receive multiple requests.~~
 - Test on LAN
 - ~~Add command hooks to both Forges~~
-- Make transitioning from old objs to new objs (reminder for tomorrow, do server TRANSITION packet tomorrow)
+- ~~Make transitioning from old objs to new objs (reminder for tomorrow, do server TRANSITION packet tomorrow)~~ 
 
 # bugs
 - ~~/decline_share doesn't give text feedback~~ Resolved
@@ -32,7 +32,7 @@
 - ~~When deleting group and not deleting child waypoints, if its shared with anyone they will get a notification saying they cannot edit the group. (Nothing should be sent)~~ Resolved?
 - ~~When the owner of a global waypoint (admin) tries to delete one, the check for owner fails.~~
 - ~~Another elusive bug where another NullPointerException is thrown. Not sure of cause maybe something to do with global objects~~ Was due to share request list using wrong UUIDs
-- Elusive bug where a NullPointerException is thrown while trying to delete shared waypoint on shared user client.
+- ~~Elusive bug where a NullPointerException is thrown while trying to delete shared waypoint on shared user client.~~ Have not had for a while when trying to recreate. Resolved but keep an eye out
 - ~~No space when creating global group (Test)~~ Resolved
 - ~~Global group doesnt remove when removed from server~~ Resolved
 - ~~Global group stays locked after being localised.~~ Resolve
@@ -42,7 +42,8 @@
     - This is because the user is offline and their name cannot be resolved. (grabbed from server)
     - This might be fixable, but I will likely leave it
     - Could fix by accessing Mojang servers but this may not age well.
-
+- If objects haven't been transitioned to 1.2.0 system and player tries to use any new commands (global or sharing) a UUID error is thrown.
+- 
 ### LAN bugs
 - ~~Handshake fails due to new config value~~ Resolved. Update old config with new
 - ~~Host cant receive share requests.~~ Resolved. 

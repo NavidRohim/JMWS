@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.server.exceptions.ObjectError;
+import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
@@ -45,7 +46,7 @@ public class JMWSServerIO {
                 return null;
             }
         }
-        public static UUID getUUIDFromPath(Path path)
+        public static UUID getUUIDFromPath(Path path, ObjectType transitionType)
         {
             String pathString = path.toString();
             String uuidString = pathString.substring(pathString.indexOf("#") + 1, pathString.length() - 5);
@@ -53,9 +54,19 @@ public class JMWSServerIO {
             try
             {
                 return UUID.fromString(uuidString);
-            } catch (IllegalArgumentException err)
+            } catch (IllegalArgumentException | IndexOutOfBoundsException err)
             {
-                throw new ObjectError("UUID is malformed. UUID: %s From String: %s".formatted(uuidString, pathString));
+                try {
+                    int uuidEnd = !pathString.contains("group") ? 5 : 11;
+
+                    UUID uuidFromLegacy = UUID.fromString(pathString.substring(pathString.lastIndexOf("_") + 1, pathString.length() - uuidEnd));
+                    LegacyObject.transitionIfNeed(path, uuidFromLegacy, transitionType);
+
+                    return uuidFromLegacy;
+                } catch (IllegalArgumentException | IndexOutOfBoundsException err2)
+                {
+                    throw new ObjectError("UUID is malformed. UUID: %s From String: %s".formatted(uuidString, pathString));
+                }
             }
         }
     }
@@ -132,7 +143,7 @@ public class JMWSServerIO {
             if (data != null && objPath != null)
             {
                 Constructor<? extends ServerObject> constructor = objectType.getObjectClass().getConstructor(JsonObject.class, UUID.class);
-                return (T) constructor.newInstance(data, Utils.getUUIDFromPath(objPath));
+                return (T) constructor.newInstance(data, Utils.getUUIDFromPath(objPath, objectType));
             } else {
                 return null;
             }
@@ -256,7 +267,7 @@ public class JMWSServerIO {
     {
         JsonObject waypointLocalData = getObjectDataFromDisk(waypointPath, false);
         if (waypointLocalData != null) {
-            return new ServerWaypoint(waypointLocalData, playerUUID);
+            return new  ServerWaypoint(waypointLocalData, playerUUID);
         }
         return null;
     }

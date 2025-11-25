@@ -68,7 +68,7 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
 
         if (!dataclass)
         {
-            this.currentObjectPath = !syncing.isGlobal() ? normalObjectPath : this.globalObjectPath;
+            this.currentObjectPath = !syncing.isGlobal() ? normalObjectPath : globalObjectPath;
         }
     }
 
@@ -198,7 +198,8 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
         {
             try {
                 Path waypointFilePath = this.getCurrentObjectPath();
-
+                Constants.getLogger().warn("FPATH " + ownerUUID.toString());
+                Constants.getLogger().warn("PATH " + waypointFilePath);
                 if (waypointFilePath != null)
                 {
                     Files.createFile(waypointFilePath);

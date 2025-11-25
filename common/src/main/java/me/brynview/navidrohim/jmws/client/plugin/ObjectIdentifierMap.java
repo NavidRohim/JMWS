@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import static me.brynview.navidrohim.jmws.common.CommonClass.*;
+import static me.brynview.navidrohim.jmws.server.objects.LegacyObject.isLegacyDataField;
 
 /**
  * Note: the term "object" may be used. In this context is a generic term for waypoints or groups.
@@ -42,19 +43,6 @@ public class ObjectIdentifierMap {
         return DigestUtils.sha256Hex(playerUUID.toString() + waypointGUID + objectName);
     }
 
-    private static boolean isLegacyDataField(@Nullable String field) {
-        if (field != null && field.length() == 64)
-        {
-            for (int i = 0; i < field.length(); i++) {
-                char c = field.charAt(i);
-                if (!Character.isLetterOrDigit(c))
-                    return false;
-            }
-
-            return true;
-        }
-        return false;
-    }
     /**
      * Get an old waypoint from a new waypoint (unique identifier)
      * @param newWaypoint -- The new waypoint being updated.
