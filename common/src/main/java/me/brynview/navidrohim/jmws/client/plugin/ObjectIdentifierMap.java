@@ -2,10 +2,11 @@ package me.brynview.navidrohim.jmws.client.plugin;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.utils.ObjectUtils;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.server.objects.ServerObject;
+import me.brynview.navidrohim.jmws.common.syncing.SyncingInformation;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,8 +43,7 @@ public class ObjectIdentifierMap {
     }
 
     private static boolean isLegacyDataField(@Nullable String field) {
-
-        if (field != null)
+        if (field != null && field.length() == 64)
         {
             for (int i = 0; i < field.length(); i++) {
                 char c = field.charAt(i);
@@ -51,9 +51,9 @@ public class ObjectIdentifierMap {
                     return false;
             }
 
-            return field.length() == 64;
+            return true;
         }
-        return true;
+        return false;
     }
     /**
      * Get an old waypoint from a new waypoint (unique identifier)
@@ -61,7 +61,7 @@ public class ObjectIdentifierMap {
      * @return Waypoint -- The old waypoint before update.
      */
     public static Waypoint getOldWaypoint(Waypoint newWaypoint) {
-        ServerObject.SyncingInformation persistentWaypointID = ServerObject.SyncingInformation.getSyncingInfo(newWaypoint.getCustomData());
+        SyncingInformation persistentWaypointID = SyncingInformation.getSyncingInfo(newWaypoint.getCustomData());
         if (persistentWaypointID != null)
         {
             return waypointIdentifierMap.get(persistentWaypointID.objectIdentifier);
@@ -86,7 +86,7 @@ public class ObjectIdentifierMap {
      */
     public static WaypointGroup getOldGroup(WaypointGroup newWaypointGroup)
     {
-        return groupIdentifierMap.get(ServerObject.SyncingInformation.getSyncingInfo(newWaypointGroup.getCustomData()).objectIdentifier);
+        return groupIdentifierMap.get(SyncingInformation.getSyncingInfo(newWaypointGroup.getCustomData()).objectIdentifier);
     }
 
     /**
@@ -103,44 +103,55 @@ public class ObjectIdentifierMap {
      * Adds a waypoint to the identifier map.
      * @param waypoint -- The waypoint that will be added to the map.
      */
-    public static void addWaypointToMap(Waypoint waypoint)
+    public static boolean addWaypointToMap(Waypoint waypoint)
     {
         String customDataField = waypoint.getCustomData();
         if (isLegacyDataField(customDataField))
         {
-            ObjectUtils.transitionObject(customDataField, PlayerHelper.ourUUID(), ObjectType.WAYPOINT);
-        }
-
-        String waypointIdentifier;
-        @Nullable ServerObject.SyncingInformation waypointSyncInfo = ServerObject.SyncingInformation.getSyncingInfo(customDataField, true);
-        if (waypointSyncInfo != null)
-        {
-            waypointIdentifier = waypointSyncInfo.objectIdentifier;
+            ObjectUtils.transitionObject(waypoint, PlayerHelper.ourUUID(), ObjectType.WAYPOINT);
+            return false;
         } else {
-            waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypoint.getGuid(), waypoint.getName());
-            waypoint.setCustomData(ServerObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID(), false));
-        }
+            String waypointIdentifier;
+            @Nullable SyncingInformation waypointSyncInfo = SyncingInformation.getSyncingInfo(customDataField, true);
+            if (waypointSyncInfo != null)
+            {
+                waypointIdentifier = waypointSyncInfo.objectIdentifier;
+            } else {
+                waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypoint.getGuid(), waypoint.getName());
+                waypoint.setCustomData(SyncingInformation.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID(), false));
+            }
 
-        waypointIdentifierMap.put(waypointIdentifier, waypoint);
+            waypointIdentifierMap.put(waypointIdentifier, waypoint);
+            return true;
+        }
     }
 
     /**
      * Adds a group to the identifier map.
      * @param waypointGroup -- The group that will be added to the map.
      */
-    public static void addGroupToMap(WaypointGroup waypointGroup)
+    public static boolean addGroupToMap(WaypointGroup waypointGroup)
     {
-        String waypointIdentifier;
-        @Nullable ServerObject.SyncingInformation waypointSyncInfo = ServerObject.SyncingInformation.getSyncingInfo(waypointGroup.getCustomData(), true);
-        if (waypointSyncInfo != null)
-        {
-            waypointIdentifier = waypointSyncInfo.objectIdentifier;
-        } else {
-            waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypointGroup.getGuid(), waypointGroup.getName());
-            waypointGroup.setCustomData(ServerObject.SyncingInformation.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID(), false));
-        }
+        String customDataField = waypointGroup.getCustomData();
 
-        groupIdentifierMap.put(waypointIdentifier, waypointGroup);
+        if (isLegacyDataField(customDataField))
+        {
+            ObjectUtils.transitionObject(waypointGroup, PlayerHelper.ourUUID(), ObjectType.GROUP);
+            return false;
+        } else {
+            String groupIdentifier;
+            @Nullable SyncingInformation groupSyncInfo = SyncingInformation.getSyncingInfo(waypointGroup.getCustomData(), true);
+            if (groupSyncInfo != null)
+            {
+                groupIdentifier = groupSyncInfo.objectIdentifier;
+            } else {
+                groupIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypointGroup.getGuid(), waypointGroup.getName());
+                waypointGroup.setCustomData(SyncingInformation.getEmptySyncingInfoString(groupIdentifier, minecraftClientInstance.player.getUUID(), false));
+            }
+
+            groupIdentifierMap.put(groupIdentifier, waypointGroup);
+            return true;
+        }
     }
 
     /**
@@ -149,7 +160,7 @@ public class ObjectIdentifierMap {
      */
     public static void removeWaypointFromMap(Waypoint waypoint)
     {
-        waypointIdentifierMap.remove(ServerObject.SyncingInformation.getSyncingInfo(waypoint.getCustomData()).objectIdentifier);
+        waypointIdentifierMap.remove(SyncingInformation.getSyncingInfo(waypoint.getCustomData()).objectIdentifier);
     }
 
     /**
@@ -158,7 +169,7 @@ public class ObjectIdentifierMap {
      */
     public static void removeGroupFromMap(WaypointGroup group)
     {
-        @Nullable ServerObject.SyncingInformation groupSyncInfo = ServerObject.SyncingInformation.getSyncingInfo(group.getCustomData());
+        @Nullable SyncingInformation groupSyncInfo = SyncingInformation.getSyncingInfo(group.getCustomData());
         if (groupSyncInfo != null)
             groupIdentifierMap.remove(groupSyncInfo.objectIdentifier);
     }

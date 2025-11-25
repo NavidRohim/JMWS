@@ -95,9 +95,9 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectIdentifier, ObjectType.GROUP, group.toString());
     }
 
-    public static String makeTransitionObjectRequest(String objectIdentifier, UUID playerOwner, ObjectType transitionType)
+    public static String makeTransitionObjectRequest(String objectIdentifier, String filename, ObjectType transitionType)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.TRANSITION, objectIdentifier, playerOwner, transitionType);
+        return CommandFactory.makeBaseJsonRequest(Commands.TRANSITION, objectIdentifier, filename, transitionType);
     }
 
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {

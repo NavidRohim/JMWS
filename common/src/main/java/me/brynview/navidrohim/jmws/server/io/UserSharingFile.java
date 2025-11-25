@@ -1,7 +1,7 @@
 package me.brynview.navidrohim.jmws.server.io;
 
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.share.io.CommonShareIO;
+import me.brynview.navidrohim.jmws.common.syncing.share.io.CommonShareIO;
 
 import java.util.UUID;
 

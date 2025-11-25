@@ -1,7 +1,6 @@
 package me.brynview.navidrohim.jmws.client.network;
 
 import com.google.gson.JsonElement;
-import com.mojang.authlib.GameProfile;
 import commonnetwork.networking.data.PacketContext;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
@@ -18,17 +17,15 @@ import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.server.objects.ServerObject;
+import me.brynview.navidrohim.jmws.common.syncing.SyncingInformation;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
-import static me.brynview.navidrohim.jmws.client.helper.PlayerHelper.getUserFromUUID;
 import static me.brynview.navidrohim.jmws.client.helper.PlayerHelper.sendUserAlert;
 
 /**
@@ -123,12 +120,12 @@ public class PacketHandler {
                     if (sharedObjectType == ObjectType.WAYPOINT)
                     {
                         Waypoint objectWp = WaypointFactory.fromWaypointJsonString(objectString);
-                        objectIdentifier = ServerObject.SyncingInformation.getSyncingInfo(objectWp.getCustomData()).objectIdentifier;
+                        objectIdentifier = SyncingInformation.getSyncingInfo(objectWp.getCustomData()).objectIdentifier;
                         object = objectWp;
                         objName = objectWp.getName();
                     } else {
                         WaypointGroup objectGp = WaypointFactory.fromGroupJsonString(objectString);
-                        objectIdentifier = ServerObject.SyncingInformation.getSyncingInfo(objectGp.getCustomData()).objectIdentifier;
+                        objectIdentifier = SyncingInformation.getSyncingInfo(objectGp.getCustomData()).objectIdentifier;
                         object = objectGp;
                         objName = objectGp.getName();
                     }

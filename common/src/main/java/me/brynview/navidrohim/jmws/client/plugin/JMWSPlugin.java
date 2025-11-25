@@ -3,7 +3,6 @@ package me.brynview.navidrohim.jmws.client.plugin;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import com.mojang.authlib.GameProfile;
 import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.client.IClientPlugin;
@@ -15,20 +14,17 @@ import journeymap.api.v2.common.event.FullscreenEventRegistry;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.event.common.WaypointGroupEvent;
 import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
-import journeymap.api.v2.common.event.impl.JourneyMapEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.client.ClientVariables;
 import me.brynview.navidrohim.jmws.client.share.ShareRequest;
-import me.brynview.navidrohim.jmws.client.utils.ObjectUtils;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
-import me.brynview.navidrohim.jmws.server.objects.ServerObject;
+import me.brynview.navidrohim.jmws.common.syncing.SyncingInformation;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
@@ -36,7 +32,6 @@ import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -145,7 +140,7 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (CommonClass.serverConfig.waypointsEnabled()) // Check config
         {
-            ServerObject.SyncingInformation syncingInformation = ServerObject.SyncingInformation.getSyncingInfo(waypoint.getCustomData());
+            SyncingInformation syncingInformation = SyncingInformation.getSyncingInfo(waypoint.getCustomData());
             Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncingInformation.objectIdentifier, waypoint)));
         } else {
             PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
@@ -159,7 +154,7 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void deleteAction(Waypoint waypoint) {
         if (CommonClass.serverConfig.waypointsEnabled()) { // Check if action is allowed by the server.
-            ServerObject.SyncingInformation syncingInformation = ServerObject.SyncingInformation.getSyncingInfo(waypoint.getCustomData());
+            SyncingInformation syncingInformation = SyncingInformation.getSyncingInfo(waypoint.getCustomData());
             ObjectIdentifierMap.removeWaypointFromMap(waypoint);
             String jsonPacketData = CommandFactory.makeDeleteRequestJson(syncingInformation.objectIdentifier,false, false);
             JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
@@ -246,7 +241,7 @@ public class JMWSPlugin implements IClientPlugin {
         if (CommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
         {
             Constants.getLogger().info(waypointGroup.getCustomData());
-            ServerObject.SyncingInformation gsi = ServerObject.SyncingInformation.getSyncingInfo(waypointGroup.getCustomData(), true);
+            SyncingInformation gsi = SyncingInformation.getSyncingInfo(waypointGroup.getCustomData(), true);
 
             if (!gsi.isGlobal())
             {
@@ -281,7 +276,7 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (CommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
         {
-            ServerObject.SyncingInformation syncingInformation = ServerObject.SyncingInformation.getSyncingInfo(waypointGroup.getCustomData());
+            SyncingInformation syncingInformation = SyncingInformation.getSyncingInfo(waypointGroup.getCustomData());
 
             if (!syncingInformation.isGlobal())
             {
@@ -468,7 +463,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Add server groups to the client
         for (WaypointGroup savedGroup : savedGroups) {
-            ServerObject.SyncingInformation gpSync = ServerObject.SyncingInformation.getSyncingInfo(savedGroup.getCustomData());
+            SyncingInformation gpSync = SyncingInformation.getSyncingInfo(savedGroup.getCustomData());
             if (gpSync.isGlobal())
             {
                 savedGroup.setName(savedGroup.getName() + " (%s)".formatted(CommonHelper.globalStringTag));
@@ -515,7 +510,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Add server waypoints to the client
         for (Waypoint savedWaypoint : savedWaypoints) {
-            ServerObject.SyncingInformation wpSync = ServerObject.SyncingInformation.getSyncingInfo(savedWaypoint.getCustomData());
+            SyncingInformation wpSync = SyncingInformation.getSyncingInfo(savedWaypoint.getCustomData());
             if (wpSync.isGlobal()) // Global
             {
                 savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(CommonHelper.globalStringTag));
@@ -587,15 +582,19 @@ public class JMWSPlugin implements IClientPlugin {
 
     public static void addWaypoint(Waypoint waypoint)
     {
-        getInstance().jmAPI.addWaypoint(waypoint.getModId(), waypoint);
-        ObjectIdentifierMap.addWaypointToMap(waypoint);
-
+        if (ObjectIdentifierMap.addWaypointToMap(waypoint))
+        {
+            getInstance().jmAPI.addWaypoint(waypoint.getModId(), waypoint);
+        }
     }
 
     public static void addGroup(WaypointGroup waypointGroup)
     {
-        getInstance().jmAPI.addWaypointGroup(waypointGroup);
-        ObjectIdentifierMap.addGroupToMap(waypointGroup);
+        if (ObjectIdentifierMap.addGroupToMap(waypointGroup))
+        {
+            getInstance().jmAPI.addWaypointGroup(waypointGroup);
+        }
+
     }
 
     public void addObjectFromRequest(ShareRequest request)

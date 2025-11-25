@@ -10,7 +10,8 @@ import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
-import me.brynview.navidrohim.jmws.server.Server;
+import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
@@ -21,6 +22,7 @@ import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -59,7 +61,7 @@ public class ServerPacketHandler {
                         String jsonWaypointFileString = Files.readString(waypointFilename);
                         jsonWaypointPayloadArray.put(String.valueOf(i), jsonWaypointFileString);
 
-                        if (JMWSServerIO.transition(playerWaypoints.get(i), ObjectType.WAYPOINT, playerUUID))
+                        if (JMWSServerIO.transitionPath(playerWaypoints.get(i), ObjectType.WAYPOINT, playerUUID))
                         {
                             Constants.getLogger().error("Could not translate %s %s to new system path.".formatted(ObjectType.WAYPOINT, playerWaypoints.get(i)));
                         }
@@ -71,7 +73,7 @@ public class ServerPacketHandler {
                         String jsonGroupFileString = Files.readString(groupFilename);
                         jsonGroupPayloadArray.put(String.valueOf(ix), jsonGroupFileString);
 
-                        if (JMWSServerIO.transition(playerGroups.get(ix), ObjectType.GROUP, playerUUID))
+                        if (JMWSServerIO.transitionPath(playerGroups.get(ix), ObjectType.GROUP, playerUUID))
                         {
                             Constants.getLogger().error("Could not translate %s %s to new system path.".formatted(ObjectType.GROUP, playerWaypoints.get(ix)));
                         }
@@ -351,6 +353,29 @@ public class ServerPacketHandler {
                 }
             }
 
+            case TRANSITION ->
+            {
+                String objectID = arguments.getFirst().getAsString();
+                Path legacyObjPath = Path.of(arguments.get(1).getAsString());
+                ObjectType objectType = ObjectType.valueOf(arguments.getLast().getAsString());
+
+                Constants.getLogger().warn(String.valueOf(legacyObjPath));
+
+                JsonObject payload = JMWSServerIO.getObjectDataFromDisk(legacyObjPath, false);
+                if (payload != null)
+                {
+                    Constants.getLogger().warn(objectID);
+                    LegacyObject oldObj = new LegacyObject(payload);
+                    ServerObject newObj = oldObj.transition(playerUUID, objectType);
+                    newObj.create();
+
+                    CommonHelper.deleteFile(legacyObjPath);
+                } else {
+                    Constants.getLogger().warn("Could not transition user object.");
+                }
+
+
+            }
             default -> Constants.getLogger().warn("Unknown packet command -> {}", command);
         }
     }

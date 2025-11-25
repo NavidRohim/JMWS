@@ -17,11 +17,6 @@ public class CommonHelper {
     public static final String unknownUser = "Unknown Soldier";
     public static final String globalStringTag = "Global";
 
-    public static String getWaypointFilename(Waypoint waypoint, UUID uuID) {
-        Vector3d waypointLocationVector = new Vector3d(waypoint.getBlockPos().getX(), waypoint.getBlockPos().getY(), waypoint.getBlockPos().getZ());
-        return _getWaypointFromRaw(waypointLocationVector, waypoint.getName(), uuID);
-    }
-
     public static String _getWaypointFromRaw(Vector3d coordVector, String waypointName, UUID playerUUID) {
         Set<Character> charsToRemove = new HashSet<>(Arrays.asList('<', '>', ':', '*', '"', '\\', '|', '?', '/'));
 

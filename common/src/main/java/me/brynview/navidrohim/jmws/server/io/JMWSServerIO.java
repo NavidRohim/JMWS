@@ -3,7 +3,6 @@ package me.brynview.navidrohim.jmws.server.io;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import com.mojang.datafixers.kinds.Const;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.server.exceptions.ObjectError;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
@@ -225,7 +224,7 @@ public class JMWSServerIO {
         return null;
     }
 
-    public static boolean transition(Path path, ObjectType transitionType, UUID player) throws FileNotFoundException {
+    public static boolean transitionPath(Path path, ObjectType transitionType, UUID player) throws FileNotFoundException {
         ServerObject serverObject = transitionType.equals(ObjectType.WAYPOINT) ? JMWSServerIO.getWaypointFromFile(path, player) : JMWSServerIO. getGroupFromFile(path, player);
 
         if (serverObject != null)

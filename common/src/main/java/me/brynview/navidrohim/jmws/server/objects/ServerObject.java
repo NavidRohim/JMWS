@@ -1,23 +1,19 @@
 package me.brynview.navidrohim.jmws.server.objects;
 
 import com.google.gson.*;
-import com.google.gson.annotations.Expose;
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
-import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.share.ShareRequest;
-import me.brynview.navidrohim.jmws.client.utils.ObjectUtils;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.server.exceptions.ObjectError;
+import me.brynview.navidrohim.jmws.common.syncing.SyncingInformation;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
-import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,151 +31,10 @@ import java.util.UUID;
 /**
  * Dataclass to hold groups and waypoints from server. This is old code, so I wouldn't mess with it.
  */
-public class ServerObject implements PossessesIdentifier {
-
-
-    public void share(ServerPlayer us, ServerPlayer player) {
-
-        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, this.ownerUUID, player.getUUID(), ShareRequest.Direction.FOR_CLIENT, getObjectType())), player); // Send share request to player
-        // Send information of the share to the sender. This is needed because this command is server-side only and the client will have no knowledge of the shared obj.
-        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, player.getUUID(), this.ownerUUID, ShareRequest.Direction.FOR_HOST, getObjectType())), us);
-    }
-
-    public static class SyncingInformation
-    {
-
-        @Expose
-        public String objectIdentifier;
-
-        @Expose
-        protected List<String> sharedTo;
-
-        @Expose
-        protected UUID owner;
-
-        @Expose
-        protected boolean isGlobal;
-
-        @Nullable
-        protected ServerObject parentObject = null;
-
-        public SyncingInformation(List<String> sharedTo, String identifier, UUID owner, boolean isGlobal)
-        {
-            this.objectIdentifier = identifier;
-            this.sharedTo = sharedTo;
-            this.owner = owner;
-            this.isGlobal = isGlobal;
-        }
-
-        public static ServerObject.SyncingInformation getSyncingInfo(ServerObject object)
-        {
-            try {
-                SyncingInformation syncingInformation = CommonClass.gson.fromJson(object.getCustomData(), SyncingInformation.class);
-                syncingInformation.parentObject = object;
-
-                return syncingInformation;
-            } catch (IllegalStateException | JsonSyntaxException reader)
-            {
-                return transition(object); // if old waypoint is present
-                //PlayerNetworkingHelper.sendUserMessage(object.ownerUUID, "fatal.jmws.server_mismatch", false, true);
-            }
-        }
-
-        public static ServerObject.SyncingInformation getSyncingInfo(String customDataField, boolean returnNullIfError)
-        {
-            try
-            {
-                return CommonClass.gson.fromJson(customDataField, SyncingInformation.class);
-            } catch (JsonSyntaxException syntaxException) // will throw if object hasn't been ported.
-            {
-                if (!returnNullIfError)
-                {
-                    return getSyncingInfo(getEmptySyncingInfoString(customDataField, PlayerHelper.ourUUID(), false));
-                }
-                return null;
-            }
-        }
-
-        public static ServerObject.SyncingInformation getSyncingInfo(String customDataField)
-        {
-            return getSyncingInfo(customDataField, false);
-        }
-
-        private static SyncingInformation transition(ServerObject object)
-        {
-            // TODO transition to new customDataField
-            object.customData = SyncingInformation.getEmptySyncingInfoString(object.getCustomData(), object.ownerUUID, false);
-            return getSyncingInfo(object);
-        }
-
-        public static String getEmptySyncingInfoString(String objectIdentifier, UUID owner, boolean isGlobal)
-        {
-            return CommonClass.gson.toJson(new SyncingInformation(List.of(), objectIdentifier, owner, isGlobal));
-        }
-
-        public void addUserToShare(UUID playerUUID)
-        {
-            this.sharedTo.add(playerUUID.toString());
-            this.update();
-        }
-
-        public void removeUserFromShare(String playerUUID)
-        {
-            this.sharedTo.remove(playerUUID);
-            this.update();
-        }
-
-        public boolean isOwner(UUID supposedOwner)
-        {
-            return this.owner.equals(supposedOwner);
-        }
-        public UUID getOwner()
-        {
-            return this.owner;
-        }
-
-        public boolean isGlobal() { return this.isGlobal; }
-
-        public void setGlobal(boolean global)
-        {
-            this.isGlobal = global;
-            this.update();
-        }
-
-        private void update()
-        {
-            if (this.parentObject != null)
-            {
-                String jsonString = CommonClass.gsonExcludeNoExpose.toJson(this, SyncingInformation.class);
-                this.parentObject.getRawJson().add("customData", new JsonPrimitive(jsonString));
-
-                this.parentObject.update(this.parentObject.getRawJson().getAsJsonObject().toString(), true); // TODO: bug test more. This seems very janky and not done right. Will test more
-            }
-            else {
-                throw new RuntimeException("Cannot update object from dataclass instance of SyncingInformation. Get instance of SyncingInformation from child of SavedObject. (SavedObject.syncing.update())");
-            }
-        }
-
-        public void syncToUsers()
-        {
-            for (String playerUUID : this.sharedTo)
-            {
-                ServerPlayer sharedUser = CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(UUID.fromString(playerUUID));
-
-                if (sharedUser != null)
-                {
-                    ServerPacketHandler.sendUserSync(sharedUser, false, false, true);
-                }
-            }
-        }
-    }
-
-    private final JsonObject payload;
-    private final String rawPacketData;
+public class ServerObject extends LegacyObject implements PossessesIdentifier {
 
     String name;
     String groupIdentifier;
-    private String customData;
 
     public UserSharingFile accessorSharing;
     public SyncingInformation syncing;
@@ -200,22 +55,20 @@ public class ServerObject implements PossessesIdentifier {
 
     public ServerObject(JsonObject payload, UUID playerUUID, boolean dataclass)
     {
+        super(payload);
         this.dataclass = dataclass;
-        this.payload = payload;
-        this.rawPacketData = payload.toString();
 
-        this.customData = payload.get("customData").getAsString(); // bug with json formatting
         this.syncing = SyncingInformation.getSyncingInfo(this);
         this.ownerUUID = playerUUID;
         this.name = payload.get("name").getAsString();
         this.accessorSharing = !dataclass ? new UserSharingFile(playerUUID) : null;
         this.globalObjectPath = !dataclass ? Path.of(JMWSServerIO.getPathLocationPrefix(this.getObjectType()) + JMWSServerIO.globalObjPrefix + JMWSServerIO.Utils.makeFilename(this.syncing.objectIdentifier, this.ownerUUID)) : null;
-        this.normalObjectPath = !dataclass ? JMWSServerIO.Utils.getNewObjectFilename(this.syncing.owner, this.syncing.objectIdentifier, getObjectType()) : null;
+        this.normalObjectPath = !dataclass ? JMWSServerIO.Utils.getNewObjectFilename(this.syncing.getOwner(), this.syncing.objectIdentifier, getObjectType()) : null;
         this.groupIdentifier = payload.get("guid").getAsString();
 
         if (!dataclass)
         {
-            this.currentObjectPath = !syncing.isGlobal ? normalObjectPath : this.globalObjectPath;
+            this.currentObjectPath = !syncing.isGlobal() ? normalObjectPath : this.globalObjectPath;
         }
     }
 
@@ -225,13 +78,6 @@ public class ServerObject implements PossessesIdentifier {
     }
 
     public String getName() { return this.name; }
-    public String getCustomData() { return this.customData; }
-
-    public void setCustomData(String data)
-    {
-        this.customData = data;
-        this.payload.add("customData", new JsonPrimitive(data));
-    }
 
     public String getGroupIdentifier() { return this.groupIdentifier; } // No usages but may be used elsewhere like with generics not sure
 
@@ -327,8 +173,6 @@ public class ServerObject implements PossessesIdentifier {
 
     public void update(String data, boolean updateSyncInfo)
     {
-        Constants.getLogger().info(data);
-
         if (!updateSyncInfo) {
             ServerObject newChange = new ServerObject(JsonParser.parseString(data).getAsJsonObject(), this.ownerUUID, true);
             newChange.setCustomData(this.getCustomData());
@@ -385,6 +229,12 @@ public class ServerObject implements PossessesIdentifier {
         return false;
     }
 
+    public void share(ServerPlayer us, ServerPlayer player) {
+
+        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, this.ownerUUID, player.getUUID(), ShareRequest.Direction.FOR_CLIENT, getObjectType())), player); // Send share request to player
+        // Send information of the share to the sender. This is needed because this command is server-side only and the client will have no knowledge of the shared obj.
+        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, player.getUUID(), this.ownerUUID, ShareRequest.Direction.FOR_HOST, getObjectType())), us);
+    }
     public void stopSharing(UUID user)
     {
         this.syncing.removeUserFromShare(String.valueOf(user));
@@ -399,6 +249,10 @@ public class ServerObject implements PossessesIdentifier {
         }
     }
 
+    public UUID getOwnerUUID()
+    {
+        return ownerUUID;
+    }
     @Override
     public String toString()
     {

@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.common.share.io;
+package me.brynview.navidrohim.jmws.common.syncing.share.io;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;

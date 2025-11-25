@@ -6,22 +6,31 @@ import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.server.objects.ServerObject;
+import me.brynview.navidrohim.jmws.common.syncing.SyncingInformation;
+import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
+import org.joml.Vector3d;
 
 import java.util.UUID;
 
+import static me.brynview.navidrohim.jmws.common.helper.CommonHelper._getWaypointFromRaw;
+
 public class ObjectUtils
 {
-    public static String getIdentifier(Waypoint waypoint)
-    {
-        return ServerObject.SyncingInformation.getSyncingInfo(waypoint.getCustomData()).objectIdentifier;
+    public static String getLegacyWaypointFilename(Waypoint waypoint, UUID uuID) {
+        Vector3d waypointLocationVector = new Vector3d(waypoint.getBlockPos().getX(), waypoint.getBlockPos().getY(), waypoint.getBlockPos().getZ());
+        return _getWaypointFromRaw(waypointLocationVector, waypoint.getName(), uuID);
     }
-    public static String getIdentifier(WaypointGroup waypointGroup)
-    {
-        return ServerObject.SyncingInformation.getSyncingInfo(waypointGroup.getCustomData()).objectIdentifier;
+
+    public static String getLegacyGroupFilename(UUID playerUUID, String universalID) {
+        return "./jmws/groups/" + universalID + "_" + playerUUID + "-group" + ".json";
     }
-    public static void transitionObject(String objectID, UUID playerOwner, ObjectType objectType)
+
+    public static void transitionObject(Waypoint waypoint, UUID playerOwner, ObjectType objectType)
     {
-        Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeTransitionObjectRequest(objectID, playerOwner, objectType)));
+        Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeTransitionObjectRequest(waypoint.getCustomData(), getLegacyWaypointFilename(waypoint, playerOwner), objectType)));
+    }
+    public static void transitionObject(WaypointGroup waypointGroup, UUID playerOwner, ObjectType objectType)
+    {
+        Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeTransitionObjectRequest(waypointGroup.getCustomData(), getLegacyGroupFilename(playerOwner, waypointGroup.getCustomData()), objectType)));
     }
 }
