@@ -152,7 +152,7 @@ public class ServerPacketHandler {
                 boolean deleteAllObjects = arguments.getLast().getAsBoolean();
 
                 boolean result;
-                @Nullable ServerGroup group = JMWSServerIO.getObjectFromDisk(groupUniversalIdentifier, playerUUID, ObjectType.GROUP);
+                @Nullable ServerGroup group = JMWSServerIO.getObjectFromDisk(groupUniversalIdentifier, playerUUID, ObjectType.GROUP, deleteAllWaypointsInGroup);
 
                 if (group != null)
                 {
@@ -161,26 +161,21 @@ public class ServerPacketHandler {
                         result = group.deleteWaypoints();
                         if (!removeGroupItself && result)
                         {
-                            sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false);
+                            sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false, silent);
                             return;
                         }
                     }
                     if (group.syncing.isOwner(playerUUID))
                     {
                         group.stopSharing();
-                        if (!deleteAllObjects) {
-                            result = group.delete(false);
+                        result = group.delete(false);
+
+                        if (result) {
+                            sendUserMessage(player, "message.jmws.deletion_group_success", true, false, silent);
                         } else {
-                            result = group.deleteAll();
+                            sendUserMessage(player, "message.jmws.deletion_group_failure", true, true, silent);
                         }
 
-                        if (!silent) {
-                            if (result) {
-                                sendUserMessage(player, "message.jmws.deletion_group_success", true, false);
-                            } else {
-                                sendUserMessage(player, "message.jmws.deletion_group_failure", true, true);
-                            }
-                        }
                     } else if (group.syncing.isGlobal()) {
                         sendUserMessage(player, "global.jmws.cannot_delete_global", true, JMWSMessageType.ONE_TIME_WARNING);
                     } else {
@@ -191,6 +186,15 @@ public class ServerPacketHandler {
                 } else if (deleteAllWaypointsInGroup)
                 {
                     ServerGroup.deleteWaypoints(playerUUID, groupGUID);
+                    sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false);
+                } else if (deleteAllObjects)
+                {
+                    if (ServerObject.deleteAll(playerUUID, ObjectType.GROUP)) {
+                        sendUserMessage(player, "message.jmws.deletion_group_success", true, false, silent);
+                    } else {
+                        sendUserMessage(player, "message.jmws.deletion_group_failure", true, true, silent);
+                    }
+
                 }
             }
 
@@ -203,17 +207,10 @@ public class ServerPacketHandler {
 
                 ServerWaypoint waypoint = JMWSServerIO.getWaypointFromUniqueIdentifier(waypointIdentifier, playerUUID);
 
-                if (waypoint != null)
-                {
-                    if (waypoint.syncing.isOwner(playerUUID))
-                    {
+                if (waypoint != null) {
+                    if (waypoint.syncing.isOwner(playerUUID)) {
                         waypoint.stopSharing();
-
-                        if (!deleteAll) {
-                            result = waypoint.delete(false);
-                        } else {
-                            result = waypoint.deleteAll();
-                        }
+                        result = waypoint.delete(false);
 
                         if (!silent) {
                             if (result) {
@@ -222,13 +219,19 @@ public class ServerPacketHandler {
                                 sendUserMessage(player, "message.jmws.deletion_failure", true, true);
                             }
                         }
-                    } else if (waypoint.syncing.isGlobal())
-                    {
+                    } else if (waypoint.syncing.isGlobal()) {
                         sendUserMessage(player, "global.jmws.cannot_delete_global", true, JMWSMessageType.ONE_TIME_WARNING);
-                    }
-                     else {
+                    } else {
                         waypoint.stopSharing(playerUUID);
                         sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
+                    }
+                } else if (deleteAll)
+                {
+                    if (ServerObject.deleteAll(playerUUID, ObjectType.WAYPOINT))
+                    {
+                        sendUserMessage(player, "message.jmws.deletion_success", true, false);
+                    } else {
+                        sendUserMessage(player, "message.jmws.deletion_failure", true, true);
                     }
                 } else {
                     sendUserMessage(player, "message.jmws.deletion_failure", true, true);

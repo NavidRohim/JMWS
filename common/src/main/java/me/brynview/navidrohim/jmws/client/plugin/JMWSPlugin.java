@@ -243,10 +243,10 @@ public class JMWSPlugin implements IClientPlugin {
             Constants.getLogger().info(waypointGroup.getCustomData());
             SyncingInformation gsi = SyncingInformation.getSyncingInfo(waypointGroup.getCustomData(), true);
 
-            if (!gsi.isGlobal())
+            if (gsi != null && !gsi.isGlobal())
             {
                 ObjectIdentifierMap.removeGroupFromMap(waypointGroup); // Remove from identifier map
-                String uID = gsi != null && gsi.objectIdentifier != null ? gsi.objectIdentifier : "null"; // This can be set to "null" but I cannot remember why.
+                String uID = gsi.objectIdentifier;
 
                 String jsonPacketData = CommandFactory.makeDeleteGroupRequestJson(
                         uID,
@@ -254,6 +254,17 @@ public class JMWSPlugin implements IClientPlugin {
                         silent,
                         deleteAllWaypoints,
                         removeGroupItself,
+                        false);
+
+                JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
+                Dispatcher.sendToServer(waypointActionPayload);
+            } else if (gsi == null && !removeGroupItself) {
+                String jsonPacketData = CommandFactory.makeDeleteGroupRequestJson(
+                        "null",
+                        waypointGroup.getGuid(),
+                        false,
+                        true,
+                        false,
                         false);
 
                 JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);

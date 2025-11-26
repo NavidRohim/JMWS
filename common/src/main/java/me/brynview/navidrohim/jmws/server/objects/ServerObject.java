@@ -163,12 +163,12 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
         return false;
     }
 
-    public boolean deleteAll()
+    public static boolean deleteAll(UUID user, ObjectType deletionType)
     {
         List<Boolean> deletionStatusList = new ArrayList<>();
 
-        for (Path waypointPath : JMWSServerIO.getObjectPathsForUser(this.ownerUUID, getObjectType())) {
-            deletionStatusList.add(JMWSServerIO.getObjectFromFile(waypointPath, this.ownerUUID, getObjectType()).delete(true));
+        for (Path waypointPath : JMWSServerIO.getObjectPathsForUser(user, deletionType)) {
+            deletionStatusList.add(JMWSServerIO.getObjectFromFile(waypointPath, user, deletionType).delete(true));
         }
 
         return deletionStatusList.isEmpty() || deletionStatusList.stream().allMatch(deletionStatusList.getFirst()::equals);
@@ -201,8 +201,6 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
         {
             try {
                 Path waypointFilePath = this.getCurrentObjectPath();
-                Constants.getLogger().warn("FPATH " + ownerUUID.toString());
-                Constants.getLogger().warn("PATH " + waypointFilePath);
                 if (waypointFilePath != null)
                 {
                     Files.createFile(waypointFilePath);

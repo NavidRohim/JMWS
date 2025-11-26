@@ -44,6 +44,7 @@
     - Could fix by accessing Mojang servers but this may not age well.
 - ~~If objects haven't been transitioned to 1.2.0 system and player tries to use any new commands (global or sharing) a UUID error is thrown.~~
 - ~~Waypoints / groups with duplicate names aren't shown in the object suggestion (differentiate by adding coordinates and dimension)~~
+- ~~deleteAll throws an error on client~~
 
 ### LAN bugs
 - ~~Handshake fails due to new config value~~ Resolved. Update old config with new
@@ -72,3 +73,22 @@
     - How does an already shared object behave when it's turned into a global object and vice versa?
 - Test `/share_waypoint_stop` and group eq.
 - Test possible bug where rejection doesn't stop timeout counter.
+
+# RC Checklist
+- Creating and deleting ✅ 
+- Editing ✅ 
+- Deleting in-build group waypoints ✅ 
+
+User Commands
+
+- clearAll ✅
+- sync ✅
+- getSyncInterval ✅
+- nextSync ✅
+
+Share Testing
+
+
+
+
+

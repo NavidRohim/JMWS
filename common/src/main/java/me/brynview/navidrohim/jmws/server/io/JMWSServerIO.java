@@ -42,7 +42,6 @@ public class JMWSServerIO {
                 return Path.of(getPathLocationPrefix(objectType) + makeFilename(objectID, playerOwner));
             } catch (InvalidPathException oldVersion)
             {
-                Constants.getLogger().error("Client has older version than server expected. %s".formatted(playerOwner));
                 return null;
             }
         }
@@ -136,10 +135,10 @@ public class JMWSServerIO {
         return list;
     }
 
-    public static <T extends ServerObject> T getObjectFromFile(Path objPath, UUID user, ObjectType objectType)
+    public static <T extends ServerObject> T getObjectFromFile(Path objPath, UUID user, ObjectType objectType, boolean silentFail)
     {
         try {
-            @Nullable JsonObject data = getObjectDataFromDisk(objPath, false);
+            @Nullable JsonObject data = getObjectDataFromDisk(objPath, silentFail);
             if (data != null && objPath != null)
             {
                 Constructor<? extends ServerObject> constructor = objectType.getObjectClass().getConstructor(JsonObject.class, UUID.class);
@@ -151,6 +150,11 @@ public class JMWSServerIO {
         {
             throw new RuntimeException("Cannot pass %s to getObjectFromDisk TODO");
         }
+    }
+
+    public static <T extends ServerObject> T getObjectFromFile(Path objPath, UUID user, ObjectType objectType)
+    {
+        return getObjectFromFile(objPath, user, objectType, false);
     }
 
     public static HashMap<String, Path> getNameHashmapLookup(UUID user, ObjectType objectType)
@@ -201,14 +205,18 @@ public class JMWSServerIO {
     }
 
     @Nullable
-    public static <T extends ServerObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, ObjectType objectType) {
+    public static <T extends ServerObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, ObjectType objectType, boolean silentFail) {
         Path objPath = Utils.getNewObjectFilename(ownerUUID, objectIdentifier, objectType);
-        Constants.getLogger().info(">> > "+objPath.toString());
         if (objPath != null)
         {
-            return getObjectFromFile(objPath, ownerUUID, objectType);
+            return getObjectFromFile(objPath, ownerUUID, objectType, silentFail);
         }
         return null;
+    }
+
+    @Nullable
+    public static <T extends ServerObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, ObjectType objectType) {
+        return getObjectFromDisk(objectIdentifier, ownerUUID, objectType, false);
     }
 
     @Nullable
@@ -265,9 +273,9 @@ public class JMWSServerIO {
     @Nullable
     public static ServerWaypoint getWaypointFromFile(Path waypointPath, UUID playerUUID)
     {
-        JsonObject waypointLocalData = getObjectDataFromDisk(waypointPath, false);
+        JsonObject waypointLocalData = getObjectDataFromDisk(waypointPath, true);
         if (waypointLocalData != null) {
-            return new  ServerWaypoint(waypointLocalData, playerUUID);
+            return new ServerWaypoint(waypointLocalData, playerUUID);
         }
         return null;
     }
