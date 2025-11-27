@@ -16,7 +16,7 @@ public class Constants {
     }
 
     public static final String MODID = "jmws";
-    public static final String VERSION = "1.2.0-1.21.1-rc.4"; // This is purely for display and is not needed
+    public static final String VERSION = "1.2.0-1.21.1-beta.28"; // This is purely for display and is not needed
     public static final double SERVER_VERSION = 1.1;
     public static final boolean DEBUG = VERSION.contains("-beta.");
 

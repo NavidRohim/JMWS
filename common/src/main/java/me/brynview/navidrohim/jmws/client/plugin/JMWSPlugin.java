@@ -68,6 +68,7 @@ public class JMWSPlugin implements IClientPlugin {
             CommonClass.config.serverEnabled.set(CommonClass.serverConfig.serverEnabled());
             CommonClass.config.serverUploadWaypoints.set(CommonClass.serverConfig.waypointsEnabled());
             CommonClass.config.serverUploadGroups.set(CommonClass.serverConfig.groupsEnabled());
+            CommonClass.config.serverAllowsSharing.set(CommonClass.serverConfig.sharingEnabled);
         });
 
         ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe("jmapi", this::handleUserDeath);
@@ -141,7 +142,7 @@ public class JMWSPlugin implements IClientPlugin {
         if (CommonClass.serverConfig.waypointsEnabled()) // Check config
         {
             SyncingInformation syncingInformation = SyncingInformation.getSyncingInfo(waypoint.getCustomData());
-            Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncingInformation.objectIdentifier, waypoint)));
+            Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncingInformation.objectIdentifier, syncingInformation.isGlobal(), waypoint)));
         } else {
             PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
         }
@@ -243,7 +244,7 @@ public class JMWSPlugin implements IClientPlugin {
             Constants.getLogger().info(waypointGroup.getCustomData());
             SyncingInformation gsi = SyncingInformation.getSyncingInfo(waypointGroup.getCustomData(), true);
 
-            if (gsi != null && !gsi.isGlobal())
+            if (gsi != null)
             {
                 ObjectIdentifierMap.removeGroupFromMap(waypointGroup); // Remove from identifier map
                 String uID = gsi.objectIdentifier;
@@ -254,17 +255,19 @@ public class JMWSPlugin implements IClientPlugin {
                         silent,
                         deleteAllWaypoints,
                         removeGroupItself,
+                        gsi.isGlobal(),
                         false);
 
                 JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
                 Dispatcher.sendToServer(waypointActionPayload);
-            } else if (gsi == null && !removeGroupItself) {
+            } else if (!removeGroupItself) {
                 String jsonPacketData = CommandFactory.makeDeleteGroupRequestJson(
                         "null",
                         waypointGroup.getGuid(),
                         false,
                         true,
                         false,
+                        true,
                         false);
 
                 JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
@@ -288,14 +291,8 @@ public class JMWSPlugin implements IClientPlugin {
         if (CommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
         {
             SyncingInformation syncingInformation = SyncingInformation.getSyncingInfo(waypointGroup.getCustomData());
+            Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncingInformation.objectIdentifier, syncingInformation.isGlobal(), waypointGroup)));
 
-            if (!syncingInformation.isGlobal())
-            {
-                Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncingInformation.objectIdentifier, waypointGroup)));
-                PlayerHelper.sendUserAlert(Component.translatable("message.jmws.modified_group_success"), true, false, JMWSMessageType.SUCCESS);
-            } else {
-                PlayerHelper.sendUserAlert(Component.translatable("global.jmws.cannot_edit_global"), true, false, JMWSMessageType.ONE_TIME_WARNING);
-            }
         } else {
             PlayerHelper.sendUserAlert(Component.translatable("message.jmws.server_disabled_groups"), true, false, JMWSMessageType.ONE_TIME_WARNING);
         }
@@ -450,7 +447,7 @@ public class JMWSPlugin implements IClientPlugin {
      * @return boolean -- If the user had any local groups to upload.
      * @throws JsonSyntaxException -- If there is a syntax error with the Json, usually from a corrupted group.
      */
-    private boolean handleUploadGroups(JsonObject jsonGroupsRaw) throws JsonSyntaxException, IllegalStateException {
+    private boolean handleUploadGroups(JsonObject jsonGroupsRaw, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException, IllegalStateException {
         boolean hasLocalGroup = false;
 
         // Get existing groups (local) and get group objects saved on server
@@ -475,10 +472,16 @@ public class JMWSPlugin implements IClientPlugin {
         // Add server groups to the client
         for (WaypointGroup savedGroup : savedGroups) {
             SyncingInformation gpSync = SyncingInformation.getSyncingInfo(savedGroup.getCustomData());
-            if (gpSync.isGlobal())
+
+            if (gpSync.isGlobal() && gpSync.isOwner(PlayerHelper.ourUUID()))
+            {
+                savedGroup.setLocked(false);
+            }
+
+            if (gpSync.isGlobal() && showGlobalLabels)
             {
                 savedGroup.setName(savedGroup.getName() + " (%s)".formatted(CommonHelper.globalStringTag));
-            } else if (!gpSync.isOwner(PlayerHelper.ourUUID()))
+            } else if (!gpSync.isOwner(PlayerHelper.ourUUID()) && showSharingLabels)
             {
                 String ownerUser = PlayerHelper.getUsernameFromUUID(gpSync.getOwner());
                 savedGroup.setName(savedGroup.getName() + " (%s)".formatted(ownerUser));
@@ -496,7 +499,7 @@ public class JMWSPlugin implements IClientPlugin {
      * @return boolean -- If the user had any local waypoints to upload.
      * @throws JsonSyntaxException -- If there is a syntax error with the Json, usually from a corrupted waypoint.
      */
-    private boolean handleUploadWaypoints(JsonObject jsonWaypoints) throws JsonSyntaxException {
+    private boolean handleUploadWaypoints(JsonObject jsonWaypoints, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException {
         boolean hasLocalWaypoint = false;
 
         // Get existing waypoints (local) and get waypoint objects saved on server
@@ -522,10 +525,10 @@ public class JMWSPlugin implements IClientPlugin {
         // Add server waypoints to the client
         for (Waypoint savedWaypoint : savedWaypoints) {
             SyncingInformation wpSync = SyncingInformation.getSyncingInfo(savedWaypoint.getCustomData());
-            if (wpSync.isGlobal()) // Global
+            if (wpSync.isGlobal() && showGlobalLabels) // Global
             {
                 savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(CommonHelper.globalStringTag));
-            } else if (!wpSync.isOwner(PlayerHelper.ourUUID())) // Shared
+            } else if (!wpSync.isOwner(PlayerHelper.ourUUID()) && showSharingLabels) // Shared
             {
                 String ownerUser = PlayerHelper.getUsernameFromUUID(wpSync.getOwner(), true);
                 savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(ownerUser));
@@ -546,15 +549,18 @@ public class JMWSPlugin implements IClientPlugin {
         boolean sendAlert = waypointPayload.arguments().get(2).getAsBoolean(); // If to send an alert
         boolean isDeathSync = waypointPayload.arguments().getLast().getAsBoolean(); // If the sync was from a death waypoint creation
 
+        boolean showSharingLabels = config.showSharingLabels.get();
+        boolean showGlobalLabels = config.showGlobalLabels.get();
+
         try {
             // Sync remote and local groups if server and client permits
             if (config.uploadGroups.get() && CommonClass.serverConfig.groupsEnabled()) {
-                hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject());
+                hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), showSharingLabels, showGlobalLabels);
             }
 
             // Sync remote and local waypoints if server and client permits
             if (config.uploadGroups.get() && CommonClass.serverConfig.waypointsEnabled()) {
-                hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject());
+                hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), showSharingLabels, showGlobalLabels);
             }
 
             // Send alerts if there were any local waypoints and or groups

@@ -25,8 +25,8 @@ public class OutgoingShareRequest extends ShareRequest {
     @Override
     protected void timeout()
     {
-        OutgoingShareRequests.removeRequest(this.originalSender);
-        PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.request_timeout"), true, false, JMWSMessageType.WARNING);
+        OutgoingShareRequests.removeRequest(this.meantFor);
+        PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.request_timeout_to", this.getRecipientName()), true, false, JMWSMessageType.WARNING);
     }
 
     private void finishRequest()

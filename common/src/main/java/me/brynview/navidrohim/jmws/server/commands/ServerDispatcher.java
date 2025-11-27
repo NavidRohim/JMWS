@@ -15,20 +15,24 @@ import net.minecraft.server.level.ServerPlayer;
 public class ServerDispatcher {
     public static void addCommandsToDispatcher(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("share_waypoint")
+                .requires(CommandSourceStack::isPlayer)
                 .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("waypointName", StringArgumentType.greedyString()).suggests(Server::suggestWaypoints).executes(ServerDispatcher::doShareWaypoint)))
         );
         dispatcher.register(Commands.literal("share_group")
+                .requires(CommandSourceStack::isPlayer)
                 .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("groupName", StringArgumentType.greedyString()).suggests(Server::suggestGroups).executes(ServerDispatcher::doShareGroup)))
         );
         dispatcher.register(Commands.literal("share_group_stop")
+                .requires(CommandSourceStack::isPlayer)
                 .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("groupName", StringArgumentType.greedyString()).suggests(Server::suggestGroups).executes(ServerDispatcher::doRemoveShareGroup)))
         );
         dispatcher.register(Commands.literal("share_waypoint_stop")
+                .requires(CommandSourceStack::isPlayer)
                 .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("waypointName", StringArgumentType.greedyString()).suggests(Server::suggestGroups).executes(ServerDispatcher::doRemoveShareWaypoint)))
         );
 
         dispatcher.register(Commands.literal("jmws_admin")
-                .requires(src -> src.hasPermission(2))
+                .requires(src -> src.hasPermission(2) && src.isPlayer())
                 .then(Commands.literal("create_global_waypoint")
                         .then(Commands.argument("waypointName", StringArgumentType.greedyString())
                                 .suggests(Server::suggestWaypoints)

@@ -2,8 +2,8 @@ package me.brynview.navidrohim.jmws.server.objects;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -22,18 +22,6 @@ public class ServerGroup extends ServerObject {
         super(payload, playerUUID);
     }
 
-    public static List<Path> getGlobalGroups() {
-        List<Path> gp = new ArrayList<>();
-        for (Path path : JMWSServerIO.getAllObjects(ObjectType.GROUP).toList())
-        {
-            if (path.toString().contains("SERVER"))
-            {
-                gp.add(path);
-            }
-        }
-        return gp;
-    }
-
     public boolean deleteWaypoints()
     {
         return ServerGroup.deleteWaypoints(this.ownerUUID, this.groupIdentifier);
@@ -41,7 +29,7 @@ public class ServerGroup extends ServerObject {
 
     public static boolean deleteWaypoints(UUID ownerUUID, String groupIdentifier)
     {
-        List<Path> objectList = JMWSServerIO.getLocalWaypointsFromGroup(ownerUUID, groupIdentifier);
+        List<Path> objectList = getLocalWaypointsFromGroup(ownerUUID, groupIdentifier);
 
         if (objectList == null) {
             return false;
@@ -90,5 +78,63 @@ public class ServerGroup extends ServerObject {
     public ObjectType getObjectType()
     {
         return objectType;
+    }
+
+    private static List<Path> getLocalWaypointsFromGroup(UUID playerUUID, String groupID) { // note; should switch to database for this shit
+        List<Path> userWaypointFilepaths = JMWSServerIO.getObjectPathsForUser(playerUUID, ObjectType.WAYPOINT);
+        List<Path> groupWaypoints = new ArrayList<>();
+
+        for (Path waypointPath : userWaypointFilepaths) {
+            ServerWaypoint serverWaypoint = ServerWaypoint.getWaypointFromFile(waypointPath, playerUUID);
+            if (serverWaypoint.getWaypointGroupId().equals(groupID)) {
+                groupWaypoints.add(waypointPath);
+            } else if (serverWaypoint == null) {
+                return null;
+            }
+        }
+        return groupWaypoints;
+    }
+
+    // Following static methods are ways to get instances of ServerGroup from files
+
+    public static List<Path> getGlobalGroups() {
+        List<Path> gp = new ArrayList<>();
+        for (Path path : JMWSServerIO.getAllObjects(ObjectType.GROUP).toList())
+        {
+            if (path.toString().contains("SERVER"))
+            {
+                gp.add(path);
+            }
+        }
+        return gp;
+    }
+
+    public static boolean createGroup(JsonObject jsonObject, UUID playerUUID)
+    {
+        ServerGroup gp = new ServerGroup(jsonObject, playerUUID);
+        return gp.create();
+    }
+
+    @Nullable
+    public static ServerGroup getGroup(UUID player, String objectUUID, boolean isGlobal)
+    {
+        return getGroupFromFile(JMWSServerIO.PathUtils.getObjectFilename(player, objectUUID, ObjectType.GROUP, isGlobal), player);
+    }
+
+    @Nullable
+    private static ServerGroup getGroupFromFile(Path path, UUID player)
+    {
+        JsonObject groupLocalServerData = JMWSServerIO.getObjectDataFromDisk(path, false);
+        if (groupLocalServerData != null)
+        {
+            return new ServerGroup(groupLocalServerData, player);
+        }
+        return null;
+    }
+
+    @Nullable
+    public static ServerGroup getGroupFromUniqueIdentifier(String groupIdentifier, UUID user)
+    {
+        return getGroupFromFile(JMWSServerIO.getObjectPathFromUniqueIdentifier(groupIdentifier, ObjectType.GROUP), user);
     }
 }

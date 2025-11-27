@@ -162,21 +162,27 @@ public class PacketHandler {
 
                 case REJECT_SHARE ->
                 {
-                    UUID incoming = UUID.fromString(arguments.getFirst().getAsString());
-                    OutgoingShareRequest request = OutgoingShareRequests.getRequest(incoming);
+                    UUID incoming = UUID.fromString(arguments.get(1).getAsString());
+                    @Nullable OutgoingShareRequest request = OutgoingShareRequests.getRequest(incoming);
 
-                    request.resolve();
-                    sendUserAlert(Component.translatable("sharing.jmws.share_rejected", request.getRecipientName()), true, false, JMWSMessageType.FAILURE);
+                    if (request != null)
+                    {
+                        request.resolve();
+                        sendUserAlert(Component.translatable("sharing.jmws.share_rejected", request.getRecipientName()), true, false, JMWSMessageType.FAILURE);
+                    }
                 }
 
                 case USER_ALREADY_PROCESSING_SHARE ->
                 {
-                    UUID incoming = UUID.fromString(arguments.get(0).getAsString());
+                    UUID incoming = UUID.fromString(arguments.get(1).getAsString());
                     String declineMessage = arguments.getLast().getAsString();
+                    @Nullable OutgoingShareRequest request = OutgoingShareRequests.getRequest(incoming);
 
-
-                    OutgoingShareRequests.getRequest(incoming).resolve();
-                    sendUserAlert(Component.translatable(declineMessage, PlayerHelper.getUsernameFromUUID(incoming)), true, false, JMWSMessageType.WARNING);
+                    if (request != null)
+                    {
+                        request.resolve();
+                        sendUserAlert(Component.translatable(declineMessage, request.getRecipientName()), true, false, JMWSMessageType.WARNING);
+                    }
 
                 }
 
@@ -186,7 +192,6 @@ public class PacketHandler {
                     if (OutgoingShareRequests.hasShareRequestFor(incoming))
                     {
                         OutgoingShareRequest request = OutgoingShareRequests.getRequest(incoming).resolve();
-                        Constants.getLogger().info(String.valueOf(request.meantFor));
                         sendUserAlert(Component.translatable("sharing.jmws.sharing_host", request.objectDisplayName, request.getRecipientName()), true, false, JMWSMessageType.SUCCESS);
                     } else {
                         sendUserAlert(Component.translatable("sharing.jmws.no_longer_valid"), true, true, JMWSMessageType.SUCCESS);

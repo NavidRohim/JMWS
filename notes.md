@@ -38,13 +38,15 @@
 - ~~Global group stays locked after being localised.~~ Resolve
 - ~~Global command suggestions don't work. (waypoints and groups)~~
 - ~~Offline users name doesn't appear when sharing an object~~ Resolved
-- Offline users shared objects don't say who they are shared from when syncing
+- ~~Offline users shared objects don't say who they are shared from when syncing~~ Wontfix
     - This is because the user is offline and their name cannot be resolved. (grabbed from server)
     - This might be fixable, but I will likely leave it
     - Could fix by accessing Mojang servers but this may not age well.
 - ~~If objects haven't been transitioned to 1.2.0 system and player tries to use any new commands (global or sharing) a UUID error is thrown.~~
 - ~~Waypoints / groups with duplicate names aren't shown in the object suggestion (differentiate by adding coordinates and dimension)~~
 - ~~deleteAll throws an error on client~~
+- ~~Rejection text doesn't work and timeout doesn't cancel. Exception thrown~~
+- ~~Busy dialogue text doesnt work~~
 
 ### LAN bugs
 - ~~Handshake fails due to new config value~~ Resolved. Update old config with new
@@ -72,7 +74,7 @@
     - How do shared objects work when owner is offline?
     - How does an already shared object behave when it's turned into a global object and vice versa?
 - Test `/share_waypoint_stop` and group eq.
-- Test possible bug where rejection doesn't stop timeout counter.
+- Test server config
 
 # RC Checklist
 - Creating and deleting ✅ 

@@ -18,6 +18,11 @@ public enum ObjectType {
         this.objectPathPrefix = objectPathPrefix;
     }
 
+    public static String getPathLocationPrefix(ObjectType objectType)
+    {
+        return objectType.getObjectPathPrefix();
+    }
+
     public Class<? extends ServerObject> getObjectClass() {
         return savedClass;
     }

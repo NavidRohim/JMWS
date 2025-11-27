@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public class UserSharingFile extends CommonShareIO {
     public UserSharingFile(UUID userUUID) {
-        super(JMWSServerIO.Utils.getNewObjectFilename(userUUID, "SHARED", ObjectType.SHARED));
+        super(JMWSServerIO.PathUtils.getObjectFilename(userUUID, "SHARED", ObjectType.SHARED, false));
     }
 
     @Override

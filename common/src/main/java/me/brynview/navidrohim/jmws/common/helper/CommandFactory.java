@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.share.ShareRequest;
@@ -35,13 +36,14 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.COMMON_DELETE_WAYPOINT, waypointIdentifier, silent, all);
     }
 
-    public static String makeDeleteGroupRequestJson(String groupUniversalIdentifier, String groupGUID, boolean silent, boolean removeAllWaypointsInGroup, boolean removeGroupItself, boolean deleteAllGroups) {
+    public static String makeDeleteGroupRequestJson(String groupUniversalIdentifier, String groupGUID, boolean silent, boolean removeAllWaypointsInGroup, boolean removeGroupItself, boolean isGlobal, boolean deleteAllGroups) {
         return CommandFactory.makeBaseJsonRequest(Commands.COMMON_DELETE_GROUP,
                 groupUniversalIdentifier,
                 groupGUID,
                 silent,
                 removeAllWaypointsInGroup,
                 removeGroupItself,
+                isGlobal,
                 deleteAllGroups);
     }
 
@@ -72,7 +74,7 @@ public class CommandFactory {
 
     public static String makeObjectShareRequestDecline(UUID originalSender)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.REJECT_SHARE, originalSender);
+        return CommandFactory.makeBaseJsonRequest(Commands.REJECT_SHARE, originalSender, PlayerHelper.ourUUID());
     }
 
     public static String makeObjectShareRequestDeclineWithMessage(UUID originalSender, String messageKey)
@@ -85,14 +87,14 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.AFFIRM_SHARE, shareRequest.originalSender, shareRequest.requestIdentifier, shareRequest.sharedObjectType, shareRequest.meantFor);
     }
 
-    public static String makeUpdateObjectRequest(String objectIdentifier, Waypoint waypoint)
+    public static String makeUpdateObjectRequest(String objectIdentifier, boolean isGlobal, Waypoint waypoint)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectIdentifier, ObjectType.WAYPOINT, waypoint.toString());
+        return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectIdentifier, ObjectType.WAYPOINT, isGlobal, waypoint.toString());
     }
 
-    public static String makeUpdateObjectRequest(String objectIdentifier, WaypointGroup group)
+    public static String makeUpdateObjectRequest(String objectIdentifier, boolean isGlobal,  WaypointGroup group)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectIdentifier, ObjectType.GROUP, group.toString());
+        return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectIdentifier, ObjectType.GROUP, isGlobal, group.toString());
     }
 
     public static String makeTransitionObjectRequest(String objectIdentifier, String filename, ObjectType transitionType)

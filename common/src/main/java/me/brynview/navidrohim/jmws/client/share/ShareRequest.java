@@ -23,9 +23,6 @@ public class ShareRequest {
     public UUID originalSender;
     public UUID meantFor;
 
-    public String originalSenderName;
-    public String recipientName;
-
     public Object currentSharedObject;
     public ObjectType sharedObjectType;
     public String requestIdentifier;
@@ -82,7 +79,7 @@ public class ShareRequest {
     protected void timeout()
     {
         IncomingShareRequests.removeRequest(this.originalSender);
-        PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.request_timeout"), true, false, JMWSMessageType.WARNING);
+        PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.request_timeout_from", this.getSenderName()), true, false, JMWSMessageType.WARNING);
     }
 
     private void finishRequest()

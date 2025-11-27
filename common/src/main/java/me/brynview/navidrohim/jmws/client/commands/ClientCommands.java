@@ -70,6 +70,7 @@ public class ClientCommands {
                     false,
                     false,
                     true,
+                    true,
                     true
             ));
             Dispatcher.sendToServer(deleteServerObjectPayload); // Deletes waypoints on the server

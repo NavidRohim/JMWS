@@ -62,8 +62,8 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
         this.ownerUUID = playerUUID;
         this.name = payload.get("name").getAsString();
         this.accessorSharing = !dataclass ? new UserSharingFile(playerUUID) : null;
-        this.globalObjectPath = !dataclass ? Path.of(JMWSServerIO.getPathLocationPrefix(this.getObjectType()) + JMWSServerIO.globalObjPrefix + JMWSServerIO.Utils.makeFilename(this.syncing.objectIdentifier, this.ownerUUID)) : null;
-        this.normalObjectPath = !dataclass ? JMWSServerIO.Utils.getNewObjectFilename(this.syncing.getOwner(), this.syncing.objectIdentifier, getObjectType()) : null;
+        this.globalObjectPath = !dataclass ? Path.of(ObjectType.getPathLocationPrefix(this.getObjectType()) + JMWSServerIO.PathUtils.makeFilename(this.syncing.objectIdentifier, this.ownerUUID, true)) : null;
+        this.normalObjectPath = !dataclass ? JMWSServerIO.PathUtils.getObjectFilename(this.syncing.getOwner(), this.syncing.objectIdentifier, getObjectType(), false) : null;
         this.groupIdentifier = payload.get("guid").getAsString();
 
         if (!dataclass)
@@ -125,7 +125,7 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
             {
                 Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteRequestJson(objectIdentifier, true, false)), sharedPlayer);
             } else {
-                Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteGroupRequestJson(this.syncing.objectIdentifier, null, true, true, true, false)), sharedPlayer);
+                Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteGroupRequestJson(this.syncing.objectIdentifier, null, true, true, true, false, false)), sharedPlayer);
             }
         }
     }

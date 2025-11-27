@@ -26,24 +26,6 @@ public class IncomingShareRequests {
         incomingShareRequestList.remove(from);
     }
 
-    @Nullable
-    public static ShareRequest getRequest(UUID from)
-    {
-        return incomingShareRequestList.get(from);
-    }
-
-    @Nullable
-    public static ShareRequest getFirstRequest()
-    {
-        try
-        {
-            return incomingShareRequestList.get(incomingShareRequestList.keySet().stream().toList().getFirst());
-        } catch (NoSuchElementException ignored)
-        {
-            return null;
-        }
-    }
-
     public static void clear()
     {
         incomingShareRequestList.clear();

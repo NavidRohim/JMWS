@@ -45,13 +45,20 @@ This is the same for groups but using `/jmws_admin remove_global_group`. Also, "
 The player who originally made it will regain it as normal waypoint
 
 #### I want to know more.
-
 When a shared / global object is created, users will gain access to it but they will not be able to modify it. Only the original creator can.
 And, if in a LAN world, the host cannot share nor create global objects.
 
+Also, if an object is global, you'll see a little `(G)` at the end of the name. You can turn this off in the config (Uncheck "Global Label?")
+This is the same with shared objects, but instead you'll see the name of the user who owns the object. And if they are offline, it'll just be `(S)`
+like global objects.
+
 ## Bugs that I am aware of
 
-None!
+None (with my mod)
+
+I realise the config screen inside JourneyMap is very messy. JourneyMap is supposed to have categories so it looks much cleaner, but currently they are broken.
+When they are fixed, in JourneyMap, so will the config screen in my mod (E.g. I won't have to release a bug fix)
+
 
 ### Other
 *Server version is 1.1, massive server changes from 1.0. Update server and client immediately.*

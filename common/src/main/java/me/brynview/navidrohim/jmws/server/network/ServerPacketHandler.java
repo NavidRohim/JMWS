@@ -89,7 +89,7 @@ public class ServerPacketHandler {
                         for (String shared : userSharingFile.getSharedList(ObjectType.WAYPOINT))
                         {
                             lastIterWp++;
-                            ServerWaypoint wp = JMWSServerIO.getWaypointFromUniqueIdentifier(shared, playerUUID);
+                            ServerWaypoint wp = ServerWaypoint.getWaypointFromUniqueIdentifier(shared, playerUUID);
                             if (wp != null)
                             {
                                 if (!wp.syncing.isGlobal())
@@ -104,7 +104,7 @@ public class ServerPacketHandler {
                         for (String sharedGpString : userSharingFile.getSharedList(ObjectType.GROUP))
                         {
                             lastIterGp++;
-                            ServerGroup gp = JMWSServerIO.getGroupFromUniqueIdentifier(sharedGpString, playerUUID);
+                            ServerGroup gp = ServerGroup.getGroupFromUniqueIdentifier(sharedGpString, playerUUID);
                             if (gp != null)
                             {
                                 if (!gp.syncing.isGlobal())
@@ -149,24 +149,25 @@ public class ServerPacketHandler {
                 boolean silent = arguments.get(2).getAsBoolean();
                 boolean deleteAllWaypointsInGroup = arguments.get(3).getAsBoolean();
                 boolean removeGroupItself = arguments.get(4).getAsBoolean();
+                boolean isObjGlobal = arguments.get(5).getAsBoolean();
                 boolean deleteAllObjects = arguments.getLast().getAsBoolean();
 
                 boolean result;
-                @Nullable ServerGroup group = JMWSServerIO.getObjectFromDisk(groupUniversalIdentifier, playerUUID, ObjectType.GROUP, deleteAllWaypointsInGroup);
+                @Nullable ServerGroup group = ServerGroup.getGroupFromUniqueIdentifier(groupUniversalIdentifier, playerUUID);
 
                 if (group != null)
                 {
-                    if (deleteAllWaypointsInGroup)
-                    {
-                        result = group.deleteWaypoints();
-                        if (!removeGroupItself && result)
-                        {
-                            sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false, silent);
-                            return;
-                        }
-                    }
                     if (group.syncing.isOwner(playerUUID))
                     {
+                        if (deleteAllWaypointsInGroup)
+                        {
+                            result = group.deleteWaypoints();
+                            if (!removeGroupItself && result)
+                            {
+                                sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false, silent);
+                                return;
+                            }
+                        }
                         group.stopSharing();
                         result = group.delete(false);
 
@@ -205,12 +206,11 @@ public class ServerPacketHandler {
                 boolean deleteAll = arguments.getLast().getAsBoolean();
                 boolean result;
 
-                ServerWaypoint waypoint = JMWSServerIO.getWaypointFromUniqueIdentifier(waypointIdentifier, playerUUID);
+                ServerWaypoint waypoint = ServerWaypoint.getWaypointFromUniqueIdentifier(waypointIdentifier, playerUUID);
 
                 if (waypoint != null) {
                     if (waypoint.syncing.isOwner(playerUUID)) {
-                        waypoint.stopSharing();
-                        result = waypoint.delete(false);
+                        result = waypoint.delete(true);
 
                         if (!silent) {
                             if (result) {
@@ -243,7 +243,7 @@ public class ServerPacketHandler {
                 if (serverEnabledJMWS() && (ServerConfig.getConfig().waypointsEnabled)) {
                     JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
                     boolean silent = arguments.get(1).getAsBoolean();
-                    boolean waypointCreationSuccess = JMWSServerIO.createWaypoint(jsonCreationData, playerUUID);
+                    boolean waypointCreationSuccess = ServerWaypoint.createWaypoint(jsonCreationData, playerUUID);
 
                     if (!silent) {
                         if (waypointCreationSuccess) {
@@ -264,7 +264,7 @@ public class ServerPacketHandler {
                 if (serverEnabledJMWS() && ( ServerConfig.getConfig().groupsEnabled || isUpdateFromCreation)) {
                     JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
                     boolean silent = arguments.get(1).getAsBoolean();
-                    boolean waypointCreationSuccess = JMWSServerIO.createGroup(jsonCreationData, playerUUID);
+                    boolean waypointCreationSuccess = ServerGroup.createGroup(jsonCreationData, playerUUID);
 
                     if (!silent) {
                         if (waypointCreationSuccess) {
@@ -283,10 +283,11 @@ public class ServerPacketHandler {
             {
                 String objectIdentifier = arguments.getFirst().getAsString();
                 ObjectType modifyingType = ObjectType.valueOf(arguments.get(1).getAsString());
-                Path objectPath = JMWSServerIO.Utils.getNewObjectFilename(playerUUID, objectIdentifier, modifyingType);
+                boolean isGlobal = arguments.get(2).getAsBoolean();
                 String objectData = arguments.getLast().getAsString();
 
-                ServerObject obj = JMWSServerIO.getObjectFromDisk(objectIdentifier, playerUUID, modifyingType);
+                ServerObject obj = JMWSServerIO.getObjectFromUniqueIdentifier(objectIdentifier, playerUUID, modifyingType);
+
                 if (obj != null)
                 {
                     if (obj.syncing.isOwner(playerUUID))

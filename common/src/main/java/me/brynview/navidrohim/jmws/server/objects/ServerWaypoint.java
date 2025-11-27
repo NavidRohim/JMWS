@@ -1,11 +1,9 @@
 package me.brynview.navidrohim.jmws.server.objects;
 
 import com.google.gson.JsonObject;
-import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.server.Server;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
-import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -42,7 +40,30 @@ public class ServerWaypoint extends ServerObject {
 
     public static ServerWaypoint getFromPath(Path waypointPath, UUID ownerUUID)
     {
-        return JMWSServerIO.getWaypointFromFile(waypointPath, ownerUUID);
+        return getWaypointFromFile(waypointPath, ownerUUID);
+    }
+
+    public static boolean createWaypoint(JsonObject jsonObject, UUID playerUUID)
+    {
+        ServerWaypoint wp = new ServerWaypoint(jsonObject, playerUUID);
+        return wp.create();
+    }
+
+    @Nullable
+    public static ServerWaypoint getWaypointFromFile(Path waypointPath, UUID playerUUID)
+    {
+        JsonObject waypointLocalData = JMWSServerIO.getObjectDataFromDisk(waypointPath, true);
+        if (waypointLocalData != null) {
+            return new ServerWaypoint(waypointLocalData, playerUUID);
+        }
+        return null;
+    }
+
+    @Nullable
+    public static ServerWaypoint getWaypointFromUniqueIdentifier(String waypointIdentifier, UUID user)
+    {
+        Path objPath = JMWSServerIO.getObjectPathFromUniqueIdentifier(waypointIdentifier, ObjectType.WAYPOINT);
+        return getWaypointFromFile(objPath, user);
     }
 
     public String getWaypointGroupId() { return this.groupId; }

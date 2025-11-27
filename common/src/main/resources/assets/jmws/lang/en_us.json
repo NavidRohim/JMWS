@@ -40,11 +40,12 @@
   "sharing.jmws.share_busy": "%s is already processing a share request from you.",
   "sharing.jmws.sharing_host": "Now sharing %s with %s",
   "sharing.jmws.sharing_child": "Now sharing",
-  "sharing.jmws.no_requests": "You don't have any share requests.",
+  "sharing.jmws.no_requests": "No share request with this user or they are offline.",
   "sharing.jmws.decline": "Declined",
   "sharing.jmws.cannot_share": "You cannot share with yourself or the owner of a LAN server.",
   "sharing.jmws.cannot_share_global": "You cannot share a global waypoint / group.",
-  "sharing.jmws.request_timeout": "Timeout, sharing request has been declined.",
+  "sharing.jmws.request_timeout_to": "Timeout, sharing request to %s has been declined.",
+  "sharing.jmws.request_timeout_from": "Timeout, sharing request from %s has been declined.",
   "sharing.jmws.local_only": "To note; you can only update admin / shared waypoints or groups locally and your changes will be overwritten.",
   "sharing.jmws.disabled": "%s has share requests disabled.",
   "sharing.jmws.no_matching_object": "No waypoint / group matching that name.",
@@ -72,6 +73,9 @@
   "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency.tooltip": "Frequency of when waypoints are grabbed from the server (in seconds)",
   "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout.tooltip": "How long until the mod determines that the server doesn't have JMWS installed (in seconds)",
 
+  "text.config.jmws-config.option.showSharingLabels.tooltip": "Show a shared objects owner name next to the waypoint name, if online.",
+  "text.config.jmws-config.option.showGlobalLabels.tooltip": "Show a '(G)' next to the name of an object if it's global.",
+
   "text.config.jmws-config.option.serverConfiguration.serverPacketLimit.tooltip": "How large a sync packet can be. Only editable by server.",
   "text.config.jmws-config.option.serverConfiguration.serverEnabled.tooltip": "If server has JMWS enabled.",
   "text.config.jmws-config.option.serverConfiguration.serverWaypointsEnabled.tooltip": "If server has waypoint syncing enabled.",
@@ -86,15 +90,20 @@
   "text.config.jmws-config.option.uploadGroups": "Sync waypoint groups?",
   "text.config.jmws-config.option.autoSync": "Auto-Sync",
   "text.config.jmws-config.option.syncIndicator": "Sync Indicator",
+  "text.config.jmws-config.option.showSharingLabels": "Share Label?",
+  "text.config.jmws-config.option.showGlobalLabels": "Global Label?",
 
   "text.config.jmws-config.option.serverEnabled": "Server Enabled",
-  "text.config.jmws-config.option.serverEnabled.tooltip": "If remote server has JMWS enabled. Does not effect your game in any way.",
+  "text.config.jmws-config.option.serverEnabled.tooltip": "If remote server has JMWS enabled. Changing this does not effect your game in any way.",
 
-  "text.config.jmws-config.option.serverUploadWaypoints.tooltip": "If remote server has waypoint syncing enabled. Does not effect your game in any way.",
+  "text.config.jmws-config.option.serverUploadWaypoints.tooltip": "If remote server has waypoint syncing enabled. Changing this does not effect your game in any way.",
   "text.config.jmws-config.option.serverUploadWaypoints": "Server Syncs Waypoints",
 
-  "text.config.jmws-config.option.serverUploadGroups.tooltip": "If remote server has group syncing enabled. Does not effect your game in any way.",
+  "text.config.jmws-config.option.serverUploadGroups.tooltip": "If remote server has group syncing enabled. Changing this does not effect your game in any way.",
   "text.config.jmws-config.option.serverUploadGroups": "Server Syncs Groups",
+
+  "text.config.jmws-config.option.serverAllowsSharing.tooltip": "Whether or not you can share waypoints and groups with other players in this server. Changing this does not effect your game in any way.",
+  "text.config.jmws-config.option.serverAllowsSharing": "Server Allows Sharing?",
 
   "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency": "Sync frequency",
   "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout": "Server Handshake Timeout",
