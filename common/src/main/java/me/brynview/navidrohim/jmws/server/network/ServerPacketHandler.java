@@ -136,7 +136,7 @@ public class ServerPacketHandler {
         JMWSActionPayload waypointActionPayload = Context.message();
         CommandFactory.Commands command = waypointActionPayload.command();
         List<JsonElement> arguments = waypointActionPayload.arguments();
-        UUID playerUUID = player.getGameProfile().getId();
+        UUID playerUUID = player.getGameProfile().id();
 
         switch (command) {
 
@@ -320,7 +320,7 @@ public class ServerPacketHandler {
             case CommandFactory.Commands.USER_ALREADY_PROCESSING_SHARE, CommandFactory.Commands.REJECT_SHARE ->
             {
                 UUID forUser = UUID.fromString(Context.message().arguments().getFirst().getAsString());
-                Dispatcher.sendToClient(Context.message(), Context.sender().server.getPlayerList().getPlayer(forUser));
+                Dispatcher.sendToClient(Context.message(), Context.sender().level().getServer().getPlayerList().getPlayer(forUser));
             }
 
             case CommandFactory.Commands.AFFIRM_SHARE ->
