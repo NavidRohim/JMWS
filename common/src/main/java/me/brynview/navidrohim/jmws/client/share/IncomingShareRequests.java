@@ -26,11 +26,6 @@ public class IncomingShareRequests {
         incomingShareRequestList.remove(from);
     }
 
-    public static void clear()
-    {
-        incomingShareRequestList.clear();
-    }
-
     public static HashMap<UUID, ShareRequest> getAll()
     {
         return incomingShareRequestList;
@@ -44,5 +39,13 @@ public class IncomingShareRequests {
             r.put(PlayerHelper.getUsernameFromUUID(s.getKey()), s.getValue());
         }
         return r;
+    }
+
+    public static void clearAll() {
+        for (ShareRequest request : incomingShareRequestList.values())
+        {
+            request.timeout.cancel(true);
+        }
+        incomingShareRequestList.clear();
     }
 }

@@ -23,6 +23,7 @@ import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -131,7 +132,7 @@ public class CommonClass {
     }
 
     public static boolean isInternalServer() {
-        if (CommonClass.minecraftClientInstance instanceof Minecraft) {
+        if (CommonClass.minecraftClientInstance != null) {
             return CommonClass.minecraftClientInstance.isLocalServer() && CommonClass.minecraftClientInstance.getSingleplayerServer() instanceof IntegratedServer;
         }
         return false;
@@ -162,5 +163,10 @@ public class CommonClass {
     {
         minecraftClientInstance = Minecraft.getInstance();
         syncCounter = new SyncCounter();
+    }
+
+    public static boolean isValidCommandUser(CommandSourceStack commandSourceStack)
+    {
+        return !isInternalServer() || (!CommonClass.getMinecraftServerInstance().isSingleplayerOwner(commandSourceStack.getPlayer().getGameProfile())); // No host user
     }
 }

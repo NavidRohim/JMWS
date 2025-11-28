@@ -30,7 +30,10 @@ public class Server {
         for (ServerObject object : JMWSServerIO.getObjectsForUser(playerUUID, objectType, global))
         {
             String nonDupeIdentifier = object.getObjectNonDuplicateIdentifier();
-            stringServerObjectHashMap.put(nonDupeIdentifier, object);
+            if (!object.syncing.isGlobal() || global)
+            {
+                stringServerObjectHashMap.put(nonDupeIdentifier, object);
+            }
         }
 
         return stringServerObjectHashMap;

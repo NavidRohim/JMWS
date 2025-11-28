@@ -34,6 +34,7 @@ public class NeoforgeEventHandler
             CommonClass.syncCounter.iterateCounter();
         }
     }
+
     @SubscribeEvent
     public static void onEntityJoinWorld(PlayerEvent.PlayerLoggedInEvent event)
     {
@@ -44,35 +45,18 @@ public class NeoforgeEventHandler
     }
 
     @SubscribeEvent
-    public static void RegisterClientCommandsEvent(RegisterClientCommandsEvent event) {
-        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-
-        dispatcher.register(
-                Commands.literal("jmws")
-                        .then(Commands.literal("sync").executes(commandContext -> ClientCommands.sync()))
-                        .then(Commands.literal("getSyncInterval").executes(commandContext -> ClientCommands.getSyncInterval()))
-                        .then(Commands.literal("nextSync").executes(updateDisplayContext -> ClientCommands.nextSync()))
-                        .then(Commands.literal("clearAll")
-                                .then(Commands.literal("groups").executes(groupClearAllCtx -> ClientCommands.clearAllGroups()))
-                                .then(Commands.literal("waypoints").executes(waypointClearAllCtx -> ClientCommands.clearAllWaypoints())))
-        );
-        dispatcher.register(Commands.literal("share_accept")
-                .then(Commands.argument("sender", StringArgumentType.greedyString())
-                        .suggests(NeoforgeEventHandler::getShareRequestSuggestionsForge)
-                        .executes(CommonClientPlatformCommands::accept)));
-
-        dispatcher.register(Commands.literal("share_decline")
-                .then(Commands.argument("sender", StringArgumentType.greedyString())
-                        .suggests(NeoforgeEventHandler::getShareRequestSuggestionsForge)
-                        .executes(CommonClientPlatformCommands::decline)));
-    }
-
-    private static CompletableFuture<Suggestions> getShareRequestSuggestionsForge(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder)
+    public static void onEntityLeaveWorld(PlayerEvent.PlayerLoggedOutEvent event)
     {
-        for (String suggestion : ShareSuggestions.getIncomingShareRequestNames())
+        if (event.getEntity() instanceof ServerPlayer)
         {
-            suggestionsBuilder.suggest(suggestion);
+            CommonEvents.clearCache();
         }
-        return suggestionsBuilder.buildFuture();
     }
+
+    @SubscribeEvent
+    public static void RegisterClientCommandsEvent(RegisterClientCommandsEvent event)
+    {
+        CommonClientPlatformCommands.registerClientDispatcher(event.getDispatcher());
+    }
+
 }

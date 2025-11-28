@@ -17,6 +17,7 @@ import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.client.helper.AssetHelper;
 import me.brynview.navidrohim.jmws.client.share.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
@@ -29,6 +30,7 @@ import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -478,13 +480,16 @@ public class JMWSPlugin implements IClientPlugin {
                 savedGroup.setLocked(false);
             }
 
-            if (gpSync.isGlobal() && showGlobalLabels)
+            if (!gpSync.isOwner(PlayerHelper.ourUUID()))
             {
-                savedGroup.setName(savedGroup.getName() + " (%s)".formatted(CommonHelper.globalStringTag));
-            } else if (!gpSync.isOwner(PlayerHelper.ourUUID()) && showSharingLabels)
-            {
-                String ownerUser = PlayerHelper.getUsernameFromUUID(gpSync.getOwner());
-                savedGroup.setName(savedGroup.getName() + " (%s)".formatted(ownerUser));
+                if (gpSync.isGlobal() && showGlobalLabels)
+                {
+                    savedGroup.setName(savedGroup.getName() + " (%s)".formatted(CommonHelper.globalStringTag));
+                } else if (showSharingLabels)
+                {
+                    String ownerUser = PlayerHelper.getUsernameFromUUID(gpSync.getOwner());
+                    savedGroup.setName(savedGroup.getName() + " (%s)".formatted(ownerUser));
+                }
             }
             addGroup(savedGroup);
         }
@@ -525,13 +530,19 @@ public class JMWSPlugin implements IClientPlugin {
         // Add server waypoints to the client
         for (Waypoint savedWaypoint : savedWaypoints) {
             SyncingInformation wpSync = SyncingInformation.getSyncingInfo(savedWaypoint.getCustomData());
-            if (wpSync.isGlobal() && showGlobalLabels) // Global
+
+            if (!wpSync.isOwner(PlayerHelper.ourUUID()))
             {
-                savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(CommonHelper.globalStringTag));
-            } else if (!wpSync.isOwner(PlayerHelper.ourUUID()) && showSharingLabels) // Shared
-            {
-                String ownerUser = PlayerHelper.getUsernameFromUUID(wpSync.getOwner(), true);
-                savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(ownerUser));
+                if (wpSync.isGlobal() && showGlobalLabels) // Global
+                {
+                    savedWaypoint.setIconResourceLoctaion(AssetHelper.globalObjectAsset);
+                    savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(CommonHelper.globalStringTag));
+                } else if (showSharingLabels) // Shared
+                {
+                    String ownerUser = PlayerHelper.getUsernameFromUUID(wpSync.getOwner(), true);
+                    savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(ownerUser));
+                    savedWaypoint.setIconResourceLoctaion(AssetHelper.sharedObjectAsset);
+                }
             }
             addWaypoint(savedWaypoint);
         }

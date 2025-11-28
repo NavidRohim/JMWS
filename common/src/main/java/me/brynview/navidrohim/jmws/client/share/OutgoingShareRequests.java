@@ -29,8 +29,11 @@ public class OutgoingShareRequests {
         return outgoingShareRequestList.get(from);
     }
 
-    public static void clear()
-    {
+    public static void clearAll() {
+        for (ShareRequest request : outgoingShareRequestList.values())
+        {
+            request.timeout.cancel(true);
+        }
         outgoingShareRequestList.clear();
     }
 }

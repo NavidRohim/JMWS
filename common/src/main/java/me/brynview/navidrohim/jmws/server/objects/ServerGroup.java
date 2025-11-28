@@ -97,28 +97,10 @@ public class ServerGroup extends ServerObject {
 
     // Following static methods are ways to get instances of ServerGroup from files
 
-    public static List<Path> getGlobalGroups() {
-        List<Path> gp = new ArrayList<>();
-        for (Path path : JMWSServerIO.getAllObjects(ObjectType.GROUP).toList())
-        {
-            if (path.toString().contains("SERVER"))
-            {
-                gp.add(path);
-            }
-        }
-        return gp;
-    }
-
     public static boolean createGroup(JsonObject jsonObject, UUID playerUUID)
     {
         ServerGroup gp = new ServerGroup(jsonObject, playerUUID);
         return gp.create();
-    }
-
-    @Nullable
-    public static ServerGroup getGroup(UUID player, String objectUUID, boolean isGlobal)
-    {
-        return getGroupFromFile(JMWSServerIO.PathUtils.getObjectFilename(player, objectUUID, ObjectType.GROUP, isGlobal), player);
     }
 
     @Nullable

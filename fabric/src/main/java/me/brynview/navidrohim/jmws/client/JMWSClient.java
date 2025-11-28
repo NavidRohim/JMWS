@@ -1,10 +1,10 @@
 package me.brynview.navidrohim.jmws.client;
 
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.commands.CommonClientPlatformCommands;
 import me.brynview.navidrohim.jmws.client.screens.MissingJourneyMapScreen;
 import me.brynview.navidrohim.jmws.common.events.CommonEvents;
 import me.brynview.navidrohim.jmws.common.CommonClass;
-import me.brynview.navidrohim.jmws.client.callback.ClientCommandCallback;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -31,7 +31,7 @@ public class JMWSClient implements ClientModInitializer {
     {
         // fabric tick events
         ClientTickEvents.END_CLIENT_TICK.register(this::handleTick);
-        ClientCommandRegistrationCallback.EVENT.register(ClientCommandCallback::Callback);
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> CommonClientPlatformCommands.registerClientDispatcher(dispatcher));
         ServerPlayConnectionEvents.JOIN.register(((handler, sender, server) -> {
             CommonEvents.handleJoin(handler.player, true, true);
         }));

@@ -46,43 +46,24 @@ public class ForgeEventHandler
     }
 
     @SubscribeEvent
+    public static void onEntityLeaveWorld(PlayerEvent.PlayerLoggedOutEvent event)
+    {
+        if (event.getEntity() instanceof ServerPlayer)
+        {
+            CommonEvents.clearCache();
+        }
+    }
+
+    @SubscribeEvent
     public static void onServerStart(ServerStartedEvent event)
     {
         CommonClass.minecraftServerInstance = event.getServer();
     }
 
     @SubscribeEvent
-    public static void RegisterClientCommandsEvent(RegisterClientCommandsEvent event) {
-        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-
-        dispatcher.register(
-                Commands.literal("jmws")
-                    .then(Commands.literal("sync").executes(commandContext -> ClientCommands.sync()))
-                    .then(Commands.literal("getSyncInterval").executes(commandContext -> ClientCommands.getSyncInterval()))
-                    .then(Commands.literal("nextSync").executes(updateDisplayContext -> ClientCommands.nextSync()))
-                    .then(Commands.literal("clearAll")
-                            .then(Commands.literal("groups").executes(groupClearAllCtx -> ClientCommands.clearAllGroups()))
-                            .then(Commands.literal("waypoints").executes(waypointClearAllCtx -> ClientCommands.clearAllWaypoints())))
-        );
-        dispatcher.register(Commands.literal("share_accept")
-                .then(Commands.argument("sender", StringArgumentType.greedyString())
-                        .suggests(ForgeEventHandler::getShareRequestSuggestionsForge)
-                        .executes(CommonClientPlatformCommands::accept)));
-
-        dispatcher.register(Commands.literal("share_decline")
-                .then(Commands.argument("sender", StringArgumentType.greedyString())
-                        .suggests(ForgeEventHandler::getShareRequestSuggestionsForge)
-                        .executes(CommonClientPlatformCommands::decline)));
-
-    }
-
-    private static CompletableFuture<Suggestions> getShareRequestSuggestionsForge(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder)
+    public static void RegisterClientCommandsEvent(RegisterClientCommandsEvent event)
     {
-        for (String suggestion : ShareSuggestions.getIncomingShareRequestNames())
-        {
-            suggestionsBuilder.suggest(suggestion);
-        }
-        return suggestionsBuilder.buildFuture();
+        CommonClientPlatformCommands.registerClientDispatcher(event.getDispatcher());
     }
 
 }

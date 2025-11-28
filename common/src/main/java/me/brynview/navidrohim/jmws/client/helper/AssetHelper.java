@@ -9,4 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 public interface AssetHelper {
     ResourceLocation onOffButtonAsset = ResourceLocation.fromNamespaceAndPath(Constants.MODID, "textures/gui/on_off_button.png");
     ResourceLocation enableButtonAsset = ResourceLocation.fromNamespaceAndPath(Constants.MODID, "textures/gui/update_button.png");
+
+    ResourceLocation globalObjectAsset = ResourceLocation.fromNamespaceAndPath(Constants.MODID, "textures/gui/global_object.png");
+    ResourceLocation sharedObjectAsset = ResourceLocation.fromNamespaceAndPath(Constants.MODID, "textures/gui/shared_object.png");
 }

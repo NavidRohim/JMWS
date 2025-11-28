@@ -47,6 +47,7 @@
 - ~~deleteAll throws an error on client~~
 - ~~Rejection text doesn't work and timeout doesn't cancel. Exception thrown~~
 - ~~Busy dialogue text doesnt work~~
+- ~~when a Global / shared object owner edits the name, or the waypoint is deleted from a group, the object tag will be duplicated~~
 
 ### LAN bugs
 - ~~Handshake fails due to new config value~~ Resolved. Update old config with new
@@ -80,6 +81,7 @@
 - Creating and deleting ✅ 
 - Editing ✅ 
 - Deleting in-build group waypoints ✅ 
+- Delete all for groups ✅
 
 User Commands
 
@@ -89,6 +91,22 @@ User Commands
 - nextSync ✅
 
 Share Testing
+
+- Follows server config rules ✅
+- Can share to multiple people ✅
+- Can decline ✅
+- Is rejected by config ✅
+- Can timeout ✅
+- Tags working ✅
+- Shared clients cannot edit objects ✅
+- Cannot share to server owner player ✅
+
+Global Testing
+
+- Shared clients cannot edit globals ✅
+- Tags working ✅
+- Shares to everyone ✅
+- Does not share to server owner player ✅
 
 
 

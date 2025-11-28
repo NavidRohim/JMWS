@@ -59,6 +59,12 @@ None (with my mod)
 I realise the config screen inside JourneyMap is very messy. JourneyMap is supposed to have categories so it looks much cleaner, but currently they are broken.
 When they are fixed, in JourneyMap, so will the config screen in my mod (E.g. I won't have to release a bug fix)
 
-
 ### Other
-*Server version is 1.1, massive server changes from 1.0. Update server and client immediately.*
+
+New server version = 1.1 (Up from 1.01)
+
+*Server version is 1.1, massive server changes from 1.01. Update server and client immediately.
+Clients who join a 1.1 server when on 1.01 WILL face errors and possibly lose saved objects.
+I do not take responsibility if this occurs. You have been warned.*
+
+Thanks!

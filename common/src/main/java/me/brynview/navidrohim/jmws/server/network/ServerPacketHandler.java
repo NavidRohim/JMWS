@@ -69,13 +69,13 @@ public class ServerPacketHandler {
                     }
                 }
 
-                for (Path globalWpPath : ServerWaypoint.getGlobalWaypoints())
+                for (Path globalWpPath : ServerObject.getGlobalObjects(ObjectType.WAYPOINT))
                 {
                     lastIterWp++;
                     jsonWaypointPayloadArray.put(String.valueOf(lastIterWp), Files.readString(globalWpPath));
                 }
 
-                for (Path globalGpPath : ServerGroup.getGlobalGroups())
+                for (Path globalGpPath : ServerObject.getGlobalObjects(ObjectType.GROUP))
                 {
                     lastIterGp++;
                     jsonGroupPayloadArray.put(String.valueOf(lastIterGp), Files.readString(globalGpPath));

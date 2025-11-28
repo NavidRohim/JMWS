@@ -77,6 +77,19 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
         this(payload, playerUUID, false);
     }
 
+    public static List<Path> getGlobalObjects(ObjectType globalObjectType)
+    {
+        List<Path> wp = new ArrayList<>();
+        for (Path path : JMWSServerIO.getAllObjects(globalObjectType).toList())
+        {
+            if (path.toString().contains(JMWSServerIO.globalObjPrefix))
+            {
+                wp.add(path);
+            }
+        }
+        return wp;
+    }
+
     public String getName() { return this.name; }
 
     public String getGroupIdentifier() { return this.groupIdentifier; } // No usages but may be used elsewhere like with generics not sure

@@ -25,8 +25,8 @@ public class CommonEvents {
         CommonClass.serverConfig = ClientSideServerConfigObject.empty();
         PlayerHelper.clearWarningAlertCache();
 
-        IncomingShareRequests.clear();
-        OutgoingShareRequests.clear();
+        IncomingShareRequests.clearAll();
+        OutgoingShareRequests.clearAll();
     }
 
     public static void handleJoin(ServerPlayer serverPlayer, boolean isInternal, boolean sendWarningIfJMNotPresent)
