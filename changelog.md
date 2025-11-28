@@ -23,13 +23,12 @@ These objects update live (changing name, location, etc) which includes deletion
 Create a waypoint or group like normal. Then do `/share_waypoint <share_to> <waypoint>` where `share_to` is the user you want to share with,
 and `waypoint` is the name of the waypoint you want to share. This is the same for groups but using `/share_group`
 
-The user who receives the object will have to accept the share request, there is a 20 second timeout. If this time passes, the request will automatically
+The user who receives the object will have to accept the share request, there is a 20-second timeout. If this time passes, the request will automatically
 be declined.
 
 #### How do I stop sharing an object?
-Simply do `/share_waypoint_stop <waypoint> <remove_from>` where `waypoint` is the name of the waypoint you want to stop sharing with.
-`remove_from` is the name of the user you want to stop sharing with. You can leave this blank if you want to stop sharing with everything.
-This is the same with waypoints but you do `/share_group_stop`
+Simply do `/stop_sharing_waypoint <waypoint>` where `waypoint` is the name of the waypoint you want to stop sharing.
+This is the same with groups but you do `/stop_sharing_group`
 
 ### What are global objects?
 
@@ -42,10 +41,10 @@ that will become global. This is the same for groups but using `/jmws_admin crea
 #### How do I stop sharing a global object?
 Do `/jmws_admin remove_global_waypoint <waypoint>` where `<waypoint>` is the name of the global waypoint you want to remove.
 This is the same for groups but using `/jmws_admin remove_global_group`. Also, "remove" means to just stop sharing it with everyone.
-The player who originally made it will regain it as normal waypoint
+The player who originally made it will regain it as normal waypoint / group
 
 #### I want to know more.
-When a shared / global object is created, users will gain access to it but they will not be able to modify it. Only the original creator can.
+When a shared / global object is created, users will gain access to it, but they will not be able to modify it. Only the original creator can.
 And, if in a LAN world, the host cannot share nor create global objects.
 
 Also, if an object is global, you'll see a little `(G)` at the end of the name. You can turn this off in the config (Uncheck "Global Label?")

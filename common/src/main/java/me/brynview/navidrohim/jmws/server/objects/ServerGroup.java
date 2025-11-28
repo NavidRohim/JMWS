@@ -104,9 +104,9 @@ public class ServerGroup extends ServerObject {
     }
 
     @Nullable
-    private static ServerGroup getGroupFromFile(Path path, UUID player)
+    private static ServerGroup getGroupFromFile(Path path, UUID player, boolean silentFail)
     {
-        JsonObject groupLocalServerData = JMWSServerIO.getObjectDataFromDisk(path, false);
+        JsonObject groupLocalServerData = JMWSServerIO.getObjectDataFromDisk(path, silentFail);
         if (groupLocalServerData != null)
         {
             return new ServerGroup(groupLocalServerData, player);
@@ -117,6 +117,6 @@ public class ServerGroup extends ServerObject {
     @Nullable
     public static ServerGroup getGroupFromUniqueIdentifier(String groupIdentifier, UUID user)
     {
-        return getGroupFromFile(JMWSServerIO.getObjectPathFromUniqueIdentifier(groupIdentifier, ObjectType.GROUP), user);
+        return getGroupFromFile(JMWSServerIO.getObjectPathFromUniqueIdentifier(groupIdentifier, ObjectType.GROUP), user, true);
     }
 }

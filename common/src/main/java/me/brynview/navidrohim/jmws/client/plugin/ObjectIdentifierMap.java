@@ -121,7 +121,6 @@ public class ObjectIdentifierMap {
     public static boolean addGroupToMap(WaypointGroup waypointGroup)
     {
         String customDataField = waypointGroup.getCustomData();
-
         if (isLegacyDataField(customDataField))
         {
             ObjectUtils.transitionObject(waypointGroup, PlayerHelper.ourUUID(), ObjectType.GROUP);

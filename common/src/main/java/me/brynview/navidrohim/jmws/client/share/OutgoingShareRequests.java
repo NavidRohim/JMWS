@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.client.share;
 
-import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
+import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -30,10 +31,9 @@ public class OutgoingShareRequests {
     }
 
     public static void clearAll() {
-        for (ShareRequest request : outgoingShareRequestList.values())
+        for (OutgoingShareRequest request : outgoingShareRequestList.values())
         {
-            request.timeout.cancel(true);
+            request.resolve();
         }
-        outgoingShareRequestList.clear();
     }
 }

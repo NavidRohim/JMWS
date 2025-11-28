@@ -51,6 +51,7 @@ public class ServerCommands {
         {
             ServerObject objIns = JMWSServerIO.getObjectFromFile(specifiedObj, sender.getUUID(), objectType);
             objIns.stopSharing();
+            PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.stopped_sharing", true, JMWSMessageType.NEUTRAL);
         }
         else {
             PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.no_matching_object", true, JMWSMessageType.FAILURE);

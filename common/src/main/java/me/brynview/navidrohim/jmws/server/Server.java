@@ -24,13 +24,13 @@ import java.util.concurrent.CompletableFuture;
 
 public class Server {
 
-    public static HashMap<String, ServerObject> getUserObjectsAsNameHashmap(UUID playerUUID, ObjectType objectType, boolean global)
+    public static HashMap<String, ServerObject> getUserObjectsAsNameHashmap(UUID playerUUID, ObjectType objectType, boolean global, boolean onlyShared)
     {
         HashMap<String, ServerObject> stringServerObjectHashMap = new HashMap<>();
         for (ServerObject object : JMWSServerIO.getObjectsForUser(playerUUID, objectType, global))
         {
             String nonDupeIdentifier = object.getObjectNonDuplicateIdentifier();
-            if (!object.syncing.isGlobal() || global)
+            if ((!object.syncing.isGlobal() && !onlyShared) || global || (onlyShared && !object.syncing.sharedTo.isEmpty()))
             {
                 stringServerObjectHashMap.put(nonDupeIdentifier, object);
             }
@@ -41,13 +41,19 @@ public class Server {
 
     private static CompletableFuture<Suggestions> suggestObject(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder, ObjectType objectType)
     {
-        List<String> names = getUserObjectsAsNameHashmap(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, false).keySet().stream().toList();
+        List<String> names = getUserObjectsAsNameHashmap(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, false, false).keySet().stream().toList();
         return SharedSuggestionProvider.suggest(names, suggestionsBuilder);
     }
 
     private static CompletableFuture<Suggestions> suggestGlobalObject(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder, ObjectType objectType)
     {
-        List<String> names = getUserObjectsAsNameHashmap(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, true).keySet().stream().toList();
+        List<String> names = getUserObjectsAsNameHashmap(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, true, false).keySet().stream().toList();
+        return SharedSuggestionProvider.suggest(names, suggestionsBuilder);
+    }
+
+    private static CompletableFuture<Suggestions> suggestSharedObject(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder, ObjectType objectType)
+    {
+        List<String> names = getUserObjectsAsNameHashmap(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, false, true).keySet().stream().toList();
         return SharedSuggestionProvider.suggest(names, suggestionsBuilder);
     }
 
@@ -67,5 +73,13 @@ public class Server {
 
     public static CompletableFuture<Suggestions> suggestGlobalWaypoints(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
         return suggestGlobalObject(commandSourceStackCommandContext, suggestionsBuilder, ObjectType.WAYPOINT);
+    }
+
+    public static CompletableFuture<Suggestions> suggestSharedGroups(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
+        return suggestSharedObject(commandSourceStackCommandContext, suggestionsBuilder, ObjectType.GROUP);
+    }
+
+    public static CompletableFuture<Suggestions> suggestSharedWaypoints(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
+        return suggestSharedObject(commandSourceStackCommandContext, suggestionsBuilder, ObjectType.WAYPOINT);
     }
 }

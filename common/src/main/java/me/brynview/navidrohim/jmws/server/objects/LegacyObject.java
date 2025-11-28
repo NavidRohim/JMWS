@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.server.objects;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.syncing.SyncingInformation;
@@ -38,7 +39,7 @@ public class LegacyObject
     public static <T extends ServerObject> T transitionIfNeed(Path path, UUID owner, ObjectType newType)
     {
         try {
-            JsonObject payload = JMWSServerIO.getObjectDataFromDisk(path, false);
+            JsonObject payload = JMWSServerIO.getObjectDataFromDisk(path, true);
             if (payload != null)
             {
                 LegacyObject oldObj = new LegacyObject(payload);
@@ -54,7 +55,8 @@ public class LegacyObject
                 }
                 return null;
             } else {
-                Constants.getLogger().warn("Could not transition user object.");
+                Constants.getLogger().debug("Possible issue translating server object. If issue arises please report.");
+                Constants.getLogger().debug("Diagnostic \nObject Path: %s\nOwner UUID: %s\nObjectType: %s\nInternal Server: %s\n\nIf in an internal server, you can likely ignore this message.\n\n".formatted(path, owner, newType, CommonClass.isInternalServer()));
                 return null;
             }
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException initExc)

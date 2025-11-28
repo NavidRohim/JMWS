@@ -3,7 +3,7 @@ package me.brynview.navidrohim.jmws.client.commands;
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
-import me.brynview.navidrohim.jmws.client.share.ShareRequest;
+import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
@@ -22,8 +22,8 @@ public class ClientCommands {
      * Returns if the player is in singleplayer.
      * @return boolean -- If the player is in singleplayer.
      */
-    private static boolean isInSingleplayer() {
-        return CommonClass.minecraftClientInstance.isSingleplayer();
+    private static boolean isNotInSingleplayer() {
+        return !CommonClass.isInternalServer();
     }
 
     /**
@@ -39,7 +39,7 @@ public class ClientCommands {
      */
     public static int sync()
     {
-        if (!isInSingleplayer()) {
+        if (isNotInSingleplayer()) {
             JMWSPlugin.updateWaypoints(true);
         } else {
             sendUserSinglePlayerWarning();
@@ -63,7 +63,7 @@ public class ClientCommands {
      */
     public static int clearAllGroups()
     {
-        if (!isInSingleplayer()) {
+        if (isNotInSingleplayer()) {
             JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandFactory.makeDeleteGroupRequestJson(
                     "*",
                     "*",
@@ -89,7 +89,7 @@ public class ClientCommands {
      */
     public static int clearAllWaypoints()
     {
-        if (!isInSingleplayer()) {
+        if (isNotInSingleplayer()) {
             JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandFactory.makeDeleteRequestJson("*", false, true)); // * = all
             Dispatcher.sendToServer(deleteServerObjectPayload);
             JMWSPlugin.updateWaypoints(false);
@@ -105,7 +105,7 @@ public class ClientCommands {
      */
     public static int nextSync()
     {
-        if (!isInSingleplayer()) {
+        if (isNotInSingleplayer()) {
             if (CommonClass.config.autoSync.get())
             {
                 PlayerHelper.sendUserAlert(Component.translatable("message.jmws.next_sync", (CommonClass.syncCounter.getTickCounterUpdateThreshold() - CommonClass.syncCounter.getCurrentTickCount()) / 20), true, false, JMWSMessageType.NEUTRAL);
@@ -122,7 +122,6 @@ public class ClientCommands {
     {
         if (specifiedShare != null)
         {
-            Constants.getLogger().info(String.valueOf(specifiedShare.sharedObjectType));
             specifiedShare.accept();
             PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.sharing_child"), true, false, JMWSMessageType.NEUTRAL);
         } else {

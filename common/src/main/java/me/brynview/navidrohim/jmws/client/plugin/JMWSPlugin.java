@@ -18,7 +18,7 @@ import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.helper.AssetHelper;
-import me.brynview.navidrohim.jmws.client.share.ShareRequest;
+import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
@@ -30,7 +30,6 @@ import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -243,7 +242,6 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (CommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
         {
-            Constants.getLogger().info(waypointGroup.getCustomData());
             SyncingInformation gsi = SyncingInformation.getSyncingInfo(waypointGroup.getCustomData(), true);
 
             if (gsi != null)
@@ -482,6 +480,7 @@ public class JMWSPlugin implements IClientPlugin {
 
             if (!gpSync.isOwner(PlayerHelper.ourUUID()))
             {
+                savedGroup.setLocked(true);
                 if (gpSync.isGlobal() && showGlobalLabels)
                 {
                     savedGroup.setName(savedGroup.getName() + " (%s)".formatted(CommonHelper.globalStringTag));

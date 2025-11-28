@@ -24,13 +24,13 @@ public class ServerDispatcher {
                 .requires(CommonClass::isValidCommandUser)
                 .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("groupName", StringArgumentType.greedyString()).suggests(Server::suggestGroups).executes(ServerDispatcher::doShareGroup)))
         );
-        dispatcher.register(Commands.literal("share_group_stop")
+        dispatcher.register(Commands.literal("stop_sharing_group")
                 .requires(CommonClass::isValidCommandUser)
-                .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("groupName", StringArgumentType.greedyString()).suggests(Server::suggestGroups).executes(ServerDispatcher::doRemoveShareGroup)))
+                .then(Commands.argument("groupName", StringArgumentType.greedyString()).suggests(Server::suggestSharedGroups).executes(ServerDispatcher::doRemoveShareGroup))
         );
-        dispatcher.register(Commands.literal("share_waypoint_stop")
+        dispatcher.register(Commands.literal("stop_sharing_waypoint")
                 .requires(CommonClass::isValidCommandUser)
-                .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("waypointName", StringArgumentType.greedyString()).suggests(Server::suggestGroups).executes(ServerDispatcher::doRemoveShareWaypoint)))
+                .then(Commands.argument("waypointName", StringArgumentType.greedyString()).suggests(Server::suggestSharedWaypoints).executes(ServerDispatcher::doRemoveShareWaypoint))
         );
 
         dispatcher.register(Commands.literal("jmws_admin")
@@ -63,7 +63,7 @@ public class ServerDispatcher {
     private static int doRemoveShareGroup(CommandContext<CommandSourceStack> context1) throws CommandSyntaxException {
         String groupID = StringArgumentType.getString(context1, "groupName");
 
-        return ServerCommands.removeShare(context1.getSource().getPlayer(), groupID, ObjectType.WAYPOINT);
+        return ServerCommands.removeShare(context1.getSource().getPlayer(), groupID, ObjectType.GROUP);
     }
 
     private static int doShareWaypoint(CommandContext<CommandSourceStack> context1) throws CommandSyntaxException {

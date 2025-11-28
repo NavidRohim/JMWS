@@ -1,7 +1,7 @@
 package me.brynview.navidrohim.jmws.client.share;
 
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
-import org.jetbrains.annotations.Nullable;
+import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 
 import java.util.*;
 import java.util.concurrent.Executors;
@@ -44,8 +44,7 @@ public class IncomingShareRequests {
     public static void clearAll() {
         for (ShareRequest request : incomingShareRequestList.values())
         {
-            request.timeout.cancel(true);
+            request.resolve();
         }
-        incomingShareRequestList.clear();
     }
 }

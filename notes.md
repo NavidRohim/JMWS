@@ -16,7 +16,7 @@
 - ~~Change name of /share as it is quite common and to avoid confusion~~
 - ~~Add server-wide object sharing (Admins can set up waypoints that are added to all clients)~~
 - ~~Add specific player request accepting, since player can receive multiple requests.~~
-- Test on LAN
+- ~~Test on LAN~~
 - ~~Add command hooks to both Forges~~
 - ~~Make transitioning from old objs to new objs (reminder for tomorrow, do server TRANSITION packet tomorrow)~~ 
 
@@ -108,6 +108,15 @@ Global Testing
 - Shares to everyone ✅
 - Does not share to server owner player ✅
 
+LAN 
+
+- Owner cant use commands ✅
+- Everything else works fine for clients ✅
+
+Other
+
+- Legacy version handling ✅
+- Legacy object transitioning ✅
 
 
 

@@ -3,8 +3,11 @@ package me.brynview.navidrohim.jmws.common.syncing;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
+import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import net.minecraft.server.level.ServerPlayer;
@@ -44,8 +47,10 @@ public class SyncingInformation {
 
             return syncingInformation;
         } catch (IllegalStateException | JsonSyntaxException reader) {
-            return transition(object); // if old waypoint is present
-            //PlayerNetworkingHelper.sendUserMessage(object.ownerUUID, "fatal.jmws.server_mismatch", false, true);
+            PlayerNetworkingHelper.sendUserMessage(object.getOwnerUUID(), "FATAL: You are on the wrong JMWS version! Update to JMWS v%s as soon as possible or you may suffer data loss!".formatted(Constants.SERVER_VERSION), false, JMWSMessageType.FAILURE);
+            object.dataclass = true;
+
+            return null;
         }
     }
 
@@ -63,12 +68,6 @@ public class SyncingInformation {
 
     public static SyncingInformation getSyncingInfo(String customDataField) {
         return getSyncingInfo(customDataField, false);
-    }
-
-    private static SyncingInformation transition(ServerObject object) {
-        // TODO transition to new customDataField
-        object.setCustomData(SyncingInformation.getEmptySyncingInfoString(object.getCustomData(), object.getOwnerUUID(), false));
-        return getSyncingInfo(object);
     }
 
     public static String getEmptySyncingInfoString(String objectIdentifier, UUID owner, boolean isGlobal) {

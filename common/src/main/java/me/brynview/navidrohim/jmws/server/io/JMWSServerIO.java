@@ -172,7 +172,6 @@ public class JMWSServerIO {
     @Nullable
     public static <T extends ServerObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, ObjectType objectType, boolean silentFail, boolean global) {
         Path objPath = PathUtils.getObjectFilename(ownerUUID, objectIdentifier, objectType, global);
-        Constants.getLogger().warn(String.valueOf(objPath));
         if (objPath != null)
         {
             return getObjectFromFile(objPath, ownerUUID, objectType, silentFail);

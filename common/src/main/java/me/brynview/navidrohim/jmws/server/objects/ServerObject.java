@@ -4,7 +4,7 @@ import com.google.gson.*;
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.enums .JMWSMessageType;
-import me.brynview.navidrohim.jmws.client.share.ShareRequest;
+import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
@@ -39,7 +39,7 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
     public UserSharingFile accessorSharing;
     public SyncingInformation syncing;
 
-    boolean dataclass;
+    public   boolean dataclass;
     public static ObjectType objectType = ObjectType.GENERIC;
 
     @Nullable
@@ -58,10 +58,12 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
         super(payload);
         this.dataclass = dataclass;
 
+        this.ownerUUID = playerUUID; // Note; if you set ownerUUID before this.syncing is defined, it enables some sort of compatibility for legacy clients. But I've left it as-is to avoid chaos.
         this.syncing = SyncingInformation.getSyncingInfo(this);
-        this.ownerUUID = playerUUID;
+
         this.name = payload.get("name").getAsString();
         this.accessorSharing = !dataclass ? new UserSharingFile(playerUUID) : null;
+
         this.globalObjectPath = !dataclass ? Path.of(ObjectType.getPathLocationPrefix(this.getObjectType()) + JMWSServerIO.PathUtils.makeFilename(this.syncing.objectIdentifier, this.ownerUUID, true)) : null;
         this.normalObjectPath = !dataclass ? JMWSServerIO.PathUtils.getObjectFilename(this.syncing.getOwner(), this.syncing.objectIdentifier, getObjectType(), false) : null;
         this.groupIdentifier = payload.get("guid").getAsString();

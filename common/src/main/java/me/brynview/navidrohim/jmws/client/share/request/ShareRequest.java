@@ -1,19 +1,18 @@
-package me.brynview.navidrohim.jmws.client.share;
+package me.brynview.navidrohim.jmws.client.share.request;
 
 import com.mojang.authlib.GameProfile;
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
+import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -31,7 +30,7 @@ public class ShareRequest {
     @Nullable public GameProfile sender;
     @Nullable public GameProfile to;
 
-    protected final ScheduledFuture<?> timeout;
+    public final ScheduledFuture<?> timeout;
 
     public enum Direction
     {
@@ -51,6 +50,12 @@ public class ShareRequest {
         PlayerHelper.getUserFromUUID(meantForPlayerUUID).ifPresentOrElse(pFor -> {this.to = pFor;}, () -> {this.sender = null;});
 
         this.timeout = IncomingShareRequests.requestScheduler.schedule(this::timeout, 20, TimeUnit.SECONDS);
+    }
+
+    public ShareRequest resolve()
+    {
+        this.finishRequest();
+        return this;
     }
 
     public void decline()

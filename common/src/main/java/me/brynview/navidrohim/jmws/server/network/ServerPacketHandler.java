@@ -136,7 +136,7 @@ public class ServerPacketHandler {
         JMWSActionPayload waypointActionPayload = Context.message();
         CommandFactory.Commands command = waypointActionPayload.command();
         List<JsonElement> arguments = waypointActionPayload.arguments();
-        UUID playerUUID = player.getUUID();
+        UUID playerUUID = player.getGameProfile().getId();
 
         switch (command) {
 
@@ -328,8 +328,6 @@ public class ServerPacketHandler {
                 UUID ownerUUID = UUID.fromString(arguments.getFirst().getAsString());
                 String objectIdentifier = arguments.get(1).getAsString();
                 ObjectType objType = ObjectType.valueOf(arguments.get(2).getAsString());
-                Constants.getLogger().info(objectIdentifier);
-                Constants.getLogger().info(String.valueOf(objType));
                 ServerObject sharedWp = JMWSServerIO.getObjectFromDisk(objectIdentifier, ownerUUID, objType);
 
                 if (sharedWp != null)
@@ -351,7 +349,6 @@ public class ServerPacketHandler {
                 Path legacyObjPath = Path.of(arguments.get(1).getAsString());
                 ObjectType objectType = ObjectType.valueOf(arguments.getLast().getAsString());
 
-                Constants.getLogger().warn(String.valueOf(playerUUID));
                 LegacyObject.transitionIfNeed(legacyObjPath, playerUUID, objectType);
 
             }
