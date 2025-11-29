@@ -1,8 +1,7 @@
 package me.brynview.navidrohim.jmws.client.screens;
 
-import io.netty.util.Constant;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.client.ClientVariables;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ErrorScreen;
@@ -30,7 +29,7 @@ public class MissingJourneyMapScreen extends ErrorScreen {
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        Component renderedString = Component.translatable("error.jmws.screen.needing_got", Constants.JourneyMapVersionString, !CommonClass.clientHasJM && CommonClass.clientJMVersion instanceof String ? CommonClass.clientJMVersion : "Nothing!");
+        Component renderedString = Component.translatable("error.jmws.screen.needing_got", Constants.JourneyMapVersionString, !ClientVariables.clientHasJM && ClientVariables.clientJMVersion instanceof String ? ClientVariables.clientJMVersion : "Nothing!");
         guiGraphics.drawCenteredString(this.font, renderedString, this.width / 2, 130, -1);
     }
 }

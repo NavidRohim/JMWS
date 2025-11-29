@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.client.config;
 
 import journeymap.api.v2.client.option.*;
 import me.brynview.navidrohim.jmws.Constants;
+import net.minecraft.world.phys.shapes.BooleanOp;
 
 public class ConfigInterface {
 
@@ -22,8 +23,8 @@ public class ConfigInterface {
     // Category for technical settings, usually best if left alone
     private OptionCategory technical = new OptionCategory(
             Constants.MODID,
-            "text.config.jmws-config.section.generalConfig",
-            "text.config.jmws-config.section.generalConfig.tooltip"
+            "text.config.jmws-config.section.general",
+            "text.config.jmws-config.section.general.tooltip"
     );
 
     // Category for server settings, for display only and cannot be changed
@@ -31,6 +32,12 @@ public class ConfigInterface {
             Constants.MODID,
             "text.config.jmws-config.section.server",
             "text.config.jmws-config.section.server.tooltip"
+    );
+
+    private OptionCategory sharing = new OptionCategory(
+            Constants.MODID,
+            "text.config.jmws-config.section.sharing",
+            "text.config.jmws-config.section.sharing.tooltip"
     );
 
     // All client side options
@@ -51,6 +58,11 @@ public class ConfigInterface {
     public final BooleanOption serverEnabled; // If the server has JMWS enabled
     public final BooleanOption serverUploadWaypoints; // If the server syncs waypoints
     public final BooleanOption serverUploadGroups; // if the server syncs groups
+    public final BooleanOption serverAllowsSharing;
+
+    public final BooleanOption enableSharing;
+    public final BooleanOption showSharingLabels;
+    public final BooleanOption showGlobalLabels;
 
     public ConfigInterface() {
 
@@ -69,6 +81,11 @@ public class ConfigInterface {
         this.serverEnabled = new BooleanOption(server, "serverEnabled", "text.config.jmws-config.option.serverEnabled", false);
         this.serverUploadWaypoints = new BooleanOption(server, "serverUploadWaypoints", "text.config.jmws-config.option.serverUploadWaypoints", false);
         this.serverUploadGroups = new BooleanOption(server, "serverUploadGroups", "text.config.jmws-config.option.serverUploadGroups", false);
+        this.serverAllowsSharing = new BooleanOption(server, "serverAllowsSharing", "text.config.jmws-config.option.serverAllowsSharing", false);
+
+        this.enableSharing = new BooleanOption(sharing, "enableSharing", "text.config.jmws-config.option.enableSharing", true);
+        this.showSharingLabels = new BooleanOption(sharing, "showSharingLabels", "text.config.jmws-config.option.showSharingLabels", true);
+        this.showGlobalLabels = new BooleanOption(sharing, "showGlobalLabels", "text.config.jmws-config.option.showGlobalLabels", true);
     }
 
     /**

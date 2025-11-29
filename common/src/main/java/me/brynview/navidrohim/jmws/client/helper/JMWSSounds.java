@@ -12,5 +12,4 @@ import net.minecraft.sounds.SoundEvent;
 public interface JMWSSounds {
     SoundEvent ACTION_SUCCEED = SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Constants.MODID, "waypoint_sync"));
     SoundEvent ACTION_FAILURE = SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Constants.MODID, "generic_error"));
-
 }

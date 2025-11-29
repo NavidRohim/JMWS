@@ -1,14 +1,18 @@
 package me.brynview.navidrohim.jmws.client.helper;
 
+import com.mojang.authlib.GameProfile;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
+import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.ClientboundPacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Random player functions that play sounds or sends action bar alerts.
@@ -68,5 +72,34 @@ public class PlayerHelper {
         if (CommonClass.config.playEffects.get() && CommonClass.minecraftClientInstance.player != null) {
             CommonClass.minecraftClientInstance.player.playSound(sound, 0.09f, 1f); // Lower volume so it becomes background noise
         }
+    }
+
+    public static Optional<GameProfile> getUserFromUUID(UUID user)
+    {
+        ClientPacketListener clientPacketListener = Objects.requireNonNull(CommonClass.minecraftClientInstance.getConnection());
+        @Nullable PlayerInfo playerInfo = clientPacketListener.getPlayerInfo(user);
+
+        if (playerInfo != null)
+        {
+            return Optional.of(playerInfo.getProfile());
+        }
+        return Optional.empty();
+    }
+
+    public static String getUsernameFromUUID(UUID user)
+    {
+        Optional<GameProfile> profile = getUserFromUUID(user);
+        return profile.isPresent() ? profile.get().name() : CommonHelper.unknownUser;
+    }
+
+    public static String getUsernameFromUUID(UUID user, boolean withTag)
+    {
+        Optional<GameProfile> profile = getUserFromUUID(user);
+        return profile.isPresent() ? profile.get().name() : "S";
+    }
+
+    public static UUID ourUUID()
+    {
+        return CommonClass.minecraftClientInstance.player.getUUID();
     }
 }

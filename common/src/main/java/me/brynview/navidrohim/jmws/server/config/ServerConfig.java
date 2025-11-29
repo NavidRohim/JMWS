@@ -1,59 +1,78 @@
 package me.brynview.navidrohim.jmws.server.config;
 
-import com.google.gson.Gson;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.server.exceptions.ServerConfigurationException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 
 public class ServerConfig {
 
-    private static final String configPath = "./config/jmws-server.json";
+    private static final Path configPath = Path.of("./config/jmws-server.json");
 
-    public static final String rawServerConfigData = getConfigJson();
-    public static final ServerConfigObject serverConfig = new Gson().fromJson(rawServerConfigData, ServerConfigObject.class);
+    public static String rawServerConfigData;
+    public static ServerConfigObject serverConfig;
 
     public static void ensureExistence()
     {
         try
         {
-            Files.createDirectories(Paths.get(configPath).getParent());
+            Files.createDirectories(configPath.getParent());
 
-            File configFileObj = new File(configPath);
+            File configFileObj = new File(configPath.toString());
             boolean didCreateNew = configFileObj.createNewFile();
 
             if (didCreateNew)
             {
-                Gson configJson = new Gson();
-                String configJsonString = configJson.toJson(new ServerConfigObject(
+                String configJsonString = CommonClass.gsonExcludeNoExpose.toJson(new ServerConfigObject(
+                                true,
                                 true,
                                 true,
                                 true
                         )
                 );
 
-                FileWriter configFileWritableObj = new FileWriter(configPath);
+                FileWriter configFileWritableObj = new FileWriter(configPath.toFile());
                 configFileWritableObj.write(configJsonString);
                 configFileWritableObj.close();
+                ensureExistence();
+
+            } else {
+                rawServerConfigData = getConfigJson();
+                serverConfig = CommonClass.gson.fromJson(rawServerConfigData, ServerConfigObject.class);
+                List<Boolean> valueList = Arrays.asList(serverConfig.groupsEnabled, serverConfig.sharingEnabled, serverConfig.waypointsEnabled, serverConfig.jmwsEnabled);
+
+                if (valueList.contains(null))
+                {
+                    deleteConfig();
+                    ensureExistence();
+                    Constants.getLogger().error("JMWS config was corrupted or from an older version. Created new config, so you may have to set your old config values.");
+                }
             }
 
         } catch (SecurityException securityException) {
             throw new ServerConfigurationException("Could not create configuration file! There are no write permissions.");
         } catch (IOException ioException) {
-            Constants.getLogger().error("JMWS Server got error when creating configuration file; {}", String.valueOf(ioException));
+            Constants.getLogger().error("JMWS Server got error when creating configuration file: {}", String.valueOf(ioException));
         }
+    }
+
+    public static boolean deleteConfig()
+    {
+        return CommonHelper.deleteFile(configPath);
     }
 
     public static String getConfigJson()
     {
-        ensureExistence();
         String content;
         try {
-            content = Files.readString(Path.of(configPath), StandardCharsets.UTF_8);
+            content = Files.readString(configPath, StandardCharsets.UTF_8);
         } catch (SecurityException securityException) {
             throw new ServerConfigurationException("Could not read server config file! Please make sure there are read permissions for the config.");
         } catch (IOException ioException) {

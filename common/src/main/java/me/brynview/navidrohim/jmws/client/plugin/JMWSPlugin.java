@@ -2,9 +2,7 @@ package me.brynview.navidrohim.jmws.client.plugin;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import com.mojang.datafixers.kinds.Const;
 import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.client.IClientPlugin;
@@ -13,31 +11,30 @@ import journeymap.api.v2.client.event.*;
 import journeymap.api.v2.common.event.ClientEventRegistry;
 import journeymap.api.v2.common.event.CommonEventRegistry;
 import journeymap.api.v2.common.event.FullscreenEventRegistry;
-import journeymap.api.v2.common.event.common.TeleportEvent;
 import journeymap.api.v2.common.event.common.WaypointEvent;
 import journeymap.api.v2.common.event.common.WaypointGroupEvent;
 import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.client.helper.AssetHelper;
+import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
-import me.brynview.navidrohim.jmws.client.objects.SavedGroup;
-import me.brynview.navidrohim.jmws.client.objects.SavedWaypoint;
-import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
-import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import me.brynview.navidrohim.jmws.common.syncing.SyncingInformation;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
+import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
-import net.minecraft.client.particle.SuspendedTownParticle;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.monster.Zombie;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -72,6 +69,7 @@ public class JMWSPlugin implements IClientPlugin {
             CommonClass.config.serverEnabled.set(CommonClass.serverConfig.serverEnabled());
             CommonClass.config.serverUploadWaypoints.set(CommonClass.serverConfig.waypointsEnabled());
             CommonClass.config.serverUploadGroups.set(CommonClass.serverConfig.groupsEnabled());
+            CommonClass.config.serverAllowsSharing.set(CommonClass.serverConfig.sharingEnabled);
         });
 
         ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe("jmapi", this::handleUserDeath);
@@ -119,16 +117,16 @@ public class JMWSPlugin implements IClientPlugin {
 
     /**
      * Creates a waypoint on the server.
+     *
      * @param waypoint -- Local instance of the new waypoint to create.
-     * @param silent -- If the creation should happen silently (no text alert on the client)
-     * @param isUpdate -- If we are just updating an already existing waypoint.
+     * @param silent   -- If the creation should happen silently (no text alert on the client)
      */
-    private void createAction(Waypoint waypoint, boolean silent, boolean isUpdate) {
+    private void createAction(Waypoint waypoint, boolean silent) {
         if (CommonClass.serverConfig.waypointsEnabled()) {
             ObjectIdentifierMap.addWaypointToMap(waypoint);
             waypoint.setPersistent(false); // Persistence must be false so it does not stay upon leaving. If it did, there would be duplicate waypoints
 
-            String creationData = CommandHelper.makeCreationRequestJson(waypoint, silent, isUpdate);
+            String creationData = CommandFactory.makeCreationRequestJson(waypoint, silent);
             Dispatcher.sendToServer(new JMWSActionPayload(creationData));
         } else {
             PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
@@ -144,13 +142,8 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (CommonClass.serverConfig.waypointsEnabled()) // Check config
         {
-            if (oldWaypoint != null) { // oldWaypoint can be null if it's not found in the identifier map. Can happen if there's a corrupted waypoint
-                this.deleteAction(oldWaypoint, true);
-                jmAPI.removeWaypoint("journeymap", oldWaypoint);
-            }
-            this.createAction(waypoint, true, true);
-
-            PlayerHelper.sendUserAlert(Component.translatable("message.jmws.modified_waypoint_success"), true, false, JMWSMessageType.SUCCESS);
+            SyncingInformation syncingInformation = SyncingInformation.getSyncingInfo(waypoint.getCustomData());
+            Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncingInformation.objectIdentifier, syncingInformation.isGlobal(), waypoint)));
         } else {
             PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
         }
@@ -158,20 +151,19 @@ public class JMWSPlugin implements IClientPlugin {
 
     /**
      * Deletes the specified waypoint on the server.
+     *
      * @param waypoint -- What waypoint to delete
-     * @param silent -- If the deletion should be silent (no text alert on client)
      */
-    private void deleteAction(Waypoint waypoint, boolean silent) {
+    private void deleteAction(Waypoint waypoint) {
         if (CommonClass.serverConfig.waypointsEnabled()) { // Check if action is allowed by the server.
-            String waypointFilename = CommonHelper.getWaypointFilename(waypoint, CommonClass.minecraftClientInstance.player.getUUID());
-
+            SyncingInformation syncingInformation = SyncingInformation.getSyncingInfo(waypoint.getCustomData());
             ObjectIdentifierMap.removeWaypointFromMap(waypoint);
-            String jsonPacketData = CommandHelper.makeDeleteRequestJson(waypointFilename, silent, false);
+            String jsonPacketData = CommandFactory.makeDeleteRequestJson(syncingInformation.objectIdentifier,false, false);
             JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
 
             // removedWaypoint is called here because, yes, we do listen for the deletion with the event (meaning, the waypoint should be already gone by the time the event is called)
             // But for some reason it bugs out and the waypoint stays and becomes persistent
-            jmAPI.removeWaypoint("journeymap", waypoint);
+            jmAPI.removeWaypoint(waypoint.getModId(), waypoint);
             Dispatcher.sendToServer(waypointActionPayload);
         } else {
             PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
@@ -186,18 +178,18 @@ public class JMWSPlugin implements IClientPlugin {
 
         if (CommonClass.getEnabledStatus() && config.waypointsEnabled() && serverConfig.waypointsEnabled()) { // Check that user is in physical server, user config allows event, and server config allows event.
             // Get old waypoint if context is UPDATE (needed because server needs reference to waypoint before it was updated so it can be deleted on the server)
-            Waypoint oldWaypoint = ObjectIdentifierMap.getOldWaypoint(waypointEvent.waypoint);
-
             switch (waypointEvent.getContext()) {
                 case CREATE ->
                     // Sends "create" packet | new = "SERVER_CREATE"
-                        this.createAction(waypointEvent.waypoint, false, false);
+                        this.createAction(waypointEvent.waypoint, false);
                 case DELETED ->
                     // Sends "delete" packet | new = "COMMON_SERVER_DELETE"
-                        this.deleteAction(waypointEvent.waypoint, false);
+                        this.deleteAction(waypointEvent.waypoint);
                 case UPDATE ->
-                    // Sends both "delete" and "create" packet in respective order and respective enums.
-                        this.updateAction(waypointEvent.waypoint, oldWaypoint);
+                {
+                    Waypoint oldWaypoint = ObjectIdentifierMap.getOldWaypoint(waypointEvent.waypoint);
+                    this.updateAction(waypointEvent.waypoint, oldWaypoint);
+                }
             }
         }
     }
@@ -217,7 +209,7 @@ public class JMWSPlugin implements IClientPlugin {
             // Trying to delete an in-built group with JM will delete the waypoints inside the group. The following flow statement checks for that and does it on the server.
             if (Constants.forbiddenGroups.contains(waypointGroup.getGuid()) && waypointGroupEvent.getContext().equals(WaypointGroupEvent.Context.DELETED))
             {
-                this.groupDeletionHandler(waypointGroup, player, false, true, false);
+                this.groupDeletionHandler(null, waypointGroup, player, false, true, false);
             }
             else if (!Constants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) { // If group is not in-built and can be deleted
                 if (player == null) {
@@ -225,12 +217,14 @@ public class JMWSPlugin implements IClientPlugin {
                 }
 
                 // Get old group if context is UPDATE (needed because server needs reference to group before it was updated so it can be deleted on the server)
-                WaypointGroup oldWaypointGroup = ObjectIdentifierMap.getOldGroup(waypointGroup);
 
                 switch (waypointGroupEvent.getContext()) {
                     case CREATE -> this.groupCreationHandler(waypointGroup, false, false);
-                    case DELETED -> this.groupDeletionHandler(waypointGroup, player, false, waypointGroupEvent.deleteWaypoints(), true);
-                    case UPDATE -> this.groupUpdateHandler(waypointGroup, oldWaypointGroup, player);
+                    case DELETED -> this.groupDeletionHandler(waypointGroupEvent, waypointGroup, player, false, waypointGroupEvent.deleteWaypoints(), true);
+                    case UPDATE -> {
+                        WaypointGroup oldWaypointGroup = ObjectIdentifierMap.getOldGroup(waypointGroup);
+                        this.groupUpdateHandler(waypointGroupEvent, waypointGroup, oldWaypointGroup, player);
+                    }
                 }
             }
         }
@@ -244,24 +238,43 @@ public class JMWSPlugin implements IClientPlugin {
      * @param deleteAllWaypoints -- If to delete all the users groups on the server.
      * @param removeGroupItself -- If to delete just the waypoints inside the group, not the group itself. Used in edge cases like removing all waypoints in an in-built group.
      */
-    private void groupDeletionHandler(WaypointGroup waypointGroup, LocalPlayer player, boolean silent, boolean deleteAllWaypoints, boolean removeGroupItself)
+    private void groupDeletionHandler(@Nullable WaypointGroupEvent event, WaypointGroup waypointGroup, LocalPlayer player, boolean silent, boolean deleteAllWaypoints, boolean removeGroupItself)
     {
         if (CommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
         {
-            ObjectIdentifierMap.removeGroupFromMap(waypointGroup); // Remove from identifier map
-            String uID = waypointGroup.getCustomData() != null ? waypointGroup.getCustomData() : "null"; // This can be set to "null" but I cannot remember why.
+            SyncingInformation gsi = SyncingInformation.getSyncingInfo(waypointGroup.getCustomData(), true);
 
-            String jsonPacketData = CommandHelper.makeDeleteGroupRequestJson(
-                    player.getUUID(),
-                    uID,
-                    waypointGroup.getGuid(),
-                    silent,
-                    deleteAllWaypoints,
-                    removeGroupItself,
-                    false);
+            if (gsi != null)
+            {
+                ObjectIdentifierMap.removeGroupFromMap(waypointGroup); // Remove from identifier map
+                String uID = gsi.objectIdentifier;
 
-            JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
-            Dispatcher.sendToServer(waypointActionPayload);
+                String jsonPacketData = CommandFactory.makeDeleteGroupRequestJson(
+                        uID,
+                        waypointGroup.getGuid(),
+                        silent,
+                        deleteAllWaypoints,
+                        removeGroupItself,
+                        gsi.isGlobal(),
+                        false);
+
+                JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
+                Dispatcher.sendToServer(waypointActionPayload);
+            } else if (!removeGroupItself) {
+                String jsonPacketData = CommandFactory.makeDeleteGroupRequestJson(
+                        "null",
+                        waypointGroup.getGuid(),
+                        false,
+                        true,
+                        false,
+                        true,
+                        false);
+
+                JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
+                Dispatcher.sendToServer(waypointActionPayload);
+            } else {
+                PlayerHelper.sendUserAlert(Component.translatable("global.jmws.cannot_delete_global"), true, false, JMWSMessageType.ONE_TIME_WARNING);
+            }
         } else {
             PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
         }
@@ -273,18 +286,13 @@ public class JMWSPlugin implements IClientPlugin {
      * @param oldWaypointGroup -- Old instance of the group (before the update)
      * @param player -- Which player this group belongs to
      */
-    private void groupUpdateHandler(WaypointGroup waypointGroup, WaypointGroup oldWaypointGroup, LocalPlayer player)
+    private void groupUpdateHandler(WaypointGroupEvent event, WaypointGroup waypointGroup, WaypointGroup oldWaypointGroup, LocalPlayer player)
     {
         if (CommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
         {
-            // Internally, we just delete the old group and create a new one
-            if (oldWaypointGroup != null) {
-                this.groupDeletionHandler(oldWaypointGroup, player, true, false, true);
-            }
-            this.groupCreationHandler(waypointGroup, true, true);
+            SyncingInformation syncingInformation = SyncingInformation.getSyncingInfo(waypointGroup.getCustomData());
+            Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncingInformation.objectIdentifier, syncingInformation.isGlobal(), waypointGroup)));
 
-            // Send alert
-            PlayerHelper.sendUserAlert(Component.translatable("message.jmws.modified_group_success"), true, false, JMWSMessageType.SUCCESS);
         } else {
             PlayerHelper.sendUserAlert(Component.translatable("message.jmws.server_disabled_groups"), true, false, JMWSMessageType.ONE_TIME_WARNING);
         }
@@ -306,7 +314,7 @@ public class JMWSPlugin implements IClientPlugin {
     }
 
     /**
-     * Removes all local groups. I remember jmAPI.removeAllWaypoints() for some reason doesn't work.
+     * Removes all local groups. There is no API call to remove all groups.
      */
     public static void deleteAllGroups() {
         // This method is a bodge fix. removeWaypointGroups (which I believe removes all groups) does not work because you cannot change the modId of a group.
@@ -320,31 +328,37 @@ public class JMWSPlugin implements IClientPlugin {
     }
 
     /**
+     * Removes all local waypoints. Used instead of jmAPI.removeAllWaypoints as that requires a mod ID. This does not and will remove all waypoints.
+     */
+    public static void deleteAllWaypoints()
+    {
+        for (Waypoint wp : getInstance().jmAPI.getAllWaypoints())
+        {
+            getInstance().jmAPI.removeWaypoint(wp.getModId(), wp);
+        }
+    }
+
+    /**
      * Delete a synced object (waypoint or group). This method is only called by COMMON_DELETE_WAYPOINT in the packet handler on the client-side.
-     * @param deleteAll -- If to delete all the specified deletionType.
      * @param deletionType -- What saved object to delete (waypoint or group)
      * @param toDelete -- ObjectIdentifierMap ID, this is stored on the server only in the "customData" field (example; 38ab19a2e6544389265e40ad23b49983d9620b199c111e20b2b9a5159458b519)
      */
-    public void deleteSavedObjects(Boolean deleteAll, JMWSServerIO.FetchType deletionType, String toDelete)
+    public void deleteSavedObjects(boolean silent, ObjectType deletionType, String toDelete)
     {
         String deletionMessageConfirmationKey = "message.jmws.deletion_all_success";
 
-        if (deletionType == JMWSServerIO.FetchType.WAYPOINT) {
-            if (deleteAll) {
-                INSTANCE.jmAPI.removeAllWaypoints("journeymap");
-            } else {
-                INSTANCE.jmAPI.removeWaypoint("journeymap", ObjectIdentifierMap.getOldWaypoint(toDelete));
-            }
-
+        if (deletionType == ObjectType.WAYPOINT) {
+            Waypoint oldWp = ObjectIdentifierMap.getOldWaypoint(toDelete);
+            jmAPI.removeWaypoint(oldWp.getModId(), oldWp);
         } else {
             deletionMessageConfirmationKey = "message.jmws.deletion_group_all_success";
-            if (deleteAll) {
-                JMWSPlugin.deleteAllGroups();
-            } else {
-                JMWSPlugin.getInstance().jmAPI.removeWaypointGroup(ObjectIdentifierMap.getOldGroup(toDelete), false);
-            }
+            WaypointGroup oldGp = ObjectIdentifierMap.getOldGroup(toDelete);
+            jmAPI.removeWaypointGroup(oldGp, false);
         }
-        PlayerHelper.sendUserAlert(Component.translatable(deletionMessageConfirmationKey), true, false, JMWSMessageType.NEUTRAL);
+        if (!silent)
+        {
+            PlayerHelper.sendUserAlert(Component.translatable(deletionMessageConfirmationKey), true, false, JMWSMessageType.NEUTRAL);
+        }
     }
 
     /**
@@ -356,7 +370,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Sends "request" packet | New = "SYNC"
         if (CommonClass.getEnabledStatus()) {
-            Dispatcher.sendToServer(new JMWSActionPayload(CommandHelper.makeWaypointSyncRequestJson(sendAlert, fromDeathEvent)));
+            Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeWaypointSyncRequestJson(sendAlert, fromDeathEvent)));
         }
     }
 
@@ -381,7 +395,7 @@ public class JMWSPlugin implements IClientPlugin {
         if (CommonClass.serverConfig.groupsEnabled()) {
             ObjectIdentifierMap.addGroupToMap(waypointGroup);
             waypointGroup.setPersistent(false);
-            String creationData = CommandHelper.makeGroupCreationRequestJson(waypointGroup, silent, isUpdate);
+            String creationData = CommandFactory.makeGroupCreationRequestJson(waypointGroup, silent, isUpdate);
 
             Dispatcher.sendToServer(new JMWSActionPayload(creationData));
         } else {
@@ -396,12 +410,12 @@ public class JMWSPlugin implements IClientPlugin {
      * @throws JsonSyntaxException If waypoint is malformed or does not parse.
      * @throws IllegalStateException Cannot remember why this can be thrown.
      */
-    private static Set<SavedWaypoint> getSavedWaypoints(JsonObject jsonData, UUID playerUUID) throws JsonSyntaxException, IllegalStateException {
-        Set<SavedWaypoint> waypoints = new HashSet<>();
+    private static Set<Waypoint> getSavedWaypoints(JsonObject jsonData, UUID playerUUID) throws JsonSyntaxException, IllegalStateException {
+        Set<Waypoint> waypoints = new HashSet<>();
 
         for (Map.Entry<String, JsonElement> entry : jsonData.entrySet()) {
-            JsonObject json = JsonParser.parseString(entry.getValue().getAsString()).getAsJsonObject();
-            waypoints.add(new SavedWaypoint(json, playerUUID));
+            String json = entry.getValue().getAsString();
+            waypoints.add(WaypointFactory.fromWaypointJsonString(json));
         }
 
         return waypoints;
@@ -415,12 +429,12 @@ public class JMWSPlugin implements IClientPlugin {
      * @throws JsonSyntaxException If group is malformed or does not parse.
      * @throws IllegalStateException Cannot remember why this can be thrown.
      */
-    private static Set<SavedGroup> getSavedGroups(JsonObject jsonData) throws JsonSyntaxException, IllegalStateException {
-        Set<SavedGroup> groups = new HashSet<>();
+    private static Set<WaypointGroup> getSavedGroups(JsonObject jsonData) throws JsonSyntaxException, IllegalStateException {
+        Set<WaypointGroup> groups = new HashSet<>();
 
         for (Map.Entry<String, JsonElement> entry : jsonData.entrySet()) {
-            JsonObject json = JsonParser.parseString(entry.getValue().getAsString()).getAsJsonObject();
-            groups.add(new SavedGroup(json));
+            String json = entry.getValue().getAsString();
+            groups.add(WaypointFactory.fromGroupJsonString(json));
         }
 
         return groups;
@@ -433,32 +447,50 @@ public class JMWSPlugin implements IClientPlugin {
      * @return boolean -- If the user had any local groups to upload.
      * @throws JsonSyntaxException -- If there is a syntax error with the Json, usually from a corrupted group.
      */
-    private boolean handleUploadGroups(JsonObject jsonGroupsRaw) throws JsonSyntaxException, IllegalStateException {
+    private boolean handleUploadGroups(JsonObject jsonGroupsRaw, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException, IllegalStateException {
         boolean hasLocalGroup = false;
 
         // Get existing groups (local) and get group objects saved on server
         List<? extends WaypointGroup> existingGroups = getInstance().jmAPI.getAllWaypointGroups();
-        Set<SavedGroup> savedGroups = JMWSPlugin.getSavedGroups(jsonGroupsRaw.deepCopy());
+        Set<WaypointGroup> savedGroups = JMWSPlugin.getSavedGroups(jsonGroupsRaw.deepCopy());
 
         // Get an identifier of every group, used to detect if the group already exists
         Set<String> remoteGroupKeys = savedGroups.stream()
-                .map(g -> g.getName() + g.getGroupIdentifier())
+                .map(g -> g.getName() + g.getGuid())
                 .collect(Collectors.toSet());
 
         // Test if any existing groups (persistent) have already been added to the server, if not, add them
         for (WaypointGroup existingGroup : existingGroups) {
             String key = existingGroup.getName() + existingGroup.getGuid();
             if (!remoteGroupKeys.contains(key) && !Constants.forbiddenGroups.contains(existingGroup.getGuid()) && existingGroup.isPersistent()) {
+                existingGroup.setPersistent(false);
                 getInstance().groupCreationHandler(existingGroup, true, false);
                 hasLocalGroup = true;
             }
         }
 
         // Add server groups to the client
-        for (SavedGroup savedGroup : savedGroups) {
-            WaypointGroup group = WaypointFactory.fromGroupJsonString(savedGroup.getRawPacketData());
-            ObjectIdentifierMap.addGroupToMap(group);
-            getInstance().jmAPI.addWaypointGroup(group);
+        for (WaypointGroup savedGroup : savedGroups) {
+            SyncingInformation gpSync = SyncingInformation.getSyncingInfo(savedGroup.getCustomData());
+
+            if (gpSync.isGlobal() && gpSync.isOwner(PlayerHelper.ourUUID()))
+            {
+                savedGroup.setLocked(false);
+            }
+
+            if (!gpSync.isOwner(PlayerHelper.ourUUID()))
+            {
+                savedGroup.setLocked(true);
+                if (gpSync.isGlobal() && showGlobalLabels)
+                {
+                    savedGroup.setName(savedGroup.getName() + " (%s)".formatted(CommonHelper.globalStringTag));
+                } else if (showSharingLabels)
+                {
+                    String ownerUser = PlayerHelper.getUsernameFromUUID(gpSync.getOwner());
+                    savedGroup.setName(savedGroup.getName() + " (%s)".formatted(ownerUser));
+                }
+            }
+            addGroup(savedGroup);
         }
 
         // return this because need to give an alert
@@ -471,34 +503,47 @@ public class JMWSPlugin implements IClientPlugin {
      * @return boolean -- If the user had any local waypoints to upload.
      * @throws JsonSyntaxException -- If there is a syntax error with the Json, usually from a corrupted waypoint.
      */
-    private boolean handleUploadWaypoints(JsonObject jsonWaypoints) throws JsonSyntaxException {
+    private boolean handleUploadWaypoints(JsonObject jsonWaypoints, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException {
         boolean hasLocalWaypoint = false;
 
         // Get existing waypoints (local) and get waypoint objects saved on server
         List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
-        Set<SavedWaypoint> savedWaypoints = JMWSPlugin.getSavedWaypoints(jsonWaypoints.deepCopy(), CommonClass.minecraftClientInstance.player.getUUID());
+        Set<Waypoint> savedWaypoints = JMWSPlugin.getSavedWaypoints(jsonWaypoints.deepCopy(), CommonClass.minecraftClientInstance.player.getUUID());
 
         // Get an identifier of every waypoint (BlockPos, location), used to detect if the waypoint already exists
         Set<BlockPos> remoteWaypointPositions = savedWaypoints.stream()
-                .map(w -> new BlockPos(w.getWaypointX(), w.getWaypointY(), w.getWaypointZ()))
+                .map(Waypoint::getBlockPos)
                 .collect(Collectors.toSet());
 
-        getInstance().jmAPI.removeAllWaypoints("journeymap");
+        deleteAllWaypoints();
 
-        // Test if any existing waypoints (persistent, usually death waypoints) have already been added to the server, if not, add them
+        // Test if any existing waypoints (persistent, usually death waypoints or 3rd party waypoints from another add-on) have already been added to the server, if not, add them
         for (Waypoint existing : existingWaypoints) {
             if (!remoteWaypointPositions.contains(existing.getBlockPos()) && existing.isPersistent()) {
-                getInstance().createAction(existing, true, false);
+                existing.setPersistent(false);
+                getInstance().createAction(existing, true);
                 hasLocalWaypoint = true;
             }
         }
 
         // Add server waypoints to the client
-        for (SavedWaypoint savedWaypoint : savedWaypoints) {
-            Waypoint wp = WaypointFactory.fromWaypointJsonString(savedWaypoint.getRawPacketData());
-            ObjectIdentifierMap.addWaypointToMap(wp);
+        for (Waypoint savedWaypoint : savedWaypoints) {
+            SyncingInformation wpSync = SyncingInformation.getSyncingInfo(savedWaypoint.getCustomData());
 
-            getInstance().jmAPI.addWaypoint("journeymap", wp);
+            if (!wpSync.isOwner(PlayerHelper.ourUUID()))
+            {
+                if (wpSync.isGlobal() && showGlobalLabels) // Global
+                {
+                    savedWaypoint.setIconResourceLoctaion(AssetHelper.globalObjectAsset);
+                    savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(CommonHelper.globalStringTag));
+                } else if (showSharingLabels) // Shared
+                {
+                    String ownerUser = PlayerHelper.getUsernameFromUUID(wpSync.getOwner(), true);
+                    savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(ownerUser));
+                    savedWaypoint.setIconResourceLoctaion(AssetHelper.sharedObjectAsset);
+                }
+            }
+            addWaypoint(savedWaypoint);
         }
 
         return hasLocalWaypoint;
@@ -514,15 +559,18 @@ public class JMWSPlugin implements IClientPlugin {
         boolean sendAlert = waypointPayload.arguments().get(2).getAsBoolean(); // If to send an alert
         boolean isDeathSync = waypointPayload.arguments().getLast().getAsBoolean(); // If the sync was from a death waypoint creation
 
+        boolean showSharingLabels = config.showSharingLabels.get();
+        boolean showGlobalLabels = config.showGlobalLabels.get();
+
         try {
             // Sync remote and local groups if server and client permits
             if (config.uploadGroups.get() && CommonClass.serverConfig.groupsEnabled()) {
-                hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject());
+                hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), showSharingLabels, showGlobalLabels);
             }
 
             // Sync remote and local waypoints if server and client permits
             if (config.uploadGroups.get() && CommonClass.serverConfig.waypointsEnabled()) {
-                hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject());
+                hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), showSharingLabels, showGlobalLabels);
             }
 
             // Send alerts if there were any local waypoints and or groups
@@ -556,6 +604,33 @@ public class JMWSPlugin implements IClientPlugin {
         } catch (IllegalStateException | JsonSyntaxException exception) {
             PlayerHelper.sendUserAlert(Component.translatable("error.jmws.error_corrupted_waypoint"), true, false, JMWSMessageType.FAILURE);
             PlayerHelper.sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
+        }
+    }
+
+    public static void addWaypoint(Waypoint waypoint)
+    {
+        if (ObjectIdentifierMap.addWaypointToMap(waypoint))
+        {
+            getInstance().jmAPI.addWaypoint(waypoint.getModId(), waypoint);
+        }
+    }
+
+    public static void addGroup(WaypointGroup waypointGroup)
+    {
+        if (ObjectIdentifierMap.addGroupToMap(waypointGroup))
+        {
+            getInstance().jmAPI.addWaypointGroup(waypointGroup);
+        }
+
+    }
+
+    public void addObjectFromRequest(ShareRequest request)
+    {
+        if (request.sharedObjectType == ObjectType.WAYPOINT)
+        {
+            addWaypoint((Waypoint) request.currentSharedObject);
+        } else {
+            addGroup((WaypointGroup) request.currentSharedObject);
         }
     }
 }

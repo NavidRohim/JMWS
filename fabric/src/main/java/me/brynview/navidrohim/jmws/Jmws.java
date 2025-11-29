@@ -1,13 +1,26 @@
 package me.brynview.navidrohim.jmws;
 
 
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import me.brynview.navidrohim.jmws.client.ClientVariables;
 import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.server.Server;
+import me.brynview.navidrohim.jmws.server.commands.ServerCommands;
+import me.brynview.navidrohim.jmws.server.commands.ServerDispatcher;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.VersionParsingException;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -60,25 +73,26 @@ public class Jmws implements ModInitializer {
                         int jarVersionString = Integer.parseInt(regexBetaVersionPatternJarMatcher.group(1));
                         int minVersionString = Integer.parseInt(regexBetaVersionPatternMinMatcher.group(1));
 
-                        CommonClass.clientJMVersion = versionString;
+                        ClientVariables.clientJMVersion = versionString;
 
                         if ((mcVersionMinor >= minMcVersionMinor && mcVersionPatch == minMcVersionPatch && jarVersionString >= minVersionString)) {
                             Constants.getLogger().info("Good to go. JMWS Version %s with JourneyMap Version %s on client-side.".formatted(Constants.VERSION, versionString));
-                            CommonClass.clientHasJM = true;
+                            ClientVariables.clientHasJM = true;
                             CommonClass.init();
                         }
                     }
                 }
 
             } else {
-                Constants.getLogger().info("JourneyMap is not needed on the server-side. If you get a warning about it on the server, you can safely ignore it.");
+                Constants.getLogger().info("JourneyMap is optional on the server. If you get a warning about it, you can safely ignore it.");
                 CommonClass.init();
             }
         } catch (NoSuchElementException | VersionParsingException | IllegalStateException ignored) {
 
         }
-    }
 
-
-
+        CommandRegistrationCallback.EVENT.register((dispatcher, context, commandSelection) -> {
+            ServerDispatcher.addCommandsToDispatcher(dispatcher);
+        });
+    };
 }

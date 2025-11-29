@@ -31,6 +31,35 @@
   "message.jmws.auto_sync_disabled": "Auto-Sync is disabled, enable it and try again.",
   "message.jmws.deleted_waypoints_in_group": "Deleted all waypoints in group.",
 
+  "__comment__": "Sharing language strings",
+  "sharing.jmws.no_longer_sharing": "This will no longer be shared.",
+  "sharing.jmws.no_longer_valid": "Shared request is no longer valid!",
+  "sharing.jmws.share_request": " %s has sent a sync request, accept? (/share_accept, /share_decline)",
+  "sharing.jmws.share_sent": "Sent request",
+  "sharing.jmws.share_rejected": "Your share request to %s was rejected.",
+  "sharing.jmws.share_busy": "%s is already processing a share request from you.",
+  "sharing.jmws.sharing_host": "Now sharing %s with %s",
+  "sharing.jmws.sharing_child": "Now sharing",
+  "sharing.jmws.no_requests": "No share request with this user or they are offline.",
+  "sharing.jmws.decline": "Declined",
+  "sharing.jmws.cannot_share": "You cannot share with yourself or the owner of a LAN server.",
+  "sharing.jmws.cannot_share_global": "You cannot share a global waypoint / group.",
+  "sharing.jmws.request_timeout_to": "Timeout, sharing request to %s has been declined.",
+  "sharing.jmws.request_timeout_from": "Timeout, sharing request from %s has been declined.",
+  "sharing.jmws.local_only": "To note; you can only update admin / shared waypoints or groups locally and your changes will be overwritten.",
+  "sharing.jmws.disabled": "%s has share requests disabled.",
+  "sharing.jmws.no_matching_object": "No waypoint / group matching that name.",
+  "sharing.jmws.no_server_sharing": "You cannot share on this server.",
+  "sharing.jmws.unknown_player": "Unknown Soldier",
+  "sharing.jmws.stopped_sharing": "Stopped sharing",
+
+  "__comment__": "Global object language strings",
+  "global.jmws.cannot_edit_global": "You cannot edit waypoints / groups made by admins.",
+  "global.jmws.cannot_delete_global": "You cannot delete waypoints / groups made by admins.",
+  "global.jmws.made_global": "Made waypoint / group global.",
+  "global.jmws.remove_global": "Removed waypoint / group from being global.",
+  "global.jmws.not_global": "Cannot make not global as it's already not global.",
+
   "__comment__": "Config language strings",
   "text.config.jmws-config.title": "JourneyMap Waypoint Syncing (JMWS)",
 
@@ -44,6 +73,9 @@
   "text.config.jmws-config.option.syncIndicator.tooltip": "Shows '(S)' on the end of a waypoint if it is synced to the server.",
   "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency.tooltip": "Frequency of when waypoints are grabbed from the server (in seconds)",
   "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout.tooltip": "How long until the mod determines that the server doesn't have JMWS installed (in seconds)",
+
+  "text.config.jmws-config.option.showSharingLabels.tooltip": "Show a shared objects owner name next to the waypoint name, if online.",
+  "text.config.jmws-config.option.showGlobalLabels.tooltip": "Show a '(G)' next to the name of an object if it's global.",
 
   "text.config.jmws-config.option.serverConfiguration.serverPacketLimit.tooltip": "How large a sync packet can be. Only editable by server.",
   "text.config.jmws-config.option.serverConfiguration.serverEnabled.tooltip": "If server has JMWS enabled.",
@@ -59,15 +91,20 @@
   "text.config.jmws-config.option.uploadGroups": "Sync waypoint groups?",
   "text.config.jmws-config.option.autoSync": "Auto-Sync",
   "text.config.jmws-config.option.syncIndicator": "Sync Indicator",
+  "text.config.jmws-config.option.showSharingLabels": "Share Label?",
+  "text.config.jmws-config.option.showGlobalLabels": "Global Label?",
 
   "text.config.jmws-config.option.serverEnabled": "Server Enabled",
-  "text.config.jmws-config.option.serverEnabled.tooltip": "If remote server has JMWS enabled. Does not effect your game in any way.",
+  "text.config.jmws-config.option.serverEnabled.tooltip": "If remote server has JMWS enabled. Changing this does not effect your game in any way.",
 
-  "text.config.jmws-config.option.serverUploadWaypoints.tooltip": "If remote server has waypoint syncing enabled. Does not effect your game in any way.",
+  "text.config.jmws-config.option.serverUploadWaypoints.tooltip": "If remote server has waypoint syncing enabled. Changing this does not effect your game in any way.",
   "text.config.jmws-config.option.serverUploadWaypoints": "Server Syncs Waypoints",
 
-  "text.config.jmws-config.option.serverUploadGroups.tooltip": "If remote server has group syncing enabled. Does not effect your game in any way.",
+  "text.config.jmws-config.option.serverUploadGroups.tooltip": "If remote server has group syncing enabled. Changing this does not effect your game in any way.",
   "text.config.jmws-config.option.serverUploadGroups": "Server Syncs Groups",
+
+  "text.config.jmws-config.option.serverAllowsSharing.tooltip": "Whether or not you can share waypoints and groups with other players in this server. Changing this does not effect your game in any way.",
+  "text.config.jmws-config.option.serverAllowsSharing": "Server Allows Sharing?",
 
   "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency": "Sync frequency",
   "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout": "Server Handshake Timeout",
@@ -80,15 +117,20 @@
   "text.config.jmws-config.category.clientConfiguration": "Client Settings",
   "text.config.jmws-config.category.serverConfiguration": "Server Settings (Non-editable)",
 
+  "text.config.jmws-config.option.enableSharing": "Sharing",
+  "text.config.jmws-config.option.enableSharing.tooltip": "If you allow share requests from other users. If disabled, they will be declined automatically.",
+
   "__comment__": "Section Header language strings",
 
   "text.config.jmws-config.section.upload": "Sync Settings (JMWS)",
-  "text.config.jmws-config.section.personalisation": "Personalisation",
-  "text.config.jmws-config.section.generalConfig": "Technical",
+  "text.config.jmws-config.section.personalisation": "Personalisation (JMWS)",
+  "text.config.jmws-config.section.general": "Technical (JMWS)",
+  "text.config.jmws-config.section.sharing": "Sharing (JMWS)",
 
   "text.config.jmws-config.section.upload.tooltip": "Settings regarding waypoint and group syncing",
   "text.config.jmws-config.section.personalisation.tooltip": "Settings regarding general JMWS customisation",
-  "text.config.jmws-config.section.generalConfig.tooltip": "Settings regarding technical settings",
+  "text.config.jmws-config.section.general.tooltip": "Settings regarding technical settings",
+  "text.config.jmws-config.section.sharing.tooltip": "Settings regarding sharing waypoints in JMWS",
 
   "__comment__": "Error / Warning language strings",
 
@@ -96,6 +138,9 @@
   "error.jmws.error_corrupted_waypoint": "One or more waypoints or groups are corrupted. Contact administration for details.",
   "error.jmws.jmws_not_installed": "Server does not have JMWS installed. JMWS will be disabled.",
   "error.jmws.screen.needing_got": "Need: %s or newer. Got: %s",
+  "error.jmws.invalid_name": "Invalid name!",
+
+  "fatal.jmws.server_mismatch": "You must update to the latest version of JMWS!",
 
   "warning.jmws.server.disabled_jmws": "Server has JMWS, but has been disabled on server.",
   "warning.jmws.server.disabled_group": "Server has JMWS, but group syncing has been disabled.",
@@ -105,7 +150,7 @@
   "warning.jmws.server.newer_server_version": "JMWS installed but server version is newer than expected! Things may not work!",
 
   "warning.jmws.world_is_local": "JMWS will be put into LAN mode. (Clients can sync to your internal-server)",
-  "warning.jmws.world_is_local_no_commands": "Playing in single player. Some commands will not work.",
+  "warning.jmws.world_is_local_no_commands": "Playing in single player or owner of a LAN server. Some commands will not work.",
   "warning.jmws.jm_not_installed": "Sorry! JourneyMap is not installed or the version is wrong!",
 
   "__comment__": "JourneyMap Buttons",

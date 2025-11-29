@@ -1,20 +1,69 @@
-# 1.1.8 Changelog
+# 1.2.0 Changelog
 
 ## New
 
-No new features.
+- New feature: Shared objects
+- New feature: Global objects
+
+Read below for what they are and do.
+
+### What are objects?
+
+"Objects" is simply a generalised term I use for waypoints or groups.
 
 ## Bug fixes / Changes
 
-- Fixed bug where users with large amount of waypoints / groups would disconnect due to default size limit of 32k bytes.
-    - Now fixed by increasing the limit to 2MB (2,097,000)
-    - This is technically possible to reach but, I just refuse to believe anyone has that amount.
+- Fixed possible bug where waypoints / groups added by 3rd party plugins of JM would be persistent when created (would reappear after being deleted and joining back)
 
-This fix is courtesy of isHaack on GitHub (resolves https://github.com/NavidRohim/JMWS/issues/4)
+### What are shared objects?
+Shared objects are just waypoints or groups that have been shared by one player to others.
+These objects update live (changing name, location, etc) which includes deletion.
+
+#### How do they work?
+Create a waypoint or group like normal. Then do `/share_waypoint <share_to> <waypoint>` where `share_to` is the user you want to share with,
+and `waypoint` is the name of the waypoint you want to share. This is the same for groups but using `/share_group`
+
+The user who receives the object will have to accept the share request, there is a 20-second timeout. If this time passes, the request will automatically
+be declined.
+
+#### How do I stop sharing an object?
+Simply do `/stop_sharing_waypoint <waypoint>` where `waypoint` is the name of the waypoint you want to stop sharing.
+This is the same with groups but you do `/stop_sharing_group`
+
+### What are global objects?
+
+Global objects are like shared objects, but they are shared with everyone at the same time! These can only be made by administrators.
+
+#### How do they work?
+Create a waypoint or group like normal. Then do `/jmws_admin create_global_waypoint <waypoint>` where `<waypoint>` is the name of waypoint
+that will become global. This is the same for groups but using `/jmws_admin create_global_group`
+
+#### How do I stop sharing a global object?
+Do `/jmws_admin remove_global_waypoint <waypoint>` where `<waypoint>` is the name of the global waypoint you want to remove.
+This is the same for groups but using `/jmws_admin remove_global_group`. Also, "remove" means to just stop sharing it with everyone.
+The player who originally made it will regain it as normal waypoint / group
+
+#### I want to know more.
+When a shared / global object is created, users will gain access to it, but they will not be able to modify it. Only the original creator can.
+And, if in a LAN world, the host cannot share nor create global objects.
+
+Also, if an object is global, you'll see a little `(G)` at the end of the name. You can turn this off in the config (Uncheck "Global Label?")
+This is the same with shared objects, but instead you'll see the name of the user who owns the object. And if they are offline, it'll just be `(S)`
+like global objects.
 
 ## Bugs that I am aware of
 
-None!
+None (with my mod)
+
+I realise the config screen inside JourneyMap is very messy. JourneyMap is supposed to have categories so it looks much cleaner, but currently they are broken.
+When they are fixed, in JourneyMap, so will the config screen in my mod (E.g. I won't have to release a bug fix)
 
 ### Other
-*Server version is 1.01, fully backwards compatible with 1.00 granting you don't have a lot of waypoints / groups (100+)*
+
+New server version = 1.1 (Up from 1.01)
+
+*Server version is 1.1, massive server changes from 1.01. Update server and client immediately.
+Clients who join a 1.1 server when on 1.01 WILL face errors and possibly lose saved objects.
+I do not take responsibility if this occurs. You have been warned.*
+
+Thanks!

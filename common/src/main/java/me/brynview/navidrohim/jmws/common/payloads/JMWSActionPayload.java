@@ -3,8 +3,8 @@ package me.brynview.navidrohim.jmws.common.payloads;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.enums.WaypointPayloadCommand;
-import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
+import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
+import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -21,7 +21,7 @@ public class JMWSActionPayload
     public static final int PACKET_SIZE = 2_097_000; // 2MB
 
     public String rawData = null;
-    public WaypointPayloadCommand command = null;
+    public CommandFactory.Commands command = null;
     public List<JsonElement> argumentList = null;
 
     public JMWSActionPayload(FriendlyByteBuf friendlyByteBuf)
@@ -35,7 +35,7 @@ public class JMWSActionPayload
             rawData = jsonData;
         else {
             Constants.getLogger().error("Packet too big! User may have too many waypoints and or groups!");
-            rawData = CommandHelper.makeClientAlertRequestJson("error.jmws.error_packet_size", true, true);
+            rawData = CommandFactory.makeClientAlertRequestJson("error.jmws.error_packet_size", true, JMWSMessageType.FAILURE);
         }
     }
 
@@ -51,13 +51,13 @@ public class JMWSActionPayload
 
     private void _setCommandAndArguments()
     {
-        JsonObject jsonifyied = CommandHelper.getJsonObjectFromJsonString(rawData);
+        JsonObject jsonifyied = CommandFactory.getJsonObjectFromJsonString(rawData);
 
-        command = WaypointPayloadCommand.valueOf(jsonifyied.asMap().get("command").getAsString());
+        command = CommandFactory.Commands.valueOf(jsonifyied.asMap().get("command").getAsString());
         argumentList = jsonifyied.asMap().get("arguments").getAsJsonArray().asList();
     }
 
-    public WaypointPayloadCommand command() {
+    public CommandFactory.Commands command() {
         _setCommandAndArguments();
         return command;
     }

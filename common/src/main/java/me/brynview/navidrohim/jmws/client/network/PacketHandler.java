@@ -1,20 +1,30 @@
 package me.brynview.navidrohim.jmws.client.network;
 
+import com.google.gson.JsonElement;
 import commonnetwork.networking.data.PacketContext;
+import journeymap.api.v2.common.waypoint.Waypoint;
+import journeymap.api.v2.common.waypoint.WaypointFactory;
+import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
+import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
+import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
+import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
+import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.syncing.SyncingInformation;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
+import java.util.List;
+import java.util.UUID;
 
 import static me.brynview.navidrohim.jmws.client.helper.PlayerHelper.sendUserAlert;
 
@@ -29,6 +39,7 @@ public class PacketHandler {
      */
     public static void handlePacket(PacketContext<JMWSActionPayload> Context) {
         JMWSActionPayload waypointPayload = Context.message();
+        List<JsonElement> arguments = waypointPayload.arguments();
 
         // Check if command should be processed (must be a client of a server)
         if (CommonClass.getEnabledStatus()) {
@@ -57,11 +68,9 @@ public class PacketHandler {
                 // This might be useless. Found out recently there is a way to do this with vanilla code without defining a custom packet.
                 case CLIENT_ALERT -> {
                     String firstArgument = waypointPayload.arguments().getFirst().getAsString();
-                    boolean isError = waypointPayload.arguments().getLast().getAsBoolean();
-                    JMWSMessageType messageType = JMWSMessageType.NEUTRAL;
+                    JMWSMessageType messageType = JMWSMessageType.valueOf(waypointPayload.arguments().getLast().getAsString());
 
-                    if (isError) {
-                        messageType = JMWSMessageType.FAILURE;
+                    if (messageType.equals(JMWSMessageType.FAILURE)) {
                         PlayerHelper.sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
                     }
 
@@ -72,13 +81,24 @@ public class PacketHandler {
                 // No outbound data
                 case COMMON_DELETE_WAYPOINT ->
                 {
-                    String firstArgument = waypointPayload.arguments().getFirst().getAsString();
+                    String waypointIdentifier = waypointPayload.arguments().getFirst().getAsString();
+                    boolean silent = arguments.get(1).getAsBoolean();
 
-                    // firstArgument can be "*" to delete all waypoints / groups, deleteAll must be `true` for this to happen still.
                     JMWSPlugin.getInstance().deleteSavedObjects(
-                            Objects.equals(firstArgument, "*"),
-                            JMWSServerIO.FetchType.valueOf(waypointPayload.arguments().get(1).getAsString()),
-                            firstArgument
+                        silent,
+                        ObjectType.WAYPOINT,
+                        waypointIdentifier
+                    );
+                }
+                case COMMON_DELETE_GROUP ->
+                {
+                    String groupIdentifier = waypointPayload.arguments().getFirst().getAsString();
+                    boolean silent = arguments.get(2).getAsBoolean();
+
+                    JMWSPlugin.getInstance().deleteSavedObjects(
+                            silent,
+                            ObjectType.GROUP,
+                            groupIdentifier
                     );
                 }
 
@@ -86,8 +106,100 @@ public class PacketHandler {
                 // No outbound data
                 case COMMON_DISPLAY_NEXT_UPDATE -> sendUserAlert(Component.translatable("message.jmws.next_sync", (CommonClass.timeUntilNextSync())), true, false, JMWSMessageType.NEUTRAL);
 
+                case OBJECT_SHARE ->
+                {
+                    ShareRequest.Direction direction = ShareRequest.Direction.valueOf(arguments.getLast().getAsString());
+
+                    ObjectType sharedObjectType = ObjectType.valueOf(arguments.get(3).getAsString());
+                    String objectString = arguments.getFirst().getAsString();
+
+                    Object object;
+                    String objName;
+                    String objectIdentifier;
+
+                    if (sharedObjectType == ObjectType.WAYPOINT)
+                    {
+                        Waypoint objectWp = WaypointFactory.fromWaypointJsonString(objectString);
+                        objectIdentifier = SyncingInformation.getSyncingInfo(objectWp.getCustomData()).objectIdentifier;
+                        object = objectWp;
+                        objName = objectWp.getName();
+                    } else {
+                        WaypointGroup objectGp = WaypointFactory.fromGroupJsonString(objectString);
+                        objectIdentifier = SyncingInformation.getSyncingInfo(objectGp.getCustomData()).objectIdentifier;
+                        object = objectGp;
+                        objName = objectGp.getName();
+                    }
+
+                    if (direction.equals(ShareRequest.Direction.FOR_CLIENT))
+                    {
+                        UUID sender = UUID.fromString(arguments.get(1).getAsString());
+                        if (!CommonClass.config.enableSharing.get())
+                        {
+                            ShareRequest.disabled(sender);
+                        }
+                        else if (!IncomingShareRequests.hasShareRequestFrom(sender))
+                        {
+                            ShareRequest request = new ShareRequest(
+                                    sender,
+                                    PlayerHelper.ourUUID(),
+                                    object,
+                                    sharedObjectType,
+                                    objectIdentifier,
+                                    objName
+                            );
+
+                            IncomingShareRequests.addRequest(sender, request);
+                            sendUserAlert(Component.translatable("sharing.jmws.share_request", request.getSenderName()), false, true, JMWSMessageType.SUCCESS);
+                        } else {
+                            ShareRequest.busy(sender);
+                        }
+                    } else {
+                        UUID incoming = UUID.fromString(arguments.get(1).getAsString());
+                        OutgoingShareRequests.addRequest(incoming, new OutgoingShareRequest(PlayerHelper.ourUUID(), incoming, object, sharedObjectType, objectIdentifier, objName));
+                        sendUserAlert(Component.translatable("sharing.jmws.share_sent"), true, false, JMWSMessageType.SUCCESS);
+                    }
+                }
+
+                case REJECT_SHARE ->
+                {
+                    UUID incoming = UUID.fromString(arguments.get(1).getAsString());
+                    @Nullable OutgoingShareRequest request = OutgoingShareRequests.getRequest(incoming);
+
+                    if (request != null)
+                    {
+                        request.resolve();
+                        sendUserAlert(Component.translatable("sharing.jmws.share_rejected", request.getRecipientName()), true, false, JMWSMessageType.FAILURE);
+                    }
+                }
+
+                case USER_ALREADY_PROCESSING_SHARE ->
+                {
+                    UUID incoming = UUID.fromString(arguments.get(1).getAsString());
+                    String declineMessage = arguments.getLast().getAsString();
+                    @Nullable OutgoingShareRequest request = OutgoingShareRequests.getRequest(incoming);
+
+                    if (request != null)
+                    {
+                        request.resolve();
+                        sendUserAlert(Component.translatable(declineMessage, request.getRecipientName()), true, false, JMWSMessageType.WARNING);
+                    }
+
+                }
+
+                case AFFIRM_SHARE ->
+                {
+                    UUID incoming = UUID.fromString(arguments.getLast().getAsString());
+                    if (OutgoingShareRequests.hasShareRequestFor(incoming))
+                    {
+                        OutgoingShareRequest request = OutgoingShareRequests.getRequest(incoming).resolve();
+                        sendUserAlert(Component.translatable("sharing.jmws.sharing_host", request.objectDisplayName, request.getRecipientName()), true, false, JMWSMessageType.SUCCESS);
+                    } else {
+                        sendUserAlert(Component.translatable("sharing.jmws.no_longer_valid"), true, true, JMWSMessageType.SUCCESS);
+                    }
+                }
+                
                 default -> Constants.getLogger().warn("Unknown packet command -> " + waypointPayload.command());
-            }
+             }
         }
     }
 

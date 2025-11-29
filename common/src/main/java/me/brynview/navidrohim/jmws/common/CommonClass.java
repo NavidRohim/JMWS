@@ -1,11 +1,14 @@
 package me.brynview.navidrohim.jmws.common;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import commonnetwork.api.Dispatcher;
 import commonnetwork.api.Network;
 
 import commonnetwork.networking.data.PacketContext;
 import commonnetwork.networking.data.Side;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.ClientVariables;
 import me.brynview.navidrohim.jmws.client.SyncCounter;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
@@ -20,7 +23,10 @@ import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 
 
 import java.io.File;
@@ -39,22 +45,26 @@ public class CommonClass {
     // code that gets invoked by the entry point of the loader specific projects.
 
     public static Minecraft minecraftClientInstance = null;
+    public static MinecraftServer minecraftServerInstance;
 
     public static ConfigInterface config = null;
     public static ClientSideServerConfigObject serverConfig = ClientSideServerConfigObject.empty();
 
     public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-    public static SyncCounter syncCounter = null;
-    public static boolean serverHasMod = false;
+    public static final Gson gson = new Gson();
+    public static final Gson gsonExcludeNoExpose = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
-    @Nullable
-    public static String clientJMVersion = null;
-    public static boolean clientHasJM = false;
+    public static SyncCounter syncCounter = null;
+
+    public static MinecraftServer getMinecraftServerInstance()
+    {
+        return minecraftServerInstance;
+    }
 
     public static void setServerModStatus(boolean serverModStatus)
     {
-        serverHasMod = serverModStatus;
+        ClientVariables.serverHasMod = serverModStatus;
 
         if (!serverModStatus)
         {
@@ -113,15 +123,16 @@ public class CommonClass {
     public static void _createServerResources() {
         new File("./jmws").mkdir();
         new File("./jmws/groups").mkdir();
+        new File("./jmws/users").mkdir();
     }
 
 
     public static boolean  getEnabledStatus() {
-        return serverHasMod && config.enabled.get() && (config.uploadGroups.get() || config.uploadWaypoints.get()) && !minecraftClientInstance.isSingleplayer() && !isInternalServer();
+        return ClientVariables.serverHasMod && config.enabled.get() && (config.uploadGroups.get() || config.uploadWaypoints.get()) && !minecraftClientInstance.isSingleplayer() && !isInternalServer();
     }
 
     public static boolean isInternalServer() {
-        if (CommonClass.minecraftClientInstance instanceof Minecraft) {
+        if (CommonClass.minecraftClientInstance != null) {
             return CommonClass.minecraftClientInstance.isLocalServer() && CommonClass.minecraftClientInstance.getSingleplayerServer() instanceof IntegratedServer;
         }
         return false;
@@ -141,7 +152,6 @@ public class CommonClass {
         ServerConfig.ensureExistence();
         _createServerResources();
 
-
         // It is common for all supported loaders to provide a similar feature that can not be used directly in the
         // common code. A popular way to get around this is using Java's built-in service loader feature to create
         // your own abstraction layer. You can learn more about this in our provided services class. In this example
@@ -153,5 +163,10 @@ public class CommonClass {
     {
         minecraftClientInstance = Minecraft.getInstance();
         syncCounter = new SyncCounter();
+    }
+
+    public static boolean isValidCommandUser(CommandSourceStack commandSourceStack)
+    {
+        return !isInternalServer() || (!CommonClass.getMinecraftServerInstance().isSingleplayerOwner(commandSourceStack.getPlayer().nameAndId())); // No host user
     }
 }

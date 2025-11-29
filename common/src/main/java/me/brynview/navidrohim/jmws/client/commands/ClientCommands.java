@@ -1,13 +1,17 @@
-package me.brynview.navidrohim.jmws.client;
+package me.brynview.navidrohim.jmws.client.commands;
 
 import commonnetwork.api.Dispatcher;
+import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
+import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
-import me.brynview.navidrohim.jmws.common.helper.CommandHelper;
+import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Static class that holds methods which commands use.
@@ -18,8 +22,8 @@ public class ClientCommands {
      * Returns if the player is in singleplayer.
      * @return boolean -- If the player is in singleplayer.
      */
-    private static boolean isInSingleplayer() {
-        return CommonClass.minecraftClientInstance.isSingleplayer();
+    private static boolean isNotInSingleplayer() {
+        return !CommonClass.isInternalServer();
     }
 
     /**
@@ -35,7 +39,7 @@ public class ClientCommands {
      */
     public static int sync()
     {
-        if (!isInSingleplayer()) {
+        if (isNotInSingleplayer()) {
             JMWSPlugin.updateWaypoints(true);
         } else {
             sendUserSinglePlayerWarning();
@@ -59,13 +63,13 @@ public class ClientCommands {
      */
     public static int clearAllGroups()
     {
-        if (!isInSingleplayer()) {
-            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandHelper.makeDeleteGroupRequestJson(
-                    CommonClass.minecraftClientInstance.player.getUUID(),
+        if (isNotInSingleplayer()) {
+            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandFactory.makeDeleteGroupRequestJson(
                     "*",
                     "*",
                     false,
                     false,
+                    true,
                     true,
                     true
             ));
@@ -85,8 +89,8 @@ public class ClientCommands {
      */
     public static int clearAllWaypoints()
     {
-        if (!isInSingleplayer()) {
-            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandHelper.makeDeleteRequestJson("*", false, true)); // * = all
+        if (isNotInSingleplayer()) {
+            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandFactory.makeDeleteRequestJson("*", false, true)); // * = all
             Dispatcher.sendToServer(deleteServerObjectPayload);
             JMWSPlugin.updateWaypoints(false);
         } else {
@@ -101,7 +105,7 @@ public class ClientCommands {
      */
     public static int nextSync()
     {
-        if (!isInSingleplayer()) {
+        if (isNotInSingleplayer()) {
             if (CommonClass.config.autoSync.get())
             {
                 PlayerHelper.sendUserAlert(Component.translatable("message.jmws.next_sync", (CommonClass.syncCounter.getTickCounterUpdateThreshold() - CommonClass.syncCounter.getCurrentTickCount()) / 20), true, false, JMWSMessageType.NEUTRAL);
@@ -112,5 +116,42 @@ public class ClientCommands {
             sendUserSinglePlayerWarning();
         }
         return 1;
+    }
+
+    public static int accept(@Nullable ShareRequest specifiedShare)
+    {
+        if (specifiedShare != null)
+        {
+            specifiedShare.accept();
+            PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.sharing_child"), true, false, JMWSMessageType.NEUTRAL);
+        } else {
+            PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.no_requests"), true, false, JMWSMessageType.NEUTRAL);
+        }
+        return 1;
+    }
+
+    public static int accept(@Nullable String name)
+    {
+        @Nullable ShareRequest request = IncomingShareRequests.getAllUserKey().get(name);
+        return accept(request);
+    }
+
+    public static int decline(@Nullable ShareRequest request)
+    {
+        if (request != null)
+        {
+            request.decline();
+            PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.decline"), true, false, JMWSMessageType.NEUTRAL);
+        } else {
+            PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.no_requests"), true, false, JMWSMessageType.NEUTRAL);
+        }
+        return 1;
+    }
+
+    public static int decline(@Nullable String from)
+    {
+
+        @Nullable ShareRequest request = IncomingShareRequests.getAllUserKey().get(from);
+        return decline(request);
     }
 }
