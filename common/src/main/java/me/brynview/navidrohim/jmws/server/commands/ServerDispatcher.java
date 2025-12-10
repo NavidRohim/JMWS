@@ -34,7 +34,7 @@ public class ServerDispatcher {
         );
 
         dispatcher.register(Commands.literal("jmws_admin")
-                .requires(src -> src.hasPermission(2) && CommonClass.isValidCommandUser(src))
+                .requires(src -> src.hasPermissions(2) && CommonClass.isValidCommandUser(src))
                 .then(Commands.literal("create_global_waypoint")
                         .then(Commands.argument("waypointName", StringArgumentType.greedyString())
                                 .suggests(Server::suggestWaypoints)

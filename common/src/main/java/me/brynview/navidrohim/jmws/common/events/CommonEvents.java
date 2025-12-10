@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.common.events;
 
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.client.ClientVariables;
+import me.brynview.navidrohim.jmws.client.commands.ClientCommands;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 
@@ -20,7 +21,7 @@ public class CommonEvents {
 
     public static void clearCache()
     {
-        // will use soon
+        ClientCommands.sync();
         CommonClass.setServerModStatus(false);
         CommonClass.serverConfig = ClientSideServerConfigObject.empty();
         PlayerHelper.clearWarningAlertCache();

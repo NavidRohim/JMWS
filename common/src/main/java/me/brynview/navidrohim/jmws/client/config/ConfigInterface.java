@@ -51,7 +51,7 @@ public class ConfigInterface {
     public final BooleanOption playEffects; // If to play sound effects, usually alongside text alerts
     public final BooleanOption colouredText; // If text alerts should be coloured, usually by importance
 
-    public final IntegerOption updateWaypointFrequency; // How often auto-sync should sync
+    public final CustomIntegerOption updateWaypointFrequency; // How often auto-sync should sync
 
     // Server side display options
 
@@ -76,7 +76,7 @@ public class ConfigInterface {
         this.playEffects = new BooleanOption(personalisation, "playEffects", "text.config.jmws-config.option.playEffects", true);
         this.colouredText = new BooleanOption(personalisation, "colouredText", "text.config.jmws-config.option.colouredText", true);
 
-        this.updateWaypointFrequency = new IntegerOption(technical, "updateWaypointFrequency", "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency", 40, 2, 120);
+        this.updateWaypointFrequency = new CustomIntegerOption(technical, "updateWaypointFrequency", "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency", 40, 2, Integer.MAX_VALUE, false);
 
         this.serverEnabled = new BooleanOption(server, "serverEnabled", "text.config.jmws-config.option.serverEnabled", false);
         this.serverUploadWaypoints = new BooleanOption(server, "serverUploadWaypoints", "text.config.jmws-config.option.serverUploadWaypoints", false);
@@ -94,7 +94,8 @@ public class ConfigInterface {
      */
     public int getUpdateWaypointFrequencyAsTicks()
     {
-        return updateWaypointFrequency.get() * 20;
+        int sc = Integer.parseInt(String.valueOf(updateWaypointFrequency.get())); // Have to do this because with CustomIntegerOption .get() crashes when trying to directly cast to int. It's wacky I know, but it's the only way it works.
+        return sc * 20;
     }
 
     /**

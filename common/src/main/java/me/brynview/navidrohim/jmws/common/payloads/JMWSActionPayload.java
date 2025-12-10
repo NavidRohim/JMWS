@@ -8,15 +8,16 @@ import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 
 public class JMWSActionPayload
 {
-    public static final ResourceLocation CHANNEL = ResourceLocation.fromNamespaceAndPath(Constants.MODID, "action_command");
-    public static final StreamCodec<FriendlyByteBuf, JMWSActionPayload> STREAM_CODEC = StreamCodec.ofMember(JMWSActionPayload::encode, JMWSActionPayload::new);
+    public static final Identifier CHANNEL = Identifier.fromNamespaceAndPath(Constants.MODID, "action_command");
+    public static final StreamCodec<@NotNull FriendlyByteBuf, @NotNull JMWSActionPayload> STREAM_CODEC = StreamCodec.ofMember(JMWSActionPayload::encode, JMWSActionPayload::new);
 
     public static final int PACKET_SIZE = 2_097_000; // 2MB
 
