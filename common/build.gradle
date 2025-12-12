@@ -17,9 +17,11 @@ neoForge {
 }
 
 repositories {
-
     maven {url = 'https://maven.blamejared.com'}
-
+    maven {
+        name = "JourneyMap (Public)"
+        url = "https://jm.gserv.me/repository/maven-public/"
+    }
 }
 dependencies {
     //compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
