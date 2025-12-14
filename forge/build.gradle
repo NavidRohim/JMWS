@@ -1,15 +1,12 @@
 plugins {
     id 'multiloader-loader'
-    id 'net.minecraftforge.gradle' version '7.0.0-beta.46'
+    id 'net.minecraftforge.gradle' version '7.0.0-beta.55'
 }
 
 repositories {
     maven minecraft.mavenizer
     maven fg.forgeMaven
     maven fg.minecraftLibsMaven
-    maven { url "https://repo.spongepowered.org/maven" }
-    maven {url = 'https://maven.blamejared.com'}
-    maven {url = "https://jm.gserv.me/repository/maven-public/"}
     mavenCentral()
     mavenLocal()
 }
@@ -52,7 +49,7 @@ dependencies {
     //implementation 'org.slf4j:slf4j-api:2.0.17'
 
     compileOnly group: 'info.journeymap', name: 'journeymap-api-forge', version: project.journeymap_api_version, changing: true
-    implementation "mysticdrew:common-networking-forge:1.0.22-1.21.10"
+    implementation "mysticdrew:common-networking-forge:${common_networking_version}"
 
 }
 
