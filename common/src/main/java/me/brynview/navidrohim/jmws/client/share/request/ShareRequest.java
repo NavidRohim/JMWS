@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.client.share.request;
 
+import com.mojang.authlib.GameProfile;
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
@@ -94,12 +95,12 @@ public class ShareRequest {
 
     public String getSenderName()
     {
-        return sender != null ? sender.() : CommonHelper.unknownUser;
+        return sender != null ? sender.getName() : CommonHelper.unknownUser;
     }
 
     public String getRecipientName()
     {
-    return to != null ? to.name() : CommonHelper.unknownUser;
+    return to != null ? to.getName() : CommonHelper.unknownUser;
     }
 }
 
