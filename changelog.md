@@ -26,8 +26,19 @@ When they are fixed, in JourneyMap, so will the config screen in my mod (E.g. I 
 
 ### Server
 
-No new server version. Still 1.1
+New server version: 1.11
 
+Very slight changes. Should cause no issues but still a good idea to update.
 All clients who use JMWS 1.2.0 can join servers with 1.2.1 or vice versa.
+
+### For Devs
+
+1.2.1 Changes to Gradle 9.3.0, and also changes to ForgeGradle 7.
+
+This introduces massive changes, mainly regarding the move from ForgeGradle 6 to ForgeGradle 7. 
+FG7 is still in beta and still buggy in noticeable ways. If at all possible, check [here](https://files.minecraftforge.net/project_index.html) for new ForgeGradle 7 versions
+which will make your life developing easier.
+
+Also check [this repo](https://github.com/MinecraftForge/MDKExamples) for ForgeGradle 7 examples.
 
 Thanks!

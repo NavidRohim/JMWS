@@ -30,7 +30,7 @@ dependencies {
     //annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
 
     compileOnly group: 'info.journeymap', name: 'journeymap-api-common', version: project.journeymap_api_version, changing: true
-    implementation "mysticdrew:common-networking-common:1.0.22-1.21.11"
+    implementation "mysticdrew:common-networking-common:${common_networking_version}"
 
 }
 
