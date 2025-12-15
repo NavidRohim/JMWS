@@ -147,7 +147,13 @@ public class ObjectIdentifierMap {
      */
     public static void removeWaypointFromMap(Waypoint waypoint)
     {
-        waypointIdentifierMap.remove(SyncingInformation.getSyncingInfo(waypoint.getCustomData()).objectIdentifier);
+        try
+        {
+            waypointIdentifierMap.remove(SyncingInformation.getSyncingInfo(waypoint.getCustomData()).objectIdentifier);
+        } catch (NullPointerException noObjIgnore)
+        {
+            return;
+        }
     }
 
     /**
@@ -156,8 +162,14 @@ public class ObjectIdentifierMap {
      */
     public static void removeGroupFromMap(WaypointGroup group)
     {
-        @Nullable SyncingInformation groupSyncInfo = SyncingInformation.getSyncingInfo(group.getCustomData());
-        if (groupSyncInfo != null)
-            groupIdentifierMap.remove(groupSyncInfo.objectIdentifier);
+        try
+        {
+            @Nullable SyncingInformation groupSyncInfo = SyncingInformation.getSyncingInfo(group.getCustomData());
+            if (groupSyncInfo != null)
+                groupIdentifierMap.remove(groupSyncInfo.objectIdentifier);
+        } catch (NullPointerException noObjIgnore)
+        {
+            return;
+        }
     }
 }

@@ -156,15 +156,22 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void deleteAction(Waypoint waypoint) {
         if (CommonClass.serverConfig.waypointsEnabled()) { // Check if action is allowed by the server.
-            SyncingInformation syncingInformation = SyncingInformation.getSyncingInfo(waypoint.getCustomData());
-            ObjectIdentifierMap.removeWaypointFromMap(waypoint);
-            String jsonPacketData = CommandFactory.makeDeleteRequestJson(syncingInformation.objectIdentifier,false, false);
-            JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
+            @Nullable SyncingInformation syncingInformation = SyncingInformation.getSyncingInfo(waypoint.getCustomData());
 
-            // removedWaypoint is called here because, yes, we do listen for the deletion with the event (meaning, the waypoint should be already gone by the time the event is called)
-            // But for some reason it bugs out and the waypoint stays and becomes persistent
-            jmAPI.removeWaypoint(waypoint.getModId(), waypoint);
-            Dispatcher.sendToServer(waypointActionPayload);
+            if (syncingInformation != null) // Can be null if JMWS has no knowledge of a waypoint
+            {
+                ObjectIdentifierMap.removeWaypointFromMap(waypoint);
+                String jsonPacketData = CommandFactory.makeDeleteRequestJson(syncingInformation.objectIdentifier,false, false);
+                JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
+
+                // removedWaypoint is called here because, yes, we do listen for the deletion with the event (meaning, the waypoint should be already gone by the time the event is called)
+                // But for some reason it bugs out and the waypoint stays and becomes persistent
+                jmAPI.removeWaypoint(waypoint.getModId(), waypoint);
+                Dispatcher.sendToServer(waypointActionPayload);
+            } else {
+                jmAPI.removeWaypoint(waypoint.getModId(), waypoint);
+            }
+
         } else {
             PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, JMWSMessageType.ONE_TIME_WARNING);
         }
@@ -243,7 +250,6 @@ public class JMWSPlugin implements IClientPlugin {
         if (CommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
         {
             SyncingInformation gsi = SyncingInformation.getSyncingInfo(waypointGroup.getCustomData(), true);
-
             if (gsi != null)
             {
                 ObjectIdentifierMap.removeGroupFromMap(waypointGroup); // Remove from identifier map

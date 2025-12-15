@@ -4,11 +4,16 @@
 
 No new features.
 
-## Changes / Fixes
+## Changes
 - Can now change the sync interval to any number between 2 and 2,147,483,647 (64-bit int limit) Before was 2 - 120
 - Added sync on disconnect. Thought there was before but apparently not, whoops.
 
-All changes / fixes here are fully thanks to "notdysthymia" on GitHub. Resolves: https://github.com/NavidRohim/JMWS/issues/5
+## Bug fixes
+
+- Fixed a bug where, if a local object was not synced with the server, an error would be thrown if deleted.
+
+
+All changes here are fully thanks to "notdysthymia" on GitHub. Partially resolves issue 5: https://github.com/NavidRohim/JMWS/issues/5
 
 ## Bugs that I am aware of
 
