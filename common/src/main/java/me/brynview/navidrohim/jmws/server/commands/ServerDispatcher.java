@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.server.Server;
@@ -12,9 +11,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.permissions.Permission;
-import net.minecraft.server.permissions.PermissionLevel;
-import net.minecraft.server.permissions.PermissionSet;
 
 public class ServerDispatcher {
 
@@ -38,7 +34,7 @@ public class ServerDispatcher {
         );
 
         dispatcher.register(Commands.literal("jmws_admin")
-                .requires(Commands.hasPermission(Commands.LEVEL_MODERATORS))
+                .requires(src -> src.hasPermission(2) && CommonClass.isValidCommandUser(src))
                 .then(Commands.literal("create_global_waypoint")
                         .then(Commands.argument("waypointName", StringArgumentType.greedyString())
                                 .suggests(Server::suggestWaypoints)
