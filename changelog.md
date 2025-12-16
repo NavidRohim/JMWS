@@ -1,4 +1,4 @@
-# 1.2.1 Changelog
+# 1.2.1 Changelog for 26.1
 
 ## New
 
@@ -40,5 +40,9 @@ FG7 is still in beta and still buggy in noticeable ways. If at all possible, che
 which will make your life developing easier.
 
 Also check [this repo](https://github.com/MinecraftForge/MDKExamples) for ForgeGradle 7 examples.
+
+(Exclusive to 1.2.1 for 26.1 and newer)
+
+All projects including JMWS now will use Java 25 instead of 21.
 
 Thanks!
