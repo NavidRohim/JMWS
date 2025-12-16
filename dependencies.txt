@@ -1,5 +1,7 @@
 Reminder for myself
 
-1.21.1 CommonNetworking required version is 1.0.18
+1.21.1 CommonNetworking required version is 1.0.21
 1.21.11 CommonNetworking required version is 1.0.22
 
+1.21.1 JM required version is 1.21.1-6.0.0-beta.52
+1.21.11 JM required version is 1.21.11-6.0.0-beta.53
