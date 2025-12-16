@@ -1,0 +1,5 @@
+Reminder for myself
+
+1.21.1 CommonNetworking required version is 1.0.18
+1.21.11 CommonNetworking required version is 1.0.22
+

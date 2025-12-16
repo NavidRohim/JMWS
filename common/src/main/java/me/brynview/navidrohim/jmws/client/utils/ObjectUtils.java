@@ -16,12 +16,12 @@ import static me.brynview.navidrohim.jmws.common.helper.CommonHelper._getWaypoin
 
 public class ObjectUtils
 {
-    public static String getLegacyWaypointFilename(Waypoint waypoint, UUID uuID) {
+    private static String getLegacyWaypointFilename(Waypoint waypoint, UUID uuID) {
         Vector3d waypointLocationVector = new Vector3d(waypoint.getBlockPos().getX(), waypoint.getBlockPos().getY(), waypoint.getBlockPos().getZ());
         return _getWaypointFromRaw(waypointLocationVector, waypoint.getName(), uuID);
     }
 
-    public static String getLegacyGroupFilename(UUID playerUUID, String universalID) {
+    private static String getLegacyGroupFilename(UUID playerUUID, String universalID) {
         return "./jmws/groups/" + universalID + "_" + playerUUID + "-group" + ".json";
     }
 

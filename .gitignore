@@ -2,10 +2,8 @@ run
 runs
 build
 buildSrc
-verspec/
 
 .idea/
 .gradle/
 *.lock
 *.launch
-journeymap-*
