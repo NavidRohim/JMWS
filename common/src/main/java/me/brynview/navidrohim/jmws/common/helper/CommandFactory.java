@@ -54,7 +54,7 @@ public class CommandFactory {
     }
 
     public static String makeGroupCreationRequestJson(WaypointGroup waypointGroup, boolean silent) {
-        return CommandFactory.makeBaseJsonRequest(Commands.SERVER_CREATE_GROUP, waypointGroup.toString(), silent);
+        return CommandFactory.makeBaseJsonRequest(Commands.SERVER_CREATE_GROUP, waypointGroup.toString(), silent, false);
     }
 
     public static String makeSyncRequestResponseJson(HashMap<String, String> jsonArray, HashMap<String, String> jsonGroupArray, boolean sendAlert, boolean isDeathSync) {
