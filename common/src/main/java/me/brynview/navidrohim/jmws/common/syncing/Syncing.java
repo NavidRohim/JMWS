@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public class SyncingInformation {
+public class Syncing {
 
     @Expose
     public String objectIdentifier;
@@ -33,19 +33,19 @@ public class SyncingInformation {
     @Nullable
     protected ServerObject parentObject = null;
 
-    public SyncingInformation(List<String> sharedTo, String identifier, UUID owner, boolean isGlobal) {
+    public Syncing(List<String> sharedTo, String identifier, UUID owner, boolean isGlobal) {
         this.objectIdentifier = identifier;
         this.sharedTo = sharedTo;
         this.owner = owner;
         this.isGlobal = isGlobal;
     }
 
-    public static SyncingInformation getSyncingInfo(ServerObject object) {
+    public static Syncing getSyncingInfo(ServerObject object) {
         try {
-            SyncingInformation syncingInformation = CommonClass.gson.fromJson(object.getCustomData(), SyncingInformation.class);
-            syncingInformation.parentObject = object;
+            Syncing syncing = CommonClass.gson.fromJson(object.getCustomData(), Syncing.class);
+            syncing.parentObject = object;
 
-            return syncingInformation;
+            return syncing;
         } catch (IllegalStateException | JsonSyntaxException reader) {
             PlayerNetworkingHelper.sendUserMessage(object.getOwnerUUID(), "FATAL: You are on the wrong JMWS version! Update to JMWS v%s as soon as possible or you may suffer data loss!".formatted(Constants.SERVER_VERSION), false, JMWSMessageType.FAILURE);
             object.dataclass = true;
@@ -54,9 +54,9 @@ public class SyncingInformation {
         }
     }
 
-    public static SyncingInformation getSyncingInfo(String customDataField, boolean returnNullIfError) {
+    public static Syncing getSyncingInfo(String customDataField, boolean returnNullIfError) {
         try {
-            return CommonClass.gson.fromJson(customDataField, SyncingInformation.class);
+            return CommonClass.gson.fromJson(customDataField, Syncing.class);
         } catch (JsonSyntaxException syntaxException) // will throw if object hasn't been ported.
         {
             if (!returnNullIfError) {
@@ -66,12 +66,12 @@ public class SyncingInformation {
         }
     }
 
-    public static SyncingInformation getSyncingInfo(String customDataField) {
+    public static Syncing getSyncingInfo(String customDataField) {
         return getSyncingInfo(customDataField, false);
     }
 
     public static String getEmptySyncingInfoString(String objectIdentifier, UUID owner, boolean isGlobal) {
-        return CommonClass.gson.toJson(new SyncingInformation(List.of(), objectIdentifier, owner, isGlobal));
+        return CommonClass.gson.toJson(new Syncing(List.of(), objectIdentifier, owner, isGlobal));
     }
 
     public void addUserToShare(UUID playerUUID) {
@@ -103,7 +103,7 @@ public class SyncingInformation {
 
     private void update() {
         if (this.parentObject != null) {
-            String jsonString = CommonClass.gsonExcludeNoExpose.toJson(this, SyncingInformation.class);
+            String jsonString = CommonClass.gsonExcludeNoExpose.toJson(this, Syncing.class);
             this.parentObject.getRawJson().add("customData", new JsonPrimitive(jsonString));
 
             this.parentObject.update(this.parentObject.getRawJson().getAsJsonObject().toString(), true); // TODO: bug test more. This seems very janky and not done right. Will test more

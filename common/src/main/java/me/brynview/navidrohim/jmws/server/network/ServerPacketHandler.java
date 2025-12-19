@@ -259,9 +259,11 @@ public class ServerPacketHandler {
             }
 
             case CommandFactory.Commands.SERVER_CREATE_GROUP -> {
-                boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
 
-                if (serverEnabledJMWS() && ( ServerConfig.getConfig().groupsEnabled || isUpdateFromCreation)) {
+                boolean _UNUSED_isUpdateFromCreation = arguments.get(2).getAsBoolean(); // This is kept for compatibility between versions. I should've removed it in 1.2.0
+                // Could technically remove and wouldn't change anything, just keeping it here to remind me the issue exists. Must keep it on the client side though.
+
+                if (serverEnabledJMWS() && ServerConfig.getConfig().groupsEnabled) {
                     JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
                     boolean silent = arguments.get(1).getAsBoolean();
                     boolean waypointCreationSuccess = ServerGroup.createGroup(jsonCreationData, playerUUID);
