@@ -2,11 +2,10 @@ package me.brynview.navidrohim.jmws.client.plugin;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.utils.ObjectUtils;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.syncing.SyncingInformation;
+import me.brynview.navidrohim.jmws.common.syncing.Syncing;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,7 +48,7 @@ public class ObjectIdentifierMap {
      * @return Waypoint -- The old waypoint before update.
      */
     public static Waypoint getOldWaypoint(Waypoint newWaypoint) {
-        SyncingInformation persistentWaypointID = SyncingInformation.getSyncingInfo(newWaypoint.getCustomData());
+        Syncing persistentWaypointID = Syncing.getSyncingInfo(newWaypoint.getCustomData());
         if (persistentWaypointID != null)
         {
             return waypointIdentifierMap.get(persistentWaypointID.objectIdentifier);
@@ -74,7 +73,7 @@ public class ObjectIdentifierMap {
      */
     public static WaypointGroup getOldGroup(WaypointGroup newWaypointGroup)
     {
-        return groupIdentifierMap.get(SyncingInformation.getSyncingInfo(newWaypointGroup.getCustomData()).objectIdentifier);
+        return groupIdentifierMap.get(Syncing.getSyncingInfo(newWaypointGroup.getCustomData()).objectIdentifier);
     }
 
     /**
@@ -100,13 +99,13 @@ public class ObjectIdentifierMap {
             return false;
         } else {
             String waypointIdentifier;
-            @Nullable SyncingInformation waypointSyncInfo = SyncingInformation.getSyncingInfo(customDataField, true);
+            @Nullable Syncing waypointSyncInfo = Syncing.getSyncingInfo(customDataField, true);
             if (waypointSyncInfo != null)
             {
                 waypointIdentifier = waypointSyncInfo.objectIdentifier;
             } else {
                 waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypoint.getGuid(), waypoint.getName());
-                waypoint.setCustomData(SyncingInformation.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID(), false));
+                waypoint.setCustomData(Syncing.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID(), false));
             }
 
             waypointIdentifierMap.put(waypointIdentifier, waypoint);
@@ -127,13 +126,13 @@ public class ObjectIdentifierMap {
             return false;
         } else {
             String groupIdentifier;
-            @Nullable SyncingInformation groupSyncInfo = SyncingInformation.getSyncingInfo(waypointGroup.getCustomData(), true);
+            @Nullable Syncing groupSyncInfo = Syncing.getSyncingInfo(waypointGroup.getCustomData(), true);
             if (groupSyncInfo != null)
             {
                 groupIdentifier = groupSyncInfo.objectIdentifier;
             } else {
                 groupIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypointGroup.getGuid(), waypointGroup.getName());
-                waypointGroup.setCustomData(SyncingInformation.getEmptySyncingInfoString(groupIdentifier, minecraftClientInstance.player.getUUID(), false));
+                waypointGroup.setCustomData(Syncing.getEmptySyncingInfoString(groupIdentifier, minecraftClientInstance.player.getUUID(), false));
             }
 
             groupIdentifierMap.put(groupIdentifier, waypointGroup);
@@ -149,7 +148,7 @@ public class ObjectIdentifierMap {
     {
         try
         {
-            waypointIdentifierMap.remove(SyncingInformation.getSyncingInfo(waypoint.getCustomData()).objectIdentifier);
+            waypointIdentifierMap.remove(Syncing.getSyncingInfo(waypoint.getCustomData()).objectIdentifier);
         } catch (NullPointerException noObjIgnore)
         {
             return;
@@ -164,7 +163,7 @@ public class ObjectIdentifierMap {
     {
         try
         {
-            @Nullable SyncingInformation groupSyncInfo = SyncingInformation.getSyncingInfo(group.getCustomData());
+            @Nullable Syncing groupSyncInfo = Syncing.getSyncingInfo(group.getCustomData());
             if (groupSyncInfo != null)
                 groupIdentifierMap.remove(groupSyncInfo.objectIdentifier);
         } catch (NullPointerException noObjIgnore)

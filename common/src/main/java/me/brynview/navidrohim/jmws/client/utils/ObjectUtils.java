@@ -6,8 +6,6 @@ import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.common.syncing.SyncingInformation;
-import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import org.joml.Vector3d;
 
 import java.util.UUID;

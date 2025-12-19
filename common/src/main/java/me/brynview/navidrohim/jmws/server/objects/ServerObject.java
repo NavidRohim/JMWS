@@ -10,7 +10,7 @@ import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.common.syncing.SyncingInformation;
+import me.brynview.navidrohim.jmws.common.syncing.Syncing;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
@@ -37,7 +37,7 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
     String groupIdentifier;
 
     public UserSharingFile accessorSharing;
-    public SyncingInformation syncing;
+    public Syncing syncing;
 
     public   boolean dataclass;
     public static ObjectType objectType = ObjectType.GENERIC;
@@ -59,7 +59,7 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
         this.dataclass = dataclass;
 
         this.ownerUUID = playerUUID; // Note; if you set ownerUUID before this.syncing is defined, it enables some sort of compatibility for legacy clients. But I've left it as-is to avoid chaos.
-        this.syncing = SyncingInformation.getSyncingInfo(this);
+        this.syncing = Syncing.getSyncingInfo(this);
 
         this.name = payload.get("name").getAsString();
         this.accessorSharing = !dataclass ? new UserSharingFile(playerUUID) : null;

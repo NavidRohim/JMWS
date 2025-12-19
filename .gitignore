@@ -2,10 +2,15 @@ run
 runs
 build
 buildSrc
+debug
 verspec/
+
+debug.py
 
 .idea/
 .gradle/
 *.lock
 *.launch
+*.json
+
 journeymap-*

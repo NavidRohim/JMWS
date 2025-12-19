@@ -259,9 +259,7 @@ public class ServerPacketHandler {
             }
 
             case CommandFactory.Commands.SERVER_CREATE_GROUP -> {
-                boolean isUpdateFromCreation = arguments.get(2).getAsBoolean();
-
-                if (serverEnabledJMWS() && ( ServerConfig.getConfig().groupsEnabled || isUpdateFromCreation)) {
+                if (serverEnabledJMWS() && ServerConfig.getConfig().groupsEnabled) {
                     JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
                     boolean silent = arguments.get(1).getAsBoolean();
                     boolean waypointCreationSuccess = ServerGroup.createGroup(jsonCreationData, playerUUID);

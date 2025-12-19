@@ -6,7 +6,7 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
-import me.brynview.navidrohim.jmws.common.syncing.SyncingInformation;
+import me.brynview.navidrohim.jmws.common.syncing.Syncing;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,7 +45,7 @@ public class LegacyObject
                 LegacyObject oldObj = new LegacyObject(payload);
                 if (isLegacyDataField(oldObj.getCustomData()))
                 {
-                    oldObj.setCustomData(SyncingInformation.getEmptySyncingInfoString(oldObj.getCustomData(), owner, false));
+                    oldObj.setCustomData(Syncing.getEmptySyncingInfoString(oldObj.getCustomData(), owner, false));
                     Constructor<? extends ServerObject> constructor = newType.getObjectClass().getConstructor(JsonObject.class, UUID.class);
                     T newObj = (T) constructor.newInstance(payload, owner);
                     newObj.create();
