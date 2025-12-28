@@ -7,4 +7,5 @@ verspec/
 .idea/
 .gradle/
 *.lock
+*.launch
 journeymap-*
