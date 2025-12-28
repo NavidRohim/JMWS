@@ -131,7 +131,13 @@ public class ServerPacketHandler {
         }
     }
 
-    public static void handleIncomingActionCommand(PacketContext<JMWSActionPayload> Context, ServerPlayer player) {
+    public static void handleIncomingActionCommand(PacketContext<JMWSActionPayload> Context, @Nullable ServerPlayer player) {
+
+        if (player == null)
+        {
+            Constants.getLogger().debug("Trashing packet as it's context is no longer valid. Cause is unknown but could be mod incompatibility or lag.");
+            return;
+        }
 
         JMWSActionPayload waypointActionPayload = Context.message();
         CommandFactory.Commands command = waypointActionPayload.command();
