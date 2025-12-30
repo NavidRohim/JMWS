@@ -135,7 +135,7 @@ public class ServerPacketHandler {
 
         if (player == null)
         {
-            Constants.getLogger().debug("Trashing packet as it's context is no longer valid. Cause is unknown but could be mod incompatibility or lag.");
+            Constants.getLogger().debug("Trashing packet as it's context is no longer valid. Cause is unknown but could be mod incompatibility or lag.\nDead packet = %s".formatted(Context.message().command()));
             return;
         }
 
