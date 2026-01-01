@@ -1,7 +1,6 @@
 package me.brynview.navidrohim.jmws.client.commands;
 
 import commonnetwork.api.Dispatcher;
-import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
@@ -40,7 +39,7 @@ public class ClientCommands {
     public static int sync()
     {
         if (isNotInSingleplayer()) {
-            JMWSPlugin.updateWaypoints(true);
+            JMWSPlugin.sync(true);
         } else {
             sendUserSinglePlayerWarning();
         }
@@ -74,7 +73,7 @@ public class ClientCommands {
                     true
             ));
             Dispatcher.sendToServer(deleteServerObjectPayload); // Deletes waypoints on the server
-            JMWSPlugin.updateWaypoints(false);
+            JMWSPlugin.sync(false);
             JMWSPlugin.deleteAllGroups(); // Deletes local copies.
         } else {
             sendUserSinglePlayerWarning();
@@ -92,7 +91,7 @@ public class ClientCommands {
         if (isNotInSingleplayer()) {
             JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandFactory.makeDeleteRequestJson("*", false, true)); // * = all
             Dispatcher.sendToServer(deleteServerObjectPayload);
-            JMWSPlugin.updateWaypoints(false);
+            JMWSPlugin.sync(false);
         } else {
             sendUserSinglePlayerWarning();
         }

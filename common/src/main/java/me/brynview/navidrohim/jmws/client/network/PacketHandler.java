@@ -57,7 +57,7 @@ public class PacketHandler {
 
                 // was "update"
                 // Sends "request" packet | New = "SYNC"
-                case REQUEST_CLIENT_SYNC -> JMWSPlugin.updateWaypoints(true);
+                case REQUEST_CLIENT_SYNC -> JMWSPlugin.sync(true);
 
                 // was display_interval
                 // No outbound data

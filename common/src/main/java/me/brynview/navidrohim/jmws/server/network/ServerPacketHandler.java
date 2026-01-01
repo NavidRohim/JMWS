@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.server.network;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
@@ -34,6 +35,11 @@ public class ServerPacketHandler {
 
     private static boolean serverEnabledJMWS() {
         return ServerConfig.getConfig().jmwsEnabled && (ServerConfig.getConfig().groupsEnabled || ServerConfig.getConfig().waypointsEnabled);
+    }
+
+    private static void debugLogCorruptPacket(CommandFactory.Commands command, UUID playerUUID, List<JsonElement> arguments, Exception error)
+    {
+        Constants.getLogger().debug("Got corrupt packet command %s for user %s data following\n\nCommand: %s\nArguments: %s\nException: %s".formatted(command, playerUUID, command, arguments.toString(), error.getMessage()));
     }
 
     public static void sendUserSync(ServerPlayer player, boolean sendAlert, boolean isDeathSync, boolean onlySyncShared)
@@ -144,223 +150,229 @@ public class ServerPacketHandler {
         List<JsonElement> arguments = waypointActionPayload.arguments();
         UUID playerUUID = player.getGameProfile().getId();
 
-        switch (command) {
+        try
+        {
+            switch (command) {
 
-            // Following two cases are for deleting waypoints and groups
-            case CommandFactory.Commands.COMMON_DELETE_GROUP -> {
+                // Following two cases are for deleting waypoints and groups
+                case CommandFactory.Commands.COMMON_DELETE_GROUP -> {
 
-                String groupUniversalIdentifier = arguments.getFirst().getAsString();
-                String groupGUID = arguments.get(1).getAsString();
+                    String groupUniversalIdentifier = arguments.getFirst().getAsString();
+                    String groupGUID = arguments.get(1).getAsString();
 
-                boolean silent = arguments.get(2).getAsBoolean();
-                boolean deleteAllWaypointsInGroup = arguments.get(3).getAsBoolean();
-                boolean removeGroupItself = arguments.get(4).getAsBoolean();
-                boolean isObjGlobal = arguments.get(5).getAsBoolean();
-                boolean deleteAllObjects = arguments.getLast().getAsBoolean();
+                    boolean silent = arguments.get(2).getAsBoolean();
+                    boolean deleteAllWaypointsInGroup = arguments.get(3).getAsBoolean();
+                    boolean removeGroupItself = arguments.get(4).getAsBoolean();
+                    boolean isObjGlobal = arguments.get(5).getAsBoolean();
+                    boolean deleteAllObjects = arguments.getLast().getAsBoolean();
 
-                boolean result;
-                @Nullable ServerGroup group = ServerGroup.getGroupFromUniqueIdentifier(groupUniversalIdentifier, playerUUID);
+                    boolean result;
+                    @Nullable ServerGroup group = ServerGroup.getGroupFromUniqueIdentifier(groupUniversalIdentifier, playerUUID);
 
-                if (group != null)
-                {
-                    if (group.syncing.isOwner(playerUUID))
+                    if (group != null)
                     {
-                        if (deleteAllWaypointsInGroup)
+                        if (group.syncing.isOwner(playerUUID))
                         {
-                            result = group.deleteWaypoints();
-                            if (!removeGroupItself && result)
+                            if (deleteAllWaypointsInGroup)
                             {
-                                sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false, silent);
-                                return;
+                                result = group.deleteWaypoints();
+                                if (!removeGroupItself && result)
+                                {
+                                    sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false, silent);
+                                    return;
+                                }
                             }
-                        }
-                        group.stopSharing();
-                        result = group.delete(false);
+                            group.stopSharing();
+                            result = group.delete(false);
 
-                        if (result) {
+                            if (result) {
+                                sendUserMessage(player, "message.jmws.deletion_group_success", true, false, silent);
+                            } else {
+                                sendUserMessage(player, "message.jmws.deletion_group_failure", true, true, silent);
+                            }
+
+                        } else if (group.syncing.isGlobal()) {
+                            sendUserMessage(player, "global.jmws.cannot_delete_global", true, JMWSMessageType.ONE_TIME_WARNING);
+                        } else {
+                            group.stopSharing(playerUUID);
+                            sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
+                        }
+
+                    } else if (deleteAllWaypointsInGroup)
+                    {
+                        ServerGroup.deleteWaypoints(playerUUID, groupGUID);
+                        sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false);
+                    } else if (deleteAllObjects)
+                    {
+                        if (ServerObject.deleteAll(playerUUID, ObjectType.GROUP)) {
                             sendUserMessage(player, "message.jmws.deletion_group_success", true, false, silent);
                         } else {
                             sendUserMessage(player, "message.jmws.deletion_group_failure", true, true, silent);
                         }
 
-                    } else if (group.syncing.isGlobal()) {
-                        sendUserMessage(player, "global.jmws.cannot_delete_global", true, JMWSMessageType.ONE_TIME_WARNING);
-                    } else {
-                        group.stopSharing(playerUUID);
-                        sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
                     }
-
-                } else if (deleteAllWaypointsInGroup)
-                {
-                    ServerGroup.deleteWaypoints(playerUUID, groupGUID);
-                    sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false);
-                } else if (deleteAllObjects)
-                {
-                    if (ServerObject.deleteAll(playerUUID, ObjectType.GROUP)) {
-                        sendUserMessage(player, "message.jmws.deletion_group_success", true, false, silent);
-                    } else {
-                        sendUserMessage(player, "message.jmws.deletion_group_failure", true, true, silent);
-                    }
-
                 }
-            }
 
-            case CommandFactory.Commands.COMMON_DELETE_WAYPOINT -> {
+                case CommandFactory.Commands.COMMON_DELETE_WAYPOINT -> {
 
-                String waypointIdentifier = arguments.getFirst().getAsString().stripTrailing();
-                boolean silent = arguments.get(1).getAsBoolean();
-                boolean deleteAll = arguments.getLast().getAsBoolean();
-                boolean result;
+                    String waypointIdentifier = arguments.getFirst().getAsString().stripTrailing();
+                    boolean silent = arguments.get(1).getAsBoolean();
+                    boolean deleteAll = arguments.getLast().getAsBoolean();
+                    boolean result;
 
-                ServerWaypoint waypoint = ServerWaypoint.getWaypointFromUniqueIdentifier(waypointIdentifier, playerUUID);
+                    ServerWaypoint waypoint = ServerWaypoint.getWaypointFromUniqueIdentifier(waypointIdentifier, playerUUID);
 
-                if (waypoint != null) {
-                    if (waypoint.syncing.isOwner(playerUUID)) {
-                        result = waypoint.delete(true);
+                    if (waypoint != null) {
+                        if (waypoint.syncing.isOwner(playerUUID)) {
+                            result = waypoint.delete(true);
 
-                        if (!silent) {
-                            if (result) {
-                                sendUserMessage(player, "message.jmws.deletion_success", true, false);
-                            } else {
-                                sendUserMessage(player, "message.jmws.deletion_failure", true, true);
+                            if (!silent) {
+                                if (result) {
+                                    sendUserMessage(player, "message.jmws.deletion_success", true, false);
+                                } else {
+                                    sendUserMessage(player, "message.jmws.deletion_failure", true, true);
+                                }
                             }
+                        } else if (waypoint.syncing.isGlobal()) {
+                            sendUserMessage(player, "global.jmws.cannot_delete_global", true, JMWSMessageType.ONE_TIME_WARNING);
+                        } else {
+                            waypoint.stopSharing(playerUUID);
+                            sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
                         }
-                    } else if (waypoint.syncing.isGlobal()) {
-                        sendUserMessage(player, "global.jmws.cannot_delete_global", true, JMWSMessageType.ONE_TIME_WARNING);
-                    } else {
-                        waypoint.stopSharing(playerUUID);
-                        sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
-                    }
-                } else if (deleteAll)
-                {
-                    if (ServerObject.deleteAll(playerUUID, ObjectType.WAYPOINT))
+                    } else if (deleteAll)
                     {
-                        sendUserMessage(player, "message.jmws.deletion_success", true, false);
+                        if (ServerObject.deleteAll(playerUUID, ObjectType.WAYPOINT))
+                        {
+                            sendUserMessage(player, "message.jmws.deletion_success", true, false);
+                        } else {
+                            sendUserMessage(player, "message.jmws.deletion_failure", true, true);
+                        }
                     } else {
                         sendUserMessage(player, "message.jmws.deletion_failure", true, true);
                     }
-                } else {
-                    sendUserMessage(player, "message.jmws.deletion_failure", true, true);
                 }
-            }
 
-            // Following two cases regarding creating groups and waypoints
-            case CommandFactory.Commands.SERVER_CREATE -> {
-                if (serverEnabledJMWS() && (ServerConfig.getConfig().waypointsEnabled)) {
-                    JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
-                    boolean silent = arguments.get(1).getAsBoolean();
-                    boolean waypointCreationSuccess = ServerWaypoint.createWaypoint(jsonCreationData, playerUUID);
+                // Following two cases regarding creating groups and waypoints
+                case CommandFactory.Commands.SERVER_CREATE -> {
+                    if (serverEnabledJMWS() && (ServerConfig.getConfig().waypointsEnabled)) {
+                        JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
+                        boolean silent = arguments.get(1).getAsBoolean();
+                        boolean waypointCreationSuccess = ServerWaypoint.createWaypoint(jsonCreationData, playerUUID);
 
-                    if (!silent) {
-                        if (waypointCreationSuccess) {
-                            sendUserMessage(player, "message.jmws.creation_success", true, false);
-                        } else {
+                        if (!silent) {
+                            if (waypointCreationSuccess) {
+                                sendUserMessage(player, "message.jmws.creation_success", true, false);
+                            } else {
 
-                            sendUserMessage(player, "message.jmws.creation_failure", false, true);
-                        }
-                    }
-                } else {
-                    sendUserMessage(player, "message.jmws.server_disabled_waypoints", true, true);
-                }
-            }
-
-            case CommandFactory.Commands.SERVER_CREATE_GROUP -> {
-
-                boolean _UNUSED_isUpdateFromCreation = arguments.get(2).getAsBoolean(); // This is kept for compatibility between versions. I should've removed it in 1.2.0
-                // Could technically remove and wouldn't change anything, just keeping it here to remind me the issue exists. Must keep it on the client side though.
-
-                if (serverEnabledJMWS() && ServerConfig.getConfig().groupsEnabled) {
-                    JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
-                    boolean silent = arguments.get(1).getAsBoolean();
-                    boolean waypointCreationSuccess = ServerGroup.createGroup(jsonCreationData, playerUUID);
-
-                    if (!silent) {
-                        if (waypointCreationSuccess) {
-                            sendUserMessage(player, "message.jmws.creation_group_success", true, false);
-                        } else {
-                            sendUserMessage(player, "message.jmws.creation_group_failure", false, true);
-
-                        }
-                    }
-                } else {
-                    sendUserMessage(player, "message.jmws.server_disabled_groups", true, true);
-                }
-            }
-
-            case UPDATE -> // Bug here, after updating, the user share list is cleared
-            {
-                String objectIdentifier = arguments.getFirst().getAsString();
-                ObjectType modifyingType = ObjectType.valueOf(arguments.get(1).getAsString());
-                boolean isGlobal = arguments.get(2).getAsBoolean();
-                String objectData = arguments.getLast().getAsString();
-
-                ServerObject obj = JMWSServerIO.getObjectFromUniqueIdentifier(objectIdentifier, playerUUID, modifyingType);
-
-                if (obj != null)
-                {
-                    if (obj.syncing.isOwner(playerUUID))
-                    {
-                        obj.update(objectData, false);
-                        obj.syncing.syncToUsers();
-
-                        if (modifyingType == ObjectType.WAYPOINT)
-                        {
-                            PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_waypoint_success", true, JMWSMessageType.NEUTRAL);
-                        } else {
-                            PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_group_success", true, JMWSMessageType.NEUTRAL);
+                                sendUserMessage(player, "message.jmws.creation_failure", false, true);
+                            }
                         }
                     } else {
-                        sendUserMessage(player, "sharing.jmws.local_only", false, JMWSMessageType.ONE_TIME_WARNING);
+                        sendUserMessage(player, "message.jmws.server_disabled_waypoints", true, true);
                     }
                 }
-            }
 
-            // was "request"
-            case CommandFactory.Commands.SYNC -> {
-                if (player instanceof ServerPlayer)
+                case CommandFactory.Commands.SERVER_CREATE_GROUP -> {
+
+                    boolean _UNUSED_isUpdateFromCreation = arguments.get(2).getAsBoolean(); // This is kept for compatibility between versions. I should've removed it in 1.2.0
+                    // Could technically remove and wouldn't change anything, just keeping it here to remind me the issue exists. Must keep it on the client side though.
+
+                    if (serverEnabledJMWS() && ServerConfig.getConfig().groupsEnabled) {
+                        JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
+                        boolean silent = arguments.get(1).getAsBoolean();
+                        boolean waypointCreationSuccess = ServerGroup.createGroup(jsonCreationData, playerUUID);
+
+                        if (!silent) {
+                            if (waypointCreationSuccess) {
+                                sendUserMessage(player, "message.jmws.creation_group_success", true, false);
+                            } else {
+                                sendUserMessage(player, "message.jmws.creation_group_failure", false, true);
+
+                            }
+                        }
+                    } else {
+                        sendUserMessage(player, "message.jmws.server_disabled_groups", true, true);
+                    }
+                }
+
+                case UPDATE -> // Bug here, after updating, the user share list is cleared
                 {
+                    String objectIdentifier = arguments.getFirst().getAsString();
+                    ObjectType modifyingType = ObjectType.valueOf(arguments.get(1).getAsString());
+                    boolean isGlobal = arguments.get(2).getAsBoolean();
+                    String objectData = arguments.getLast().getAsString();
+
+                    ServerObject obj = JMWSServerIO.getObjectFromUniqueIdentifier(objectIdentifier, playerUUID, modifyingType);
+
+                    if (obj != null)
+                    {
+                        if (obj.syncing.isOwner(playerUUID))
+                        {
+                            obj.update(objectData, false);
+                            obj.syncing.syncToUsers();
+
+                            if (modifyingType == ObjectType.WAYPOINT)
+                            {
+                                PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_waypoint_success", true, JMWSMessageType.NEUTRAL);
+                            } else {
+                                PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_group_success", true, JMWSMessageType.NEUTRAL);
+                            }
+                        } else {
+                            sendUserMessage(player, "sharing.jmws.local_only", false, JMWSMessageType.ONE_TIME_WARNING);
+                        }
+                    }
+                }
+
+                // was "request"
+                case CommandFactory.Commands.SYNC -> {
                     boolean sendAlert = arguments.get(2).getAsBoolean();
                     boolean isDeathSync = arguments.getLast().getAsBoolean();
                     sendUserSync(player, sendAlert, isDeathSync, false);
                 }
-            }
 
-            case CommandFactory.Commands.USER_ALREADY_PROCESSING_SHARE, CommandFactory.Commands.REJECT_SHARE ->
-            {
-                UUID forUser = UUID.fromString(Context.message().arguments().getFirst().getAsString());
-                Dispatcher.sendToClient(Context.message(), Context.sender().level().getServer().getPlayerList().getPlayer(forUser));
-            }
-
-            case CommandFactory.Commands.AFFIRM_SHARE ->
-            {
-                UUID ownerUUID = UUID.fromString(arguments.getFirst().getAsString());
-                String objectIdentifier = arguments.get(1).getAsString();
-                ObjectType objType = ObjectType.valueOf(arguments.get(2).getAsString());
-                ServerObject sharedWp = JMWSServerIO.getObjectFromDisk(objectIdentifier, ownerUUID, objType);
-
-                if (sharedWp != null)
+                case CommandFactory.Commands.USER_ALREADY_PROCESSING_SHARE, CommandFactory.Commands.REJECT_SHARE ->
                 {
-                    try (UserSharingFile usf = new UserSharingFile(playerUUID))
-                    {
-                        usf.addToShared(objectIdentifier, objType);
-                    }
-                    sharedWp.syncing.addUserToShare(playerUUID);
-                    Dispatcher.sendToClient(waypointActionPayload, CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(ownerUUID));
-                } else {
-                    sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
+                    UUID forUser = UUID.fromString(Context.message().arguments().getFirst().getAsString());
+                    Dispatcher.sendToClient(Context.message(), Context.sender().level().getServer().getPlayerList().getPlayer(forUser));
                 }
-            }
 
-            case TRANSITION ->
-            {
-                String objectID = arguments.getFirst().getAsString();
-                Path legacyObjPath = Path.of(arguments.get(1).getAsString());
-                ObjectType objectType = ObjectType.valueOf(arguments.getLast().getAsString());
+                case CommandFactory.Commands.AFFIRM_SHARE ->
+                {
+                    UUID ownerUUID = UUID.fromString(arguments.getFirst().getAsString());
+                    String objectIdentifier = arguments.get(1).getAsString();
+                    ObjectType objType = ObjectType.valueOf(arguments.get(2).getAsString());
+                    ServerObject sharedWp = JMWSServerIO.getObjectFromDisk(objectIdentifier, ownerUUID, objType);
 
-                LegacyObject.transitionIfNeed(legacyObjPath, playerUUID, objectType);
+                    if (sharedWp != null)
+                    {
+                        try (UserSharingFile usf = new UserSharingFile(playerUUID))
+                        {
+                            usf.addToShared(objectIdentifier, objType);
+                        }
+                        sharedWp.syncing.addUserToShare(playerUUID);
+                        Dispatcher.sendToClient(waypointActionPayload, CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(ownerUUID));
+                    } else {
+                        sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
+                    }
+                }
 
-            }
-            default -> Constants.getLogger().warn("Unknown packet command -> {}", command);
+                case TRANSITION ->
+                {
+                    String objectID = arguments.getFirst().getAsString();
+                    Path legacyObjPath = Path.of(arguments.get(1).getAsString());
+                    ObjectType objectType = ObjectType.valueOf(arguments.getLast().getAsString());
+
+                    LegacyObject.transitionIfNeed(legacyObjPath, playerUUID, objectType);
+
+                }
+
+                default -> Constants.getLogger().warn("Unknown packet command -> {}", command);}
+
+        } catch (UnsupportedOperationException error)
+        {
+            // Thrown if arguments cannot be parsed by Gson. Usually a corrupt packet but ideally this should never be called as it is
+            // Handled on the client. Other errors will just have a normal traceback.
+            debugLogCorruptPacket(command, playerUUID, arguments, error);
         }
     }
 }

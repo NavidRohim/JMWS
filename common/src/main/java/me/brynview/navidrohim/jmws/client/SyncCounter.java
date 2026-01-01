@@ -1,12 +1,10 @@
 package me.brynview.navidrohim.jmws.client;
 
-import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
-import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
+import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.minecraft.client.multiplayer.ClientLevel;
 
-import static me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin.updateWaypoints;
+import static me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin.sync;
 
 /**
  * Auto-sync counter class. Keeps track of how often the client should sync.
@@ -71,7 +69,7 @@ public class SyncCounter {
                 tickCounter++;
                 if (tickCounter >= tickCounterUpdateThreshold) { // Check if we have reached auto-sync threshold
 
-                    updateWaypoints(true); // sync
+                    JMWSPlugin.sync(true); // sync
                     resetSyncThreshold();
                     tickCounter = 0;
                 }

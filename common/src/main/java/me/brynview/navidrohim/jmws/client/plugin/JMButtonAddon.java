@@ -6,7 +6,7 @@ import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.helper.AssetHelper;
 import net.minecraft.network.chat.Component;
 
-import static me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin.updateWaypoints;
+import static me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin.sync;
 
 /**
  * Static methods for anything regarding buttons on the fullscreen.
@@ -66,6 +66,6 @@ public class JMButtonAddon {
      * @param iThemeButton the button, will be the manual sync button
      */
     private static void updateFromButton(IThemeButton iThemeButton) {
-        updateWaypoints(true);
+        JMWSPlugin.sync(true);
     }
 }
