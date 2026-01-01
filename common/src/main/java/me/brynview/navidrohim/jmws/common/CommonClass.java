@@ -167,6 +167,6 @@ public class CommonClass {
 
     public static boolean isValidCommandUser(CommandSourceStack commandSourceStack)
     {
-        return !isInternalServer() || (!CommonClass.getMinecraftServerInstance().isSingleplayerOwner(commandSourceStack.getPlayer().getGameProfile())); // No host user
+        return !isInternalServer() || (!CommonClass.getMinecraftServerInstance().isSingleplayerOwner(commandSourceStack.getPlayer().nameAndId())); // No host user
     }
 }
