@@ -234,7 +234,7 @@ public class JMWSPlugin implements IClientPlugin {
             // Trying to delete an in-built group with JM will delete the waypoints inside the group. The following flow statement checks for that and does it on the server.
             if (Constants.forbiddenGroups.contains(waypointGroup.getGuid()) && waypointGroupEvent.getContext().equals(WaypointGroupEvent.Context.DELETED))
             {
-                this.groupDeletionHandler(waypointGroup, false, true, false);
+                this.groupDeletionHandler(waypointGroup, true, false);
             }
             else if (!Constants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) { // If group is not in-built and can be deleted
                 if (player == null) {
@@ -245,7 +245,7 @@ public class JMWSPlugin implements IClientPlugin {
 
                 switch (waypointGroupEvent.getContext()) {
                     case CREATE -> this.groupCreationHandler(waypointGroup, false);
-                    case DELETED -> this.groupDeletionHandler(waypointGroup, false, waypointGroupEvent.deleteWaypoints(), true);
+                    case DELETED -> this.groupDeletionHandler(waypointGroup, waypointGroupEvent.deleteWaypoints(), true);
                     case UPDATE -> {this.groupUpdateHandler(waypointGroup);}
                 }
             }
@@ -254,12 +254,12 @@ public class JMWSPlugin implements IClientPlugin {
 
     /**
      * Delete group(s) on the server.
-     * @param waypointGroup -- What group needs deleting
-     * @param silent -- If the deletion should be silent (no text alert)
+     *
+     * @param waypointGroup      -- What group needs deleting
      * @param deleteAllWaypoints -- If to delete all the users groups on the server.
-     * @param removeGroupItself -- If to delete just the waypoints inside the group, not the group itself. Used in edge cases like removing all waypoints in an in-built group.
+     * @param removeGroupItself  -- If to delete just the waypoints inside the group, not the group itself. Used in edge cases like removing all waypoints in an in-built group.
      */
-    private void groupDeletionHandler(WaypointGroup waypointGroup, boolean silent, boolean deleteAllWaypoints, boolean removeGroupItself)
+    private void groupDeletionHandler(WaypointGroup waypointGroup, boolean deleteAllWaypoints, boolean removeGroupItself)
     {
         if (CommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
         {
@@ -274,7 +274,7 @@ public class JMWSPlugin implements IClientPlugin {
                     String jsonPacketData = CommandFactory.makeDeleteGroupRequestJson(
                             uID,
                             waypointGroup.getGuid(),
-                            silent,
+                            false,
                             deleteAllWaypoints,
                             removeGroupItself,
                             gsi.isGlobal(),
@@ -544,7 +544,7 @@ public class JMWSPlugin implements IClientPlugin {
      * Sync helper for waypoints
      * @param jsonWaypoints -- The waypoints to add to the client.
      * @return boolean -- If the user had any local waypoints to upload.
-     * @throws JsonSyntaxException -- If there is a syntax error with the Json, usually from a corrupted waypoint.
+     * @throws JsonSyntaxException -- If there is a syntax error with the JSON, usually from a corrupted waypoint.
      */
     private boolean handleUploadWaypoints(JsonObject jsonWaypoints, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException {
         boolean hasLocalWaypoint = false;

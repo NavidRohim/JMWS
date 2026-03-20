@@ -70,8 +70,13 @@ public class ServerCommands {
         {
             if (make)
             {
-                globalObject.makeGlobal();
-                PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.made_global", true, JMWSMessageType.NEUTRAL);
+                if (!globalObject.syncing.isGlobal())
+                {
+                    globalObject.makeGlobal();
+                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.made_global", true, JMWSMessageType.NEUTRAL);
+                } else {
+                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.already_global", true, JMWSMessageType.WARNING);
+                }
             } else {
                 if (globalObject.syncing.isGlobal())
                 {
