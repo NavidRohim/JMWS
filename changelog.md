@@ -1,18 +1,15 @@
-# 1.2.2 Changelog
+# 1.2.4 Changelog
 
 ## New
 
-No new features. Very minor bug fix.
+- New command
+  - `remove_global_no_op waypoint|group <object_identifier>` --> Removes a global object that was made by an opped player who is no longer opped. 
 
 ## Bug fixes
 
-- Fixed a bug where if you tried to update a local-only waypoint, game would crash.
-    - Issue discovered by Kaac on discord. I owe them this as it caused trouble for them.
-- Fixed an issue where Waystones waypoints would duplicate / not show at all.
-    - Resolves https://github.com/NavidRohim/JMWS/issues/5
-- JMWS no longer syncs objects belonging to other plugins. Only player-made objects.
+- Added text response if a global object is already global.
 
-## Bugs that I am aware of
+## Pre-existing bugs
 
 - When using fullscreen map, you cannot delete synced objects with the dropdown menu.
   - This is a JourneyMap problem and will be fixed in the future.
@@ -22,4 +19,12 @@ When they are fixed in JourneyMap, so will the config screen in my mod (E.g. I w
 
 ### Server
 
-Server version is still 1.101 (No change)
+Server version is 1.103
+
+- Added new command stated above.
+- Added new client text.
+
+Due to the new client text, servers will **expect** clients to be
+compatible with 1.103. 
+
+Technically a client can join without issue (no crashes or errors) but it will produce unexpected text feedback results.

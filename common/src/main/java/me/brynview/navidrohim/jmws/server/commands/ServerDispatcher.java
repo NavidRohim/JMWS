@@ -51,7 +51,24 @@ public class ServerDispatcher {
                         .then(Commands.argument("waypointName", StringArgumentType.greedyString())
                                 .suggests(Server::suggestGlobalWaypoints)
                                 .executes(ServerDispatcher::removeServerWp)))
+                .then(Commands.literal("remove_global_no_op")
+                        .then(Commands.literal("waypoint")
+                            .then(Commands.argument("waypointName", StringArgumentType.greedyString()))
+                            .executes(ServerDispatcher::removeServerWpFromBadOp))
+                        .then(Commands.literal("group")
+                            .then(Commands.argument("groupName", StringArgumentType.greedyString()))
+                            .executes(ServerDispatcher::removeServerGpFromBadOp))
+                )
         );
+    }
+
+    private static int removeServerGpFromBadOp(CommandContext<CommandSourceStack> commandSourceStackCommandContext)
+    {
+        return 0;
+    }
+
+    private static int removeServerWpFromBadOp(CommandContext<CommandSourceStack> commandSourceStackCommandContext) {
+        return 0;
     }
 
     private static int doRemoveShareWaypoint(CommandContext<CommandSourceStack> context1) throws CommandSyntaxException {
