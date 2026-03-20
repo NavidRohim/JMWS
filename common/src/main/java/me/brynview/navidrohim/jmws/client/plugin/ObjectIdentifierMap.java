@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.client.plugin;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.utils.ObjectUtils;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
@@ -48,7 +49,7 @@ public class ObjectIdentifierMap {
      * @return Waypoint -- The old waypoint before update.
      */
     public static Waypoint getOldWaypoint(Waypoint newWaypoint) {
-        Syncing persistentWaypointID = Syncing.getSyncingInfo(newWaypoint.getCustomData());
+        Syncing persistentWaypointID = Syncing.getSyncingInfo(newWaypoint.getCustomData(Constants.MODID));
         if (persistentWaypointID != null)
         {
             return waypointIdentifierMap.get(persistentWaypointID.objectIdentifier);
@@ -73,7 +74,7 @@ public class ObjectIdentifierMap {
      */
     public static WaypointGroup getOldGroup(WaypointGroup newWaypointGroup)
     {
-        return groupIdentifierMap.get(Syncing.getSyncingInfo(newWaypointGroup.getCustomData()).objectIdentifier);
+        return groupIdentifierMap.get(Syncing.getSyncingInfo(newWaypointGroup.getCustomData(Constants.MODID)).objectIdentifier);
     }
 
     /**
@@ -92,7 +93,7 @@ public class ObjectIdentifierMap {
      */
     public static boolean addWaypointToMap(Waypoint waypoint)
     {
-        String customDataField = waypoint.getCustomData();
+        String customDataField = waypoint.getCustomData(Constants.MODID);
         if (isLegacyDataField(customDataField))
         {
             ObjectUtils.transitionObject(waypoint, PlayerHelper.ourUUID(), ObjectType.WAYPOINT);
@@ -105,7 +106,7 @@ public class ObjectIdentifierMap {
                 waypointIdentifier = waypointSyncInfo.objectIdentifier;
             } else {
                 waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypoint.getGuid(), waypoint.getName());
-                waypoint.setCustomData(Syncing.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID(), false));
+                waypoint.setCustomData(Syncing.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID(), false), Constants.MODID);
             }
 
             waypointIdentifierMap.put(waypointIdentifier, waypoint);
@@ -119,20 +120,20 @@ public class ObjectIdentifierMap {
      */
     public static boolean addGroupToMap(WaypointGroup waypointGroup)
     {
-        String customDataField = waypointGroup.getCustomData();
+        String customDataField = waypointGroup.getCustomData(Constants.MODID);
         if (isLegacyDataField(customDataField))
         {
             ObjectUtils.transitionObject(waypointGroup, PlayerHelper.ourUUID(), ObjectType.GROUP);
             return false;
         } else {
             String groupIdentifier;
-            @Nullable Syncing groupSyncInfo = Syncing.getSyncingInfo(waypointGroup.getCustomData(), true);
+            @Nullable Syncing groupSyncInfo = Syncing.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID), true);
             if (groupSyncInfo != null)
             {
                 groupIdentifier = groupSyncInfo.objectIdentifier;
             } else {
                 groupIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypointGroup.getGuid(), waypointGroup.getName());
-                waypointGroup.setCustomData(Syncing.getEmptySyncingInfoString(groupIdentifier, minecraftClientInstance.player.getUUID(), false));
+                waypointGroup.setCustomData(Syncing.getEmptySyncingInfoString(groupIdentifier, minecraftClientInstance.player.getUUID(), false), Constants.MODID);
             }
 
             groupIdentifierMap.put(groupIdentifier, waypointGroup);
@@ -148,7 +149,7 @@ public class ObjectIdentifierMap {
     {
         try
         {
-            waypointIdentifierMap.remove(Syncing.getSyncingInfo(waypoint.getCustomData()).objectIdentifier);
+            waypointIdentifierMap.remove(Syncing.getSyncingInfo(waypoint.getCustomData(Constants.MODID)).objectIdentifier);
         } catch (NullPointerException noObjIgnore)
         {
             return;
@@ -163,7 +164,7 @@ public class ObjectIdentifierMap {
     {
         try
         {
-            @Nullable Syncing groupSyncInfo = Syncing.getSyncingInfo(group.getCustomData());
+            @Nullable Syncing groupSyncInfo = Syncing.getSyncingInfo(group.getCustomData(Constants.MODID));
             if (groupSyncInfo != null)
                 groupIdentifierMap.remove(groupSyncInfo.objectIdentifier);
         } catch (NullPointerException noObjIgnore)

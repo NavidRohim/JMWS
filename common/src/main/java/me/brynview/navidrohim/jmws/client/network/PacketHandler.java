@@ -120,12 +120,12 @@ public class PacketHandler {
                     if (sharedObjectType == ObjectType.WAYPOINT)
                     {
                         Waypoint objectWp = WaypointFactory.fromWaypointJsonString(objectString);
-                        objectIdentifier = Syncing.getSyncingInfo(objectWp.getCustomData()).objectIdentifier;
+                        objectIdentifier = Syncing.getSyncingInfo(objectWp.getCustomData(Constants.MODID)).objectIdentifier;
                         object = objectWp;
                         objName = objectWp.getName();
                     } else {
                         WaypointGroup objectGp = WaypointFactory.fromGroupJsonString(objectString);
-                        objectIdentifier = Syncing.getSyncingInfo(objectGp.getCustomData()).objectIdentifier;
+                        objectIdentifier = Syncing.getSyncingInfo(objectGp.getCustomData(Constants.MODID)).objectIdentifier;
                         object = objectGp;
                         objName = objectGp.getName();
                     }

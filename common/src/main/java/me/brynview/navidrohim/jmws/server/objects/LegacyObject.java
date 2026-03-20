@@ -27,9 +27,9 @@ public class LegacyObject
         this.customData = payload.get("customData").getAsString();
     }
 
-    public String getCustomData() { return this.customData; }
+    public String getOldCustomData() { return this.customData; }
 
-    public void setCustomData(String data)
+    public void setSyncedCustomData(String data)
     {
         this.customData = data;
         this.payload.add("customData", new JsonPrimitive(data));
@@ -43,9 +43,9 @@ public class LegacyObject
             if (payload != null)
             {
                 LegacyObject oldObj = new LegacyObject(payload);
-                if (isLegacyDataField(oldObj.getCustomData()))
+                if (isLegacyDataField(oldObj.getOldCustomData()))
                 {
-                    oldObj.setCustomData(Syncing.getEmptySyncingInfoString(oldObj.getCustomData(), owner, false));
+                    oldObj.setSyncedCustomData(Syncing.getEmptySyncingInfoString(oldObj.getOldCustomData(), owner, false));
                     Constructor<? extends ServerObject> constructor = newType.getObjectClass().getConstructor(JsonObject.class, UUID.class);
                     T newObj = (T) constructor.newInstance(payload, owner);
                     newObj.create();

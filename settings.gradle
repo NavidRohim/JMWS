@@ -12,7 +12,8 @@ pluginManagement {
             }
             filter {
                 includeGroup('net.fabricmc')
-                includeGroup('fabric-loom')
+                // see https://docs.fabricmc.net/develop/porting/next for 26.1 changes to plugin id
+                includeGroup('net.fabricmc.fabric-loom')
             }
         }
         exclusiveContent {
@@ -49,4 +50,4 @@ rootProject.name = 'JMWS'
 include('common')
 include('fabric')
 include('neoforge')
-include('forge')
+//include('forge') No release.

@@ -28,9 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Dataclass to hold groups and waypoints from server. This is old code, so I wouldn't mess with it.
- */
 public class ServerObject extends LegacyObject implements PossessesIdentifier {
 
     String name;
@@ -93,6 +90,11 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
     }
 
     public String getName() { return this.name; }
+
+    @Override
+    public String getSyncedCustomData() {
+        return this.customData;
+    }
 
     public String getGroupIdentifier() { return this.groupIdentifier; } // No usages but may be used elsewhere like with generics not sure
 
@@ -193,7 +195,7 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
     {
         if (!updateSyncInfo) {
             ServerObject newChange = new ServerObject(JsonParser.parseString(data).getAsJsonObject(), this.ownerUUID, true);
-            newChange.setCustomData(this.getCustomData());
+            newChange.setSyncedCustomData(this.getOldCustomData());
             data = newChange.toString();
         }
 

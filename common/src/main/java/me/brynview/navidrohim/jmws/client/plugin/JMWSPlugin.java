@@ -6,8 +6,8 @@ import com.google.gson.JsonSyntaxException;
 import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.client.IClientPlugin;
-import journeymap.api.v2.client.JourneyMapPlugin;
 import journeymap.api.v2.client.event.*;
+import journeymap.api.v2.common.JourneyMapPlugin;
 import journeymap.api.v2.common.event.ClientEventRegistry;
 import journeymap.api.v2.common.event.CommonEventRegistry;
 import journeymap.api.v2.common.event.FullscreenEventRegistry;
@@ -64,7 +64,6 @@ public class JMWSPlugin implements IClientPlugin {
     @Override
     public void initialize(@NotNull IClientAPI jmClientApi)
     {
-
         this.jmAPI = jmClientApi;
 
         CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", this::waypointCreationHandler);
@@ -153,7 +152,7 @@ public class JMWSPlugin implements IClientPlugin {
         {
             if (isJmwsWaypoint(waypoint))
             {
-                Syncing syncing = Syncing.getSyncingInfo(waypoint.getCustomData());
+                Syncing syncing = Syncing.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
                 if (syncing != null)
                 {
                     Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncing.objectIdentifier, syncing.isGlobal(), waypoint)));
@@ -176,7 +175,7 @@ public class JMWSPlugin implements IClientPlugin {
         if (CommonClass.serverConfig.waypointsEnabled()) {
             if (isJmwsWaypoint(waypoint))
             {
-                @Nullable Syncing syncing = Syncing.getSyncingInfo(waypoint.getCustomData());
+                @Nullable Syncing syncing = Syncing.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
 
                 if (syncing != null) // Can be null if JMWS has no knowledge of a waypoint
                 {
@@ -266,7 +265,7 @@ public class JMWSPlugin implements IClientPlugin {
         {
             if (isJmwsGroup(waypointGroup))
             {
-                Syncing gsi = Syncing.getSyncingInfo(waypointGroup.getCustomData(), true);
+                Syncing gsi = Syncing.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID), true);
                 if (gsi != null)
                 {
                     ObjectIdentifierMap.removeGroupFromMap(waypointGroup); // Remove from identifier map
@@ -314,7 +313,7 @@ public class JMWSPlugin implements IClientPlugin {
         {
             if (isJmwsGroup(waypointGroup))
             {
-                Syncing syncing = Syncing.getSyncingInfo(waypointGroup.getCustomData());
+                Syncing syncing = Syncing.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID));
                 if (syncing != null)
                 {
                     Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncing.objectIdentifier, syncing.isGlobal(), waypointGroup)));
@@ -407,20 +406,21 @@ public class JMWSPlugin implements IClientPlugin {
 
     private static boolean isJmwsWaypoint(Waypoint waypoint)
     {
-        if (Constants.allowedMods.contains(waypoint.getModId()) && waypoint.getCustomData() == null && waypoint.isPersistent())
+        if (Constants.allowedMods.contains(waypoint.getModId()) && waypoint.getCustomData(Constants.MODID) == null && waypoint.isPersistent())
         {
             return true;
         }
-        return Constants.allowedMods.contains(waypoint.getModId()) && isValidCustomDataField(waypoint.getCustomData()) && !waypoint.isPersistent();
+        return Constants.allowedMods.contains(waypoint.getModId()) && isValidCustomDataField(waypoint.getCustomData(Constants.MODID)) && !waypoint.isPersistent();
     }
 
     private static boolean isJmwsGroup(WaypointGroup waypointGroup)
     {
-        if (Constants.allowedMods.contains(waypointGroup.getModId()) && waypointGroup.getCustomData() == null && waypointGroup.isPersistent())
+        @Nullable String customData = waypointGroup.getCustomData(Constants.MODID);
+        if (Constants.allowedMods.contains(waypointGroup.getModId()) && customData == null && waypointGroup.isPersistent())
         {
             return true;
         }
-        return Constants.allowedMods.contains(waypointGroup.getModId()) && isValidCustomDataField(waypointGroup.getCustomData()) && !waypointGroup.isPersistent();
+        return Constants.allowedMods.contains(waypointGroup.getModId()) && isValidCustomDataField(customData) && !waypointGroup.isPersistent();
     }
     // Syncing -- Functions for syncing waypoints and groups
 
@@ -514,7 +514,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Add server groups to the client
         for (WaypointGroup savedGroup : savedGroups) {
-            Syncing gpSync = Syncing.getSyncingInfo(savedGroup.getCustomData());
+            Syncing gpSync = Syncing.getSyncingInfo(savedGroup.getCustomData(Constants.MODID));
 
             if (gpSync.isGlobal() && gpSync.isOwner(PlayerHelper.ourUUID()))
             {
@@ -571,7 +571,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Add server waypoints to the client
         for (Waypoint savedWaypoint : savedWaypoints) {
-            Syncing wpSync = Syncing.getSyncingInfo(savedWaypoint.getCustomData());
+            Syncing wpSync = Syncing.getSyncingInfo(savedWaypoint.getCustomData(Constants.MODID));
 
             if (!wpSync.isOwner(PlayerHelper.ourUUID()))
             {

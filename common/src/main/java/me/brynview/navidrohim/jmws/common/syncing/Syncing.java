@@ -42,7 +42,7 @@ public class Syncing {
 
     public static Syncing getSyncingInfo(ServerObject object) {
         try {
-            Syncing syncing = CommonClass.gson.fromJson(object.getCustomData(), Syncing.class);
+            Syncing syncing = CommonClass.gson.fromJson(object.getSyncedCustomData(), Syncing.class);
             syncing.parentObject = object;
 
             return syncing;
