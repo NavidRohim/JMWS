@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.server.exceptions.ObjectError;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -86,11 +87,14 @@ public class JMWSServerIO {
         String globalPrefix = global ? globalObjPrefix : "";
 
         try (Stream<Path> files = Files.list(Path.of(pathSearch))) {
-                files.filter(Files::isRegularFile).forEach(path -> {
+            files.filter(Files::isRegularFile).forEach(path -> {
                 if (path.toString().contains(uuid.toString()) && path.toString().contains(globalPrefix)) {
                     waypointFileList.add(path);
                 }
             });
+        } catch (NoSuchFileException exc) {
+            CommonClass._createServerResources();
+            return getObjectPathsForUser(uuid, objectType, global);
         } catch (IOException err) {
             Constants.getLogger().error("Got error trying to get user objects: %s".formatted(err));
             return List.of();

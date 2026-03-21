@@ -84,6 +84,11 @@ public class Syncing {
         this.update();
     }
 
+    public void removeAllFromShare() {
+        this.sharedTo.clear();
+        this.update();
+    }
+
     public boolean isOwner(UUID supposedOwner) {
         return this.owner.equals(supposedOwner);
     }

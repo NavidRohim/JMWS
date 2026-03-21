@@ -266,6 +266,7 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
         {
             removeObjectFromUser(UUID.fromString(userUUID), this.syncing.objectIdentifier);
         }
+        this.syncing.removeAllFromShare();
     }
 
     public UUID getOwnerUUID()
