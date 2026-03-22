@@ -67,9 +67,9 @@ public class JMWSPlugin implements IClientPlugin {
     {
         this.jmAPI = jmClientApi;
 
-        CommonEventRegistry.WAYPOINT_EVENT.subscribe("jmapi", this::waypointCreationHandler);
-        CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe("jmapi", Constants.MODID, this::groupEventListener);
-        CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe("jmapi", Constants.MODID, this::waypointDragHandler);
+        CommonEventRegistry.WAYPOINT_EVENT.subscribe(Constants.MODID, this::waypointCreationHandler);
+        CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe(Constants.MODID + "group_event", Constants.MODID, this::groupEventListener);
+        CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe(Constants.MODID + "group_transfer", Constants.MODID, this::waypointDragHandler);
 
         FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(Constants.MODID, JMButtonAddon::addJMButtons);
         FullscreenEventRegistry.FULLSCREEN_RENDER_EVENT.subscribe(Constants.MODID, (renderEvent) -> {
