@@ -43,7 +43,7 @@ public class ServerDispatcher {
         );
 
         dispatcher.register(Commands.literal("jmws_admin")
-                .requires(Commands.hasPermission(Commands.LEVEL_MODERATORS))
+                .requires(src -> src.hasPermission(2) && isValidCommandUser(src))
                 .then(Commands.literal("create_global_waypoint")
                         .then(Commands.argument("waypointName", StringArgumentType.greedyString())
                                 .suggests(ServerDispatcher::suggestWaypoints)
@@ -185,6 +185,6 @@ public class ServerDispatcher {
 
     private static boolean isValidCommandUser(CommandSourceStack commandSourceStack)
     {
-        return !CommonClass.isInternalServer() || (!CommonClass.getMinecraftServerInstance().isSingleplayerOwner(commandSourceStack.getPlayer().nameAndId())); // No host user
+        return !CommonClass.isInternalServer() || (!CommonClass.getMinecraftServerInstance().isSingleplayerOwner(commandSourceStack.getPlayer().getGameProfile())); // No host user
     }
 }

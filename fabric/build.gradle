@@ -1,7 +1,6 @@
 plugins {
     id 'multiloader-loader'
-    // see https://docs.fabricmc.net/develop/porting/next for 26.1 changes to plugin id
-    id "net.fabricmc.fabric-loom" version "${loom_version}"
+    id 'fabric-loom' version "${loom_version}"
 }
 
 base {
@@ -22,13 +21,17 @@ repositories {
 dependencies {
     runtimeOnly 'net.fabricmc.unpick:unpick-format-utils:3.0.0-beta.5'
     minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
+    }
 
-    implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-    // JourneyMap TODO: NOT PORTED
-    //implementation "mysticdrew:common-networking-fabric:${common_networking_version}"
-    //compileOnlyApi group: 'info.journeymap', name: 'journeymap-api-common', version: project.journeymap_api_version, changing: true
+    // JourneyMap
+    modImplementation "mysticdrew:common-networking-fabric:${common_networking_version}"
+    modCompileOnlyApi group: 'info.journeymap', name: 'journeymap-api-common', version: project.journeymap_api_version, changing: true
 }
 
 loom {
