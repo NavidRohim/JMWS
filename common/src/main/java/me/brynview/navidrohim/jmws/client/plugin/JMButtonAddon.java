@@ -2,11 +2,11 @@ package me.brynview.navidrohim.jmws.client.plugin;
 
 import journeymap.api.v2.client.event.FullscreenDisplayEvent;
 import journeymap.api.v2.client.fullscreen.IThemeButton;
+import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.client.helper.AssetHelper;
 import net.minecraft.network.chat.Component;
-
-import static me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin.sync;
 
 /**
  * Static methods for anything regarding buttons on the fullscreen.
@@ -25,7 +25,7 @@ public class JMButtonAddon {
             IThemeButton buttonEnabled = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
                     "button.jmws.enable_button",
                     AssetHelper.onOffButtonAsset,
-                    CommonClass.getEnabledStatus(),
+                    ConfigInterface.getEnabledStatus(),
                     JMButtonAddon::enableMod);
 
             // Manual sync button
@@ -35,7 +35,7 @@ public class JMButtonAddon {
                     true,
                     JMButtonAddon::updateFromButton);
 
-            buttonSync.setEnabled(CommonClass.getEnabledStatus()); // Sync button will only be functional if JMWS is enabled.
+            buttonSync.setEnabled(ConfigInterface.getEnabledStatus()); // Sync button will only be functional if JMWS is enabled.
             buttonSync.setTooltip(Component.translatable("button.jmws.tooltip.update_button").getString());
 
             buttonEnabled.setTooltip(Component.translatable("button.jmws.tooltip.enable_button").getString());
@@ -52,11 +52,11 @@ public class JMButtonAddon {
                 Component.translatable("button.jmws.enable_button.disabled").getString()
         );
 
-        if (CommonClass.getEnabledStatus()) { // Turn off
-            CommonClass.config.enabled.set(false);
+        if (ConfigInterface.getEnabledStatus()) { // Turn off
+            ClientCommonClass.config.enabled.set(false);
             iThemeButton.setToggled(false);
         } else { // Turn on
-            CommonClass.config.enabled.set(true);
+            ClientCommonClass.config.enabled.set(true);
             iThemeButton.setToggled(true);
         }
     }

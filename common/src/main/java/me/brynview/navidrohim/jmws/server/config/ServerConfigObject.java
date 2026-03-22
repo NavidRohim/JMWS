@@ -2,9 +2,6 @@ package me.brynview.navidrohim.jmws.server.config;
 
 import com.google.gson.annotations.Expose;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
 * An initialised subclass of this class (ClientSideServerConfigObject) is sent to every client that joins.
 * The server has certain permissions of what is and is not allowed + the JMWS server version and that is sent in this class.

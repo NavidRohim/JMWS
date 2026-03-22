@@ -6,7 +6,7 @@ import com.google.gson.JsonParser;
 import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
+import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
@@ -191,7 +191,7 @@ public class ServerPacketHandler {
                             }
 
                         } else if (group.syncing.isGlobal()) {
-                            sendUserMessage(player, "global.jmws.cannot_delete_global", true, JMWSMessageType.ONE_TIME_WARNING);
+                            sendUserMessage(player, "global.jmws.cannot_delete_global", true, MessageType.ONE_TIME_WARNING);
                         } else {
                             group.stopSharing(playerUUID);
                             sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
@@ -233,7 +233,7 @@ public class ServerPacketHandler {
                                 }
                             }
                         } else if (waypoint.syncing.isGlobal()) {
-                            sendUserMessage(player, "global.jmws.cannot_delete_global", true, JMWSMessageType.ONE_TIME_WARNING);
+                            sendUserMessage(player, "global.jmws.cannot_delete_global", true, MessageType.ONE_TIME_WARNING);
                         } else {
                             waypoint.stopSharing(playerUUID);
                             sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
@@ -312,12 +312,12 @@ public class ServerPacketHandler {
 
                             if (modifyingType == ObjectType.WAYPOINT)
                             {
-                                PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_waypoint_success", true, JMWSMessageType.NEUTRAL);
+                                PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_waypoint_success", true, MessageType.NEUTRAL);
                             } else {
-                                PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_group_success", true, JMWSMessageType.NEUTRAL);
+                                PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_group_success", true, MessageType.NEUTRAL);
                             }
                         } else {
-                            sendUserMessage(player, "sharing.jmws.local_only", false, JMWSMessageType.ONE_TIME_WARNING);
+                            sendUserMessage(player, "sharing.jmws.local_only", false, MessageType.ONE_TIME_WARNING);
                         }
                     }
                 }

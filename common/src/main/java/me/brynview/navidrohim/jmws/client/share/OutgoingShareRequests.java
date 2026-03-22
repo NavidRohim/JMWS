@@ -1,7 +1,6 @@
 package me.brynview.navidrohim.jmws.client.share;
 
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
-import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

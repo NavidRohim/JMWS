@@ -1,6 +1,6 @@
 package me.brynview.navidrohim.jmws.server.commands;
 
-import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
+import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 
 public class ServerCommands {
+
     public static int share(ServerPlayer sender, ServerPlayer player, String waypointID, ObjectType objectType) {
         if (ServerConfig.serverConfig.sharingEnabled)
         {
@@ -30,15 +31,15 @@ public class ServerCommands {
                     {
                         objIns.share(sender, player);
                     } else {
-                        PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.cannot_share_global", true, JMWSMessageType.WARNING);
+                        PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.cannot_share_global", true, MessageType.WARNING);
                     }
                 }
                 else {
-                    PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.no_matching_object", true, JMWSMessageType.FAILURE);
+                    PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.no_matching_object", true, MessageType.FAILURE);
                 }
             }
         } else {
-            PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.no_server_sharing", true, JMWSMessageType.FAILURE);
+            PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.no_server_sharing", true, MessageType.FAILURE);
         }
         return 1;
     }
@@ -51,10 +52,10 @@ public class ServerCommands {
         {
             ServerObject objIns = JMWSServerIO.getObjectFromFile(specifiedObj, sender.getUUID(), objectType);
             objIns.stopSharing();
-            PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.stopped_sharing", true, JMWSMessageType.NEUTRAL);
+            PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.stopped_sharing", true, MessageType.NEUTRAL);
         }
         else {
-            PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.no_matching_object", true, JMWSMessageType.FAILURE);
+            PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.no_matching_object", true, MessageType.FAILURE);
         }
 
         return 1;
@@ -73,21 +74,21 @@ public class ServerCommands {
                 if (!globalObject.syncing.isGlobal())
                 {
                     globalObject.makeGlobal();
-                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.made_global", true, JMWSMessageType.NEUTRAL);
+                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.made_global", true, MessageType.NEUTRAL);
                 } else {
-                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.already_global", true, JMWSMessageType.WARNING);
+                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.already_global", true, MessageType.WARNING);
                 }
             } else {
                 if (globalObject.syncing.isGlobal())
                 {
                     globalObject.removeGlobal();
-                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.remove_global", true, JMWSMessageType.NEUTRAL);
+                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.remove_global", true, MessageType.NEUTRAL);
                 } else {
-                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.not_global", true, JMWSMessageType.NEUTRAL);
+                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.not_global", true, MessageType.NEUTRAL);
                 }
             }
         } else {
-            PlayerNetworkingHelper.sendUserMessage(player, "sharing.jmws.no_matching_object", true, JMWSMessageType.FAILURE);
+            PlayerNetworkingHelper.sendUserMessage(player, "sharing.jmws.no_matching_object", true, MessageType.FAILURE);
         }
         return 1;
     }

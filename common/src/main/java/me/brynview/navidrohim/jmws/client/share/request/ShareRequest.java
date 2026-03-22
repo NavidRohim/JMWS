@@ -2,7 +2,7 @@ package me.brynview.navidrohim.jmws.client.share.request;
 
 import com.mojang.authlib.GameProfile;
 import commonnetwork.api.Dispatcher;
-import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
+import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
@@ -31,12 +31,6 @@ public class ShareRequest {
     @Nullable public GameProfile to;
 
     public final ScheduledFuture<?> timeout;
-
-    public enum Direction
-    {
-        FOR_HOST,
-        FOR_CLIENT
-    }
 
     public ShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, @Nullable Object waypointOrGroup, ObjectType sharedObjectType, String requestIdentifier, String objectDisplayName) {
         this.originalSender = uuid;
@@ -84,7 +78,7 @@ public class ShareRequest {
     protected void timeout()
     {
         IncomingShareRequests.removeRequest(this.originalSender);
-        PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.request_timeout_from", this.getSenderName()), true, false, JMWSMessageType.WARNING);
+        PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.request_timeout_from", this.getSenderName()), true, false, MessageType.WARNING);
     }
 
     private void finishRequest()

@@ -2,7 +2,8 @@ package me.brynview.navidrohim.jmws.client.config;
 
 import journeymap.api.v2.client.option.*;
 import me.brynview.navidrohim.jmws.Constants;
-import net.minecraft.world.phys.shapes.BooleanOp;
+import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 
 public class ConfigInterface {
 
@@ -86,6 +87,10 @@ public class ConfigInterface {
         this.enableSharing = new BooleanOption(sharing, "enableSharing", "text.config.jmws-config.option.enableSharing", true);
         this.showSharingLabels = new BooleanOption(sharing, "showSharingLabels", "text.config.jmws-config.option.showSharingLabels", true);
         this.showGlobalLabels = new BooleanOption(sharing, "showGlobalLabels", "text.config.jmws-config.option.showGlobalLabels", true);
+    }
+
+    public static boolean getEnabledStatus() {
+        return ClientCommonClass.serverHasMod && ClientCommonClass.config.enabled.get() && (ClientCommonClass.config.uploadGroups.get() || ClientCommonClass.config.uploadWaypoints.get()) && !CommonClass.minecraftClientInstance.isSingleplayer() && !CommonClass.isInternalServer();
     }
 
     /**

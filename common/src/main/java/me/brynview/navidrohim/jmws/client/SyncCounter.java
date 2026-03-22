@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.client;
 
+import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -15,6 +16,18 @@ public class SyncCounter {
     private ClientLevel oldWorld = null;
     private static int tickCounterUpdateThreshold = 800;
     private static int tickCounter = 0;
+
+    public static int timeUntilNextSync()
+    {
+        // syncCounter can be null but the chance of it ever being null while this method is being called is none.
+        // Same with getSyncFrequency
+        return (ClientCommonClass.syncCounter.getTickCounterUpdateThreshold() - ClientCommonClass.syncCounter.getCurrentTickCount()) / 20;
+    }
+
+    public static int getSyncFrequency()
+    {
+        return ClientCommonClass.syncCounter.getTickCounterUpdateThreshold() / 20;
+    }
 
     /**
      * What tick auto-tick is on. 1 second = 20 ticks.
@@ -39,7 +52,7 @@ public class SyncCounter {
      */
     public void resetSyncThreshold()
     {
-        tickCounterUpdateThreshold = CommonClass.config.getUpdateWaypointFrequencyAsTicks();
+        tickCounterUpdateThreshold = ClientCommonClass.config.getUpdateWaypointFrequencyAsTicks();
     }
 
     /**
@@ -57,7 +70,7 @@ public class SyncCounter {
         ClientLevel world = CommonClass.minecraftClientInstance.level;
 
         // Check if player is in a world, if the player is in a valid server and auto-sync is enabled
-        if (world != null && CommonClass.getEnabledStatus() && CommonClass.config.autoSync.get()) {
+        if (world != null && ConfigInterface.getEnabledStatus() && ClientCommonClass.config.autoSync.get()) {
             // Check if the world is still equal to the world of the last counter tick. If not, we have changed dimension.
             if (world != oldWorld) {
                 if (oldWorld != null) { // This can be false if this is the first tick being in a new server.

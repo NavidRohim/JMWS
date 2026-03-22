@@ -5,7 +5,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 

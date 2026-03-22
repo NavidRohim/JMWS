@@ -13,7 +13,7 @@ import java.util.UUID;
 
 import static me.brynview.navidrohim.jmws.common.helper.CommonHelper._getWaypointFromRaw;
 
-public class ObjectUtils
+public class LegacyUtils
 {
     private static String getLegacyWaypointFilename(Waypoint waypoint, UUID uuID) {
         Vector3d waypointLocationVector = new Vector3d(waypoint.getBlockPos().getX(), waypoint.getBlockPos().getY(), waypoint.getBlockPos().getZ());

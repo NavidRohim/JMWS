@@ -1,6 +1,6 @@
 package me.brynview.navidrohim.jmws;
 
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -12,6 +12,6 @@ public class ClientSetup {
     @SubscribeEvent
     public static void setupClientMinecraft(FMLLoadCompleteEvent event)
     {
-        CommonClass.setupMinecraftClientInstance();
+        ClientCommonClass.setupMinecraftClientInstance();
     }
 }

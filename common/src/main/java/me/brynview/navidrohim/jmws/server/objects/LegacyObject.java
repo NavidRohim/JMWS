@@ -43,7 +43,7 @@ public class LegacyObject
             if (payload != null)
             {
                 LegacyObject oldObj = new LegacyObject(payload);
-                if (isLegacyDataField(oldObj.getOldCustomData()))
+                if (CommonHelper.isLegacyDataField(oldObj.getOldCustomData()))
                 {
                     oldObj.setSyncedCustomData(Syncing.getEmptySyncingInfoString(oldObj.getOldCustomData(), owner, false));
                     Constructor<? extends ServerObject> constructor = newType.getObjectClass().getConstructor(JsonObject.class, UUID.class);
@@ -64,20 +64,6 @@ public class LegacyObject
             Constants.getLogger().error("Could not transition pre-1.2.0 object to new. Error: %s".formatted(initExc));
             throw new RuntimeException(initExc);
         }
-    }
-
-    public static boolean isLegacyDataField(@Nullable String field) {
-        if (field != null && field.length() == 64)
-        {
-            for (int i = 0; i < field.length(); i++) {
-                char c = field.charAt(i);
-                if (!Character.isLetterOrDigit(c))
-                    return false;
-            }
-
-            return true;
-        }
-        return false;
     }
 
     public String getDifferentiator()

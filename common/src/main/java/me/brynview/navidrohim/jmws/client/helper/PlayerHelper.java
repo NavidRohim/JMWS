@@ -1,15 +1,14 @@
 package me.brynview.navidrohim.jmws.client.helper;
 
 import com.mojang.authlib.GameProfile;
+import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.common.CommonClass;
-import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
+import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.network.ClientboundPacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -27,15 +26,15 @@ public class PlayerHelper {
      * @param ignoreConfig If to ignore the users set config value. If they have alerts turned off but ignoreConfig is true, the alert will be sent regardless.
      * @param messageType What colour the message will be. Named with importance instead of colour.
      */
-    public static void sendUserAlert(Component text, boolean overlayText, boolean ignoreConfig, JMWSMessageType messageType) {
+    public static void sendUserAlert(Component text, boolean overlayText, boolean ignoreConfig, MessageType messageType) {
 
         // Check if player allows alerts, check if player exists, and make sure it has not been sent before if one-time message
-        if (!sentWarningsInServer.contains(text.getString()) && (CommonClass.config.showAlerts.get() || ignoreConfig) && CommonClass.minecraftClientInstance.player != null)
+        if (!sentWarningsInServer.contains(text.getString()) && (ClientCommonClass.config.showAlerts.get() || ignoreConfig) && CommonClass.minecraftClientInstance.player != null)
         {
             String finalText = text.getString();
 
             // Check if user allows coloured text, add colour tag if so
-            if (CommonClass.config.colouredText.get()) {
+            if (ClientCommonClass.config.colouredText.get()) {
                 finalText = messageType.toString() + text.getString();
             }
 
@@ -46,7 +45,7 @@ public class PlayerHelper {
             }
 
             // Add alert to cache if it's one-time
-            if (messageType.equals(JMWSMessageType.ONE_TIME_WARNING))
+            if (messageType.equals(MessageType.ONE_TIME_WARNING))
             {
                 sentWarningsInServer.add(text.getString());
             }
@@ -69,7 +68,7 @@ public class PlayerHelper {
      */
     public static void sendUserSoundAlert(SoundEvent sound) {
 
-        if (CommonClass.config.playEffects.get() && CommonClass.minecraftClientInstance.player != null) {
+        if (ClientCommonClass.config.playEffects.get() && CommonClass.minecraftClientInstance.player != null) {
             CommonClass.minecraftClientInstance.player.playSound(sound, 0.09f, 1f); // Lower volume so it becomes background noise
         }
     }

@@ -1,7 +1,6 @@
 package me.brynview.navidrohim.jmws.common.helper;
 
-import journeymap.api.v2.common.waypoint.Waypoint;
-import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
 import java.io.File;
@@ -47,5 +46,19 @@ public class CommonHelper {
     public static boolean fileExists(Path filePath)
     {
         return new File(filePath.toUri()).exists();
+    }
+
+    public static boolean isLegacyDataField(@Nullable String field) {
+        if (field != null && field.length() == 64)
+        {
+            for (int i = 0; i < field.length(); i++) {
+                char c = field.charAt(i);
+                if (!Character.isLetterOrDigit(c))
+                    return false;
+            }
+
+            return true;
+        }
+        return false;
     }
 }

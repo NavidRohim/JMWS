@@ -5,11 +5,12 @@ import com.google.gson.JsonParser;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.client.enums.JMWSMessageType;
+import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ShareRequestDirection;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,11 +62,11 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.SYNC, jsonArray, jsonGroupArray, sendAlert, isDeathSync);
     }
 
-    public static String makeClientAlertRequestJson(String message, boolean overlay, JMWSMessageType messageType) {
+    public static String makeClientAlertRequestJson(String message, boolean overlay, MessageType messageType) {
         return CommandFactory.makeBaseJsonRequest(Commands.CLIENT_ALERT, message, overlay, messageType);
     }
 
-    public static String makeObjectShareRequestForUser(String waypoint, UUID to, UUID from, ShareRequest.Direction direction, ObjectType objectType)
+    public static String makeObjectShareRequestForUser(String waypoint, UUID to, UUID from, ShareRequestDirection direction, ObjectType objectType)
     {
         return CommandFactory.makeBaseJsonRequest(Commands.OBJECT_SHARE, waypoint, to, from, objectType, direction);
     }

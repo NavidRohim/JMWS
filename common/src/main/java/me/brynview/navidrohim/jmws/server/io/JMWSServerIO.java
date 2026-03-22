@@ -93,7 +93,7 @@ public class JMWSServerIO {
                 }
             });
         } catch (NoSuchFileException exc) {
-            CommonClass._createServerResources();
+            CommonClass.createServerResources();
             return getObjectPathsForUser(uuid, objectType, global);
         } catch (IOException err) {
             Constants.getLogger().error("Got error trying to get user objects: %s".formatted(err));

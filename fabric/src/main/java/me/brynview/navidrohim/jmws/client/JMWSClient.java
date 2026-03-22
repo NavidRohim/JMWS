@@ -19,9 +19,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
 
-import java.util.Collection;
-import java.util.List;
-
 
 public class JMWSClient implements ClientModInitializer {
 
@@ -37,7 +34,7 @@ public class JMWSClient implements ClientModInitializer {
         }));
         ScreenEvents.AFTER_INIT.register(this::waitForStartScreenRegister);
         ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
-            CommonEvents.clearCache();
+            ClientCommonClass.clearCache();
         }));
 
         // New
@@ -48,7 +45,7 @@ public class JMWSClient implements ClientModInitializer {
 
     private void waitForStartScreenRegister(Minecraft minecraft, Screen screen, int i, int i1) {
 
-        if (screen instanceof TitleScreen && !ClientVariables.clientHasJM)
+        if (screen instanceof TitleScreen && !ClientCommonClass.clientHasJM)
         {
             Constants.getLogger().error("JourneyMap is missing or the wrong version is installed!");
             minecraft.setScreen(new MissingJourneyMapScreen(Component.translatable("text.config.jmws-config.title"), Component.translatable("warning.jmws.jm_not_installed")));
@@ -58,9 +55,9 @@ public class JMWSClient implements ClientModInitializer {
 
     private void handleTick(Minecraft _minecraftClient)
     {
-        if (CommonClass.syncCounter != null)
+        if (ClientCommonClass.syncCounter != null)
         {
-            CommonClass.syncCounter.iterateCounter();
+            ClientCommonClass.syncCounter.iterateCounter();
         }
     }
 

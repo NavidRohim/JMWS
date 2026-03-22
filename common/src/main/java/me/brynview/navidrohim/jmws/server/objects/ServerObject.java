@@ -3,10 +3,10 @@ package me.brynview.navidrohim.jmws.server.objects;
 import com.google.gson.*;
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.client.enums .JMWSMessageType;
-import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
+import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ShareRequestDirection;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
@@ -227,12 +227,12 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
 
                     return true;
                 } else {
-                    PlayerNetworkingHelper.sendUserMessage(this.ownerUUID, "error.jmws.invalid_name", false, JMWSMessageType.FAILURE);
+                    PlayerNetworkingHelper.sendUserMessage(this.ownerUUID, "error.jmws.invalid_name", false, MessageType.FAILURE);
                     return false;
                 }
 
             } catch (NoSuchFileException noSuchFileException) {
-                CommonClass._createServerResources();
+                CommonClass.createServerResources();
                 Constants.getLogger().warn("`jmws` folder was not found so another was made (%s error)".formatted(getObjectType()));
                 return create();
 
@@ -250,9 +250,9 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
 
     public void share(ServerPlayer us, ServerPlayer player) {
 
-        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, this.ownerUUID, player.getUUID(), ShareRequest.Direction.FOR_CLIENT, getObjectType())), player); // Send share request to player
+        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, this.ownerUUID, player.getUUID(), ShareRequestDirection.FOR_CLIENT, getObjectType())), player); // Send share request to player
         // Send information of the share to the sender. This is needed because this command is server-side only and the client will have no knowledge of the shared obj.
-        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, player.getUUID(), this.ownerUUID, ShareRequest.Direction.FOR_HOST, getObjectType())), us);
+        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, player.getUUID(), this.ownerUUID, ShareRequestDirection.FOR_HOST, getObjectType())), us);
     }
     public void stopSharing(UUID user)
     {

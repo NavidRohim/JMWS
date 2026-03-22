@@ -4,52 +4,61 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.server.Server;
+import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
+import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class ServerDispatcher {
 
 
     public static void addCommandsToDispatcher(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("share_waypoint")
-                .requires(CommonClass::isValidCommandUser)
-                .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("waypointName", StringArgumentType.greedyString()).suggests(Server::suggestWaypoints).executes(ServerDispatcher::doShareWaypoint)))
+                .requires(ServerDispatcher::isValidCommandUser)
+                .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("waypointName", StringArgumentType.greedyString()).suggests(ServerDispatcher::suggestWaypoints).executes(ServerDispatcher::doShareWaypoint)))
         );
         dispatcher.register(Commands.literal("share_group")
-                .requires(CommonClass::isValidCommandUser)
-                .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("groupName", StringArgumentType.greedyString()).suggests(Server::suggestGroups).executes(ServerDispatcher::doShareGroup)))
+                .requires(ServerDispatcher::isValidCommandUser)
+                .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("groupName", StringArgumentType.greedyString()).suggests(ServerDispatcher::suggestGroups).executes(ServerDispatcher::doShareGroup)))
         );
         dispatcher.register(Commands.literal("stop_sharing_group")
-                .requires(CommonClass::isValidCommandUser)
-                .then(Commands.argument("groupName", StringArgumentType.greedyString()).suggests(Server::suggestSharedGroups).executes(ServerDispatcher::doRemoveShareGroup))
+                .requires(ServerDispatcher::isValidCommandUser)
+                .then(Commands.argument("groupName", StringArgumentType.greedyString()).suggests(ServerDispatcher::suggestSharedGroups).executes(ServerDispatcher::doRemoveShareGroup))
         );
         dispatcher.register(Commands.literal("stop_sharing_waypoint")
-                .requires(CommonClass::isValidCommandUser)
-                .then(Commands.argument("waypointName", StringArgumentType.greedyString()).suggests(Server::suggestSharedWaypoints).executes(ServerDispatcher::doRemoveShareWaypoint))
+                .requires(ServerDispatcher::isValidCommandUser)
+                .then(Commands.argument("waypointName", StringArgumentType.greedyString()).suggests(ServerDispatcher::suggestSharedWaypoints).executes(ServerDispatcher::doRemoveShareWaypoint))
         );
 
         dispatcher.register(Commands.literal("jmws_admin")
                 .requires(Commands.hasPermission(Commands.LEVEL_MODERATORS))
                 .then(Commands.literal("create_global_waypoint")
                         .then(Commands.argument("waypointName", StringArgumentType.greedyString())
-                                .suggests(Server::suggestWaypoints)
+                                .suggests(ServerDispatcher::suggestWaypoints)
                                 .executes(ServerDispatcher::createServerWp)))
                 .then(Commands.literal("create_global_group")
                         .then(Commands.argument("groupName", StringArgumentType.greedyString())
-                                .suggests(Server::suggestGroups)
+                                .suggests(ServerDispatcher::suggestGroups)
                                 .executes(ServerDispatcher::createServerGp)))
                 .then(Commands.literal("remove_global_group")
                         .then(Commands.argument("groupName", StringArgumentType.greedyString())
-                                .suggests(Server::suggestGlobalGroups)
+                                .suggests(ServerDispatcher::suggestGlobalGroups)
                                 .executes(ServerDispatcher::removeServerGp)))
                 .then(Commands.literal("remove_global_waypoint")
                         .then(Commands.argument("waypointName", StringArgumentType.greedyString())
-                                .suggests(Server::suggestGlobalWaypoints)
+                                .suggests(ServerDispatcher::suggestGlobalWaypoints)
                                 .executes(ServerDispatcher::removeServerWp)))
                 .then(Commands.literal("remove_global_no_op")
                         .then(Commands.literal("waypoint")
@@ -117,4 +126,65 @@ public class ServerDispatcher {
         return ServerCommands.globalShare(waypointName, commandSourceStackCommandContext.getSource().getPlayer(), ObjectType.WAYPOINT, false);
     }
 
+    public static HashMap<String, ServerObject> getUserObjectsAsNameHashmap(UUID playerUUID, ObjectType objectType, boolean global, boolean onlyShared)
+    {
+        HashMap<String, ServerObject> stringServerObjectHashMap = new HashMap<>();
+        for (ServerObject object : JMWSServerIO.getObjectsForUser(playerUUID, objectType, global))
+        {
+            String nonDupeIdentifier = object.getObjectNonDuplicateIdentifier();
+            if ((!object.syncing.isGlobal() && !onlyShared) || global || (onlyShared && !object.syncing.sharedTo.isEmpty()))
+            {
+                stringServerObjectHashMap.put(nonDupeIdentifier, object);
+            }
+        }
+
+        return stringServerObjectHashMap;
+    }
+
+    private static CompletableFuture<Suggestions> suggestObject(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder, ObjectType objectType)
+    {
+        List<String> names = getUserObjectsAsNameHashmap(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, false, false).keySet().stream().toList();
+        return SharedSuggestionProvider.suggest(names, suggestionsBuilder);
+    }
+
+    private static CompletableFuture<Suggestions> suggestGlobalObject(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder, ObjectType objectType)
+    {
+        List<String> names = getUserObjectsAsNameHashmap(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, true, false).keySet().stream().toList();
+        return SharedSuggestionProvider.suggest(names, suggestionsBuilder);
+    }
+
+    private static CompletableFuture<Suggestions> suggestSharedObject(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder, ObjectType objectType)
+    {
+        List<String> names = getUserObjectsAsNameHashmap(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, false, true).keySet().stream().toList();
+        return SharedSuggestionProvider.suggest(names, suggestionsBuilder);
+    }
+
+    public static CompletableFuture<Suggestions> suggestWaypoints(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
+        return suggestObject(commandSourceStackCommandContext, suggestionsBuilder, ObjectType.WAYPOINT);
+    }
+
+    public static CompletableFuture<Suggestions> suggestGroups(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
+        return suggestObject(commandSourceStackCommandContext, suggestionsBuilder, ObjectType.GROUP);
+    }
+
+    public static CompletableFuture<Suggestions> suggestGlobalGroups(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
+        return suggestGlobalObject(commandSourceStackCommandContext, suggestionsBuilder, ObjectType.GROUP);
+    }
+
+    public static CompletableFuture<Suggestions> suggestGlobalWaypoints(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
+        return suggestGlobalObject(commandSourceStackCommandContext, suggestionsBuilder, ObjectType.WAYPOINT);
+    }
+
+    public static CompletableFuture<Suggestions> suggestSharedGroups(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
+        return suggestSharedObject(commandSourceStackCommandContext, suggestionsBuilder, ObjectType.GROUP);
+    }
+
+    public static CompletableFuture<Suggestions> suggestSharedWaypoints(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder) {
+        return suggestSharedObject(commandSourceStackCommandContext, suggestionsBuilder, ObjectType.WAYPOINT);
+    }
+
+    private static boolean isValidCommandUser(CommandSourceStack commandSourceStack)
+    {
+        return !CommonClass.isInternalServer() || (!CommonClass.getMinecraftServerInstance().isSingleplayerOwner(commandSourceStack.getPlayer().nameAndId())); // No host user
+    }
 }

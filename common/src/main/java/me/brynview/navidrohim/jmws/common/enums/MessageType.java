@@ -1,9 +1,9 @@
-package me.brynview.navidrohim.jmws.client.enums;
+package me.brynview.navidrohim.jmws.common.enums;
 
 /**
  * Different colour types for action bar alerts.
  */
-public enum JMWSMessageType {
+public enum MessageType {
     FAILURE("§C"), // Red
     SUCCESS("§2"), // Green
     WARNING("§e"), // Orange
@@ -12,7 +12,7 @@ public enum JMWSMessageType {
 
     private final String text;
 
-    JMWSMessageType(final String text) {
+    MessageType(final String text) {
         this.text = text;
     }
 

@@ -1,7 +1,7 @@
 package me.brynview.navidrohim.jmws;
 
+import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.commands.CommonClientPlatformCommands;
-import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.events.CommonEvents;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,9 +18,9 @@ public class NeoforgeEventHandler
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post clientTickEvent)
     {
-        if (CommonClass.syncCounter != null)
+        if (ClientCommonClass.syncCounter != null)
         {
-            CommonClass.syncCounter.iterateCounter();
+            ClientCommonClass.syncCounter.iterateCounter();
         }
     }
 
@@ -38,7 +38,7 @@ public class NeoforgeEventHandler
     {
         if (event.getEntity() instanceof ServerPlayer)
         {
-            CommonEvents.clearCache();
+            ClientCommonClass.clearCache();
         }
     }
 
