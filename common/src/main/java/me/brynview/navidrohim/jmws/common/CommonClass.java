@@ -17,6 +17,7 @@ import me.brynview.navidrohim.jmws.client.network.PacketHandler;
 
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 
+import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
@@ -83,7 +84,7 @@ public class CommonClass {
         {
             PacketHandler.HandshakeHandler(ctx.message());
         } else {
-            Dispatcher.sendToClient(new JMWSHandshakePayload(), ctx.sender());
+            PlayerNetworkingHelper.sendHandshakeAndValidate(ctx.sender());
         }
     }
 

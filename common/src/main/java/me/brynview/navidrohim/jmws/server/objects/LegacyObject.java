@@ -9,6 +9,7 @@ import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.syncing.Syncing;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
+import org.apache.commons.lang3.ObjectUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
@@ -23,6 +24,8 @@ public class LegacyObject
     protected JsonObject customDataJmwsFieldObject;
     protected String customData;
 
+    protected boolean didTransitionToNewData = false;
+
     public LegacyObject(JsonObject payload) throws IllegalStateException {
         this.payload = payload;
         this.rawPacketData = payload.toString();
@@ -30,17 +33,18 @@ public class LegacyObject
         {
             this.customData = payload.get("customDataMap").getAsJsonObject().get(Constants.MODID).getAsString();
             this.customDataJmwsFieldObject = payload.get("customDataMap").getAsJsonObject();
-        } catch (IllegalStateException e) // catch old customData field.
+        } catch (IllegalStateException | NullPointerException e) // catch old customData field.
         {
             if (payload.has("customData"))
             {
                 String customDataForJMWSLegacy = payload.get("customData").getAsString();
 
-                payload.add("customDataMap", new JsonArray());
+                payload.add("customDataMap", new JsonObject());
                 payload.get("customDataMap").getAsJsonObject().add(Constants.MODID, new JsonPrimitive(customDataForJMWSLegacy));
 
                 this.customData = payload.get("customDataMap").getAsJsonObject().get(Constants.MODID).getAsString();
                 this.customDataJmwsFieldObject = payload.get("customDataMap").getAsJsonObject();
+                this.didTransitionToNewData = true;
             } else {
                 throw new IllegalStateException("Unable to parse legacy object. customData doesn't exist which likely means the object has been tampered with.");
             }

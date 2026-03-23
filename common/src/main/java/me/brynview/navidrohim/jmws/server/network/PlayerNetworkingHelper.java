@@ -1,10 +1,15 @@
 package me.brynview.navidrohim.jmws.server.network;
 
 import commonnetwork.api.Dispatcher;
+import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
+import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
+import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.UUID;
@@ -30,5 +35,15 @@ public class PlayerNetworkingHelper {
     public static void sendUserMessage(UUID player, String messageKey, Boolean overlay, MessageType messageType) {
         JMWSActionPayload messagePayload = new JMWSActionPayload(CommandFactory.makeClientAlertRequestJson(messageKey, overlay, messageType));
         Dispatcher.sendToClient(messagePayload, CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(player));
+    }
+
+    public static void sendHandshakeAndValidate(ServerPlayer joinedUser)
+    {
+        JMWSServerIO.getObjectsForUser(joinedUser.getUUID(), ObjectType.WAYPOINT, false);
+        JMWSServerIO.getObjectsForUser(joinedUser.getUUID(), ObjectType.WAYPOINT, true);
+        JMWSServerIO.getObjectsForUser(joinedUser.getUUID(), ObjectType.GROUP, false);
+        JMWSServerIO.getObjectsForUser(joinedUser.getUUID(), ObjectType.GROUP, true);
+
+        Dispatcher.sendToClient(new JMWSHandshakePayload(), joinedUser);
     }
 }

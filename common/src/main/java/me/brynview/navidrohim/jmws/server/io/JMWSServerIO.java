@@ -132,7 +132,7 @@ public class JMWSServerIO {
             }
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException initExc)
         {
-            throw new RuntimeException("Cannot pass %s to getObjectFromDisk TODO");
+            throw new RuntimeException("Cannot pass %s to getObjectFromDisk TODO ERROR: %s".formatted("PLACEHOLDER", initExc));
         }
     }
 
