@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.server.objects;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import me.brynview.navidrohim.jmws.Constants;
@@ -19,12 +20,31 @@ public class LegacyObject
 {
     protected final JsonObject payload;
     protected final String rawPacketData;
+    protected JsonObject customDataJmwsFieldObject;
     protected String customData;
 
-    public LegacyObject(JsonObject payload) {
+    public LegacyObject(JsonObject payload) throws IllegalStateException {
         this.payload = payload;
         this.rawPacketData = payload.toString();
-        this.customData = payload.get("customData").getAsString();
+        try
+        {
+            this.customData = payload.get("customDataMap").getAsJsonObject().get(Constants.MODID).getAsString();
+            this.customDataJmwsFieldObject = payload.get("customDataMap").getAsJsonObject();
+        } catch (IllegalStateException e) // catch old customData field.
+        {
+            if (payload.has("customData"))
+            {
+                String customDataForJMWSLegacy = payload.get("customData").getAsString();
+
+                payload.add("customDataMap", new JsonArray());
+                payload.get("customDataMap").getAsJsonObject().add(Constants.MODID, new JsonPrimitive(customDataForJMWSLegacy));
+
+                this.customData = payload.get("customDataMap").getAsJsonObject().get(Constants.MODID).getAsString();
+                this.customDataJmwsFieldObject = payload.get("customDataMap").getAsJsonObject();
+            } else {
+                throw new IllegalStateException("Unable to parse legacy object. customData doesn't exist which likely means the object has been tampered with.");
+            }
+        }
     }
 
     public String getOldCustomData() { return this.customData; }
@@ -32,7 +52,7 @@ public class LegacyObject
     public void setSyncedCustomData(String data)
     {
         this.customData = data;
-        this.payload.add("customData", new JsonPrimitive(data));
+        this.customDataJmwsFieldObject.add(Constants.MODID, new JsonPrimitive(data));
     }
 
     @Nullable
@@ -59,7 +79,7 @@ public class LegacyObject
                 Constants.getLogger().debug("Diagnostic \nObject Path: %s\nOwner UUID: %s\nObjectType: %s\nInternal Server: %s\n\nIf in an internal server, you can likely ignore this message.\n\n".formatted(path, owner, newType, CommonClass.isInternalServer()));
                 return null;
             }
-        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException initExc)
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | IllegalStateException initExc)
         {
             Constants.getLogger().error("Could not transition pre-1.2.0 object to new. Error: %s".formatted(initExc));
             throw new RuntimeException(initExc);

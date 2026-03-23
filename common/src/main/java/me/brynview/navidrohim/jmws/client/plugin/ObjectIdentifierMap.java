@@ -106,7 +106,7 @@ public class ObjectIdentifierMap {
                 waypointIdentifier = waypointSyncInfo.objectIdentifier;
             } else {
                 waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypoint.getGuid(), waypoint.getName());
-                waypoint.setCustomData(Syncing.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID(), false), Constants.MODID);
+                waypoint.setCustomData(Constants.MODID, Syncing.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID(), false));
             }
 
             waypointIdentifierMap.put(waypointIdentifier, waypoint);

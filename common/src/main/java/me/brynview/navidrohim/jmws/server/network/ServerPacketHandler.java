@@ -256,6 +256,7 @@ public class ServerPacketHandler {
                     if (serverEnabledJMWS() && (ServerConfig.getConfig().waypointsEnabled)) {
                         JsonObject jsonCreationData = JsonParser.parseString(arguments.getFirst().getAsString()).getAsJsonObject();
                         boolean silent = arguments.get(1).getAsBoolean();
+                        Constants.getLogger().info(jsonCreationData.toString());
                         boolean waypointCreationSuccess = ServerWaypoint.createWaypoint(jsonCreationData, playerUUID);
 
                         if (!silent) {

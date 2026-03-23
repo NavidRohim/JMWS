@@ -36,7 +36,7 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
     public UserSharingFile accessorSharing;
     public Syncing syncing;
 
-    public   boolean dataclass;
+    public boolean dataclass;
     public static ObjectType objectType = ObjectType.GENERIC;
 
     @Nullable
