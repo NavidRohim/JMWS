@@ -1,6 +1,5 @@
 package me.brynview.navidrohim.jmws.server.objects;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import me.brynview.navidrohim.jmws.Constants;
@@ -9,8 +8,6 @@ import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.syncing.Syncing;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
-import org.apache.commons.lang3.ObjectUtils;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -59,8 +56,7 @@ public class LegacyObject
         this.customDataJmwsFieldObject.add(Constants.MODID, new JsonPrimitive(data));
     }
 
-    @Nullable
-    public static <T extends ServerObject> T transitionIfNeed(Path path, UUID owner, ObjectType newType)
+    public static <T extends ServerObject> void transitionIfNeed(Path path, UUID owner, ObjectType newType)
     {
         try {
             JsonObject payload = JMWSServerIO.getObjectDataFromDisk(path, true);
@@ -75,13 +71,10 @@ public class LegacyObject
                     newObj.create();
 
                     CommonHelper.deleteFile(path);
-                    return newObj;
                 }
-                return null;
             } else {
                 Constants.getLogger().debug("Possible issue translating server object. If issue arises please report.");
                 Constants.getLogger().debug("Diagnostic \nObject Path: %s\nOwner UUID: %s\nObjectType: %s\nInternal Server: %s\n\nIf in an internal server, you can likely ignore this message.\n\n".formatted(path, owner, newType, CommonClass.isInternalServer()));
-                return null;
             }
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | IllegalStateException initExc)
         {

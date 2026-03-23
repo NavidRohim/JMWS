@@ -39,11 +39,7 @@ public class PlayerNetworkingHelper {
 
     public static void sendHandshakeAndValidate(ServerPlayer joinedUser)
     {
-        JMWSServerIO.getObjectsForUser(joinedUser.getUUID(), ObjectType.WAYPOINT, false);
-        JMWSServerIO.getObjectsForUser(joinedUser.getUUID(), ObjectType.WAYPOINT, true);
-        JMWSServerIO.getObjectsForUser(joinedUser.getUUID(), ObjectType.GROUP, false);
-        JMWSServerIO.getObjectsForUser(joinedUser.getUUID(), ObjectType.GROUP, true);
-
+        JMWSServerIO.validateUserObjects(joinedUser.getUUID());
         Dispatcher.sendToClient(new JMWSHandshakePayload(), joinedUser);
     }
 }
