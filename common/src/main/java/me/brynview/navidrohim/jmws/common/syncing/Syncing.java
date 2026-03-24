@@ -109,8 +109,8 @@ public class Syncing {
     private void update() {
         if (this.parentObject != null) {
             String jsonString = CommonClass.gsonExcludeNoExpose.toJson(this, Syncing.class);
-            this.parentObject.getRawJson().add("customData", new JsonPrimitive(jsonString));
 
+            this.parentObject.getRawJson().get("customDataMap").getAsJsonObject().add(Constants.MODID, new JsonPrimitive(jsonString));
             this.parentObject.update(this.parentObject.getRawJson().getAsJsonObject().toString(), true); // TODO: bug test more. This seems very janky and not done right. Will test more
         } else {
             throw new RuntimeException("Cannot update object from dataclass instance of SyncingInformation. Get instance of SyncingInformation from child of SavedObject. (SavedObject.syncing.update())");

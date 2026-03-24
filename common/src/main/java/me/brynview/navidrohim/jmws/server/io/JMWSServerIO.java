@@ -25,6 +25,20 @@ public class JMWSServerIO {
 
     public static final String globalObjPrefix = "GLOBAL_";
 
+    public static <T extends ServerObject> List<T> getAllInitialisedGlobalObjects(ObjectType globalObjectType)
+    {
+        List<T> wp = new ArrayList<>();
+        for (Path path : getAllObjects(globalObjectType).toList())
+        {
+            if (path.toString().contains(globalObjPrefix))
+            {
+                UUID playerUUID = PathUtils.getUUIDFromPath(path, globalObjectType);
+                wp.add(getObjectFromFile(path, playerUUID, globalObjectType));
+            }
+        }
+        return wp;
+    }
+
     public static class PathUtils
     {
         public static String makeFilename(String objectID, UUID playerOwner, boolean isGlobal)
@@ -75,7 +89,7 @@ public class JMWSServerIO {
             return Files.list(Path.of(pathSearch));
         } catch (SecurityException e)
         {
-            Constants.getLogger().error("FATAL: Missing permissions! cannot read from %s".formatted(pathSearch));
+            Constants.getLogger().error("FATAL: Missing permissions! cannot read from {}", pathSearch);
         } catch (IOException ignored) {}
         return Stream.of();
     }
@@ -96,12 +110,30 @@ public class JMWSServerIO {
             CommonClass.createServerResources();
             return getObjectPathsForUser(uuid, objectType, global);
         } catch (IOException err) {
-            Constants.getLogger().error("Got error trying to get user objects: %s".formatted(err));
+            Constants.getLogger().error("Got error trying to get user objects: {}", err.getMessage());
             return List.of();
             }
         return waypointFileList;
     }
 
+    public static void validateUserObjects(UUID userUUID)
+    {
+        try (Stream<Path> wpFiles = Files.list(Path.of(ObjectType.WAYPOINT.getObjectPathPrefix())) ; Stream<Path> gpFiles = Files.list(Path.of(ObjectType.GROUP.getObjectPathPrefix()))) {
+            wpFiles.filter(Files::isRegularFile).forEach(path -> {
+                if (path.toString().contains(userUUID.toString())) {
+                    getObjectFromFile(path, userUUID, ObjectType.WAYPOINT);
+                }
+            });
+            gpFiles.filter(Files::isRegularFile).forEach(path -> {
+                if (path.toString().contains(userUUID.toString())) {
+                    getObjectFromFile(path, userUUID, ObjectType.GROUP);
+                }
+            });
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public static List<Path> getObjectPathsForUser(UUID uuid, ObjectType objectType) {
         return getObjectPathsForUser(uuid, objectType, false);
     }
@@ -115,9 +147,25 @@ public class JMWSServerIO {
             list.add((T) getObjectFromFile(objPath, user, objectType));
         }
 
-
         return list;
     }
+
+    /*
+    public static <T extends ServerObject> List<T> getAllGlobals(ObjectType objectType)
+    {
+        List<T> list = new ArrayList<>();
+
+        try (Stream<Path> wpFiles = Files.list(Path.of(objectType.getObjectPathPrefix())))
+        {
+            wpFiles.filter(Files::isRegularFile).forEach(path -> {
+                if (path.toString().contains(globalObjPrefix)) {
+
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }*/
 
     public static <T extends ServerObject> T getObjectFromFile(Path objPath, UUID user, ObjectType objectType, boolean silentFail)
     {
@@ -132,7 +180,7 @@ public class JMWSServerIO {
             }
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException initExc)
         {
-            throw new RuntimeException("Cannot pass %s to getObjectFromDisk TODO");
+            throw new RuntimeException("Cannot pass %s to getObjectFromDisk TODO ERROR: %s".formatted("PLACEHOLDER", initExc));
         }
     }
 
@@ -161,7 +209,7 @@ public class JMWSServerIO {
         {
             if (!silentFail)
             {
-                Constants.getLogger().error("Error retrieving saved object data -> " + ioException);
+                Constants.getLogger().error("Error retrieving saved object data -> {}", ioException.getMessage());
             }
         }
         return null;

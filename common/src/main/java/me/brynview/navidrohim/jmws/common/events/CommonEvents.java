@@ -8,6 +8,7 @@ import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
+import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -17,7 +18,6 @@ public class CommonEvents {
 
     public static void handleJoin(ServerPlayer serverPlayer, boolean isInternal, boolean sendWarningIfJMNotPresent)
     {
-
         if (isInternal && CommonClass.minecraftClientInstance.player == null)
         {
             if (sendWarningIfJMNotPresent && !ClientCommonClass.clientHasJM) {
@@ -26,7 +26,7 @@ public class CommonEvents {
             }
             CommonClass.scheduler.schedule(() -> {PlayerHelper.sendUserAlert(Component.translatable("warning.jmws.world_is_local"), true, false, MessageType.NEUTRAL);}, 2, TimeUnit.SECONDS);
         } else {
-            Dispatcher.sendToClient(new JMWSHandshakePayload(), serverPlayer);
+            PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer);
         }
     }
 }

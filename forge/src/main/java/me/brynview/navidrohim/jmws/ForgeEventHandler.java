@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.commands.ClientCommands;
 import me.brynview.navidrohim.jmws.client.commands.CommonClientPlatformCommands;
 import me.brynview.navidrohim.jmws.client.commands.ShareSuggestions;
@@ -19,7 +20,7 @@ import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.listener.SubscribeEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.concurrent.CompletableFuture;
@@ -30,9 +31,9 @@ public class ForgeEventHandler
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent.Post clientTickEvent)
     {
-        if (CommonClass.syncCounter != null) // will be depricated and will become something like neo
+        if (ClientCommonClass.syncCounter != null) // will be depricated and will become something like neo
         {
-            CommonClass.syncCounter.iterateCounter();
+            ClientCommonClass.syncCounter.iterateCounter();
         }
     }
 
@@ -50,7 +51,7 @@ public class ForgeEventHandler
     {
         if (event.getEntity() instanceof ServerPlayer)
         {
-            CommonEvents.clearCache();
+            ClientCommonClass.clearCache();
         }
     }
 

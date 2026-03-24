@@ -12,13 +12,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.UUID;
 
 public class ServerCommands {
 
     public static int share(ServerPlayer sender, ServerPlayer player, String waypointID, ObjectType objectType) {
         if (ServerConfig.serverConfig.sharingEnabled)
         {
-            if (sender.equals(player) || (CommonClass.isInternalServer() && player.level().getServer().getSingleplayerProfile().id().equals(player.getUUID())))
+            if (sender.equals(player) || (CommonClass.isInternalServer() && player.level().getServer().getSingleplayerProfile().getId().equals(player.getUUID())))
             {
                 PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.cannot_share", true, false);
             } else {
@@ -63,9 +64,14 @@ public class ServerCommands {
 
     public static int globalShare(String objectName, ServerPlayer player, ObjectType objectType, boolean make)
     {
-        HashMap<String, Path> userObjs = JMWSServerIO.getNameHashmapLookup(player.getUUID(), objectType);
+        return globalShare(objectName, player.getUUID(), objectType, make);
+    }
+
+    public static int globalShare(String objectName, UUID uuid, ObjectType objectType, boolean make)
+    {
+        HashMap<String, Path> userObjs = JMWSServerIO.getNameHashmapLookup(uuid, objectType);
         @Nullable Path specifiedObject = userObjs.get(objectName);
-        ServerObject globalObject = JMWSServerIO.getObjectFromFile(specifiedObject, player.getUUID(), objectType);
+        ServerObject globalObject = JMWSServerIO.getObjectFromFile(specifiedObject, uuid, objectType);
 
         if (specifiedObject != null && globalObject != null)
         {
@@ -74,22 +80,43 @@ public class ServerCommands {
                 if (!globalObject.syncing.isGlobal())
                 {
                     globalObject.makeGlobal();
-                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.made_global", true, MessageType.NEUTRAL);
+                    PlayerNetworkingHelper.sendUserMessage(uuid, "global.jmws.made_global", true, MessageType.NEUTRAL);
                 } else {
-                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.already_global", true, MessageType.WARNING);
+                    PlayerNetworkingHelper.sendUserMessage(uuid, "global.jmws.already_global", true, MessageType.WARNING);
                 }
             } else {
                 if (globalObject.syncing.isGlobal())
                 {
                     globalObject.removeGlobal();
-                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.remove_global", true, MessageType.NEUTRAL);
+                    PlayerNetworkingHelper.sendUserMessage(uuid, "global.jmws.remove_global", true, MessageType.NEUTRAL);
                 } else {
-                    PlayerNetworkingHelper.sendUserMessage(player, "global.jmws.not_global", true, MessageType.NEUTRAL);
+                    PlayerNetworkingHelper.sendUserMessage(uuid, "global.jmws.not_global", true, MessageType.NEUTRAL);
                 }
             }
         } else {
-            PlayerNetworkingHelper.sendUserMessage(player, "sharing.jmws.no_matching_object", true, MessageType.FAILURE);
+            PlayerNetworkingHelper.sendUserMessage(uuid, "sharing.jmws.no_matching_object", true, MessageType.FAILURE);
         }
+        return 1;
+    }
+
+    public static int removeGlobalFromBadOp(String waypointID, ObjectType objectType, ServerPlayer senderPlayer)
+    {
+        HashMap<String, ServerObject> userObjs = ServerDispatcher.getInactiveOpUserGlobalObjects(objectType);
+        @Nullable ServerObject specifiedObject = userObjs.get(waypointID);
+
+        if (specifiedObject != null)
+        {
+            if (specifiedObject.syncing.isGlobal())
+            {
+                specifiedObject.removeGlobal();
+                PlayerNetworkingHelper.sendUserMessage(senderPlayer, "global.jmws.remove_global", true, MessageType.NEUTRAL);
+            } else {
+                PlayerNetworkingHelper.sendUserMessage(senderPlayer, "global.jmws.not_global", true, MessageType.NEUTRAL);
+            }
+        } else {
+            PlayerNetworkingHelper.sendUserMessage(senderPlayer, "sharing.jmws.no_matching_object", true, MessageType.FAILURE);
+        }
+
         return 1;
     }
 }

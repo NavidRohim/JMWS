@@ -36,7 +36,7 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
     public UserSharingFile accessorSharing;
     public Syncing syncing;
 
-    public   boolean dataclass;
+    public boolean dataclass;
     public static ObjectType objectType = ObjectType.GENERIC;
 
     @Nullable
@@ -53,6 +53,7 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
     public ServerObject(JsonObject payload, UUID playerUUID, boolean dataclass)
     {
         super(payload);
+
         this.dataclass = dataclass;
 
         this.ownerUUID = playerUUID; // Note; if you set ownerUUID before this.syncing is defined, it enables some sort of compatibility for legacy clients. But I've left it as-is to avoid chaos.
@@ -68,6 +69,11 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
         if (!dataclass)
         {
             this.currentObjectPath = !syncing.isGlobal() ? normalObjectPath : globalObjectPath;
+            if (this.didTransitionToNewData) // If true, means
+            {
+                this.update();
+                Constants.getLogger().info("Transitioned old customData for object '%s' field to new customDataMap Hashmap (ID: %s). You can ignore this.".formatted(this.name, this.syncing.objectIdentifier));
+            }
         }
     }
 
@@ -99,6 +105,7 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
     public String getGroupIdentifier() { return this.groupIdentifier; } // No usages but may be used elsewhere like with generics not sure
 
     public String getRawString() { return this.payload.toString();}
+
     public JsonObject getRawJson() { return this.payload;}
 
     public ObjectType getObjectType()
@@ -209,6 +216,11 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
                 Constants.getLogger().error("Error on server when trying to process %s from %s ERROR: %s".formatted(getObjectType(), this.ownerUUID, ioException.toString()));
             }
         }
+    }
+
+    public void update()
+    {
+        update(this.getRawJson().toString(), true);
     }
 
     public boolean create()

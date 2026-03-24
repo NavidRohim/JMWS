@@ -12,12 +12,12 @@ import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 public class JMWSHandshakePayload
 {
-    public static final Identifier CHANNEL = Identifier.fromNamespaceAndPath(Constants.MODID, "jmws_handshake");
+    public static final ResourceLocation CHANNEL = ResourceLocation.fromNamespaceAndPath(Constants.MODID, "jmws_handshake");
     public static final StreamCodec<@NotNull FriendlyByteBuf, @NotNull JMWSHandshakePayload> STREAM_CODEC = StreamCodec.ofMember(JMWSHandshakePayload::encode, JMWSHandshakePayload::new);
     public String serverConfigDataJson;
     public ClientSideServerConfigObject serverConfigData;

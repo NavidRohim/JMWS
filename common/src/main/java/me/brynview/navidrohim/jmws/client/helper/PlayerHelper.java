@@ -88,13 +88,13 @@ public class PlayerHelper {
     public static String getUsernameFromUUID(UUID user)
     {
         Optional<GameProfile> profile = getUserFromUUID(user);
-        return profile.isPresent() ? profile.get().name() : CommonHelper.unknownUser;
+        return profile.isPresent() ? profile.get().getName() : CommonHelper.unknownUser;
     }
 
     public static String getUsernameFromUUID(UUID user, boolean withTag)
     {
         Optional<GameProfile> profile = getUserFromUUID(user);
-        return profile.isPresent() ? profile.get().name() : "S";
+        return profile.isPresent() ? profile.get().getName() : "S";
     }
 
     public static UUID ourUUID()
