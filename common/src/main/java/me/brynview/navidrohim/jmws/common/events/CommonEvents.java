@@ -18,6 +18,7 @@ public class CommonEvents {
 
     public static void handleJoin(ServerPlayer serverPlayer, boolean isInternal, boolean sendWarningIfJMNotPresent)
     {
+
         if (isInternal && CommonClass.minecraftClientInstance.player == null)
         {
             if (sendWarningIfJMNotPresent && !ClientCommonClass.clientHasJM) {

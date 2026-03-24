@@ -16,6 +16,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -44,7 +45,7 @@ public class ServerDispatcher {
         );
 
         dispatcher.register(Commands.literal("jmws_admin")
-                .requires(src -> src.hasPermission(2) && isValidCommandUser(src))
+                .requires(Commands.hasPermission(Commands.LEVEL_MODERATORS))
                 .then(Commands.literal("create_global_waypoint")
                         .then(Commands.argument("waypointName", StringArgumentType.greedyString())
                                 .suggests(ServerDispatcher::suggestWaypoints)
@@ -152,8 +153,8 @@ public class ServerDispatcher {
         HashMap<String, ServerObject> stringServerObjectHashMap = new HashMap<>();
 
         objs.forEach(obj -> {
-            Optional<GameProfile> oldOpPlayerProfile = CommonClass.minecraftServerInstance.getProfileCache().get(obj.getOwnerUUID());
-            boolean isOp = oldOpPlayerProfile.isPresent() && CommonClass.minecraftServerInstance.getPlayerList().isOp(oldOpPlayerProfile.get());
+            Optional<GameProfile> oldOpPlayerProfile = CommonClass.minecraftServerInstance.services().profileResolver().fetchById(obj.getOwnerUUID());
+            boolean isOp = oldOpPlayerProfile.isPresent() && CommonClass.minecraftServerInstance.getPlayerList().isOp(new NameAndId(oldOpPlayerProfile.get()));
 
             if (!isOp)
             {
@@ -219,6 +220,6 @@ public class ServerDispatcher {
 
     private static boolean isValidCommandUser(CommandSourceStack commandSourceStack)
     {
-        return !CommonClass.isInternalServer() || (!CommonClass.getMinecraftServerInstance().isSingleplayerOwner(commandSourceStack.getPlayer().getGameProfile())); // No host user
+        return !CommonClass.isInternalServer() || (!CommonClass.getMinecraftServerInstance().isSingleplayerOwner(commandSourceStack.getPlayer().nameAndId())); // No host user
     }
 }
