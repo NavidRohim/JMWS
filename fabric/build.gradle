@@ -27,8 +27,8 @@ dependencies {
     implementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
     // JourneyMap TODO: NOT PORTED
-    implementation "mysticdrew:common-networking-fabric:${common_networking_version}"
-    compileOnlyApi group: 'info.journeymap', name: 'journeymap-api-common', version: project.journeymap_api_version, changing: true
+    //implementation "mysticdrew:common-networking-fabric:${common_networking_version}"
+    //compileOnlyApi group: 'info.journeymap', name: 'journeymap-api-common', version: project.journeymap_api_version, changing: true
 }
 
 loom {
