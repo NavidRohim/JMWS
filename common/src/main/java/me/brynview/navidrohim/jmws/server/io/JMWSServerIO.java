@@ -25,6 +25,20 @@ public class JMWSServerIO {
 
     public static final String globalObjPrefix = "GLOBAL_";
 
+    public static <T extends ServerObject> List<T> getAllInitialisedGlobalObjects(ObjectType globalObjectType)
+    {
+        List<T> wp = new ArrayList<>();
+        for (Path path : getAllObjects(globalObjectType).toList())
+        {
+            if (path.toString().contains(globalObjPrefix))
+            {
+                UUID playerUUID = PathUtils.getUUIDFromPath(path, globalObjectType);
+                wp.add(getObjectFromFile(path, playerUUID, globalObjectType));
+            }
+        }
+        return wp;
+    }
+
     public static class PathUtils
     {
         public static String makeFilename(String objectID, UUID playerOwner, boolean isGlobal)
@@ -133,9 +147,25 @@ public class JMWSServerIO {
             list.add((T) getObjectFromFile(objPath, user, objectType));
         }
 
-
         return list;
     }
+
+    /*
+    public static <T extends ServerObject> List<T> getAllGlobals(ObjectType objectType)
+    {
+        List<T> list = new ArrayList<>();
+
+        try (Stream<Path> wpFiles = Files.list(Path.of(objectType.getObjectPathPrefix())))
+        {
+            wpFiles.filter(Files::isRegularFile).forEach(path -> {
+                if (path.toString().contains(globalObjPrefix)) {
+
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }*/
 
     public static <T extends ServerObject> T getObjectFromFile(Path objPath, UUID user, ObjectType objectType, boolean silentFail)
     {

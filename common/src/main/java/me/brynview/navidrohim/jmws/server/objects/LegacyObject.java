@@ -41,6 +41,8 @@ public class LegacyObject
 
                 this.customData = payload.get("customDataMap").getAsJsonObject().get(Constants.MODID).getAsString();
                 this.customDataJmwsFieldObject = payload.get("customDataMap").getAsJsonObject();
+                payload.remove("customData");
+
                 this.didTransitionToNewData = true;
             } else {
                 throw new IllegalStateException("Unable to parse legacy object. customData doesn't exist which likely means the object has been tampered with.");

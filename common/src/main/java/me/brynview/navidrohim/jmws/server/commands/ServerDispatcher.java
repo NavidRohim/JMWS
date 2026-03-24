@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.server.commands;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -16,10 +17,10 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+
+import static me.brynview.navidrohim.jmws.server.io.JMWSServerIO.getAllInitialisedGlobalObjects;
 
 public class ServerDispatcher {
 
@@ -62,10 +63,12 @@ public class ServerDispatcher {
                                 .executes(ServerDispatcher::removeServerWp)))
                 .then(Commands.literal("remove_global_no_op")
                         .then(Commands.literal("waypoint")
-                            .then(Commands.argument("waypointName", StringArgumentType.greedyString()))
-                            .executes(ServerDispatcher::removeServerWpFromBadOp))
+                            .then(Commands.argument("waypointName", StringArgumentType.greedyString())
+                            .suggests(ServerDispatcher::suggestInactiveOpWp)
+                            .executes(ServerDispatcher::removeServerWpFromBadOp)))
                         .then(Commands.literal("group")
-                            .then(Commands.argument("groupName", StringArgumentType.greedyString()))
+                            .then(Commands.argument("groupName", StringArgumentType.greedyString())
+                            .suggests(ServerDispatcher::suggestInactiveOpGp))
                             .executes(ServerDispatcher::removeServerGpFromBadOp))
                 )
         );
@@ -73,11 +76,13 @@ public class ServerDispatcher {
 
     private static int removeServerGpFromBadOp(CommandContext<CommandSourceStack> commandSourceStackCommandContext)
     {
-        return 0;
+        String groupID = StringArgumentType.getString(commandSourceStackCommandContext, "groupName");
+        return ServerCommands.removeGlobalFromBadOp(groupID, ObjectType.GROUP, commandSourceStackCommandContext.getSource().getPlayer());
     }
 
     private static int removeServerWpFromBadOp(CommandContext<CommandSourceStack> commandSourceStackCommandContext) {
-        return 0;
+        String waypointID = StringArgumentType.getString(commandSourceStackCommandContext, "waypointName");
+        return ServerCommands.removeGlobalFromBadOp(waypointID, ObjectType.WAYPOINT, commandSourceStackCommandContext.getSource().getPlayer());
     }
 
     private static int doRemoveShareWaypoint(CommandContext<CommandSourceStack> context1) throws CommandSyntaxException {
@@ -141,21 +146,50 @@ public class ServerDispatcher {
         return stringServerObjectHashMap;
     }
 
+    public static HashMap<String, ServerObject> getInactiveOpUserGlobalObjects(ObjectType objectType)
+    {
+        List<ServerObject> objs = getAllInitialisedGlobalObjects(objectType);
+        HashMap<String, ServerObject> stringServerObjectHashMap = new HashMap<>();
+
+        objs.forEach(obj -> {
+            Optional<GameProfile> oldOpPlayerProfile = CommonClass.minecraftServerInstance.getProfileCache().get(obj.getOwnerUUID());
+            boolean isOp = oldOpPlayerProfile.isPresent() && CommonClass.minecraftServerInstance.getPlayerList().isOp(oldOpPlayerProfile.get());
+
+            if (!isOp)
+            {
+                stringServerObjectHashMap.put(obj.getObjectNonDuplicateIdentifier(), obj);
+            }
+        });
+        return stringServerObjectHashMap;
+    }
+
+    private static CompletableFuture<Suggestions> suggestInactiveOpWp(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder)
+    {
+        Set<String> objNames = getInactiveOpUserGlobalObjects(ObjectType.WAYPOINT).keySet();
+        return SharedSuggestionProvider.suggest(objNames, suggestionsBuilder);
+    }
+
+    private static CompletableFuture<Suggestions> suggestInactiveOpGp(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder)
+    {
+        Set<String> objNames = getInactiveOpUserGlobalObjects(ObjectType.GROUP).keySet();
+        return SharedSuggestionProvider.suggest(objNames, suggestionsBuilder);
+    }
+
     private static CompletableFuture<Suggestions> suggestObject(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder, ObjectType objectType)
     {
-        List<String> names = getUserObjectsAsNameHashmap(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, false, false).keySet().stream().toList();
+        Set<String> names = getUserObjectsAsNameHashmap(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, false, false).keySet();
         return SharedSuggestionProvider.suggest(names, suggestionsBuilder);
     }
 
     private static CompletableFuture<Suggestions> suggestGlobalObject(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder, ObjectType objectType)
     {
-        List<String> names = getUserObjectsAsNameHashmap(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, true, false).keySet().stream().toList();
+        Set<String> names = getUserObjectsAsNameHashmap(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, true, false).keySet();
         return SharedSuggestionProvider.suggest(names, suggestionsBuilder);
     }
 
     private static CompletableFuture<Suggestions> suggestSharedObject(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder, ObjectType objectType)
     {
-        List<String> names = getUserObjectsAsNameHashmap(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, false, true).keySet().stream().toList();
+        Set<String> names = getUserObjectsAsNameHashmap(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), objectType, false, true).keySet();
         return SharedSuggestionProvider.suggest(names, suggestionsBuilder);
     }
 
