@@ -68,7 +68,7 @@ public class JMWSPlugin implements IClientPlugin {
     {
         this.jmAPI = jmClientApi;
 
-        CommonEventRegistry.WAYPOINT_EVENT.subscribe(Constants.MODID, this::waypointCreationHandler);
+        CommonEventRegistry.WAYPOINT_EVENT.subscribe(Constants.MODID, this::waypointEventHandler);
         CommonEventRegistry.WAYPOINT_GROUP_EVENT.subscribe(Constants.MODID + "group_event", Constants.MODID, this::groupEventListener);
         CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.subscribe(Constants.MODID + "group_transfer", Constants.MODID, this::waypointDragHandler);
 
@@ -200,10 +200,10 @@ public class JMWSPlugin implements IClientPlugin {
      * Only called from WAYPOINT_EVENT (when waypoint is created, updated, or deleted) Do not call.
      * @param waypointEvent The event.
      */
-    void waypointCreationHandler(WaypointEvent waypointEvent) {
-        Constants.getLogger().info(String.valueOf(waypointEvent.getContext()));
+    void waypointEventHandler(WaypointEvent waypointEvent) {
         if (!isBusy && ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled()) { // Check that user is in physical server, user config allows event, and server config allows event.
             // Get old waypoint if context is UPDATE (needed because server needs reference to waypoint before it was updated so it can be deleted on the server)
+            isBusy = true;
             switch (waypointEvent.getContext()) {
                 case CREATE ->
                     // Sends "create" packet | new = "SERVER_CREATE"
@@ -216,6 +216,7 @@ public class JMWSPlugin implements IClientPlugin {
                     this.updateAction(waypointEvent.waypoint);
                 }
             }
+            isBusy = false;
         }
     }
 
@@ -503,6 +504,7 @@ public class JMWSPlugin implements IClientPlugin {
                 .collect(Collectors.toSet());
 
         // Test if any existing groups (persistent) have already been added to the server, if not, add them
+
         for (WaypointGroup existingGroup : existingGroups) {
             String key = existingGroup.getName() + existingGroup.getGuid();
             if (!remoteGroupKeys.contains(key) && !Constants.forbiddenGroups.contains(existingGroup.getGuid()) && existingGroup.isPersistent() && isJmwsGroup(existingGroup)) {
@@ -559,9 +561,14 @@ public class JMWSPlugin implements IClientPlugin {
                 .map(Waypoint::getBlockPos)
                 .collect(Collectors.toSet());
 
+        getInstance().jmAPI.removeAllWaypoints(Constants.MODID); // Delete all waypoints belonging to JMWS
+        getInstance().jmAPI.removeAllWaypoints("journeymap");
+        ObjectIdentifierMap.removeAll(ObjectType.WAYPOINT);
+
         // Test if any existing waypoints (persistent, usually death waypoints or 3rd party waypoints from another add-on) have already been added to the server, if not, add them
         for (Waypoint existing : existingWaypoints) {
-            //jmAPI.removeWaypoint(existing.getModId(), existing);
+
+
             if (!remoteWaypointPositions.contains(existing.getBlockPos()) && existing.isPersistent() && isJmwsWaypoint(existing)) {
                 existing.setPersistent(false);
                 getInstance().createAction(existing, true);

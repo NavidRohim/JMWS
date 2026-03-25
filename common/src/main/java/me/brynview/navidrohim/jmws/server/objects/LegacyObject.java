@@ -28,7 +28,6 @@ public class LegacyObject
         this.rawPacketData = payload.toString();
         try
         {
-            Constants.getLogger().info(this.rawPacketData);
             this.customData = payload.get("customDataMap").getAsJsonObject().get(Constants.MODID).getAsString();
             this.customDataJmwsFieldObject = payload.get("customDataMap").getAsJsonObject();
         } catch (IllegalStateException | NullPointerException e) // catch old customData field.

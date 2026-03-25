@@ -150,9 +150,8 @@ public class ObjectIdentifierMap {
         try
         {
             waypointIdentifierMap.remove(Syncing.getSyncingInfo(waypoint.getCustomData(Constants.MODID)).objectIdentifier);
-        } catch (NullPointerException noObjIgnore)
+        } catch (NullPointerException _)
         {
-            return;
         }
     }
 
@@ -170,6 +169,16 @@ public class ObjectIdentifierMap {
         } catch (NullPointerException noObjIgnore)
         {
             return;
+        }
+    }
+
+    public static void removeAll(ObjectType objectType)
+    {
+        if (objectType == ObjectType.WAYPOINT)
+        {
+            waypointIdentifierMap.clear();
+        } else {
+            groupIdentifierMap.clear();
         }
     }
 }
