@@ -100,6 +100,7 @@ public class JMWSPlugin implements IClientPlugin {
         if (ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled())
         {
             Waypoint waypoint = waypointPopupMenuEvent.getWaypoint();
+            Constants.getLogger().info(waypoint.toString());
             ClientSyncingHandler clientSyncingHandler = ClientSyncingHandler.getClientSyncingHandlerFromWaypoint(waypoint);
 
             if (!clientSyncingHandler.isGlobal())
