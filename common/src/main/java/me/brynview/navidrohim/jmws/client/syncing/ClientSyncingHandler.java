@@ -1,6 +1,5 @@
 package me.brynview.navidrohim.jmws.client.syncing;
 
-import ca.weblite.objc.Client;
 import com.google.gson.JsonSyntaxException;
 import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.common.waypoint.Waypoint;

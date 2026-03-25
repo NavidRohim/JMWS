@@ -103,12 +103,13 @@ public class JMWSPlugin implements IClientPlugin {
             Constants.getLogger().info(waypoint.toString());
             ClientSyncingHandler clientSyncingHandler = ClientSyncingHandler.getClientSyncingHandlerFromWaypoint(waypoint);
 
+            /*
             if (!clientSyncingHandler.isGlobal())
             {
                 waypointPopupMenuEvent.getPopupMenu().addMenuItem("Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, clientSyncingHandler, blockPos, Action.GLOBAL);});
             } else {
                 waypointPopupMenuEvent.getPopupMenu().addMenuItem("Remove Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, clientSyncingHandler, blockPos, Action.UNGLOBAL);});
-            }
+            }*/
 
             waypointPopupMenuEvent.getPopupMenu().addMenuItem("Share", (blockPos) -> {this.handleWaypointContextMenuClick(waypointPopupMenuEvent.getWaypoint(), clientSyncingHandler, blockPos, Action.SHARE);});
         }
@@ -178,6 +179,7 @@ public class JMWSPlugin implements IClientPlugin {
      * @param silent   -- If the creation should happen silently (no text alert on the client)
      */
     private void createAction(Waypoint waypoint, boolean silent) {
+        ClientSyncingHandler.getClientSyncingHandlerFromWaypoint(waypoint);
         if (ClientCommonClass.serverConfig.waypointsEnabled()) {
             if (isJmwsWaypoint(waypoint))
             {
