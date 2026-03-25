@@ -5,3 +5,5 @@ Reminder for myself
 
 1.21.1 JM required version is 1.21.1-6.0.0-beta.52
 1.21.11 JM required version is 1.21.11-6.0.0-beta.53
+
+26.1 JM required version is 26.1-6.0.0-beta.60

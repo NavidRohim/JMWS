@@ -40,8 +40,8 @@ sourceSets.main.resources.srcDir 'src/generated/resources'
 dependencies {
     implementation minecraft.dependency("net.minecraftforge:forge:${minecraft_version}-${forge_version}");
 
-    //compileOnly group: 'info.journeymap', name: 'journeymap-api-forge', version: project.journeymap_api_version, changing: true
-    //implementation "mysticdrew:common-networking-forge:${common_networking_version}"
+    compileOnly group: 'info.journeymap', name: 'journeymap-api-forge', version: project.journeymap_api_version, changing: true
+    implementation "mysticdrew:common-networking-forge:${common_networking_version}"
 
 }
 
