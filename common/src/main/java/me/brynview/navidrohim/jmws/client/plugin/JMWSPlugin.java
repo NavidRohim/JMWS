@@ -52,6 +52,7 @@ public class JMWSPlugin implements IClientPlugin {
     // JourneyMap API
     private IClientAPI jmAPI = null;
     private static JMWSPlugin INSTANCE;
+    private static boolean isBusy = false;
 
     private static final String[] checkForCustomDataKeys = {
             "objectIdentifier",
@@ -186,10 +187,8 @@ public class JMWSPlugin implements IClientPlugin {
 
                     // removedWaypoint is called here because, yes, we do listen for the deletion with the event (meaning, the waypoint should be already gone by the time the event is called)
                     // But for some reason it bugs out and the waypoint stays and becomes persistent
-                    jmAPI.removeWaypoint(waypoint.getModId(), waypoint);
+                    //jmAPI.removeWaypoint(waypoint.getModId(), waypoint);
                     Dispatcher.sendToServer(waypointActionPayload);
-                } else {
-                    jmAPI.removeWaypoint(waypoint.getModId(), waypoint);
                 }
             }
         } else {
@@ -202,8 +201,8 @@ public class JMWSPlugin implements IClientPlugin {
      * @param waypointEvent The event.
      */
     void waypointCreationHandler(WaypointEvent waypointEvent) {
-
-        if (ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled()) { // Check that user is in physical server, user config allows event, and server config allows event.
+        Constants.getLogger().info(String.valueOf(waypointEvent.getContext()));
+        if (!isBusy && ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled()) { // Check that user is in physical server, user config allows event, and server config allows event.
             // Get old waypoint if context is UPDATE (needed because server needs reference to waypoint before it was updated so it can be deleted on the server)
             switch (waypointEvent.getContext()) {
                 case CREATE ->
@@ -549,6 +548,7 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private boolean handleUploadWaypoints(JsonObject jsonWaypoints, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException {
         boolean hasLocalWaypoint = false;
+        isBusy = true;
 
         // Get existing waypoints (local) and get waypoint objects saved on server
         List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
@@ -559,10 +559,9 @@ public class JMWSPlugin implements IClientPlugin {
                 .map(Waypoint::getBlockPos)
                 .collect(Collectors.toSet());
 
-        getInstance().jmAPI.removeAllWaypoints(Constants.MODID); // Delete all waypoints belonging to JMWS
-        getInstance().jmAPI.removeAllWaypoints("journeymap");
         // Test if any existing waypoints (persistent, usually death waypoints or 3rd party waypoints from another add-on) have already been added to the server, if not, add them
         for (Waypoint existing : existingWaypoints) {
+            //jmAPI.removeWaypoint(existing.getModId(), existing);
             if (!remoteWaypointPositions.contains(existing.getBlockPos()) && existing.isPersistent() && isJmwsWaypoint(existing)) {
                 existing.setPersistent(false);
                 getInstance().createAction(existing, true);
@@ -590,6 +589,7 @@ public class JMWSPlugin implements IClientPlugin {
             addWaypoint(savedWaypoint);
         }
 
+        isBusy = false;
         return hasLocalWaypoint;
     }
 

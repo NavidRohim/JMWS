@@ -133,7 +133,7 @@ public class ObjectIdentifierMap {
                 groupIdentifier = groupSyncInfo.objectIdentifier;
             } else {
                 groupIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypointGroup.getGuid(), waypointGroup.getName());
-                waypointGroup.setCustomData(Syncing.getEmptySyncingInfoString(groupIdentifier, minecraftClientInstance.player.getUUID(), false), Constants.MODID);
+                waypointGroup.setCustomData(Constants.MODID, Syncing.getEmptySyncingInfoString(groupIdentifier, minecraftClientInstance.player.getUUID(), false));
             }
 
             groupIdentifierMap.put(groupIdentifier, waypointGroup);

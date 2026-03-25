@@ -69,8 +69,8 @@ public class ServerDispatcher {
                             .executes(ServerDispatcher::removeServerWpFromBadOp)))
                         .then(Commands.literal("group")
                             .then(Commands.argument("groupName", StringArgumentType.greedyString())
-                            .suggests(ServerDispatcher::suggestInactiveOpGp))
-                            .executes(ServerDispatcher::removeServerGpFromBadOp))
+                            .suggests(ServerDispatcher::suggestInactiveOpGp)
+                            .executes(ServerDispatcher::removeServerGpFromBadOp)))
                 )
         );
     }
