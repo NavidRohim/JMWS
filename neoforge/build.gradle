@@ -14,10 +14,7 @@ neoForge {
     if (at.exists()) {
         accessTransformers.add(at.absolutePath)
     }
-    parchment {
-        minecraftVersion = parchment_minecraft
-        mappingsVersion = parchment_version
-    }
+
     runs {
         configureEach {
             systemProperty('neoforge.enabledGameTestNamespaces', mod_id)
@@ -44,7 +41,7 @@ repositories {
     }
 }
 dependencies {
-    compileOnly group: 'info.journeymap', name: 'journeymap-api-neoforge', version: project.journeymap_api_version, changing: true
-    implementation "mysticdrew:common-networking-neoforge:${common_networking_version}"
+    //compileOnly group: 'info.journeymap', name: 'journeymap-api-neoforge', version: project.journeymap_api_version, changing: true
+    //implementation "mysticdrew:common-networking-neoforge:${common_networking_version}"
 }
 sourceSets.main.resources { srcDir 'src/generated/resources' }

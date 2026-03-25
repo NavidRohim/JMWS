@@ -79,9 +79,9 @@ public class JMWSPlugin implements IClientPlugin {
             ClientCommonClass.config.serverAllowsSharing.set(ClientCommonClass.serverConfig.sharingEnabled);
         });
 
-        ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe("jmapi", this::handleUserDeath);
-        ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe("jmapi", (optionsRegistryEvent -> ClientCommonClass.config = new ConfigInterface()));
-        ClientEventRegistry.MAPPING_EVENT.subscribe("jmapi", (MappingEvent event) -> {JMWSPlugin.sync(false);});
+        ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe(Constants.MODID, this::handleUserDeath);
+        ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe(Constants.MODID, (optionsRegistryEvent -> ClientCommonClass.config = new ConfigInterface()));
+        ClientEventRegistry.MAPPING_EVENT.subscribe(Constants.MODID, (MappingEvent event) -> {JMWSPlugin.sync(false);});
 
     }
 
