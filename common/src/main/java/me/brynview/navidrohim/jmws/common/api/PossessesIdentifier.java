@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.server.objects;
+package me.brynview.navidrohim.jmws.common.api;
 
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 

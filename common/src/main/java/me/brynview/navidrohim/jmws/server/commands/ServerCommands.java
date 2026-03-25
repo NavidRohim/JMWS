@@ -30,7 +30,7 @@ public class ServerCommands {
                     ServerObject objIns = JMWSServerIO.getObjectFromFile(specifiedObj, sender.getUUID(), objectType);
                     if (!objIns.syncing.isGlobal())
                     {
-                        objIns.share(sender, player);
+                        objIns.shareWith(player.getUUID());
                     } else {
                         PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.cannot_share_global", true, MessageType.WARNING);
                     }
@@ -52,7 +52,7 @@ public class ServerCommands {
         if (specifiedObj != null)
         {
             ServerObject objIns = JMWSServerIO.getObjectFromFile(specifiedObj, sender.getUUID(), objectType);
-            objIns.stopSharing();
+            objIns.stopSharingWithAll();
             PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.stopped_sharing", true, MessageType.NEUTRAL);
         }
         else {

@@ -101,11 +101,16 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.TRANSITION, objectIdentifier, filename, transitionType);
     }
 
+    public static String makeShareRequestForServer(UUID from, UUID to, String objectIdentifier, ObjectType objectType)
+    {
+        return CommandFactory.makeBaseJsonRequest(Commands.SHARE_FROM_CLIENT, from, to, objectIdentifier, objectType);
+    }
+
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {
         return JsonParser.parseString(jsonString).getAsJsonObject();
     }
 
-    /**
+    /*
      * Enums for different packet commands
      */
 
@@ -131,8 +136,10 @@ public class CommandFactory {
         AFFIRM_SHARE, // Confirm user wants shared object
         REJECT_SHARE, // User doesnt want shared object.
 
+        SHARE_FROM_CLIENT,
+
         // Object sharing errors
-        USER_ALREADY_PROCESSING_SHARE, // User is already processing another share request
+        USER_ALREADY_PROCESSING_SHARE, // User is already processing another shareWith request
 
         UPDATE,
         TRANSITION

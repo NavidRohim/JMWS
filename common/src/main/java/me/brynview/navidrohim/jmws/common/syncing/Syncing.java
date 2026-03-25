@@ -1,13 +1,10 @@
 package me.brynview.navidrohim.jmws.common.syncing;
 
 import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.common.api.CommonSyncHandler;
 import me.brynview.navidrohim.jmws.common.CommonClass;
-import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public class Syncing {
+public class Syncing extends CommonSyncHandler {
 
     @Expose
     public String objectIdentifier;
@@ -40,54 +37,27 @@ public class Syncing {
         this.isGlobal = isGlobal;
     }
 
-    public static Syncing getSyncingInfo(ServerObject object) {
-        try {
-            Syncing syncing = CommonClass.gson.fromJson(object.getSyncedCustomData(), Syncing.class);
-            syncing.parentObject = object;
+    // Sharing
 
-            return syncing;
-        } catch (IllegalStateException | JsonSyntaxException reader) {
-            PlayerNetworkingHelper.sendUserMessage(object.getOwnerUUID(), "FATAL: You are on the wrong JMWS version! Update to JMWS v%s as soon as possible or you may suffer data loss!".formatted(Constants.SERVER_VERSION), false, MessageType.FAILURE);
-            object.dataclass = true;
-
-            return null;
-        }
-    }
-
-    public static Syncing getSyncingInfo(String customDataField, boolean returnNullIfError) {
-        try {
-            return CommonClass.gson.fromJson(customDataField, Syncing.class);
-        } catch (JsonSyntaxException syntaxException) // will throw if object hasn't been ported.
-        {
-            if (!returnNullIfError) {
-                return getSyncingInfo(getEmptySyncingInfoString(customDataField, PlayerHelper.ourUUID(), false));
-            }
-            return null;
-        }
-    }
-
-    public static Syncing getSyncingInfo(String customDataField) {
-        return getSyncingInfo(customDataField, false);
-    }
-
-    public static String getEmptySyncingInfoString(String objectIdentifier, UUID owner, boolean isGlobal) {
-        return CommonClass.gson.toJson(new Syncing(List.of(), objectIdentifier, owner, isGlobal));
-    }
-
+    @Override
     public void addUserToShare(UUID playerUUID) {
         this.sharedTo.add(playerUUID.toString());
         this.update();
     }
 
-    public void removeUserFromShare(String playerUUID) {
-        this.sharedTo.remove(playerUUID);
+    @Override
+    public void removeUserFromShare(UUID playerUUID) {
+        this.sharedTo.remove(playerUUID.toString());
         this.update();
     }
 
+    @Override
     public void removeAllFromShare() {
         this.sharedTo.clear();
         this.update();
     }
+
+    // Owner stuffs
 
     public boolean isOwner(UUID supposedOwner) {
         return this.owner.equals(supposedOwner);
@@ -97,14 +67,19 @@ public class Syncing {
         return this.owner;
     }
 
+    // Global handling
+
     public boolean isGlobal() {
         return this.isGlobal;
     }
 
-    public void setGlobal(boolean global) {
+    public void setGlobal(boolean global)
+    {
         this.isGlobal = global;
         this.update();
     }
+
+    // IO (SERVER ONLY)
 
     private void update() {
         if (this.parentObject != null) {
@@ -116,6 +91,8 @@ public class Syncing {
             throw new RuntimeException("Cannot update object from dataclass instance of SyncingInformation. Get instance of SyncingInformation from child of SavedObject. (SavedObject.syncing.update())");
         }
     }
+
+    // Syncing
 
     public void syncToUsers() {
         for (String playerUUID : this.sharedTo) {

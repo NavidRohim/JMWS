@@ -21,7 +21,7 @@ import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.enums.ShareRequestDirection;
-import me.brynview.navidrohim.jmws.common.syncing.Syncing;
+import me.brynview.navidrohim.jmws.common.syncing.SyncUtils;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.minecraft.network.chat.Component;
@@ -124,12 +124,12 @@ public class PacketHandler {
                     if (sharedObjectType == ObjectType.WAYPOINT)
                     {
                         Waypoint objectWp = WaypointFactory.fromWaypointJsonString(objectString);
-                        objectIdentifier = Syncing.getSyncingInfo(objectWp.getCustomData(Constants.MODID)).objectIdentifier;
+                        objectIdentifier = SyncUtils.getSyncingInfo(objectWp.getCustomData(Constants.MODID)).objectIdentifier;
                         object = objectWp;
                         objName = objectWp.getName();
                     } else {
                         WaypointGroup objectGp = WaypointFactory.fromGroupJsonString(objectString);
-                        objectIdentifier = Syncing.getSyncingInfo(objectGp.getCustomData(Constants.MODID)).objectIdentifier;
+                        objectIdentifier = SyncUtils.getSyncingInfo(objectGp.getCustomData(Constants.MODID)).objectIdentifier;
                         object = objectGp;
                         objName = objectGp.getName();
                     }

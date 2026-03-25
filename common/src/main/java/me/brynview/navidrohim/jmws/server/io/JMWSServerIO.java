@@ -3,12 +3,16 @@ package me.brynview.navidrohim.jmws.server.io;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
+import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.exceptions.ObjectError;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -37,6 +41,31 @@ public class JMWSServerIO {
             }
         }
         return wp;
+    }
+
+    public static List<Path> getGlobalObjects(ObjectType globalObjectType)
+    {
+        List<Path> wp = new ArrayList<>();
+        for (Path path : getAllObjects(globalObjectType).toList())
+        {
+            if (path.toString().contains(globalObjPrefix))
+            {
+                wp.add(path);
+            }
+        }
+        return wp;
+    }
+
+    public static void removeObjectFromUser(ServerObject serverObject, UUID playerUUID, String objectIdentifier, ObjectType objectType) {
+        UserSharingFile.removeObjectFromUser(playerUUID, objectIdentifier, serverObject.getObjectType());
+        ServerPlayer sharedPlayer = CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(playerUUID);
+        if (sharedPlayer != null) {
+            if (objectType == ObjectType.WAYPOINT) {
+                Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteRequestJson(objectIdentifier, true, false)), sharedPlayer);
+            } else {
+                Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteGroupRequestJson(objectIdentifier, null, true, true, true, false, false)), sharedPlayer);
+            }
+        }
     }
 
     public static class PathUtils

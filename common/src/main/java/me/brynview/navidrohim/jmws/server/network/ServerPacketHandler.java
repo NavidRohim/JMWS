@@ -74,13 +74,13 @@ public class ServerPacketHandler {
                     }
                 }
 
-                for (Path globalWpPath : ServerObject.getGlobalObjects(ObjectType.WAYPOINT))
+                for (Path globalWpPath : JMWSServerIO.getGlobalObjects(ObjectType.WAYPOINT))
                 {
                     lastIterWp++;
                     jsonWaypointPayloadArray.put(String.valueOf(lastIterWp), Files.readString(globalWpPath));
                 }
 
-                for (Path globalGpPath : ServerObject.getGlobalObjects(ObjectType.GROUP))
+                for (Path globalGpPath : JMWSServerIO.getGlobalObjects(ObjectType.GROUP))
                 {
                     lastIterGp++;
                     jsonGroupPayloadArray.put(String.valueOf(lastIterGp), Files.readString(globalGpPath));
@@ -181,7 +181,7 @@ public class ServerPacketHandler {
                                     return;
                                 }
                             }
-                            group.stopSharing();
+                            group.stopSharingWithAll();
                             result = group.delete(false);
 
                             if (result) {
@@ -193,7 +193,7 @@ public class ServerPacketHandler {
                         } else if (group.syncing.isGlobal()) {
                             sendUserMessage(player, "global.jmws.cannot_delete_global", true, MessageType.ONE_TIME_WARNING);
                         } else {
-                            group.stopSharing(playerUUID);
+                            group.stopSharingWith(playerUUID);
                             sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
                         }
 
@@ -235,7 +235,7 @@ public class ServerPacketHandler {
                         } else if (waypoint.syncing.isGlobal()) {
                             sendUserMessage(player, "global.jmws.cannot_delete_global", true, MessageType.ONE_TIME_WARNING);
                         } else {
-                            waypoint.stopSharing(playerUUID);
+                            waypoint.stopSharingWith(playerUUID);
                             sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
                         }
                     } else if (deleteAll)
@@ -294,7 +294,7 @@ public class ServerPacketHandler {
                     }
                 }
 
-                case UPDATE -> // Bug here, after updating, the user share list is cleared
+                case UPDATE -> // Bug here, after updating, the user shareWith list is cleared
                 {
                     String objectIdentifier = arguments.getFirst().getAsString();
                     ObjectType modifyingType = ObjectType.valueOf(arguments.get(1).getAsString());
