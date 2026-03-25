@@ -97,20 +97,25 @@ public class JMWSPlugin implements IClientPlugin {
 
     private void addOptionForContextMenu(PopupMenuEvent.WaypointPopupMenuEvent waypointPopupMenuEvent)
     {
-        Waypoint waypoint = waypointPopupMenuEvent.getWaypoint();
-        ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
-
-        if (!serverSyncingHandler.isGlobal())
+        if (ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled())
         {
-            waypointPopupMenuEvent.getPopupMenu().addMenuItem("Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypointPopupMenuEvent.getWaypoint(), serverSyncingHandler, blockPos, Action.GLOBAL);});
-        }
-        waypointPopupMenuEvent.getPopupMenu().addMenuItem("Share", (blockPos) -> {this.handleWaypointContextMenuClick(waypointPopupMenuEvent.getWaypoint(), serverSyncingHandler, blockPos, Action.SHARE);});
+            Waypoint waypoint = waypointPopupMenuEvent.getWaypoint();
+            ClientSyncingHandler clientSyncingHandler = ClientSyncingHandler.getClientSyncingHandlerFromWaypoint(waypoint);
 
+            if (!clientSyncingHandler.isGlobal())
+            {
+                waypointPopupMenuEvent.getPopupMenu().addMenuItem("Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, clientSyncingHandler, blockPos, Action.GLOBAL);});
+            } else {
+                waypointPopupMenuEvent.getPopupMenu().addMenuItem("Remove Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, clientSyncingHandler, blockPos, Action.UNGLOBAL);});
+            }
+
+            waypointPopupMenuEvent.getPopupMenu().addMenuItem("Share", (blockPos) -> {this.handleWaypointContextMenuClick(waypointPopupMenuEvent.getWaypoint(), clientSyncingHandler, blockPos, Action.SHARE);});
+        }
     }
 
-    private void handleWaypointContextMenuClick(Waypoint waypoint, ServerSyncingHandler waypointSync, BlockPos blockPos, Action action)
+    private void handleWaypointContextMenuClick(Waypoint waypoint, ClientSyncingHandler waypointSyncingHandler, BlockPos blockPos, Action action)
     {
-        ClientSyncingHandler waypointSyncingHandler = ClientSyncingHandler.getClientSyncingHandlerFromWaypoint(waypoint);
+
         switch (action)
         {
             case GLOBAL:
