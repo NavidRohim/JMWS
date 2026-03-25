@@ -12,8 +12,7 @@ import me.brynview.navidrohim.jmws.common.enums.ShareRequestDirection;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.common.syncing.SyncUtils;
-import me.brynview.navidrohim.jmws.common.syncing.Syncing;
+import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
@@ -36,7 +35,7 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
     String groupIdentifier; // TODO: remove?
 
     public UserSharingFile accessorSharing;
-    public Syncing syncing;
+    public ServerSyncingHandler serverSyncingHandler;
 
     public boolean dataclass;
     public static ObjectType objectType = ObjectType.GENERIC;
@@ -61,21 +60,21 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
         this.dataclass = dataclass;
 
         this.ownerUUID = playerUUID; // Note; if you set ownerUUID before this.syncing is defined, it enables some sort of compatibility for legacy clients. But I've left it as-is to avoid chaos.
-        this.syncing = SyncUtils.getSyncingInfo(this);
+        this.serverSyncingHandler = ServerSyncingHandler.getSyncingHandlerFromServerObject(this);
 
         this.name = payload.get("name").getAsString();
         this.accessorSharing = !dataclass ? new UserSharingFile(playerUUID) : null;
 
-        this.globalObjectPath = !dataclass ? Path.of(ObjectType.getPathLocationPrefix(this.getObjectType()) + JMWSServerIO.PathUtils.makeFilename(this.syncing.objectIdentifier, this.ownerUUID, true)) : null;
-        this.normalObjectPath = !dataclass ? JMWSServerIO.PathUtils.getObjectFilename(this.syncing.getOwner(), this.syncing.objectIdentifier, getObjectType(), false) : null;
+        this.globalObjectPath = !dataclass ? Path.of(ObjectType.getPathLocationPrefix(this.getObjectType()) + JMWSServerIO.PathUtils.makeFilename(this.serverSyncingHandler.objectIdentifier, this.ownerUUID, true)) : null;
+        this.normalObjectPath = !dataclass ? JMWSServerIO.PathUtils.getObjectFilename(this.serverSyncingHandler.getOwner(), this.serverSyncingHandler.objectIdentifier, getObjectType(), false) : null;
         this.groupIdentifier = payload.get("guid").getAsString();
 
         if (!dataclass) {
-            this.currentObjectPath = !syncing.isGlobal() ? normalObjectPath : globalObjectPath;
+            this.currentObjectPath = !serverSyncingHandler.isGlobal() ? normalObjectPath : globalObjectPath;
             if (this.didTransitionToNewData) // If true, means object was using old customData.
             {
                 this.update();
-                Constants.getLogger().info("Transitioned old customData for object '%s' field to new customDataMap Hashmap (ID: %s). You can ignore this.".formatted(this.name, this.syncing.objectIdentifier));
+                Constants.getLogger().info("Transitioned old customData for object '%s' field to new customDataMap Hashmap (ID: %s). You can ignore this.".formatted(this.name, this.serverSyncingHandler.objectIdentifier));
             }
         }
     }
@@ -93,7 +92,7 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
         oldNameFile.renameTo(newFileName);
 
         this.currentObjectPath = getGlobalObjectPath();
-        this.syncing.setGlobal(true);
+        this.serverSyncingHandler.setGlobal(true);
     }
 
     @Override // From syncable
@@ -103,7 +102,7 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
         this.currentObjectPath = getNormalObjectPath();
 
         oldNameFile.renameTo(newFileName);
-        this.syncing.setGlobal(false);
+        this.serverSyncingHandler.setGlobal(false);
     }
 
     // Sharing
@@ -118,16 +117,16 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
 
     @Override
     public void stopSharingWith(UUID user) {
-        this.syncing.removeUserFromShare(user);
-        this.accessorSharing.removeFromShared(this.syncing.objectIdentifier, getObjectType());
+        this.serverSyncingHandler.removeUserFromShare(user);
+        this.accessorSharing.removeFromShared(this.serverSyncingHandler.objectIdentifier, getObjectType());
     }
 
     @Override
     public void stopSharingWithAll() {
-        for (String userUUID : this.syncing.sharedTo) {
-            JMWSServerIO.removeObjectFromUser(this, UUID.fromString(userUUID), this.syncing.objectIdentifier, this.getObjectType());
+        for (String userUUID : this.serverSyncingHandler.sharedTo) {
+            JMWSServerIO.removeObjectFromUser(this, UUID.fromString(userUUID), this.serverSyncingHandler.objectIdentifier, this.getObjectType());
         }
-        this.syncing.removeAllFromShare();
+        this.serverSyncingHandler.removeAllFromShare();
     }
 
     // General server operations
@@ -245,8 +244,8 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
     }
 
     @Override
-    public Syncing getSyncingHandler() {
-        return syncing;
+    public ServerSyncingHandler getSyncingHandler() {
+        return serverSyncingHandler;
     }
 
     @Nullable

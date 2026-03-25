@@ -7,7 +7,7 @@ import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.utils.LegacyUtils;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.syncing.SyncUtils;
-import me.brynview.navidrohim.jmws.common.syncing.Syncing;
+import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,7 +50,7 @@ public class ObjectIdentifierMap {
      * @return Waypoint -- The old waypoint before update.
      */
     public static Waypoint getOldWaypoint(Waypoint newWaypoint) {
-        Syncing persistentWaypointID = SyncUtils.getSyncingInfo(newWaypoint.getCustomData(Constants.MODID));
+        ServerSyncingHandler persistentWaypointID = SyncUtils.getSyncingInfo(newWaypoint.getCustomData(Constants.MODID));
         if (persistentWaypointID != null)
         {
             return waypointIdentifierMap.get(persistentWaypointID.objectIdentifier);
@@ -101,7 +101,7 @@ public class ObjectIdentifierMap {
             return false;
         } else {
             String waypointIdentifier;
-            @Nullable Syncing waypointSyncInfo = SyncUtils.getSyncingInfo(customDataField, true);
+            @Nullable ServerSyncingHandler waypointSyncInfo = SyncUtils.getSyncingInfo(customDataField, true);
             if (waypointSyncInfo != null)
             {
                 waypointIdentifier = waypointSyncInfo.objectIdentifier;
@@ -128,7 +128,7 @@ public class ObjectIdentifierMap {
             return false;
         } else {
             String groupIdentifier;
-            @Nullable Syncing groupSyncInfo = SyncUtils.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID), true);
+            @Nullable ServerSyncingHandler groupSyncInfo = SyncUtils.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID), true);
             if (groupSyncInfo != null)
             {
                 groupIdentifier = groupSyncInfo.objectIdentifier;
@@ -165,7 +165,7 @@ public class ObjectIdentifierMap {
     {
         try
         {
-            @Nullable Syncing groupSyncInfo = SyncUtils.getSyncingInfo(group.getCustomData(Constants.MODID));
+            @Nullable ServerSyncingHandler groupSyncInfo = SyncUtils.getSyncingInfo(group.getCustomData(Constants.MODID));
             if (groupSyncInfo != null)
                 groupIdentifierMap.remove(groupSyncInfo.objectIdentifier);
         } catch (NullPointerException noObjIgnore)

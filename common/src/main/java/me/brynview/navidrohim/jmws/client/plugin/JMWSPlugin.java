@@ -20,6 +20,7 @@ import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.helper.AssetHelper;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncingHandler;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
@@ -27,7 +28,7 @@ import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
 import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.syncing.SyncUtils;
-import me.brynview.navidrohim.jmws.common.syncing.Syncing;
+import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
@@ -97,21 +98,30 @@ public class JMWSPlugin implements IClientPlugin {
     private void addOptionForContextMenu(PopupMenuEvent.WaypointPopupMenuEvent waypointPopupMenuEvent)
     {
         Waypoint waypoint = waypointPopupMenuEvent.getWaypoint();
-        Syncing syncing = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
+        ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
 
-        if (!syncing.isGlobal())
+        if (!serverSyncingHandler.isGlobal())
         {
-            waypointPopupMenuEvent.getPopupMenu().addMenuItem("Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypointPopupMenuEvent.getWaypoint(), syncing, blockPos, Action.GLOBAL);});
+            waypointPopupMenuEvent.getPopupMenu().addMenuItem("Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypointPopupMenuEvent.getWaypoint(), serverSyncingHandler, blockPos, Action.GLOBAL);});
         }
-        waypointPopupMenuEvent.getPopupMenu().addMenuItem("Share", (blockPos) -> {this.handleWaypointContextMenuClick(waypointPopupMenuEvent.getWaypoint(), syncing, blockPos, Action.SHARE);});
+        waypointPopupMenuEvent.getPopupMenu().addMenuItem("Share", (blockPos) -> {this.handleWaypointContextMenuClick(waypointPopupMenuEvent.getWaypoint(), serverSyncingHandler, blockPos, Action.SHARE);});
 
     }
 
-    private void handleWaypointContextMenuClick(Waypoint waypoint, Syncing waypointSync, BlockPos blockPos, Action action)
+    private void handleWaypointContextMenuClick(Waypoint waypoint, ServerSyncingHandler waypointSync, BlockPos blockPos, Action action)
     {
+        ClientSyncingHandler waypointSyncingHandler = ClientSyncingHandler.getClientSyncingHandlerFromWaypoint(waypoint);
         switch (action)
         {
             case GLOBAL:
+            {
+                waypointSyncingHandler.setGlobal(true);
+            }
+            case UNGLOBAL:
+            {
+                waypointSyncingHandler.setGlobal(false);
+            }
+            case SHARE:
             {
 
             }
@@ -186,10 +196,10 @@ public class JMWSPlugin implements IClientPlugin {
         {
             if (isJmwsWaypoint(waypoint))
             {
-                Syncing syncing = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
-                if (syncing != null)
+                ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
+                if (serverSyncingHandler != null)
                 {
-                    Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncing.objectIdentifier, syncing.isGlobal(), waypoint)));
+                    Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(serverSyncingHandler.objectIdentifier, serverSyncingHandler.isGlobal(), waypoint)));
                 } else {
                     this.createAction(waypoint, false);
                 }
@@ -209,12 +219,12 @@ public class JMWSPlugin implements IClientPlugin {
         if (ClientCommonClass.serverConfig.waypointsEnabled()) {
             if (isJmwsWaypoint(waypoint))
             {
-                @Nullable Syncing syncing = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
+                @Nullable ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
 
-                if (syncing != null) // Can be null if JMWS has no knowledge of a waypoint
+                if (serverSyncingHandler != null) // Can be null if JMWS has no knowledge of a waypoint
                 {
                     ObjectIdentifierMap.removeWaypointFromMap(waypoint);
-                    String jsonPacketData = CommandFactory.makeDeleteRequestJson(syncing.objectIdentifier,false, false);
+                    String jsonPacketData = CommandFactory.makeDeleteRequestJson(serverSyncingHandler.objectIdentifier,false, false);
                     JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
 
                     // removedWaypoint is called here because, yes, we do listen for the deletion with the event (meaning, the waypoint should be already gone by the time the event is called)
@@ -299,7 +309,7 @@ public class JMWSPlugin implements IClientPlugin {
         {
             if (isJmwsGroup(waypointGroup))
             {
-                Syncing gsi = SyncUtils.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID), true);
+                ServerSyncingHandler gsi = SyncUtils.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID), true);
                 if (gsi != null)
                 {
                     ObjectIdentifierMap.removeGroupFromMap(waypointGroup); // Remove from identifier map
@@ -347,10 +357,10 @@ public class JMWSPlugin implements IClientPlugin {
         {
             if (isJmwsGroup(waypointGroup))
             {
-                Syncing syncing = SyncUtils.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID));
-                if (syncing != null)
+                ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID));
+                if (serverSyncingHandler != null)
                 {
-                    Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncing.objectIdentifier, syncing.isGlobal(), waypointGroup)));
+                    Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(serverSyncingHandler.objectIdentifier, serverSyncingHandler.isGlobal(), waypointGroup)));
                 } else {
                     this.groupCreationHandler(waypointGroup, false);
                 }
@@ -548,7 +558,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Add server groups to the client
         for (WaypointGroup savedGroup : savedGroups) {
-            Syncing gpSync = SyncUtils.getSyncingInfo(savedGroup.getCustomData(Constants.MODID));
+            ServerSyncingHandler gpSync = SyncUtils.getSyncingInfo(savedGroup.getCustomData(Constants.MODID));
 
             if (gpSync.isGlobal() && gpSync.isOwner(PlayerHelper.ourUUID()))
             {
@@ -605,7 +615,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Add server waypoints to the client
         for (Waypoint savedWaypoint : savedWaypoints) {
-            Syncing wpSync = SyncUtils.getSyncingInfo(savedWaypoint.getCustomData(Constants.MODID));
+            ServerSyncingHandler wpSync = SyncUtils.getSyncingInfo(savedWaypoint.getCustomData(Constants.MODID));
 
             if (!wpSync.isOwner(PlayerHelper.ourUUID()))
             {

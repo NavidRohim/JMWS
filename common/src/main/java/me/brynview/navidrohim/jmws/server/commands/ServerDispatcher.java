@@ -137,7 +137,7 @@ public class ServerDispatcher {
         for (ServerObject object : JMWSServerIO.getObjectsForUser(playerUUID, objectType, global))
         {
             String nonDupeIdentifier = object.getObjectNonDuplicateIdentifier();
-            if ((!object.syncing.isGlobal() && !onlyShared) || global || (onlyShared && !object.syncing.sharedTo.isEmpty()))
+            if ((!object.serverSyncingHandler.isGlobal() && !onlyShared) || global || (onlyShared && !object.serverSyncingHandler.sharedTo.isEmpty()))
             {
                 stringServerObjectHashMap.put(nonDupeIdentifier, object);
             }

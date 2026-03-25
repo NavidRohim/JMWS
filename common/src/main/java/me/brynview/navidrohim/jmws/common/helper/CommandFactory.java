@@ -106,6 +106,26 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.SHARE_FROM_CLIENT, from, to, objectIdentifier, objectType);
     }
 
+    public static String makeUnshareRequestForUserOnServer(UUID from, UUID subject, String objectIdentifier, ObjectType objectType)
+    {
+        return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_FROM_CLIENT, from, subject, objectIdentifier, objectType);
+    }
+
+    public static String makeUnshareRequestForAllOnServer(UUID from, String objectIdentifier, ObjectType objectType)
+    {
+        return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_FOR_ALL, from, objectIdentifier, objectType);
+    }
+
+    public static String makeGlobalRequestForServer(UUID from, String objectIdentifier, ObjectType objectType)
+    {
+        return CommandFactory.makeBaseJsonRequest(Commands.MAKE_GLOBAL, from, objectIdentifier, objectType);
+    }
+
+    public static String makeUnglobalRequestForServer(UUID from, String objectIdentifier, ObjectType objectType)
+    {
+        return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_GLOBAL, from, objectIdentifier, objectType);
+    }
+
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {
         return JsonParser.parseString(jsonString).getAsJsonObject();
     }
@@ -136,7 +156,13 @@ public class CommandFactory {
         AFFIRM_SHARE, // Confirm user wants shared object
         REJECT_SHARE, // User doesnt want shared object.
 
+        // Object sharing from client
         SHARE_FROM_CLIENT,
+        REMOVE_SHARE_FROM_CLIENT,
+        REMOVE_SHARE_FOR_ALL,
+
+        MAKE_GLOBAL,
+        REMOVE_GLOBAL,
 
         // Object sharing errors
         USER_ALREADY_PROCESSING_SHARE, // User is already processing another shareWith request

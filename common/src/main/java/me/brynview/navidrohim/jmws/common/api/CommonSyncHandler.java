@@ -21,10 +21,44 @@ public class CommonSyncHandler
     @Expose
     protected boolean isGlobal;
 
-    @Nullable
-    protected ServerObject parentObject = null;
+    public CommonSyncHandler(List<String> sharedTo, String identifier, UUID owner, boolean isGlobal) {
+        this.objectIdentifier = identifier;
+        this.sharedTo = sharedTo;
+        this.owner = owner;
+        this.isGlobal = isGlobal;
+    }
 
-    void addUserToShare(UUID userUUID);
-    void removeUserFromShare(UUID userUUID);
-    void removeAllFromShare();
+    public void addUserToShare(UUID userUUID)
+    {
+        this.sharedTo.add(userUUID.toString());
+    }
+
+    public void removeUserFromShare(UUID userUUID)
+    {
+        this.sharedTo.remove(userUUID.toString());
+    }
+
+    public void removeAllFromShare()
+    {
+        this.sharedTo.clear();
+    }
+
+    public boolean isGlobal() {
+        return this.isGlobal;
+    }
+
+    public void setGlobal(boolean global)
+    {
+        this.isGlobal = global;
+    }
+
+    public boolean isOwner(UUID supposedOwner)
+    {
+        return this.owner.equals(supposedOwner);
+    }
+
+    public UUID getOwner()
+    {
+        return this.owner;
+    }
 }

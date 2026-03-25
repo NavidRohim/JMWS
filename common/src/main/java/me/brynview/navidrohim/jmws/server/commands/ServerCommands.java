@@ -28,7 +28,7 @@ public class ServerCommands {
                 if (specifiedObj != null)
                 {
                     ServerObject objIns = JMWSServerIO.getObjectFromFile(specifiedObj, sender.getUUID(), objectType);
-                    if (!objIns.syncing.isGlobal())
+                    if (!objIns.serverSyncingHandler.isGlobal())
                     {
                         objIns.shareWith(player.getUUID());
                     } else {
@@ -77,7 +77,7 @@ public class ServerCommands {
         {
             if (make)
             {
-                if (!globalObject.syncing.isGlobal())
+                if (!globalObject.serverSyncingHandler.isGlobal())
                 {
                     globalObject.makeGlobal();
                     PlayerNetworkingHelper.sendUserMessage(uuid, "global.jmws.made_global", true, MessageType.NEUTRAL);
@@ -85,7 +85,7 @@ public class ServerCommands {
                     PlayerNetworkingHelper.sendUserMessage(uuid, "global.jmws.already_global", true, MessageType.WARNING);
                 }
             } else {
-                if (globalObject.syncing.isGlobal())
+                if (globalObject.serverSyncingHandler.isGlobal())
                 {
                     globalObject.removeGlobal();
                     PlayerNetworkingHelper.sendUserMessage(uuid, "global.jmws.remove_global", true, MessageType.NEUTRAL);
@@ -106,7 +106,7 @@ public class ServerCommands {
 
         if (specifiedObject != null)
         {
-            if (specifiedObject.syncing.isGlobal())
+            if (specifiedObject.serverSyncingHandler.isGlobal())
             {
                 specifiedObject.removeGlobal();
                 PlayerNetworkingHelper.sendUserMessage(senderPlayer, "global.jmws.remove_global", true, MessageType.NEUTRAL);

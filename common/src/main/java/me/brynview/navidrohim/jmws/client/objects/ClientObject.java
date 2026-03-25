@@ -9,7 +9,7 @@ import me.brynview.navidrohim.jmws.common.api.Synchronizable;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.syncing.SyncUtils;
-import me.brynview.navidrohim.jmws.common.syncing.Syncing;
+import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
 
 import java.util.UUID;
 
@@ -20,7 +20,7 @@ public class ClientObject implements Synchronizable, PossessesIdentifier {
     private String guid;
     private ObjectType objectType;
 
-    private Syncing syncingHandler;
+    private ServerSyncingHandler serverSyncingHandlerHandler;
 
     private ClientObject(
             String name,
@@ -33,7 +33,7 @@ public class ClientObject implements Synchronizable, PossessesIdentifier {
         this.customDataForJMWS = customDataForJMWS;
         this.guid = guid;
         this.objectType = objectType;
-        this.syncingHandler = SyncUtils.getSyncingInfo(customDataForJMWS);
+        this.serverSyncingHandlerHandler = SyncUtils.getSyncingInfo(customDataForJMWS);
     }
 
     public static ClientObject fromWaypoint(Waypoint waypoint)
@@ -46,10 +46,10 @@ public class ClientObject implements Synchronizable, PossessesIdentifier {
         );
     }
 
-    public static ClientObject fromGroup(WaypointGroup group)
+    /*public static ClientObject fromGroup(WaypointGroup group)
     {
         return new ClientObject();
-    }
+    }*/
 
     @Override
     public String getName() {
@@ -86,7 +86,7 @@ public class ClientObject implements Synchronizable, PossessesIdentifier {
     @Override
     public void shareWith(UUID toUser)
     {
-        Dispatcher.sendToServer(CommandFactory.makeShareRequestForServer(syncingHandler.getOwner(), toUser, syncingHandler.objectIdentifier, getObjectType()));
+        Dispatcher.sendToServer(CommandFactory.makeShareRequestForServer(serverSyncingHandlerHandler.getOwner(), toUser, serverSyncingHandlerHandler.objectIdentifier, getObjectType()));
     }
 
     @Override
@@ -102,8 +102,8 @@ public class ClientObject implements Synchronizable, PossessesIdentifier {
     }
 
     @Override
-    public Syncing getSyncingHandler()
+    public ServerSyncingHandler getSyncingHandler()
     {
-        return syncingHandler;
+        return serverSyncingHandlerHandler;
     }
 }
