@@ -45,7 +45,7 @@ public class CommonClass {
     public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public static final Gson gson = new Gson();
-    public static final Gson gsonExcludeNoExpose = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+    public static final Gson gsonExcludeNoExpose = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create();
 
     public static MinecraftServer getMinecraftServerInstance()
     {

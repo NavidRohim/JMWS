@@ -34,7 +34,8 @@ public class ServerConfig {
                                 true,
                                 true,
                                 true,
-                                true
+                                true,
+                                250
                         )
                 );
 
@@ -46,9 +47,8 @@ public class ServerConfig {
             } else {
                 rawServerConfigData = getConfigJson();
                 serverConfig = CommonClass.gson.fromJson(rawServerConfigData, ServerConfigObject.class);
-                List<Boolean> valueList = Arrays.asList(serverConfig.groupsEnabled, serverConfig.sharingEnabled, serverConfig.waypointsEnabled, serverConfig.jmwsEnabled);
 
-                if (valueList.contains(null))
+                if (!serverConfig.isValid())
                 {
                     deleteConfig();
                     ensureExistence();

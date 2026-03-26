@@ -1,6 +1,10 @@
 package me.brynview.navidrohim.jmws.server.config;
 
 import com.google.gson.annotations.Expose;
+import me.brynview.navidrohim.jmws.Constants;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
 * An initialised subclass of this class (ClientSideServerConfigObject) is sent to every client that joins.
@@ -21,17 +25,27 @@ public class ServerConfigObject {
     @Expose
     public Boolean sharingEnabled;
 
+    @Expose
+    public int handshakeDelay;
+
+    private final boolean isNotValid;
+
     /**
      * Only use this constructor in its raw form on the server side. For the client side, use Gson().fromJson() with the raw packet data and specify this class.
      * @param jmwsEnabled If JMWS is enabled.
      * @param waypointsEnabled If waypoints are allowed to be synced.
      * @param groupsEnabled If groups are allowed to be synced.
      */
-    public ServerConfigObject(boolean jmwsEnabled, boolean waypointsEnabled, boolean groupsEnabled, boolean sharingEnabled) {
+    public ServerConfigObject(boolean jmwsEnabled, boolean waypointsEnabled, boolean groupsEnabled, boolean sharingEnabled, int handshakeDelay) {
         this.jmwsEnabled = jmwsEnabled;
         this.waypointsEnabled = waypointsEnabled;
         this.groupsEnabled = groupsEnabled;
         this.sharingEnabled = sharingEnabled;
+        this.handshakeDelay = handshakeDelay;
+
+        List<Object> valueList = Arrays.asList(groupsEnabled, sharingEnabled, waypointsEnabled, jmwsEnabled, handshakeDelay);
+        this.isNotValid = valueList.contains(null) || valueList.contains(0);
+
     }
 
     /**
@@ -68,5 +82,10 @@ public class ServerConfigObject {
     public boolean allEnabled()
     {
         return (jmwsEnabled && waypointsEnabled && groupsEnabled && sharingEnabled);
+    }
+
+    public boolean isValid()
+    {
+        return !isNotValid;
     }
 }

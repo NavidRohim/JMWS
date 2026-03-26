@@ -8,6 +8,7 @@ import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
+import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -27,7 +28,7 @@ public class CommonEvents {
             }
             CommonClass.scheduler.schedule(() -> {PlayerHelper.sendUserAlert(Component.translatable("warning.jmws.world_is_local"), true, false, MessageType.NEUTRAL);}, 2, TimeUnit.SECONDS);
         } else {
-            CommonClass.scheduler.schedule(() -> PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer), 250, TimeUnit.MILLISECONDS);
+            CommonClass.scheduler.schedule(() -> PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer), ServerConfig.serverConfig.handshakeDelay, TimeUnit.MILLISECONDS);
             //PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer);
         }
     }
