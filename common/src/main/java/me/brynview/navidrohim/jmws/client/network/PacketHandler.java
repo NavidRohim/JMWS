@@ -44,6 +44,7 @@ public class PacketHandler {
     public static void handlePacket(PacketContext<JMWSActionPayload> Context) {
         JMWSActionPayload waypointPayload = Context.message();
         List<JsonElement> arguments = waypointPayload.arguments();
+        ClientCommonClass.isBusy = true;
 
         // Check if command should be processed (must be a client of a server)
         if (ConfigInterface.getEnabledStatus()) {
@@ -205,6 +206,7 @@ public class PacketHandler {
                 default -> Constants.getLogger().warn("Unknown packet command -> " + waypointPayload.command());
              }
         }
+        ClientCommonClass.isBusy = false;
     }
 
     /**
@@ -245,5 +247,12 @@ public class PacketHandler {
         @Nullable Double serverVersion =  ClientCommonClass.serverConfig.getServerVersion();
         ClientCommonClass.setServerModStatus(true); // We have JMWS on server side
         sendUserJoinAlert(serverVersion);
+
+        if (ClientCommonClass.isMapping)
+        {
+            JMWSPlugin.sync(false);
+        } else {
+            ClientCommonClass.didHandshake = true;
+        }
     }
 }

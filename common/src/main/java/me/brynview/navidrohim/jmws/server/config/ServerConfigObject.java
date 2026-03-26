@@ -12,7 +12,6 @@ import java.util.List;
  * This class is also used on the server side to just read what the server can and cannot do
  */
 public class ServerConfigObject {
-
     @Expose
     public Boolean jmwsEnabled;
 
@@ -28,8 +27,6 @@ public class ServerConfigObject {
     @Expose
     public int handshakeDelay;
 
-    private final boolean isNotValid;
-
     /**
      * Only use this constructor in its raw form on the server side. For the client side, use Gson().fromJson() with the raw packet data and specify this class.
      * @param jmwsEnabled If JMWS is enabled.
@@ -42,10 +39,6 @@ public class ServerConfigObject {
         this.groupsEnabled = groupsEnabled;
         this.sharingEnabled = sharingEnabled;
         this.handshakeDelay = handshakeDelay;
-
-        List<Object> valueList = Arrays.asList(groupsEnabled, sharingEnabled, waypointsEnabled, jmwsEnabled, handshakeDelay);
-        this.isNotValid = valueList.contains(null) || valueList.contains(0);
-
     }
 
     /**
@@ -86,6 +79,7 @@ public class ServerConfigObject {
 
     public boolean isValid()
     {
-        return !isNotValid;
+        List<Object> valueList = Arrays.asList(groupsEnabled, sharingEnabled, waypointsEnabled, jmwsEnabled, handshakeDelay);
+        return !(valueList.contains(null) || valueList.contains(0));
     }
 }

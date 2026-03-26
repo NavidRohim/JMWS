@@ -142,7 +142,7 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
     public void removeObjectFromUser(UUID playerUUID, String objectIdentifier)
     {
         UserSharingFile.removeObjectFromUser(playerUUID, objectIdentifier, getObjectType());
-        ServerPlayer sharedPlayer = CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(playerUUID);
+        ServerPlayer sharedPlayer = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
         if (sharedPlayer != null)
         {
             if (this.getObjectType() == ObjectType.WAYPOINT)

@@ -41,7 +41,7 @@ public class PlayerHelper {
             if (overlayText) {
                 CommonClass.minecraftClientInstance.gui.setOverlayMessage(Component.literal(finalText), false); // Action bar
             } else {
-                CommonClass.minecraftClientInstance.gui.getChat().addRecentChat(finalText); // Chat
+                CommonClass.minecraftClientInstance.gui.getChat().addClientSystemMessage(Component.literal(finalText)); // Chat
             }
 
             // Add alert to cache if it's one-time

@@ -34,7 +34,7 @@ public class PlayerNetworkingHelper {
 
     public static void sendUserMessage(UUID player, String messageKey, Boolean overlay, MessageType messageType) {
         JMWSActionPayload messagePayload = new JMWSActionPayload(CommandFactory.makeClientAlertRequestJson(messageKey, overlay, messageType));
-        Dispatcher.sendToClient(messagePayload, CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(player));
+        Dispatcher.sendToClient(messagePayload, CommonClass.minecraftServerInstance.getPlayerList().getPlayer(player));
     }
 
     public static void sendHandshakeAndValidate(ServerPlayer joinedUser)

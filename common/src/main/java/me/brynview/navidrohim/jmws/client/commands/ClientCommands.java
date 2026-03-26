@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.client.commands;
 
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
@@ -64,7 +65,7 @@ public class ClientCommands {
     public static int clearAllGroups()
     {
         if (isNotInSingleplayer()) {
-            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandFactory.makeDeleteGroupRequestJson(
+            ClientNetworkDispatcher.sendString(CommandFactory.makeDeleteGroupRequestJson(
                     "*",
                     "*",
                     false,
@@ -73,7 +74,6 @@ public class ClientCommands {
                     true,
                     true
             ));
-            Dispatcher.sendToServer(deleteServerObjectPayload); // Deletes waypoints on the server
             JMWSPlugin.sync(false);
             JMWSPlugin.deleteAllGroups(); // Deletes local copies.
         } else {
@@ -90,8 +90,7 @@ public class ClientCommands {
     public static int clearAllWaypoints()
     {
         if (isNotInSingleplayer()) {
-            JMWSActionPayload deleteServerObjectPayload = new JMWSActionPayload(CommandFactory.makeDeleteRequestJson("*", false, true)); // * = all
-            Dispatcher.sendToServer(deleteServerObjectPayload);
+            ClientNetworkDispatcher.sendString(CommandFactory.makeDeleteRequestJson("*", false, true));
             JMWSPlugin.sync(false);
         } else {
             sendUserSinglePlayerWarning();

@@ -9,8 +9,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
 
 public class ServerConfig {
 
@@ -63,9 +61,9 @@ public class ServerConfig {
         }
     }
 
-    public static boolean deleteConfig()
+    public static void deleteConfig()
     {
-        return CommonHelper.deleteFile(configPath);
+        CommonHelper.deleteFile(configPath);
     }
 
     public static String getConfigJson()

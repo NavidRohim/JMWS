@@ -1,13 +1,15 @@
 package me.brynview.navidrohim.jmws.common.events;
 
-import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.commands.ClientCommands;
+import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
+import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
+import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 
-import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import net.minecraft.network.chat.Component;
@@ -31,5 +33,20 @@ public class CommonEvents {
             CommonClass.scheduler.schedule(() -> PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer), ServerConfig.serverConfig.handshakeDelay, TimeUnit.MILLISECONDS);
             //PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer);
         }
+    }
+
+    public static void handleDisconnect()
+    {
+        ClientCommands.sync();
+        ClientCommonClass.setServerModStatus(false);
+        ClientCommonClass.serverConfig = ClientSideServerConfigObject.empty();
+        PlayerHelper.clearWarningAlertCache();
+
+        IncomingShareRequests.clearAll();
+        OutgoingShareRequests.clearAll();
+
+        ClientCommonClass.isMapping = false;
+        ClientCommonClass.didHandshake = false;
+        ClientCommonClass.isBusy = false;
     }
 }

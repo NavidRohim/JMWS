@@ -2,6 +2,8 @@ package me.brynview.navidrohim.jmws.client.share.request;
 
 import com.mojang.authlib.GameProfile;
 import commonnetwork.api.Dispatcher;
+import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
@@ -54,25 +56,27 @@ public class ShareRequest {
 
     public void decline()
     {
-        Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestDecline(this.originalSender)));
+        ClientNetworkDispatcher.sendString(CommandFactory.makeObjectShareRequestDecline(this.originalSender));
         this.finishRequest();
     }
 
     public static void busy(UUID originalSender)
     {
-        Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestDeclineWithMessage(originalSender, "sharing.jmws.share_busy")));
+        ClientNetworkDispatcher.sendString(CommandFactory.makeObjectShareRequestDeclineWithMessage(originalSender, "sharing.jmws.share_busy"));
     }
 
     public static void disabled(UUID originalSender) {
-        Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestDeclineWithMessage(originalSender, "sharing.jmws.disabled")));
+        ClientNetworkDispatcher.sendString(CommandFactory.makeObjectShareRequestDeclineWithMessage(originalSender, "sharing.jmws.disabled"));
     }
 
     public void accept()
     {
-        Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeObjectShareRequestAccept(this)));
+        ClientCommonClass.isBusy = true;
+        ClientNetworkDispatcher.sendString(CommandFactory.makeObjectShareRequestAccept(this));
         JMWSPlugin.getInstance().addObjectFromRequest(this);
 
         this.finishRequest();
+        ClientCommonClass.isBusy = false;
     }
 
     protected void timeout()

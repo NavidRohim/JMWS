@@ -108,7 +108,7 @@ public class Syncing {
 
     private void update() {
         if (this.parentObject != null) {
-            String jsonString = CommonClass.gsonExcludeNoExpose.toJson(this, Syncing.class);
+            String jsonString = CommonClass.gsonExcludeNoExposeNotPretty.toJson(this, Syncing.class);
 
             this.parentObject.getRawJson().get("customDataMap").getAsJsonObject().add(Constants.MODID, new JsonPrimitive(jsonString));
             this.parentObject.update(this.parentObject.getRawJson().getAsJsonObject().toString(), true); // TODO: bug test more. This seems very janky and not done right. Will test more
@@ -119,7 +119,7 @@ public class Syncing {
 
     public void syncToUsers() {
         for (String playerUUID : this.sharedTo) {
-            ServerPlayer sharedUser = CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(UUID.fromString(playerUUID));
+            ServerPlayer sharedUser = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(UUID.fromString(playerUUID));
 
             if (sharedUser != null) {
                 ServerPacketHandler.sendUserSync(sharedUser, false, false, true);

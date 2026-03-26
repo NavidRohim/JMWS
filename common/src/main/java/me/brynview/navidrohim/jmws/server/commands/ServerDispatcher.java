@@ -220,6 +220,6 @@ public class ServerDispatcher {
 
     private static boolean isValidCommandUser(CommandSourceStack commandSourceStack)
     {
-        return !CommonClass.isInternalServer() || (!CommonClass.getMinecraftServerInstance().isSingleplayerOwner(commandSourceStack.getPlayer().nameAndId())); // No host user
+        return !CommonClass.isInternalServer() || (!CommonClass.minecraftServerInstance.isSingleplayerOwner(commandSourceStack.getPlayer().nameAndId())); // No host user
     }
 }

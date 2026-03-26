@@ -3,7 +3,6 @@ package me.brynview.navidrohim.jmws.client.plugin;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.client.IClientPlugin;
 import journeymap.api.v2.client.event.*;
@@ -19,6 +18,7 @@ import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.helper.AssetHelper;
+import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
@@ -52,7 +52,6 @@ public class JMWSPlugin implements IClientPlugin {
     // JourneyMap API
     private IClientAPI jmAPI = null;
     private static JMWSPlugin INSTANCE;
-    private static boolean isBusy = false;
 
     private static final String[] checkForCustomDataKeys = {
             "objectIdentifier",
@@ -82,7 +81,14 @@ public class JMWSPlugin implements IClientPlugin {
 
         ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe(Constants.MODID, this::handleUserDeath);
         ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe(Constants.MODID, (_ -> ClientCommonClass.config = new ConfigInterface()));
-        ClientEventRegistry.MAPPING_EVENT.subscribe(Constants.MODID, (MappingEvent _) -> {JMWSPlugin.sync(false);});
+        ClientEventRegistry.MAPPING_EVENT.subscribe(Constants.MODID, (MappingEvent event) -> {
+            if (ClientCommonClass.didHandshake)
+            {
+                JMWSPlugin.sync(false);
+            } else {
+                ClientCommonClass.isMapping = true;
+            }
+            });
 
     }
 
@@ -137,7 +143,7 @@ public class JMWSPlugin implements IClientPlugin {
                 waypoint.setPersistent(false); // Persistence must be false so it does not stay upon leaving. If it did, there would be duplicate waypoints
 
                 String creationData = CommandFactory.makeCreationRequestJson(waypoint, silent);
-                Dispatcher.sendToServer(new JMWSActionPayload(creationData));
+                ClientNetworkDispatcher.sendString(creationData);
             }
         } else {
             PlayerHelper.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, MessageType.ONE_TIME_WARNING);
@@ -157,7 +163,7 @@ public class JMWSPlugin implements IClientPlugin {
                 Syncing syncing = Syncing.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
                 if (syncing != null)
                 {
-                    Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncing.objectIdentifier, syncing.isGlobal(), waypoint)));
+                    ClientNetworkDispatcher.sendString(CommandFactory.makeUpdateObjectRequest(syncing.objectIdentifier, syncing.isGlobal(), waypoint));
                 } else {
                     this.createAction(waypoint, false);
                 }
@@ -183,12 +189,11 @@ public class JMWSPlugin implements IClientPlugin {
                 {
                     ObjectIdentifierMap.removeWaypointFromMap(waypoint);
                     String jsonPacketData = CommandFactory.makeDeleteRequestJson(syncing.objectIdentifier,false, false);
-                    JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
-
+                    ClientNetworkDispatcher.sendString(jsonPacketData);
                     // removedWaypoint is called here because, yes, we do listen for the deletion with the event (meaning, the waypoint should be already gone by the time the event is called)
                     // But for some reason it bugs out and the waypoint stays and becomes persistent
                     //jmAPI.removeWaypoint(waypoint.getModId(), waypoint);
-                    Dispatcher.sendToServer(waypointActionPayload);
+
                 }
             }
         } else {
@@ -201,9 +206,9 @@ public class JMWSPlugin implements IClientPlugin {
      * @param waypointEvent The event.
      */
     void waypointEventHandler(WaypointEvent waypointEvent) {
-        if (!isBusy && ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled()) { // Check that user is in physical server, user config allows event, and server config allows event.
+        if (!ClientCommonClass.isBusy && ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled()) { // Check that user is in physical server, user config allows event, and server config allows event.
             // Get old waypoint if context is UPDATE (needed because server needs reference to waypoint before it was updated so it can be deleted on the server)
-            isBusy = true;
+            ClientCommonClass.isBusy = true;
             switch (waypointEvent.getContext()) {
                 case CREATE ->
                     // Sends "create" packet | new = "SERVER_CREATE"
@@ -213,10 +218,10 @@ public class JMWSPlugin implements IClientPlugin {
                         this.deleteAction(waypointEvent.waypoint);
                 case UPDATE ->
                 {
-                    this.updateAction(waypointEvent.waypoint);
+                        this.updateAction(waypointEvent.waypoint);
                 }
             }
-            isBusy = false;
+            ClientCommonClass.isBusy = false;
         }
     }
 
@@ -281,8 +286,7 @@ public class JMWSPlugin implements IClientPlugin {
                             gsi.isGlobal(),
                             false);
 
-                    JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
-                    Dispatcher.sendToServer(waypointActionPayload);
+                    ClientNetworkDispatcher.sendString(jsonPacketData);
                 } else if (!removeGroupItself) {
                     String jsonPacketData = CommandFactory.makeDeleteGroupRequestJson(
                             "null",
@@ -293,8 +297,7 @@ public class JMWSPlugin implements IClientPlugin {
                             true,
                             false);
 
-                    JMWSActionPayload waypointActionPayload = new JMWSActionPayload(jsonPacketData);
-                    Dispatcher.sendToServer(waypointActionPayload);
+                    ClientNetworkDispatcher.sendString(jsonPacketData);
                 } else {
                     PlayerHelper.sendUserAlert(Component.translatable("global.jmws.cannot_delete_global"), true, false, MessageType.ONE_TIME_WARNING);
                 }
@@ -317,7 +320,7 @@ public class JMWSPlugin implements IClientPlugin {
                 Syncing syncing = Syncing.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID));
                 if (syncing != null)
                 {
-                    Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUpdateObjectRequest(syncing.objectIdentifier, syncing.isGlobal(), waypointGroup)));
+                    ClientNetworkDispatcher.sendString(CommandFactory.makeUpdateObjectRequest(syncing.objectIdentifier, syncing.isGlobal(), waypointGroup));
                 } else {
                     this.groupCreationHandler(waypointGroup, false);
                 }
@@ -388,7 +391,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Sends "request" packet | New = "SYNC"
         if (ConfigInterface.getEnabledStatus()) {
-            Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeWaypointSyncRequestJson(sendAlert, fromDeathEvent)));
+            ClientNetworkDispatcher.sendString(CommandFactory.makeWaypointSyncRequestJson(sendAlert, fromDeathEvent));
         }
     }
 
@@ -441,7 +444,7 @@ public class JMWSPlugin implements IClientPlugin {
                 waypointGroup.setPersistent(false);
                 String creationData = CommandFactory.makeGroupCreationRequestJson(waypointGroup, silent);
 
-                Dispatcher.sendToServer(new JMWSActionPayload(creationData));
+                ClientNetworkDispatcher.sendString(creationData);
             }
         } else {
             PlayerHelper.sendUserAlert(Component.translatable("message.jmws.server_disabled_groups"), true, false, MessageType.ONE_TIME_WARNING);
@@ -551,7 +554,7 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private boolean handleUploadWaypoints(JsonObject jsonWaypoints, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException {
         boolean hasLocalWaypoint = false;
-        isBusy = true;
+        ClientCommonClass.isBusy = true;
 
         // Get existing waypoints (local) and get waypoint objects saved on server
         List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
@@ -597,7 +600,7 @@ public class JMWSPlugin implements IClientPlugin {
             addWaypoint(savedWaypoint);
         }
 
-        isBusy = false;
+        ClientCommonClass.isBusy = false;
         return hasLocalWaypoint;
     }
 

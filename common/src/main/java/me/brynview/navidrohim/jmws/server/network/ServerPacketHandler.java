@@ -262,7 +262,6 @@ public class ServerPacketHandler {
                             if (waypointCreationSuccess) {
                                 sendUserMessage(player, "message.jmws.creation_success", true, false);
                             } else {
-
                                 sendUserMessage(player, "message.jmws.creation_failure", false, true);
                             }
                         }
@@ -349,7 +348,7 @@ public class ServerPacketHandler {
                             usf.addToShared(objectIdentifier, objType);
                         }
                         sharedWp.syncing.addUserToShare(playerUUID);
-                        Dispatcher.sendToClient(waypointActionPayload, CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(ownerUUID));
+                        Dispatcher.sendToClient(waypointActionPayload, CommonClass.minecraftServerInstance.getPlayerList().getPlayer(ownerUUID));
                     } else {
                         sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
                     }
