@@ -23,7 +23,12 @@ public class IncomingShareRequests {
 
     public static void removeRequest(UUID from)
     {
-        incomingShareRequestList.remove(from);
+        if (incomingShareRequestList.containsKey(from)) {
+            ShareRequest shareRequest = incomingShareRequestList.remove(from);
+            if (!shareRequest.isResolved()) {
+                shareRequest.resolve();
+            }
+        }
     }
 
     public static HashMap<UUID, ShareRequest> getAll()

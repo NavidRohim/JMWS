@@ -83,8 +83,13 @@ public class ShareRequest {
 
     private void finishRequest()
     {
-        IncomingShareRequests.removeRequest(this.originalSender);
         this.timeout.cancel(true);
+        IncomingShareRequests.removeRequest(this.originalSender);
+    }
+
+    public boolean isResolved()
+    {
+        return this.timeout.isCancelled() || this.timeout.isDone();
     }
 
     public String getSenderName()

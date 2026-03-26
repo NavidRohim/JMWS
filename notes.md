@@ -5,8 +5,8 @@
 
 bugs
 
-- remove_global_no_op group command arguments not properly registered.
-
+- ~~remove_global_no_op group command arguments not properly registered.~~
+- ~~When syncing, all server server waypoints on would fire the event handler.~~
 ## Meaningful 26.1 differences for JMWS
 - Uses Java 25 as opposed to Java 21
 

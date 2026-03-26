@@ -24,8 +24,9 @@ public class NeoforgeServerEventHandler {
     }
 
     @SubscribeEvent
-    public static void onEntityJoinServer(PlayerEvent.PlayerLoggedInEvent event)
+    public static void onEntityJoinWorld(PlayerEvent.PlayerLoggedInEvent event)
     {
+
         if (event.getEntity() instanceof ServerPlayer && ServerConfig.serverConfig.serverEnabled())
         {
             CommonEvents.handleJoin((ServerPlayer) event.getEntity(), false, false);

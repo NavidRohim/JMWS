@@ -27,7 +27,8 @@ public class CommonEvents {
             }
             CommonClass.scheduler.schedule(() -> {PlayerHelper.sendUserAlert(Component.translatable("warning.jmws.world_is_local"), true, false, MessageType.NEUTRAL);}, 2, TimeUnit.SECONDS);
         } else {
-            PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer);
+            CommonClass.scheduler.schedule(() -> PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer), 250, TimeUnit.MILLISECONDS);
+            //PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer);
         }
     }
 }

@@ -81,8 +81,8 @@ public class JMWSPlugin implements IClientPlugin {
         });
 
         ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe(Constants.MODID, this::handleUserDeath);
-        ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe(Constants.MODID, (optionsRegistryEvent -> ClientCommonClass.config = new ConfigInterface()));
-        ClientEventRegistry.MAPPING_EVENT.subscribe(Constants.MODID, (MappingEvent event) -> {JMWSPlugin.sync(false);});
+        ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe(Constants.MODID, (_ -> ClientCommonClass.config = new ConfigInterface()));
+        ClientEventRegistry.MAPPING_EVENT.subscribe(Constants.MODID, (MappingEvent _) -> {JMWSPlugin.sync(false);});
 
     }
 
@@ -344,6 +344,7 @@ public class JMWSPlugin implements IClientPlugin {
     /**
      * Removes all local groups. There is no API call to remove all groups.
      */
+
     public static void deleteAllGroups() {
         // This method is a bodge fix. removeWaypointGroups (which I believe removes all groups) does not work because you cannot change the modId of a group.
 
