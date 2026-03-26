@@ -554,7 +554,6 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private boolean handleUploadWaypoints(JsonObject jsonWaypoints, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException {
         boolean hasLocalWaypoint = false;
-        ClientCommonClass.isBusy = true;
 
         // Get existing waypoints (local) and get waypoint objects saved on server
         List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
@@ -600,7 +599,6 @@ public class JMWSPlugin implements IClientPlugin {
             addWaypoint(savedWaypoint);
         }
 
-        ClientCommonClass.isBusy = false;
         return hasLocalWaypoint;
     }
 
