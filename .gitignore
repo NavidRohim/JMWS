@@ -13,4 +13,5 @@ debug.py
 *.launch
 *.json
 
+.DS_Store
 journeymap-*
