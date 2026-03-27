@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.server.exceptions.ObjectError;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -218,7 +219,7 @@ public class JMWSServerIO {
     @Nullable
     public static JsonObject getObjectDataFromDisk(Path objPath, boolean silentFail) {
         String data = readRaw(objPath, silentFail);
-        return data != null ? JsonParser.parseString(data).getAsJsonObject() : null;
+        return data != null ? CommonUtils.parseStringToJsonObject(data) : null;
     }
 
     @Nullable

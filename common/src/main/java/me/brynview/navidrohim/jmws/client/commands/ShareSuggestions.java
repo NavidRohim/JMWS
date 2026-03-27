@@ -1,8 +1,8 @@
 package me.brynview.navidrohim.jmws.client.commands;
 
-import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
-import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +14,8 @@ public class ShareSuggestions {
         List<String> names = new ArrayList<>();
         for (UUID user : IncomingShareRequests.getAll().keySet())
         {
-            String username = PlayerHelper.getUsernameFromUUID(user);
-            if (!username.equals(CommonHelper.unknownUser))
+            String username = PlayerUtils.getUsernameFromUUID(user);
+            if (!username.equals(CommonUtils.unknownUser))
             {
                 names.add(username);
             }

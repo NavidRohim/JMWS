@@ -16,9 +16,9 @@ import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.client.helper.JMWSSounds;
+import me.brynview.navidrohim.jmws.client.assets.JMWSSounds;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
-import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.enums.ShareRequestDirection;
 import me.brynview.navidrohim.jmws.common.syncing.Syncing;
@@ -30,12 +30,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-import static me.brynview.navidrohim.jmws.client.helper.PlayerHelper.sendUserAlert;
+import static me.brynview.navidrohim.jmws.client.utils.PlayerUtils.sendUserAlert;
 
 /**
  * Collection of static methods relating to packet handling on the client side.
  */
-public class PacketHandler {
+public class ClientPacketHandler {
 
     /**
      * Handles a packet sent from the server.
@@ -76,7 +76,7 @@ public class PacketHandler {
                     MessageType messageType = MessageType.valueOf(waypointPayload.arguments().getLast().getAsString());
 
                     if (messageType.equals(MessageType.FAILURE)) {
-                        PlayerHelper.sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
+                        PlayerUtils.sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
                     }
 
                     sendUserAlert(Component.translatable(firstArgument), waypointPayload.arguments().get(1).getAsBoolean(), false, messageType);
@@ -146,7 +146,7 @@ public class PacketHandler {
                         {
                             ShareRequest request = new ShareRequest(
                                     sender,
-                                    PlayerHelper.ourUUID(),
+                                    PlayerUtils.ourUUID(),
                                     object,
                                     sharedObjectType,
                                     objectIdentifier,
@@ -160,7 +160,7 @@ public class PacketHandler {
                         }
                     } else {
                         UUID incoming = UUID.fromString(arguments.get(1).getAsString());
-                        OutgoingShareRequests.addRequest(incoming, new OutgoingShareRequest(PlayerHelper.ourUUID(), incoming, object, sharedObjectType, objectIdentifier, objName));
+                        OutgoingShareRequests.addRequest(incoming, new OutgoingShareRequest(PlayerUtils.ourUUID(), incoming, object, sharedObjectType, objectIdentifier, objName));
                         sendUserAlert(Component.translatable("sharing.jmws.share_sent"), true, false, MessageType.SUCCESS);
                     }
                 }

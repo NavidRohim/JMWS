@@ -7,7 +7,7 @@ import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 
-import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
@@ -25,10 +25,12 @@ public class CommonEvents {
         if (isInternal && CommonClass.minecraftClientInstance.player == null)
         {
             if (sendWarningIfJMNotPresent && !ClientCommonClass.clientHasJM) {
-                CommonClass.scheduler.schedule(() -> {PlayerHelper.sendUserAlert(Component.translatable("warning.jmws.jm_not_installed"), true, false, MessageType.NEUTRAL);}, 2, TimeUnit.SECONDS);
+                CommonClass.scheduler.schedule(() -> {
+                    PlayerUtils.sendUserAlert(Component.translatable("warning.jmws.jm_not_installed"), true, false, MessageType.NEUTRAL);}, 2, TimeUnit.SECONDS);
                 return;
             }
-            CommonClass.scheduler.schedule(() -> {PlayerHelper.sendUserAlert(Component.translatable("warning.jmws.world_is_local"), true, false, MessageType.NEUTRAL);}, 2, TimeUnit.SECONDS);
+            CommonClass.scheduler.schedule(() -> {
+                PlayerUtils.sendUserAlert(Component.translatable("warning.jmws.world_is_local"), true, false, MessageType.NEUTRAL);}, 2, TimeUnit.SECONDS);
         } else {
             CommonClass.scheduler.schedule(() -> PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer), ServerConfig.serverConfig.handshakeDelay, TimeUnit.MILLISECONDS);
             //PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer);
@@ -40,7 +42,7 @@ public class CommonEvents {
         ClientCommands.sync();
         ClientCommonClass.setServerModStatus(false);
         ClientCommonClass.serverConfig = ClientSideServerConfigObject.empty();
-        PlayerHelper.clearWarningAlertCache();
+        PlayerUtils.clearWarningAlertCache();
 
         IncomingShareRequests.clearAll();
         OutgoingShareRequests.clearAll();

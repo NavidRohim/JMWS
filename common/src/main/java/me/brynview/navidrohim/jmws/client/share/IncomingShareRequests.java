@@ -1,6 +1,6 @@
 package me.brynview.navidrohim.jmws.client.share;
 
-import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 
 import java.util.*;
@@ -41,7 +41,7 @@ public class IncomingShareRequests {
         HashMap<String, ShareRequest> r = new HashMap<>();
         for (Map.Entry<UUID, ShareRequest> s : getAll().entrySet())
         {
-            r.put(PlayerHelper.getUsernameFromUUID(s.getKey()), s.getValue());
+            r.put(PlayerUtils.getUsernameFromUUID(s.getKey()), s.getValue());
         }
         return r;
     }

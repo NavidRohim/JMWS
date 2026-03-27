@@ -12,7 +12,7 @@ import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.platform.Services;
 
-import me.brynview.navidrohim.jmws.client.network.PacketHandler;
+import me.brynview.navidrohim.jmws.client.network.ClientPacketHandler;
 
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 
@@ -64,7 +64,7 @@ public class CommonClass {
         {
             if (!isInternalServer())
             {
-                PacketHandler.handlePacket(ctx);
+                ClientPacketHandler.handlePacket(ctx);
             } else {
                 ServerPacketHandler.handleIncomingActionCommand(ctx, ctx.sender());
             }
@@ -77,7 +77,7 @@ public class CommonClass {
     {
         if (Side.CLIENT.equals(ctx.side()))
         {
-            PacketHandler.HandshakeHandler(ctx.message());
+            ClientPacketHandler.HandshakeHandler(ctx.message());
         } else {
             PlayerNetworkingHelper.sendHandshakeAndValidate(ctx.sender());
         }

@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.client.helper;
+package me.brynview.navidrohim.jmws.client.assets;
 
 import me.brynview.navidrohim.jmws.Constants;
 import net.minecraft.resources.Identifier;
@@ -6,7 +6,7 @@ import net.minecraft.resources.Identifier;
 /**
  * ResourceLocations for image assets
  */
-public interface AssetHelper {
+public interface JMWSTextures {
 
     Identifier onOffButtonAsset = Identifier.fromNamespaceAndPath(Constants.MODID, "textures/gui/on_off_button.png");
     Identifier enableButtonAsset = Identifier.fromNamespaceAndPath(Constants.MODID, "textures/gui/update_button.png");

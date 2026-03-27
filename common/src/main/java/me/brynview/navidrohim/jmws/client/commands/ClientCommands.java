@@ -1,15 +1,13 @@
 package me.brynview.navidrohim.jmws.client.commands;
 
-import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
-import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
-import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +29,7 @@ public class ClientCommands {
      * Convenience method for sending a warning that commands may not work in singleplayer.
      */
     private static void sendUserSinglePlayerWarning() {
-        PlayerHelper.sendUserAlert(Component.translatable("warning.jmws.world_is_local_no_commands"), true, false, MessageType.WARNING);
+        PlayerUtils.sendUserAlert(Component.translatable("warning.jmws.world_is_local_no_commands"), true, false, MessageType.WARNING);
     }
 
     /**
@@ -54,7 +52,7 @@ public class ClientCommands {
      */
     public static int getSyncInterval()
     {
-        PlayerHelper.sendUserAlert(Component.translatable("message.jmws.sync_frequency", ClientCommonClass.syncCounter.getTickCounterUpdateThreshold() / 20), true, false, MessageType.NEUTRAL);
+        PlayerUtils.sendUserAlert(Component.translatable("message.jmws.sync_frequency", ClientCommonClass.syncCounter.getTickCounterUpdateThreshold() / 20), true, false, MessageType.NEUTRAL);
         return 1;
     }
 
@@ -107,9 +105,9 @@ public class ClientCommands {
         if (isNotInSingleplayer()) {
             if (ClientCommonClass.config.autoSync.get())
             {
-                PlayerHelper.sendUserAlert(Component.translatable("message.jmws.next_sync", (ClientCommonClass.syncCounter.getTickCounterUpdateThreshold() - ClientCommonClass.syncCounter.getCurrentTickCount()) / 20), true, false, MessageType.NEUTRAL);
+                PlayerUtils.sendUserAlert(Component.translatable("message.jmws.next_sync", (ClientCommonClass.syncCounter.getTickCounterUpdateThreshold() - ClientCommonClass.syncCounter.getCurrentTickCount()) / 20), true, false, MessageType.NEUTRAL);
             } else {
-                PlayerHelper.sendUserAlert(Component.translatable("message.jmws.auto_sync_disabled"), true, false, MessageType.WARNING);
+                PlayerUtils.sendUserAlert(Component.translatable("message.jmws.auto_sync_disabled"), true, false, MessageType.WARNING);
             }
         } else {
             sendUserSinglePlayerWarning();
@@ -122,9 +120,9 @@ public class ClientCommands {
         if (specifiedShare != null)
         {
             specifiedShare.accept();
-            PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.sharing_child"), true, false, MessageType.NEUTRAL);
+            PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.sharing_child"), true, false, MessageType.NEUTRAL);
         } else {
-            PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.no_requests"), true, false, MessageType.NEUTRAL);
+            PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.no_requests"), true, false, MessageType.NEUTRAL);
         }
         return 1;
     }
@@ -140,9 +138,9 @@ public class ClientCommands {
         if (request != null)
         {
             request.decline();
-            PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.decline"), true, false, MessageType.NEUTRAL);
+            PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.decline"), true, false, MessageType.NEUTRAL);
         } else {
-            PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.no_requests"), true, false, MessageType.NEUTRAL);
+            PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.no_requests"), true, false, MessageType.NEUTRAL);
         }
         return 1;
     }

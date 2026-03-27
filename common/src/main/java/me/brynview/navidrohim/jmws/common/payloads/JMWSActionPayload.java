@@ -4,7 +4,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
+import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
+import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -52,7 +53,7 @@ public class JMWSActionPayload
 
     private void _setCommandAndArguments()
     {
-        JsonObject jsonifyied = CommandFactory.getJsonObjectFromJsonString(rawData);
+        JsonObject jsonifyied = CommonUtils.parseStringToJsonObject(rawData);
 
         command = CommandFactory.Commands.valueOf(jsonifyied.asMap().get("command").getAsString());
         argumentList = jsonifyied.asMap().get("arguments").getAsJsonArray().asList();

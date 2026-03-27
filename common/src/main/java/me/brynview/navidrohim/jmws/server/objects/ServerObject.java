@@ -7,8 +7,8 @@ import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.enums.ShareRequestDirection;
-import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
-import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
+import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.syncing.Syncing;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
@@ -136,7 +136,7 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
 
     public Boolean hasFile()
     {
-        return this.getCurrentObjectPath() != null && CommonHelper.fileExists(this.getCurrentObjectPath());
+        return this.getCurrentObjectPath() != null && CommonUtils.fileExists(this.getCurrentObjectPath());
     }
 
     public void removeObjectFromUser(UUID playerUUID, String objectIdentifier)
@@ -182,7 +182,7 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
         if (this.currentObjectPath != null && !dataclass)
         {
             if (stopSharing) {this.stopSharing();}
-            return CommonHelper.deleteFile(this.getCurrentObjectPath());
+            return CommonUtils.deleteFile(this.getCurrentObjectPath());
         }
         return false;
     }

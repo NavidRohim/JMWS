@@ -1,17 +1,15 @@
 package me.brynview.navidrohim.jmws.client.share.request;
 
 import com.mojang.authlib.GameProfile;
-import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
-import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
-import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
+import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,8 +40,8 @@ public class ShareRequest {
         this.requestIdentifier = requestIdentifier;
         this.objectDisplayName = objectDisplayName;
 
-        PlayerHelper.getUserFromUUID(uuid).ifPresentOrElse(p -> {this.sender = p;}, () -> {this.sender = null;});
-        PlayerHelper.getUserFromUUID(meantForPlayerUUID).ifPresentOrElse(pFor -> {this.to = pFor;}, () -> {this.sender = null;});
+        PlayerUtils.getUserFromUUID(uuid).ifPresentOrElse(p -> {this.sender = p;}, () -> {this.sender = null;});
+        PlayerUtils.getUserFromUUID(meantForPlayerUUID).ifPresentOrElse(pFor -> {this.to = pFor;}, () -> {this.sender = null;});
 
         this.timeout = IncomingShareRequests.requestScheduler.schedule(this::timeout, 20, TimeUnit.SECONDS);
     }
@@ -82,7 +80,7 @@ public class ShareRequest {
     protected void timeout()
     {
         IncomingShareRequests.removeRequest(this.originalSender);
-        PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.request_timeout_from", this.getSenderName()), true, false, MessageType.WARNING);
+        PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.request_timeout_from", this.getSenderName()), true, false, MessageType.WARNING);
     }
 
     private void finishRequest()
@@ -98,12 +96,12 @@ public class ShareRequest {
 
     public String getSenderName()
     {
-        return sender != null ? sender.name() : CommonHelper.unknownUser;
+        return sender != null ? sender.name() : CommonUtils.unknownUser;
     }
 
     public String getRecipientName()
     {
-    return to != null ? to.name() : CommonHelper.unknownUser;
+    return to != null ? to.name() : CommonUtils.unknownUser;
     }
 }
 

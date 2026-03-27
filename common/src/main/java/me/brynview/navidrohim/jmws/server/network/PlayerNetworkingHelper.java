@@ -1,15 +1,12 @@
 package me.brynview.navidrohim.jmws.server.network;
 
 import commonnetwork.api.Dispatcher;
-import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
+import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
-import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.UUID;

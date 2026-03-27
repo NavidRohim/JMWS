@@ -2,7 +2,7 @@ package me.brynview.navidrohim.jmws.server.config;
 
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.CommonClass;
-import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.server.exceptions.ServerConfigurationException;
 
 import java.io.*;
@@ -63,7 +63,7 @@ public class ServerConfig {
 
     public static void deleteConfig()
     {
-        CommonHelper.deleteFile(configPath);
+        CommonUtils.deleteFile(configPath);
     }
 
     public static String getConfigJson()

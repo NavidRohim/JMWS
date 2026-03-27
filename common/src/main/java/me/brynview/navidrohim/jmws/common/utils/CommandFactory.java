@@ -1,12 +1,9 @@
-package me.brynview.navidrohim.jmws.common.helper;
-
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+package me.brynview.navidrohim.jmws.common.utils;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
@@ -73,12 +70,12 @@ public class CommandFactory {
 
     public static String makeObjectShareRequestDecline(UUID originalSender)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.REJECT_SHARE, originalSender, PlayerHelper.ourUUID());
+        return CommandFactory.makeBaseJsonRequest(Commands.REJECT_SHARE, originalSender, PlayerUtils.ourUUID());
     }
 
     public static String makeObjectShareRequestDeclineWithMessage(UUID originalSender, String messageKey)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.USER_ALREADY_PROCESSING_SHARE, originalSender, PlayerHelper.ourUUID(), messageKey);
+        return CommandFactory.makeBaseJsonRequest(Commands.USER_ALREADY_PROCESSING_SHARE, originalSender, PlayerUtils.ourUUID(), messageKey);
     }
 
     public static String makeObjectShareRequestAccept(ShareRequest shareRequest)
@@ -101,8 +98,9 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.TRANSITION, objectIdentifier, filename, transitionType);
     }
 
-    public static JsonObject getJsonObjectFromJsonString(String jsonString) {
-        return JsonParser.parseString(jsonString).getAsJsonObject();
+    public static String makeTransitionObjectRequestForLegacyCustomData(String objectIdentifier, UUID owner, boolean isGlobal, ObjectType transitionType)
+    {
+        return CommandFactory.makeBaseJsonRequest(Commands.TRANSITION_NEW_DATA, objectIdentifier, owner, isGlobal, transitionType);
     }
 
     /**
@@ -135,6 +133,7 @@ public class CommandFactory {
         USER_ALREADY_PROCESSING_SHARE, // User is already processing another share request
 
         UPDATE,
-        TRANSITION
+        TRANSITION,
+        TRANSITION_NEW_DATA
     }
 }

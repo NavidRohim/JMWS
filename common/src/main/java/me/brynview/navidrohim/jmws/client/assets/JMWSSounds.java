@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.client.helper;
+package me.brynview.navidrohim.jmws.client.assets;
 
 
 
