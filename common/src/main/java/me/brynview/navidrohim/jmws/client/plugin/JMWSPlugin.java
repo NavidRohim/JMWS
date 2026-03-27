@@ -600,7 +600,10 @@ public class JMWSPlugin implements IClientPlugin {
             @Nullable Syncing wpSync = Syncing.getSyncingInfo(savedWaypoint.getCustomData(Constants.MODID));
             if (wpSync == null) {
                 portLegacyDataField(savedWaypoint.toString(), ObjectType.WAYPOINT);
-            } else if (!wpSync.isOwner(PlayerUtils.ourUUID()))
+                continue;
+            }
+
+            if (!wpSync.isOwner(PlayerUtils.ourUUID()))
             {
                 if (wpSync.isGlobal() && showGlobalLabels) // Global
                 {
@@ -612,8 +615,9 @@ public class JMWSPlugin implements IClientPlugin {
                     savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(ownerUser));
                     savedWaypoint.setIconResourceLoctaion(JMWSTextures.sharedObjectAsset);
                 }
-                addWaypoint(savedWaypoint);
+
             }
+            addWaypoint(savedWaypoint);
         }
 
         return hasLocalWaypoint;
