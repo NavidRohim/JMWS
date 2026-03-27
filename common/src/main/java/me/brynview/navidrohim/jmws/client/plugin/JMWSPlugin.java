@@ -436,6 +436,8 @@ public class JMWSPlugin implements IClientPlugin {
             } else {
                 Constants.getLogger().error("Error transitioning customData to customDataMap. Trace: {} {} {}", customDataOld, customDataString, customData);
             }
+        } else {
+            Constants.getLogger().error("portLegacyDataField was called but customData not present? **TRACE** Object as String: {} <> as JSON: {} <> transitionType: {}", objectAsString, legacy, transitionType);
         }
     }
     // Syncing -- Functions for syncing waypoints and groups
