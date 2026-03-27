@@ -26,9 +26,8 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-    // JourneyMap TODO: NOT PORTED
     implementation "mysticdrew:common-networking-fabric:${common_networking_version}"
-    compileOnlyApi group: 'info.journeymap', name: 'journeymap-api-common', version: project.journeymap_api_version, changing: true
+    compileOnlyApi "info.journeymap:journeymap-api-common:$project.journeymap_api_version"
     runtimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.2")
 }
 

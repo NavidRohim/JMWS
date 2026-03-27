@@ -181,7 +181,8 @@ public class JMWSServerIO {
             }
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException initExc)
         {
-            throw new RuntimeException("Cannot pass %s to getObjectFromDisk TODO ERROR: %s".formatted("PLACEHOLDER", initExc));
+            // This catch field should never ever be used.
+            throw new RuntimeException("Error constructing ServerObject: DEBUG (Exception, exception message)-> %s, %s".formatted(initExc, initExc.getMessage()));
         }
     }
 
