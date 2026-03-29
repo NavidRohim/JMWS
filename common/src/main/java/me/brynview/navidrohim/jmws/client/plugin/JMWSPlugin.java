@@ -101,6 +101,9 @@ public class JMWSPlugin implements IClientPlugin {
         {
             Waypoint waypoint = waypointPopupMenuEvent.getWaypoint();
             Constants.getLogger().info(waypoint.toString());
+            Constants.getLogger().info(waypoint.getCustomData());
+
+            Constants.getLogger().info(waypoint.toString());
             ClientSyncingHandler clientSyncingHandler = ClientSyncingHandler.getClientSyncingHandlerFromWaypoint(waypoint);
 
             /*
@@ -179,7 +182,7 @@ public class JMWSPlugin implements IClientPlugin {
      * @param silent   -- If the creation should happen silently (no text alert on the client)
      */
     private void createAction(Waypoint waypoint, boolean silent) {
-        ClientSyncingHandler.getClientSyncingHandlerFromWaypoint(waypoint);
+        //ClientSyncingHandler.getClientSyncingHandlerFromWaypoint(waypoint);
         if (ClientCommonClass.serverConfig.waypointsEnabled()) {
             if (isJmwsWaypoint(waypoint))
             {
