@@ -1,18 +1,16 @@
 # JourneyMap Waypoint Syncing (JMWS)
 
-This mod allows you to save and share waypoints on JourneyMap between multiple devices via the players account UUID on the server.
+This mod allows you to sync waypoints and groups on JourneyMap between multiple devices via the players account UUID on the server. 
+
+You can also live sync waypoints and groups to other players! Any edits you make will be synced live, including deletion. 
 
 Check out the [Discord server](https://discord.gg/WNXRSaEbPe) for support.
 
-Think of this mod as a cloud where all your waypoints are stored, and if you join a server on another computer / device where this mod is installed on the server-side, it'll share all waypoint data like the cloud shares photos, videos, etc with all devices on that cloud.
-
-This mod seamlessly integrates with JourneyMap, and if desired can be totally obscured but still work in the background via this mods configuration page which is in the addon section of JourneyMap.
-
 This mod **does not upload your saved JourneyMap settings**. Only your waypoints and groups will be uploaded.
 
-## How to use?
+## How do I install JMWS?
 
-Drop this mod into the the clients and servers mod folder. The server must have the mod CommonNetwork installed for your appropriate version. There is no extra setup. If working correctly, when you join a server you will get a green success message.
+Drop this mod into the clients and servers mod folder. The server must have the mod CommonNetwork installed for your appropriate version. There is no extra setup. If working correctly, when you join a server you will get a green success message.
 
 ## Why?
 
