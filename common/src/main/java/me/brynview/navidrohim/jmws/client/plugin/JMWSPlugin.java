@@ -73,7 +73,7 @@ public class JMWSPlugin implements IClientPlugin {
         });
 
         ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe(Constants.MODID, this::handleUserDeath);
-        ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe(Constants.MODID, (_ -> ClientCommonClass.config = new ConfigInterface()));
+        ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe(Constants.MODID, (ignored -> ClientCommonClass.config = new ConfigInterface()));
         ClientEventRegistry.MAPPING_EVENT.subscribe(Constants.MODID, (MappingEvent event) -> {
             if (ClientCommonClass.didHandshake)
             {

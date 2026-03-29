@@ -1,7 +1,6 @@
 plugins {
     id 'multiloader-loader'
-    // see https://docs.fabricmc.net/develop/porting/next for 26.1 changes to plugin id
-    id "net.fabricmc.fabric-loom" version "${loom_version}"
+    id 'fabric-loom' version "${loom_version}"
 }
 
 base {
@@ -22,20 +21,19 @@ repositories {
 dependencies {
     runtimeOnly 'net.fabricmc.unpick:unpick-format-utils:3.0.0-beta.5'
     minecraft "com.mojang:minecraft:${minecraft_version}"
-
-    implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-
-    implementation "mysticdrew:common-networking-fabric:${common_networking_version}"
-    compileOnlyApi "info.journeymap:journeymap-api-common:$project.journeymap_api_version"
-    runtimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.2")
-}
-
-configurations {
-    configureEach {
-        exclude group: "mysticdrew", module: "common-networking-common"
+    mappings loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
     }
+
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+
+    // JourneyMap
+    modImplementation "mysticdrew:common-networking-fabric:${common_networking_version}"
+    modCompileOnlyApi group: 'info.journeymap', name: 'journeymap-api-common', version: project.journeymap_api_version, changing: true
 }
+
 loom {
     def aw = project(':common').file("src/main/resources/${mod_id}.accesswidener")
     if (aw.exists()) {

@@ -150,7 +150,7 @@ public class ObjectIdentifierMap {
         try
         {
             waypointIdentifierMap.remove(Syncing.getSyncingInfo(waypoint.getCustomData(Constants.MODID)).objectIdentifier);
-        } catch (NullPointerException _)
+        } catch (NullPointerException ignored)
         {
         }
     }
