@@ -96,12 +96,12 @@ public class ShareRequest {
 
     public String getSenderName()
     {
-        return sender != null ? sender.name() : CommonUtils.unknownUser;
+        return sender != null ? sender.getName() : CommonUtils.unknownUser;
     }
 
     public String getRecipientName()
     {
-    return to != null ? to.name() : CommonUtils.unknownUser;
+    return to != null ? to.getName() : CommonUtils.unknownUser;
     }
 }
 

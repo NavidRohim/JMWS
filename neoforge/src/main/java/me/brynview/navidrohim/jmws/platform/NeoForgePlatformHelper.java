@@ -19,12 +19,12 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public boolean isDevelopmentEnvironment() {
-        return !FMLLoader.getCurrent().isProduction();
+        return !FMLLoader.isProduction();
     }
 
     @Override
     public String side() {
-        String side = FMLEnvironment.getDist().name();
+        String side = FMLEnvironment.dist.name();
         if (side.equalsIgnoreCase("SERVER") || side.equalsIgnoreCase("DEDICATED_SERVER"))
         {
             return "SERVER";
