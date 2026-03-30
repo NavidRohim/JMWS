@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.server.config;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
+import me.brynview.navidrohim.jmws.server.ServerCommonClass;
 import me.brynview.navidrohim.jmws.server.exceptions.ServerConfigurationException;
 
 import java.io.*;
@@ -33,7 +34,7 @@ public class ServerConfig {
                                 true,
                                 true,
                                 true,
-                                250
+                        ServerCommonClass.handshakeDelayDefault
                         )
                 );
 

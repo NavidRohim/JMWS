@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.client.config;
 
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.server.ServerCommonClass;
 import me.brynview.navidrohim.jmws.server.config.ServerConfigObject;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,7 +41,7 @@ public class ClientSideServerConfigObject extends ServerConfigObject {
      */
     public static ClientSideServerConfigObject empty()
     {
-        return new ClientSideServerConfigObject(false, false, false, false, 250, Constants.SERVER_VERSION);
+        return new ClientSideServerConfigObject(false, false, false, false, ServerCommonClass.handshakeDelayDefault, Constants.SERVER_VERSION);
     }
 
     /**
@@ -49,6 +50,6 @@ public class ClientSideServerConfigObject extends ServerConfigObject {
      */
     public static ClientSideServerConfigObject serverOwner()
     {
-        return new ClientSideServerConfigObject(true, true, true, true, 250, Constants.SERVER_VERSION);
+        return new ClientSideServerConfigObject(true, true, true, true, ServerCommonClass.handshakeDelayDefault, Constants.SERVER_VERSION);
     }
 }
