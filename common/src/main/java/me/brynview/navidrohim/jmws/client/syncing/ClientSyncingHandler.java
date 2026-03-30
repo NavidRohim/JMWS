@@ -75,10 +75,7 @@ public class ClientSyncingHandler extends CommonSyncHandler {
     public void setGlobal(boolean global)
     {
         super.setGlobal(global);
-        if (global) {
-            Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeGlobalRequestForServer(owner, objectIdentifier, objectType)));
-        } else {
-            Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeUnglobalRequestForServer(owner, objectIdentifier, objectType)));
-        }
+        Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeGlobalRequestForServer(owner, objectIdentifier, objectType, global)));
+
     }
 }

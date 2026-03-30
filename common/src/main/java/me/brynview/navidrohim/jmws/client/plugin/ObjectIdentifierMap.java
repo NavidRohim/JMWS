@@ -29,8 +29,14 @@ public class ObjectIdentifierMap {
     // Waypoint identifier map (key is the universal identifier, value is the waypoint)
     private static final HashMap<String, Waypoint> waypointIdentifierMap = new HashMap<>();
 
+    private static final HashMap<String, Waypoint> waypointIdentifierMapForContextMenu = new HashMap<>();
+
     // Group identifier map
     private static final HashMap<String, WaypointGroup> groupIdentifierMap = new HashMap<>();
+
+    private static String getContextMenuKey(Waypoint waypoint) {
+        return "%s%s%s".formatted(waypoint.getName(), waypoint.getColor(), waypoint.getX());
+    }
 
     /**
      * Creates a universal identifier from the players UUID, the waypoints GUID and name of the object.
@@ -111,6 +117,7 @@ public class ObjectIdentifierMap {
             }
 
             waypointIdentifierMap.put(waypointIdentifier, waypoint);
+            waypointIdentifierMapForContextMenu.put(getContextMenuKey(waypoint), waypoint);
             return true;
         }
     }
@@ -150,6 +157,7 @@ public class ObjectIdentifierMap {
     {
         try
         {
+            waypointIdentifierMapForContextMenu.remove(getContextMenuKey(waypoint));
             waypointIdentifierMap.remove(SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID)).objectIdentifier);
         } catch (NullPointerException noObjIgnore)
         {
@@ -172,5 +180,10 @@ public class ObjectIdentifierMap {
         {
             return;
         }
+    }
+
+    public static Waypoint getWaypointFromContextMenu(Waypoint waypoint)
+    {
+        return waypointIdentifierMapForContextMenu.get(getContextMenuKey(waypoint));
     }
 }

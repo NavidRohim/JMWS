@@ -10,6 +10,7 @@ import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
+import me.brynview.navidrohim.jmws.server.commands.ServerCommands;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -364,7 +365,37 @@ public class ServerPacketHandler {
                     LegacyObject.transitionIfNeed(legacyObjPath, playerUUID, objectType);
 
                 }
+                case MAKE_GLOBAL ->
+                {
+                    UUID from = UUID.fromString(arguments.getFirst().getAsString());
+                    String objectIdentifier = arguments.get(1).getAsString();
+                    ObjectType objectType = ObjectType.valueOf(arguments.get(2).getAsString());
+                    boolean global = arguments.getLast().getAsBoolean();
 
+                    ServerWaypoint globalObject = ServerWaypoint.getWaypointFromUniqueIdentifier(objectIdentifier, from);
+                    Constants.getLogger().info("Making global " + global);
+                    if (globalObject != null)
+                    {
+                        if (global)
+                        {
+                            if (!globalObject.serverSyncingHandler.isGlobal())
+                            {
+                                globalObject.makeGlobal();
+                                PlayerNetworkingHelper.sendUserMessage(from, "global.jmws.made_global", true, MessageType.NEUTRAL);
+                            } else {
+                                PlayerNetworkingHelper.sendUserMessage(from, "global.jmws.already_global", true, MessageType.WARNING);
+                            }
+                        } else {
+                            if (globalObject.serverSyncingHandler.isGlobal())
+                            {
+                                globalObject.removeGlobal();
+                                PlayerNetworkingHelper.sendUserMessage(from, "global.jmws.remove_global", true, MessageType.NEUTRAL);
+                            } else {
+                                PlayerNetworkingHelper.sendUserMessage(from, "global.jmws.not_global", true, MessageType.NEUTRAL);
+                            }
+                        }
+                    }
+                }
                 default -> Constants.getLogger().warn("Unknown packet command -> {}", command);}
 
         } catch (UnsupportedOperationException error)

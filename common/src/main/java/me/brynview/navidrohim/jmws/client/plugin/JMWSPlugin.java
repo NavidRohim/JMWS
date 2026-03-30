@@ -99,20 +99,17 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled())
         {
-            Waypoint waypoint = waypointPopupMenuEvent.getWaypoint();
-            Constants.getLogger().info(waypoint.toString());
-            Constants.getLogger().info(waypoint.getCustomData());
-
+            Waypoint waypoint = ObjectIdentifierMap.getWaypointFromContextMenu(waypointPopupMenuEvent.getWaypoint());
             Constants.getLogger().info(waypoint.toString());
             ClientSyncingHandler clientSyncingHandler = ClientSyncingHandler.getClientSyncingHandlerFromWaypoint(waypoint);
 
-            /*
+
             if (!clientSyncingHandler.isGlobal())
             {
                 waypointPopupMenuEvent.getPopupMenu().addMenuItem("Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, clientSyncingHandler, blockPos, Action.GLOBAL);});
             } else {
                 waypointPopupMenuEvent.getPopupMenu().addMenuItem("Remove Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, clientSyncingHandler, blockPos, Action.UNGLOBAL);});
-            }*/
+            }
 
             waypointPopupMenuEvent.getPopupMenu().addMenuItem("Share", (blockPos) -> {this.handleWaypointContextMenuClick(waypointPopupMenuEvent.getWaypoint(), clientSyncingHandler, blockPos, Action.SHARE);});
         }
@@ -123,15 +120,15 @@ public class JMWSPlugin implements IClientPlugin {
 
         switch (action)
         {
-            case GLOBAL:
+            case GLOBAL ->
             {
                 waypointSyncingHandler.setGlobal(true);
             }
-            case UNGLOBAL:
+            case UNGLOBAL ->
             {
                 waypointSyncingHandler.setGlobal(false);
             }
-            case SHARE:
+            case SHARE ->
             {
 
             }

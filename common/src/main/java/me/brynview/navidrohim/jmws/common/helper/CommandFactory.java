@@ -116,14 +116,9 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_FOR_ALL, from, objectIdentifier, objectType);
     }
 
-    public static String makeGlobalRequestForServer(UUID from, String objectIdentifier, ObjectType objectType)
+    public static String makeGlobalRequestForServer(UUID from, String objectIdentifier, ObjectType objectType, boolean global)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.MAKE_GLOBAL, from, objectIdentifier, objectType);
-    }
-
-    public static String makeUnglobalRequestForServer(UUID from, String objectIdentifier, ObjectType objectType)
-    {
-        return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_GLOBAL, from, objectIdentifier, objectType);
+        return CommandFactory.makeBaseJsonRequest(Commands.MAKE_GLOBAL, from, objectIdentifier, objectType, global);
     }
 
     public static JsonObject getJsonObjectFromJsonString(String jsonString) {
@@ -162,7 +157,6 @@ public class CommandFactory {
         REMOVE_SHARE_FOR_ALL,
 
         MAKE_GLOBAL,
-        REMOVE_GLOBAL,
 
         // Object sharing errors
         USER_ALREADY_PROCESSING_SHARE, // User is already processing another shareWith request
