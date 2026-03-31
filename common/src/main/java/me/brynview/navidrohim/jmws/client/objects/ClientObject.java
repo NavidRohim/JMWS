@@ -1,12 +1,7 @@
 package me.brynview.navidrohim.jmws.client.objects;
 
 import commonnetwork.api.Dispatcher;
-import journeymap.api.v2.common.waypoint.Waypoint;
-import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
-import me.brynview.navidrohim.jmws.client.syncing.ClientSyncingHandler;
-import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
-import me.brynview.navidrohim.jmws.common.api.CommonSyncHandler;
 import me.brynview.navidrohim.jmws.common.api.PossessesIdentifier;
 import me.brynview.navidrohim.jmws.common.api.Synchronizable;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
@@ -14,23 +9,22 @@ import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 
 import java.util.UUID;
 
-public class ClientObject implements Synchronizable, PossessesIdentifier {
+public class ClientObject <T extends ClientObjectWrapper> implements Synchronizable, PossessesIdentifier {
 
-    private String name;
-    private String customDataForJMWS;
-    private String guid;
-    private ObjectType objectType;
+    private final String name;
+    private final String customDataForJMWS;
+    private final String guid;
+    private final ObjectType objectType;
 
-    private ClientSyncingHandler clientSyncingHandler;
-    private ClientObjectWrapper objectWrapper;
+    private final T objectWrapper;
 
-    private ClientObject(
+    public ClientObject(
             String name,
             String customDataForJMWS,
             String guid,
             ObjectType objectType,
-            ClientObjectWrapper ownerObjectWrapper
-        )
+            T ownerObjectWrapper
+    )
     {
         this.name = name;
         this.customDataForJMWS = customDataForJMWS;
@@ -38,18 +32,6 @@ public class ClientObject implements Synchronizable, PossessesIdentifier {
         this.objectType = objectType;
 
         this.objectWrapper = ownerObjectWrapper;
-        this.clientSyncingHandler = new ClientSyncingHandler(ownerObjectWrapper);
-    }
-
-    public static ClientObject fromWaypoint(Waypoint waypoint)
-    {
-        return new ClientObject(
-                waypoint.getName(),
-                waypoint.getCustomData(Constants.MODID),
-                waypoint.getGuid(),
-                ObjectType.WAYPOINT,
-                new ClientWaypointWrapper(waypoint)
-        );
     }
 
     @Override
@@ -68,7 +50,8 @@ public class ClientObject implements Synchronizable, PossessesIdentifier {
     }
 
     @Override
-    public ObjectType getObjectType() {
+    public ObjectType getObjectType()
+    {
         return objectType;
     }
 
@@ -108,11 +91,8 @@ public class ClientObject implements Synchronizable, PossessesIdentifier {
         return this.objectWrapper.getGlobal();
     }
 
-    @Override
-    public CommonSyncHandler getSyncingHandler()
+    public ClientObjectWrapper getObjectWrapper()
     {
-        return clientSyncingHandler;
+        return objectWrapper;
     }
-
-
 }

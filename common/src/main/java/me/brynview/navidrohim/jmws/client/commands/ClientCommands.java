@@ -1,7 +1,6 @@
 package me.brynview.navidrohim.jmws.client.commands;
 
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
-import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.CommonClass;
@@ -63,7 +62,7 @@ public class ClientCommands {
     public static int clearAllGroups()
     {
         if (isNotInSingleplayer()) {
-            ClientNetworkDispatcher.sendString(CommandFactory.makeDeleteGroupRequestJson(
+            CommandFactory.deleteGroup(
                     "*",
                     "*",
                     false,
@@ -71,7 +70,7 @@ public class ClientCommands {
                     true,
                     true,
                     true
-            ));
+            )
             JMWSPlugin.sync(false);
             JMWSPlugin.deleteAllGroups(); // Deletes local copies.
         } else {
@@ -88,7 +87,7 @@ public class ClientCommands {
     public static int clearAllWaypoints()
     {
         if (isNotInSingleplayer()) {
-            ClientNetworkDispatcher.sendString(CommandFactory.makeDeleteRequestJson("*", false, true));
+            CommandFactory.deleteWaypoint("*", false, true);
             JMWSPlugin.sync(false);
         } else {
             sendUserSinglePlayerWarning();

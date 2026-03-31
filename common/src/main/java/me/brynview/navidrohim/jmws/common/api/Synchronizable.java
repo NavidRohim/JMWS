@@ -13,6 +13,4 @@ public interface Synchronizable
     void makeGlobal();
     void removeGlobal();
     boolean isGlobal();
-
-    CommonSyncHandler getSyncingHandler();
 }

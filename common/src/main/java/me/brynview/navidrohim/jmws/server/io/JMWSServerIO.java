@@ -1,7 +1,6 @@
 package me.brynview.navidrohim.jmws.server.io;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
@@ -62,9 +61,9 @@ public class JMWSServerIO {
         ServerPlayer sharedPlayer = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
         if (sharedPlayer != null) {
             if (objectType == ObjectType.WAYPOINT) {
-                Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteRequestJson(objectIdentifier, true, false)), sharedPlayer);
+                Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.deleteWaypoint(objectIdentifier, true, false)), sharedPlayer); // TODO: SERVER
             } else {
-                Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteGroupRequestJson(objectIdentifier, null, true, true, true, false, false)), sharedPlayer);
+                Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.deleteGroup(objectIdentifier, null, true, true, true, false, false)), sharedPlayer);
             }
         }
     }

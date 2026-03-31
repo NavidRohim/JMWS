@@ -16,4 +16,5 @@ public interface ClientObjectWrapper {
     void clearSharedTo();
 
     void update();
+    String getSerialization();
 }

@@ -20,8 +20,9 @@ import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.objects.ClientObject;
+import me.brynview.navidrohim.jmws.client.objects.factory.ClientObjectFactory;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
-import me.brynview.navidrohim.jmws.client.syncing.ClientSyncingHandler;
+import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
@@ -100,7 +101,7 @@ public class JMWSPlugin implements IClientPlugin {
         if (ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled())
         {
             Waypoint waypoint = ObjectIdentifierMap.getWaypointFromContextMenu(waypointPopupMenuEvent.getWaypoint());
-            ClientObject syncableObject = ClientObject.fromWaypoint(waypoint);
+            ClientObject<ClientWaypointWrapper> syncableObject = ClientObjectFactory.fromWaypoint(waypoint);
 
 
             if (!syncableObject.isGlobal())
@@ -114,7 +115,7 @@ public class JMWSPlugin implements IClientPlugin {
         }
     }
 
-    private void handleWaypointContextMenuClick(ClientObject waypoint, BlockPos blockPos, Action action)
+    private void handleWaypointContextMenuClick(ClientObject<ClientWaypointWrapper> waypoint, BlockPos blockPos, Action action)
     {
 
         switch (action)
@@ -202,7 +203,7 @@ public class JMWSPlugin implements IClientPlugin {
         {
             if (isJmwsWaypoint(waypoint))
             {
-                ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
+                ClientObject<ClientWaypointWrapper> syncableObject = ClientObjectFactory.fromWaypoint(waypoint);
                 if (serverSyncingHandler != null)
                 {
                     ClientNetworkDispatcher.sendString(CommandFactory.makeUpdateObjectRequest(serverSyncingHandler.objectIdentifier, serverSyncingHandler.isGlobal(), waypoint));
@@ -230,8 +231,7 @@ public class JMWSPlugin implements IClientPlugin {
                 if (serverSyncingHandler != null) // Can be null if JMWS has no knowledge of a waypoint
                 {
                     ObjectIdentifierMap.removeWaypointFromMap(waypoint);
-                    String jsonPacketData = CommandFactory.makeDeleteRequestJson(serverSyncingHandler.objectIdentifier,false, false);
-                    ClientNetworkDispatcher.sendString(jsonPacketData);
+                    CommandFactory.deleteWaypoint(serverSyncingHandler.objectIdentifier,false, false);
                     // removedWaypoint is called here because, yes, we do listen for the deletion with the event (meaning, the waypoint should be already gone by the time the event is called)
                     // But for some reason it bugs out and the waypoint stays and becomes persistent
                     //jmAPI.removeWaypoint(waypoint.getModId(), waypoint);
@@ -319,7 +319,7 @@ public class JMWSPlugin implements IClientPlugin {
                     ObjectIdentifierMap.removeGroupFromMap(waypointGroup); // Remove from identifier map
                     String uID = gsi.objectIdentifier;
 
-                    String jsonPacketData = CommandFactory.makeDeleteGroupRequestJson(
+                    String jsonPacketData = CommandFactory.deleteGroup(
                             uID,
                             waypointGroup.getGuid(),
                             false,
@@ -330,7 +330,7 @@ public class JMWSPlugin implements IClientPlugin {
 
                     ClientNetworkDispatcher.sendString(jsonPacketData);
                 } else if (!removeGroupItself) {
-                    String jsonPacketData = CommandFactory.makeDeleteGroupRequestJson(
+                    String jsonPacketData = CommandFactory.deleteGroup(
                             "null",
                             waypointGroup.getGuid(),
                             false,

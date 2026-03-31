@@ -248,11 +248,6 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
         return this.payload;
     }
 
-    @Override
-    public ServerSyncingHandler getSyncingHandler() {
-        return serverSyncingHandler;
-    }
-
     @Nullable
     public Path getCurrentObjectPath() {
         return this.currentObjectPath;

@@ -2,8 +2,6 @@ package me.brynview.navidrohim.jmws.client.syncing;
 
 import com.google.gson.JsonSyntaxException;
 import commonnetwork.api.Dispatcher;
-import journeymap.api.v2.common.waypoint.Waypoint;
-import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
@@ -41,16 +39,6 @@ public class ClientSyncingHandler extends CommonSyncHandler {
         }
     }
 
-    public static ClientSyncingHandler getClientSyncingHandlerFromWaypoint(Waypoint waypoint)
-    {
-        return getClientSyncingHandlerFromData(waypoint.getCustomData(Constants.MODID), ObjectType.WAYPOINT);
-    }
-
-    public static ClientSyncingHandler getClientSyncingHandlerFromGroup(WaypointGroup waypointGroup)
-    {
-        return getClientSyncingHandlerFromData(waypointGroup.getCustomData(Constants.MODID), ObjectType.GROUP);
-    }
-
     @Override
     public void addUserToShare(UUID playerUUID) {
         super.addUserToShare(playerUUID);
@@ -74,7 +62,6 @@ public class ClientSyncingHandler extends CommonSyncHandler {
     public void setGlobal(boolean global)
     {
         super.setGlobal(global);
-
         Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeGlobalRequestForServer(owner, objectIdentifier, objectType, global)));
 
     }
