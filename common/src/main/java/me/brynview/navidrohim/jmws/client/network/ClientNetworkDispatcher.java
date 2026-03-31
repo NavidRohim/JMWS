@@ -5,6 +5,7 @@ import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.objects.ClientObject;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
+import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.JMObjectWrapper;
@@ -16,10 +17,10 @@ import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import java.util.UUID;
 
 public class ClientNetworkDispatcher {
-    public static void sendString(String data)
+    private static void sendString(String data)
     {
         // ignoreCheck is true because forge broke packet validation I think.
-        Network.getNetworkHandler().sendToServer(new JMWSActionPayload(data), true);
+        sendPacket(new JMWSActionPayload(data));
     }
 
     private static void sendPacket(JMWSActionPayload payload)
@@ -91,34 +92,24 @@ public class ClientNetworkDispatcher {
         sendString(CommandFactory.makeTransitionObjectRequest(filename, objectIdentifier, transitionType));
     }
 
-    public static String makeShareRequestForServer(UUID from, UUID to, String objectIdentifier, ObjectType objectType)
+    public static void shareWith(UUID to, ClientObject<? extends ClientObjectWrapper> obj)
     {
-        return CommandFactory.makeBaseJsonRequest(CommandFactory.Commands.SHARE_FROM_CLIENT, from, to, objectIdentifier, objectType);
+        sendString(CommandFactory.makeShareRequestForServer(PlayerUtils.ourUUID(), to, obj.getObjectWrapper().getIdentifier(), obj.getObjectType()));
     }
 
-    public static void shareWaypointWith(UUID from, UUID to, ClientObject<ClientWaypointWrapper> waypoint)
+    public static void removeShareWith(UUID subject, ClientObject<? extends ClientObjectWrapper> waypoint)
     {
-        sendString(makeShareRequestForServer(from, to, waypoint.getObjectWrapper().getIdentifier(), ObjectType.WAYPOINT));
+        sendString(CommandFactory.makeUnshareRequestForUserOnServer(PlayerUtils.ourUUID(), subject, waypoint.getObjectWrapper().getIdentifier(), waypoint.getObjectType()));
     }
 
-    public static void shareGroupWith(UUID from, UUID to, ClientObject<JMObjectWrapper> group)
+    public static void removeShareFromAll(ClientObject<? extends ClientObjectWrapper> shareableObject)
     {
-        sendString(makeShareRequestForServer(from, to, group.getObjectWrapper().getIdentifier(), ObjectType.GROUP));
+        sendString(CommandFactory.makeUnshareRequestForAllOnServer(PlayerUtils.ourUUID(), shareableObject.getObjectWrapper().getIdentifier(), shareableObject.getObjectType()));
     }
 
-    public static void removeShareWith(UUID from, UUID subject, ClientObject<JMObjectWrapper> waypoint)
+    public static void makeGlobal(ClientObject<? extends ClientObjectWrapper> globalObject, boolean global)
     {
-        sendString(CommandFactory.makeUnshareRequestForUserOnServer(from, subject, waypoint.getObjectWrapper().getIdentifier(), waypoint.getObjectType()));
-    }
-
-    public static void removeShareFromAll(UUID from, ClientObject<JMObjectWrapper> shareableObject)
-    {
-        sendString(CommandFactory.makeUnshareRequestForAllOnServer(from, shareableObject.getObjectWrapper().getIdentifier(), shareableObject.getObjectType()));
-    }
-
-    public static void makeGlobal(UUID from, ClientObject<JMObjectWrapper> globalObject, boolean global)
-    {
-        sendString(CommandFactory.makeGlobalRequestForServer(from, globalObject.getObjectWrapper().getIdentifier(), globalObject.getObjectType(), global));
+        sendString(CommandFactory.makeGlobalRequestForServer(PlayerUtils.ourUUID(), globalObject.getObjectWrapper().getIdentifier(), globalObject.getObjectType(), global));
     }
 
 }

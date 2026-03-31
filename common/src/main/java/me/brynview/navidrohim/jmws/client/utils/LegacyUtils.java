@@ -25,10 +25,10 @@ public class LegacyUtils
 
     public static void transitionObject(Waypoint waypoint, UUID playerOwner, ObjectType objectType)
     {
-        ClientNetworkDispatcher.sendString(CommandFactory.makeTransitionObjectRequest(waypoint.getCustomData(Constants.MODID), getLegacyWaypointFilename(waypoint, playerOwner), objectType));
+        ClientNetworkDispatcher.transitionOldObject(waypoint.getCustomData(Constants.MODID), getLegacyWaypointFilename(waypoint, playerOwner), objectType);
     }
     public static void transitionObject(WaypointGroup waypointGroup, UUID playerOwner, ObjectType objectType)
     {
-        ClientNetworkDispatcher.sendString(CommandFactory.makeTransitionObjectRequest(waypointGroup.getCustomData(Constants.MODID), getLegacyGroupFilename(playerOwner, waypointGroup.getCustomData(Constants.MODID)), objectType));
+        ClientNetworkDispatcher.transitionOldObject(waypointGroup.getCustomData(Constants.MODID), getLegacyGroupFilename(playerOwner, waypointGroup.getCustomData(Constants.MODID)), objectType);
     }
 }

@@ -13,7 +13,7 @@ public class ClientWaypointWrapper extends JMObjectWrapper {
 
     private final Waypoint waypoint;
 
-    public ClientWaypointWrapper(Waypoint waypoint)
+    public ClientWaypointWrapper(Waypoint waypoint) throws NullPointerException
     {
         super(waypoint.getCustomData(Constants.MODID));
         this.waypoint = waypoint;

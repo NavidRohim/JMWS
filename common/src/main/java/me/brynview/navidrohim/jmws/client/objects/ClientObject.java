@@ -1,11 +1,10 @@
 package me.brynview.navidrohim.jmws.client.objects;
 
-import commonnetwork.api.Dispatcher;
+import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.common.api.PossessesIdentifier;
 import me.brynview.navidrohim.jmws.common.api.Synchronizable;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 
 import java.util.UUID;
 
@@ -58,31 +57,33 @@ public class ClientObject <T extends ClientObjectWrapper> implements Synchroniza
     @Override
     public void stopSharingWith(UUID user)
     {
-
+        ClientNetworkDispatcher.removeShareWith(user, this);
     }
 
     @Override
     public void stopSharingWithAll()
     {
-
+        ClientNetworkDispatcher.removeShareFromAll(this);
     }
 
     @Override
     public void shareWith(UUID toUser)
     {
-        Dispatcher.sendToServer(CommandFactory.makeShareRequestForServer(objectWrapper.getOwner(), toUser, objectWrapper.getIdentifier(), getObjectType()));
+        ClientNetworkDispatcher.shareWith(toUser, this);
     }
 
     @Override
     public void makeGlobal()
     {
         this.objectWrapper.setGlobal(true);
+        ClientNetworkDispatcher.makeGlobal(this, true);
     }
 
     @Override
     public void removeGlobal()
     {
         this.objectWrapper.setGlobal(false);
+        ClientNetworkDispatcher.makeGlobal(this, false);
     }
 
     @Override

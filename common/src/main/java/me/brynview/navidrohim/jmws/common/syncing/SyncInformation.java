@@ -1,7 +1,9 @@
 package me.brynview.navidrohim.jmws.common.syncing;
 
+import com.google.gson.JsonSyntaxException;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,9 +14,16 @@ public class SyncInformation {
     public List<String> sharedTo;
     public boolean global;
 
+    @Nullable
     public static SyncInformation SyncInformationFromString(String info)
     {
-        return CommonClass.gson.fromJson(info, SyncInformation.class);
+        try
+        {
+            return CommonClass.gson.fromJson(info, SyncInformation.class);
+        } catch (JsonSyntaxException e)
+        {
+            return null;
+        }
     }
 
     public String getSyncInformationAsString()

@@ -21,7 +21,9 @@ import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.objects.ClientObject;
 import me.brynview.navidrohim.jmws.client.objects.factory.ClientObjectFactory;
+import me.brynview.navidrohim.jmws.client.screens.ShareScreen;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
+import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
@@ -101,8 +103,7 @@ public class JMWSPlugin implements IClientPlugin {
         if (ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled())
         {
             Waypoint waypoint = ObjectIdentifierMap.getWaypointFromContextMenu(waypointPopupMenuEvent.getWaypoint());
-            ClientObject<ClientWaypointWrapper> syncableObject = ClientObjectFactory.fromWaypoint(waypoint);
-
+            @Nullable ClientObject<ClientWaypointWrapper> syncableObject = ClientObjectFactory.fromWaypoint(waypoint);
 
             if (!syncableObject.isGlobal())
             {
@@ -131,6 +132,7 @@ public class JMWSPlugin implements IClientPlugin {
             case SHARE ->
             {
 
+                minecraftClientInstance.setScreen(new ShareScreen(minecraftClientInstance.screen, Component.empty()));
             }
         }
     }
@@ -185,8 +187,7 @@ public class JMWSPlugin implements IClientPlugin {
                 ObjectIdentifierMap.addWaypointToMap(waypoint);
                 waypoint.setPersistent(false); // Persistence must be false so it does not stay upon leaving. If it did, there would be duplicate waypoints
 
-                String creationData = CommandFactory.makeCreationRequestJson(waypoint, silent);
-                ClientNetworkDispatcher.sendString(creationData);
+                ClientNetworkDispatcher.makeWaypoint(waypoint, silent);
             }
         } else {
             PlayerUtils.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, MessageType.ONE_TIME_WARNING);
@@ -203,10 +204,10 @@ public class JMWSPlugin implements IClientPlugin {
         {
             if (isJmwsWaypoint(waypoint))
             {
-                ClientObject<ClientWaypointWrapper> syncableObject = ClientObjectFactory.fromWaypoint(waypoint);
-                if (serverSyncingHandler != null)
+                @Nullable ClientObject<ClientWaypointWrapper> syncableObject = ClientObjectFactory.fromWaypoint(waypoint);
+                if (syncableObject != null)
                 {
-                    ClientNetworkDispatcher.sendString(CommandFactory.makeUpdateObjectRequest(serverSyncingHandler.objectIdentifier, serverSyncingHandler.isGlobal(), waypoint));
+                    ClientNetworkDispatcher.updateWaypoint(syncableObject);
                 } else {
                     this.createAction(waypoint, false);
                 }
@@ -226,12 +227,13 @@ public class JMWSPlugin implements IClientPlugin {
         if (ClientCommonClass.serverConfig.waypointsEnabled()) {
             if (isJmwsWaypoint(waypoint))
             {
-                @Nullable ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
-
-                if (serverSyncingHandler != null) // Can be null if JMWS has no knowledge of a waypoint
+                //@Nullable ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
+                @Nullable ClientObject<ClientWaypointWrapper> syncWaypoint = ClientObjectFactory.fromWaypoint(waypoint);
+                if (syncWaypoint != null) // Can be null if JMWS has no knowledge of a waypoint
                 {
                     ObjectIdentifierMap.removeWaypointFromMap(waypoint);
-                    CommandFactory.deleteWaypoint(serverSyncingHandler.objectIdentifier,false, false);
+                    ClientNetworkDispatcher.deleteWaypoint(syncWaypoint.getObjectWrapper().getIdentifier(), false, false);
+                    //CommandFactory.deleteWaypoint(serverSyncingHandler.objectIdentifier,false, false);
                     // removedWaypoint is called here because, yes, we do listen for the deletion with the event (meaning, the waypoint should be already gone by the time the event is called)
                     // But for some reason it bugs out and the waypoint stays and becomes persistent
                     //jmAPI.removeWaypoint(waypoint.getModId(), waypoint);
@@ -313,33 +315,29 @@ public class JMWSPlugin implements IClientPlugin {
         {
             if (isJmwsGroup(waypointGroup))
             {
-                ServerSyncingHandler gsi = SyncUtils.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID), true);
-                if (gsi != null)
+                @Nullable ClientObject<ClientGroupWrapper> group = ClientObjectFactory.fromGroup(waypointGroup);
+                if (group != null)
                 {
                     ObjectIdentifierMap.removeGroupFromMap(waypointGroup); // Remove from identifier map
-                    String uID = gsi.objectIdentifier;
-
-                    String jsonPacketData = CommandFactory.deleteGroup(
-                            uID,
-                            waypointGroup.getGuid(),
+                    ClientNetworkDispatcher.deleteGroup(
+                            group.getObjectWrapper().getIdentifier(),
+                            group.getGroupIdentifier(),
                             false,
                             deleteAllWaypoints,
                             removeGroupItself,
-                            gsi.isGlobal(),
-                            false);
-
-                    ClientNetworkDispatcher.sendString(jsonPacketData);
+                            group.isGlobal(),
+                            false
+                    );
                 } else if (!removeGroupItself) {
-                    String jsonPacketData = CommandFactory.deleteGroup(
+                    ClientNetworkDispatcher.deleteGroup(
                             "null",
                             waypointGroup.getGuid(),
                             false,
                             true,
                             false,
                             true,
-                            false);
-
-                    ClientNetworkDispatcher.sendString(jsonPacketData);
+                            false
+                    );
                 } else {
                     PlayerUtils.sendUserAlert(Component.translatable("global.jmws.cannot_delete_global"), true, false, MessageType.ONE_TIME_WARNING);
                 }
@@ -359,10 +357,11 @@ public class JMWSPlugin implements IClientPlugin {
         {
             if (isJmwsGroup(waypointGroup))
             {
-                ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID));
-                if (serverSyncingHandler != null)
+                @Nullable ClientObject<ClientGroupWrapper> syncableObject = ClientObjectFactory.fromGroup(waypointGroup);
+                if (syncableObject != null)
                 {
-                    ClientNetworkDispatcher.sendString(CommandFactory.makeUpdateObjectRequest(serverSyncingHandler.objectIdentifier, serverSyncingHandler.isGlobal(), waypointGroup));
+                    ClientNetworkDispatcher.updateGroup(syncableObject);
+                    //ClientNetworkDispatcher.sendString(CommandFactory.makeUpdateObjectRequest(serverSyncingHandler.objectIdentifier, serverSyncingHandler.isGlobal(), waypointGroup));
                 } else {
                     this.groupCreationHandler(waypointGroup, false);
                 }
@@ -433,7 +432,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Sends "request" packet | New = "SYNC"
         if (ConfigInterface.getEnabledStatus()) {
-            ClientNetworkDispatcher.sendString(CommandFactory.makeWaypointSyncRequestJson(sendAlert, fromDeathEvent));
+            ClientNetworkDispatcher.sync(sendAlert, fromDeathEvent);
         }
     }
 
@@ -480,7 +479,8 @@ public class JMWSPlugin implements IClientPlugin {
                 UUID legacyOwnerUUID = UUID.fromString(customData.get("owner").getAsString());
                 boolean isGlobal = customData.get("isGlobal").getAsBoolean();
 
-                ClientNetworkDispatcher.sendString(CommandFactory.makeTransitionObjectRequestForLegacyCustomData(legacyObjectIdentifier, legacyOwnerUUID, isGlobal, transitionType));
+                ClientNetworkDispatcher.transitionToNewCustomData(legacyObjectIdentifier, legacyOwnerUUID, isGlobal, transitionType);
+                // ClientNetworkDispatcher.sendString(CommandFactory.makeTransitionObjectRequestForLegacyCustomData(legacyObjectIdentifier, legacyOwnerUUID, isGlobal, transitionType));
                 Constants.getLogger().info("Detected legacy customData from an object not belonging to this client. Sent porting packet. Please use '/jmws sync' to resync.");
             } else {
                 Constants.getLogger().error("Error transitioning customData to customDataMap. Trace: {} {} {}", customDataOld, customDataString, customData);
@@ -504,9 +504,9 @@ public class JMWSPlugin implements IClientPlugin {
             {
                 ObjectIdentifierMap.addGroupToMap(waypointGroup);
                 waypointGroup.setPersistent(false);
-                String creationData = CommandFactory.makeGroupCreationRequestJson(waypointGroup, silent);
-
-                ClientNetworkDispatcher.sendString(creationData);
+                //String creationData = CommandFactory.makeGroupCreationRequestJson(waypointGroup, silent);
+                ClientNetworkDispatcher.makeGroup(waypointGroup, silent);
+                //ClientNetworkDispatcher.sendString(creationData);
             }
         } else {
             PlayerUtils.sendUserAlert(Component.translatable("message.jmws.server_disabled_groups"), true, false, MessageType.ONE_TIME_WARNING);

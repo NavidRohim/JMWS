@@ -54,23 +54,26 @@ public class ShareRequest {
 
     public void decline()
     {
-        ClientNetworkDispatcher.sendString(CommandFactory.makeObjectShareRequestDecline(this.originalSender));
+        ClientNetworkDispatcher.declineShare(this.originalSender);
+        //ClientNetworkDispatcher.sendString(CommandFactory.makeObjectShareRequestDecline(this.originalSender));
         this.finishRequest();
     }
 
     public static void busy(UUID originalSender)
     {
-        ClientNetworkDispatcher.sendString(CommandFactory.makeObjectShareRequestDeclineWithMessage(originalSender, "sharing.jmws.share_busy"));
+        ClientNetworkDispatcher.declineShare(originalSender, "sharing.jmws.share_busy");
+        //ClientNetworkDispatcher.sendString(CommandFactory.makeObjectShareRequestDeclineWithMessage(originalSender, "sharing.jmws.share_busy"));
     }
 
     public static void disabled(UUID originalSender) {
-        ClientNetworkDispatcher.sendString(CommandFactory.makeObjectShareRequestDeclineWithMessage(originalSender, "sharing.jmws.disabled"));
+        ClientNetworkDispatcher.declineShare(originalSender, "sharing.jmws.disabled");
+        //ClientNetworkDispatcher.sendString(CommandFactory.makeObjectShareRequestDeclineWithMessage(originalSender, "sharing.jmws.disabled"));
     }
 
     public void accept()
     {
         ClientCommonClass.isBusy = true;
-        ClientNetworkDispatcher.sendString(CommandFactory.makeObjectShareRequestAccept(this));
+        ClientNetworkDispatcher.acceptShare(this);
         JMWSPlugin.getInstance().addObjectFromRequest(this);
 
         this.finishRequest();

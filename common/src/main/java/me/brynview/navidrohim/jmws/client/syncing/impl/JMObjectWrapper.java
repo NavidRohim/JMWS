@@ -11,9 +11,12 @@ import java.util.UUID;
 public class JMObjectWrapper implements ClientObjectWrapper {
     final SyncInformation info;
 
-    public JMObjectWrapper(String customData)
+    public JMObjectWrapper(String customData) throws NullPointerException
     {
         this.info = SyncInformation.SyncInformationFromString(customData);
+        if (this.info == null) {
+            throw new NullPointerException("info is null, usually means corrupt customData or is not a valid JMWS syncable object.");
+        }
     }
 
     @Override

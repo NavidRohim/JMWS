@@ -9,10 +9,14 @@ import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.SyncCounter;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
+import me.brynview.navidrohim.jmws.client.objects.ClientObject;
+import me.brynview.navidrohim.jmws.client.objects.factory.ClientObjectFactory;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
+import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
+import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
@@ -113,55 +117,65 @@ public class ClientPacketHandler {
 
                 case OBJECT_SHARE ->
                 {
-                    ShareRequestDirection direction = ShareRequestDirection.valueOf(arguments.getLast().getAsString());
-
-                    ObjectType sharedObjectType = ObjectType.valueOf(arguments.get(3).getAsString());
-                    String objectString = arguments.getFirst().getAsString();
-
-                    Object object;
-                    String objName;
-                    String objectIdentifier;
-
-                    if (sharedObjectType == ObjectType.WAYPOINT)
+                    try
                     {
-                        Waypoint objectWp = WaypointFactory.fromWaypointJsonString(objectString);
-                        objectIdentifier = SyncUtils.getSyncingInfo(objectWp.getCustomData(Constants.MODID)).objectIdentifier;
-                        object = objectWp;
-                        objName = objectWp.getName();
-                    } else {
-                        WaypointGroup objectGp = WaypointFactory.fromGroupJsonString(objectString);
-                        objectIdentifier = SyncUtils.getSyncingInfo(objectGp.getCustomData(Constants.MODID)).objectIdentifier;
-                        object = objectGp;
-                        objName = objectGp.getName();
-                    }
+                        ShareRequestDirection direction = ShareRequestDirection.valueOf(arguments.getLast().getAsString());
 
-                    if (direction.equals(ShareRequestDirection.FOR_CLIENT))
-                    {
-                        UUID sender = UUID.fromString(arguments.get(1).getAsString());
-                        if (!ClientCommonClass.config.enableSharing.get())
-                        {
-                            ShareRequest.disabled(sender);
-                        }
-                        else if (!IncomingShareRequests.hasShareRequestFrom(sender))
-                        {
-                            ShareRequest request = new ShareRequest(
-                                    sender,
-                                    PlayerUtils.ourUUID(),
-                                    object,
-                                    sharedObjectType,
-                                    objectIdentifier,
-                                    objName
-                            );
+                        ObjectType sharedObjectType = ObjectType.valueOf(arguments.get(3).getAsString());
+                        String objectString = arguments.getFirst().getAsString();
 
-                            IncomingShareRequests.addRequest(sender, request);
-                            sendUserAlert(Component.translatable("sharing.jmws.share_request", request.getSenderName()), false, true, MessageType.SUCCESS);
+                        Object object;
+                        String objName;
+                        String objectIdentifier;
+
+                        if (sharedObjectType == ObjectType.WAYPOINT)
+                        {
+                            Waypoint objectWp = WaypointFactory.fromWaypointJsonString(objectString);
+                            ClientObject<ClientWaypointWrapper> JMWSWaypoint = ClientObjectFactory.fromWaypoint(objectWp);
+
+                            objectIdentifier = JMWSWaypoint.getObjectWrapper().getIdentifier();
+                            object = objectWp;
+                            objName = objectWp.getName();
                         } else {
-                            ShareRequest.busy(sender);
+                            WaypointGroup objectGp = WaypointFactory.fromGroupJsonString(objectString);
+                            ClientObject<ClientGroupWrapper> JMWSGroup = ClientObjectFactory.fromGroup(objectGp);
+
+                            objectIdentifier = JMWSGroup.getObjectWrapper().getIdentifier();
+                            object = objectGp;
+                            objName = objectGp.getName();
                         }
-                    } else {
-                        UUID incoming = UUID.fromString(arguments.get(1).getAsString());
-                        OutgoingShareRequests.addRequest(incoming, new OutgoingShareRequest(PlayerUtils.ourUUID(), incoming, object, sharedObjectType, objectIdentifier, objName));
-                        sendUserAlert(Component.translatable("sharing.jmws.share_sent"), true, false, MessageType.SUCCESS);
+
+                        if (direction.equals(ShareRequestDirection.FOR_CLIENT))
+                        {
+                            UUID sender = UUID.fromString(arguments.get(1).getAsString());
+                            if (!ClientCommonClass.config.enableSharing.get())
+                            {
+                                ShareRequest.disabled(sender);
+                            }
+                            else if (!IncomingShareRequests.hasShareRequestFrom(sender))
+                            {
+                                ShareRequest request = new ShareRequest(
+                                        sender,
+                                        PlayerUtils.ourUUID(),
+                                        object,
+                                        sharedObjectType,
+                                        objectIdentifier,
+                                        objName
+                                );
+
+                                IncomingShareRequests.addRequest(sender, request);
+                                sendUserAlert(Component.translatable("sharing.jmws.share_request", request.getSenderName()), false, true, MessageType.SUCCESS);
+                            } else {
+                                ShareRequest.busy(sender);
+                            }
+                        } else {
+                            UUID incoming = UUID.fromString(arguments.get(1).getAsString());
+                            OutgoingShareRequests.addRequest(incoming, new OutgoingShareRequest(PlayerUtils.ourUUID(), incoming, object, sharedObjectType, objectIdentifier, objName));
+                            sendUserAlert(Component.translatable("sharing.jmws.share_sent"), true, false, MessageType.SUCCESS);
+                        }
+                    } catch (NullPointerException e)
+                    {
+                        throw new RuntimeException("Got corrupt object when sharing.");
                     }
                 }
 
