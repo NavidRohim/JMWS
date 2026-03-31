@@ -5,7 +5,7 @@ import journeymap.api.v2.client.fullscreen.IThemeButton;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.common.CommonClass;
-import me.brynview.navidrohim.jmws.client.helper.AssetHelper;
+import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -24,14 +24,14 @@ public class JMButtonAddon {
             // Button for enabling and disabling JMWS
             IThemeButton buttonEnabled = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
                     "button.jmws.enable_button",
-                    AssetHelper.onOffButtonAsset,
+                    JMWSTextures.onOffButtonAsset,
                     ConfigInterface.getEnabledStatus(),
                     JMButtonAddon::enableMod);
 
             // Manual sync button
             IThemeButton buttonSync = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
                     "button.jmws.update_button",
-                    AssetHelper.enableButtonAsset,
+                    JMWSTextures.enableButtonAsset,
                     true,
                     JMButtonAddon::updateFromButton);
 

@@ -1,10 +1,10 @@
-package me.brynview.navidrohim.jmws.client.helper;
+package me.brynview.navidrohim.jmws.client.utils;
 
 import com.mojang.authlib.GameProfile;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
@@ -16,7 +16,7 @@ import java.util.*;
 /**
  * Random player functions that play sounds or sends action bar alerts.
  */
-public class PlayerHelper {
+public class PlayerUtils {
     private static final List<String> sentWarningsInServer = new ArrayList<>();
 
     /**
@@ -41,7 +41,7 @@ public class PlayerHelper {
             if (overlayText) {
                 CommonClass.minecraftClientInstance.gui.setOverlayMessage(Component.literal(finalText), false); // Action bar
             } else {
-                CommonClass.minecraftClientInstance.gui.getChat().addRecentChat(finalText); // Chat
+                CommonClass.minecraftClientInstance.gui.getChat().addClientSystemMessage(Component.literal(finalText)); // Chat
             }
 
             // Add alert to cache if it's one-time
@@ -88,13 +88,13 @@ public class PlayerHelper {
     public static String getUsernameFromUUID(UUID user)
     {
         Optional<GameProfile> profile = getUserFromUUID(user);
-        return profile.isPresent() ? profile.get().getName() : CommonHelper.unknownUser;
+        return profile.isPresent() ? profile.get().name() : CommonUtils.unknownUser;
     }
 
     public static String getUsernameFromUUID(UUID user, boolean withTag)
     {
         Optional<GameProfile> profile = getUserFromUUID(user);
-        return profile.isPresent() ? profile.get().getName() : "S";
+        return profile.isPresent() ? profile.get().name() : "S";
     }
 
     public static UUID ourUUID()

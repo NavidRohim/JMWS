@@ -1,6 +1,7 @@
 plugins {
     // see https://fabricmc.net/develop/ for new versions
-    id 'fabric-loom' version "${loom_version}" apply false
+    // see https://docs.fabricmc.net/develop/porting/next for 26.1 changes to plugin id
+    id 'net.fabricmc.fabric-loom' version "${loom_version}" apply false
     // see https://projects.neoforged.net/neoforged/moddevgradle for new versions
     id 'net.neoforged.moddev' version "${moddev_version}" apply false
 }

@@ -2,15 +2,13 @@ package me.brynview.navidrohim.jmws.server.config;
 
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.CommonClass;
-import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.server.exceptions.ServerConfigurationException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
 
 public class ServerConfig {
 
@@ -34,7 +32,8 @@ public class ServerConfig {
                                 true,
                                 true,
                                 true,
-                                true
+                                true,
+                                250
                         )
                 );
 
@@ -46,9 +45,8 @@ public class ServerConfig {
             } else {
                 rawServerConfigData = getConfigJson();
                 serverConfig = CommonClass.gson.fromJson(rawServerConfigData, ServerConfigObject.class);
-                List<Boolean> valueList = Arrays.asList(serverConfig.groupsEnabled, serverConfig.sharingEnabled, serverConfig.waypointsEnabled, serverConfig.jmwsEnabled);
 
-                if (valueList.contains(null))
+                if (!serverConfig.isValid())
                 {
                     deleteConfig();
                     ensureExistence();
@@ -63,9 +61,9 @@ public class ServerConfig {
         }
     }
 
-    public static boolean deleteConfig()
+    public static void deleteConfig()
     {
-        return CommonHelper.deleteFile(configPath);
+        CommonUtils.deleteFile(configPath);
     }
 
     public static String getConfigJson()

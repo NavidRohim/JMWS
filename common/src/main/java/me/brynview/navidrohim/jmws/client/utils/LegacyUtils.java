@@ -1,17 +1,16 @@
 package me.brynview.navidrohim.jmws.client.utils;
 
-import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
-import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import org.joml.Vector3d;
 
 import java.util.UUID;
 
-import static me.brynview.navidrohim.jmws.common.helper.CommonHelper._getWaypointFromRaw;
+import static me.brynview.navidrohim.jmws.common.utils.CommonUtils._getWaypointFromRaw;
 
 public class LegacyUtils
 {
@@ -26,10 +25,10 @@ public class LegacyUtils
 
     public static void transitionObject(Waypoint waypoint, UUID playerOwner, ObjectType objectType)
     {
-        Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeTransitionObjectRequest(waypoint.getCustomData(Constants.MODID), getLegacyWaypointFilename(waypoint, playerOwner), objectType)));
+        ClientNetworkDispatcher.sendString(CommandFactory.makeTransitionObjectRequest(waypoint.getCustomData(Constants.MODID), getLegacyWaypointFilename(waypoint, playerOwner), objectType));
     }
     public static void transitionObject(WaypointGroup waypointGroup, UUID playerOwner, ObjectType objectType)
     {
-        Dispatcher.sendToServer(new JMWSActionPayload(CommandFactory.makeTransitionObjectRequest(waypointGroup.getCustomData(Constants.MODID), getLegacyGroupFilename(playerOwner, waypointGroup.getCustomData(Constants.MODID)), objectType)));
+        ClientNetworkDispatcher.sendString(CommandFactory.makeTransitionObjectRequest(waypointGroup.getCustomData(Constants.MODID), getLegacyGroupFilename(playerOwner, waypointGroup.getCustomData(Constants.MODID)), objectType));
     }
 }

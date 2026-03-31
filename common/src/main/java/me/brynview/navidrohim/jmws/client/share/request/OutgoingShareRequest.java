@@ -1,7 +1,7 @@
 package me.brynview.navidrohim.jmws.client.share.request;
 
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import net.minecraft.network.chat.Component;
@@ -28,7 +28,7 @@ public class OutgoingShareRequest extends ShareRequest {
     protected void timeout()
     {
         OutgoingShareRequests.removeRequest(this.meantFor);
-        PlayerHelper.sendUserAlert(Component.translatable("sharing.jmws.request_timeout_to", this.getRecipientName()), true, false, MessageType.WARNING);
+        PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.request_timeout_to", this.getRecipientName()), true, false, MessageType.WARNING);
     }
 
     private void finishRequest()

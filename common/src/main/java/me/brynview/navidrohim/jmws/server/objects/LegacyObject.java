@@ -5,8 +5,9 @@ import com.google.gson.JsonPrimitive;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+
 import me.brynview.navidrohim.jmws.common.syncing.SyncUtils;
+import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 
 import java.lang.reflect.Constructor;
@@ -65,14 +66,14 @@ public class LegacyObject
             if (payload != null)
             {
                 LegacyObject oldObj = new LegacyObject(payload);
-                if (CommonHelper.isLegacyDataField(oldObj.getOldCustomData()))
+                if (CommonUtils.isLegacyDataField(oldObj.getOldCustomData()))
                 {
                     oldObj.setSyncedCustomData(SyncUtils.getEmptySyncingInfoString(oldObj.getOldCustomData(), owner, false));
                     Constructor<? extends ServerObject> constructor = newType.getObjectClass().getConstructor(JsonObject.class, UUID.class);
                     T newObj = (T) constructor.newInstance(payload, owner);
                     newObj.create();
 
-                    CommonHelper.deleteFile(path);
+                    CommonUtils.deleteFile(path);
                 }
             } else {
                 Constants.getLogger().debug("Possible issue translating server object. If issue arises please report.");

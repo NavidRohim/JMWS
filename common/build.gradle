@@ -10,10 +10,6 @@ neoForge {
     if (at.exists()) {
         accessTransformers.add(at.absolutePath)
     }
-    parchment {
-        minecraftVersion = parchment_minecraft
-        mappingsVersion = parchment_version
-    }
 }
 
 repositories {
@@ -28,12 +24,10 @@ dependencies {
     // fabric and neoforge both bundle mixinextras, so it is safe to use it in common
     //compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
     //annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
-
     compileOnly group: 'info.journeymap', name: 'journeymap-api-common', version: project.journeymap_api_version, changing: true
     implementation "mysticdrew:common-networking-common:${common_networking_version}"
 
 }
-
 configurations {
     commonJava {
         canBeResolved = false

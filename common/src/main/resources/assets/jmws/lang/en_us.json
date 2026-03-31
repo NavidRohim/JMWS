@@ -46,7 +46,7 @@
   "sharing.jmws.cannot_share_global": "You cannot share a global waypoint / group.",
   "sharing.jmws.request_timeout_to": "Timeout, sharing request to %s has been declined.",
   "sharing.jmws.request_timeout_from": "Timeout, sharing request from %s has been declined.",
-  "sharing.jmws.local_only": "To note; you can only update admin / shared waypoints or groups locally and your changes will be overwritten.",
+  "sharing.jmws.local_only": "You can only update global / shared waypoints or groups locally. Your changes will be overwritten.",
   "sharing.jmws.disabled": "%s has share requests disabled.",
   "sharing.jmws.no_matching_object": "No waypoint / group matching that name.",
   "sharing.jmws.no_server_sharing": "You cannot share on this server.",

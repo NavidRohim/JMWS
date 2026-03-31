@@ -9,8 +9,7 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
-import me.brynview.navidrohim.jmws.server.commands.ServerCommands;
+import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -263,7 +262,6 @@ public class ServerPacketHandler {
                             if (waypointCreationSuccess) {
                                 sendUserMessage(player, "message.jmws.creation_success", true, false);
                             } else {
-
                                 sendUserMessage(player, "message.jmws.creation_failure", false, true);
                             }
                         }
@@ -350,7 +348,7 @@ public class ServerPacketHandler {
                             usf.addToShared(objectIdentifier, objType);
                         }
                         sharedWp.serverSyncingHandler.addUserToShare(playerUUID);
-                        Dispatcher.sendToClient(waypointActionPayload, CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(ownerUUID));
+                        Dispatcher.sendToClient(waypointActionPayload, CommonClass.minecraftServerInstance.getPlayerList().getPlayer(ownerUUID));
                     } else {
                         sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
                     }
@@ -396,6 +394,17 @@ public class ServerPacketHandler {
                         }
                     }
                 }
+
+                case TRANSITION_NEW_DATA ->
+                {
+                    String legacyObjectIdentifier = arguments.getFirst().getAsString();
+                    UUID legacyOwnerUUID =  UUID.fromString(arguments.get(1).getAsString());
+                    boolean isGlobal = arguments.get(2).getAsBoolean();
+                    ObjectType legacyObjectType = ObjectType.valueOf(arguments.getLast().getAsString());
+
+                    JMWSServerIO.getObjectFromDisk(legacyObjectIdentifier, legacyOwnerUUID, legacyObjectType, false, isGlobal);
+                }
+
                 default -> Constants.getLogger().warn("Unknown packet command -> {}", command);}
 
         } catch (UnsupportedOperationException error)

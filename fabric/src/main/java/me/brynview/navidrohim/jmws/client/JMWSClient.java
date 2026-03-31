@@ -34,7 +34,7 @@ public class JMWSClient implements ClientModInitializer {
         }));
         ScreenEvents.AFTER_INIT.register(this::waitForStartScreenRegister);
         ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
-            ClientCommonClass.clearCache();
+            CommonEvents.handleDisconnect();
         }));
 
         // New

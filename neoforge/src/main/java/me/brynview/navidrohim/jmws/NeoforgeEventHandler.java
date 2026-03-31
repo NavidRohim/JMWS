@@ -38,7 +38,7 @@ public class NeoforgeEventHandler
     {
         if (event.getEntity() instanceof ServerPlayer)
         {
-            ClientCommonClass.clearCache();
+            CommonEvents.handleDisconnect();
         }
     }
 

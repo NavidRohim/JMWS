@@ -6,8 +6,6 @@ import com.google.gson.JsonParser;
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.CommonClass;
-import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
-import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.exceptions.ObjectError;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -209,7 +207,8 @@ public class JMWSServerIO {
             }
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException initExc)
         {
-            throw new RuntimeException("Cannot pass %s to getObjectFromDisk TODO ERROR: %s".formatted("PLACEHOLDER", initExc));
+            // This catch field should never ever be used.
+            throw new RuntimeException("Error constructing ServerObject: DEBUG (Exception, exception message)-> %s, %s".formatted(initExc, initExc.getMessage()));
         }
     }
 
@@ -247,7 +246,7 @@ public class JMWSServerIO {
     @Nullable
     public static JsonObject getObjectDataFromDisk(Path objPath, boolean silentFail) {
         String data = readRaw(objPath, silentFail);
-        return data != null ? JsonParser.parseString(data).getAsJsonObject() : null;
+        return data != null ? CommonUtils.parseStringToJsonObject(data) : null;
     }
 
     @Nullable

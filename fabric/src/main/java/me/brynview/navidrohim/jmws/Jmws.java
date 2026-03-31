@@ -48,11 +48,11 @@ public class Jmws implements ModInitializer {
                         SemanticVersion minAllowedVersion = SemanticVersion.parse(Constants.JourneyMapVersionString);
                         SemanticVersion betaVersion = SemanticVersion.parse(versionString);
 
-                        int mcVersionMinor = betaVersion.getVersionComponent(1);
-                        int mcVersionPatch = betaVersion.getVersionComponent(2);
+                        int mcVersionMinor = betaVersion.getVersionComponent(0);
+                        int mcVersionPatch = betaVersion.getVersionComponent(1);
 
-                        int minMcVersionMinor = minAllowedVersion.getVersionComponent(1);
-                        int minMcVersionPatch = minAllowedVersion.getVersionComponent(2);
+                        int minMcVersionMinor = minAllowedVersion.getVersionComponent(0);
+                        int minMcVersionPatch = minAllowedVersion.getVersionComponent(1);
 
                         Matcher regexBetaVersionPatternMinMatcher = Pattern.compile("beta\\.([0-9]+)").matcher(minAllowedVersion.toString());
                         Matcher regexBetaVersionPatternJarMatcher = Pattern.compile("beta\\.([0-9]+)").matcher(betaVersion.toString());
@@ -64,8 +64,7 @@ public class Jmws implements ModInitializer {
                         int minVersionString = Integer.parseInt(regexBetaVersionPatternMinMatcher.group(1));
 
                         ClientCommonClass.clientJMVersion = versionString;
-
-                        if ((mcVersionMinor >= minMcVersionMinor && mcVersionPatch == minMcVersionPatch && jarVersionString >= minVersionString)) {
+                        if ((mcVersionMinor == minMcVersionMinor && mcVersionPatch >= minMcVersionPatch && jarVersionString >= minVersionString)) {
                             Constants.getLogger().info("Good to go. JMWS Version %s with JourneyMap Version %s on client-side.".formatted(Constants.VERSION, versionString));
                             ClientCommonClass.clientHasJM = true;
                             CommonClass.init();

@@ -4,11 +4,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
+import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
+import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public class JMWSActionPayload
 {
-    public static final ResourceLocation CHANNEL = ResourceLocation.fromNamespaceAndPath(Constants.MODID, "action_command");
+    public static final Identifier CHANNEL = Identifier.fromNamespaceAndPath(Constants.MODID, "action_command");
     public static final StreamCodec<@NotNull FriendlyByteBuf, @NotNull JMWSActionPayload> STREAM_CODEC = StreamCodec.ofMember(JMWSActionPayload::encode, JMWSActionPayload::new);
 
     public static final int PACKET_SIZE = 2_097_000; // 2MB
@@ -52,7 +53,7 @@ public class JMWSActionPayload
 
     private void _setCommandAndArguments()
     {
-        JsonObject jsonifyied = CommandFactory.getJsonObjectFromJsonString(rawData);
+        JsonObject jsonifyied = CommonUtils.parseStringToJsonObject(rawData);
 
         command = CommandFactory.Commands.valueOf(jsonifyied.asMap().get("command").getAsString());
         argumentList = jsonifyied.asMap().get("arguments").getAsJsonArray().asList();

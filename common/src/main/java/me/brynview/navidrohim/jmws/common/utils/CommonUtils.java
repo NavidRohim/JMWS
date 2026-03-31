@@ -1,5 +1,7 @@
-package me.brynview.navidrohim.jmws.common.helper;
+package me.brynview.navidrohim.jmws.common.utils;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
@@ -11,10 +13,16 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class CommonHelper {
+public class CommonUtils {
     // This is kinda just a "put whatever here that is used everywhere" class
     public static final String unknownUser = "Unknown Soldier";
     public static final String globalStringTag = "G";
+    private static final String[] checkForCustomDataKeys = {
+            "objectIdentifier",
+            "sharedTo",
+            "owner",
+            "isGlobal"
+    };
 
     public static String _getWaypointFromRaw(Vector3d coordVector, String waypointName, UUID playerUUID) {
         Set<Character> charsToRemove = new HashSet<>(Arrays.asList('<', '>', ':', '*', '"', '\\', '|', '?', '/'));
@@ -60,5 +68,15 @@ public class CommonHelper {
             return true;
         }
         return false;
+    }
+
+    public static JsonObject parseStringToJsonObject(String jsonString) {
+        return JsonParser.parseString(jsonString).getAsJsonObject();
+    }
+
+    public static boolean isValidCustomDataField(@Nullable String input) {
+
+        if (input == null) { return true; }
+        return Arrays.stream(checkForCustomDataKeys).allMatch(input::contains);
     }
 }

@@ -2,7 +2,6 @@ package me.brynview.navidrohim.jmws.common;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import commonnetwork.api.Dispatcher;
 import commonnetwork.api.Network;
 
 import commonnetwork.networking.data.PacketContext;
@@ -13,7 +12,7 @@ import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.platform.Services;
 
-import me.brynview.navidrohim.jmws.client.network.PacketHandler;
+import me.brynview.navidrohim.jmws.client.network.ClientPacketHandler;
 
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 
@@ -45,14 +44,10 @@ public class CommonClass {
     public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public static final Gson gson = new Gson();
-    public static final Gson gsonExcludeNoExpose = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+    public static final Gson gsonExcludeNoExpose = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create();
+    public static final Gson gsonExcludeNoExposeNotPretty = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
-    public static MinecraftServer getMinecraftServerInstance()
-    {
-        return minecraftServerInstance;
-    }
-
-    private static void _determinePacketAction(PacketContext<JMWSActionPayload> ctx)
+    private static void determinePacketAction(PacketContext<JMWSActionPayload> ctx)
     {
         // This is a bodge fix. This is purely a consequence of me not doing things the right way. But I am
         // so far deep now, I cannot reengineer everything just so I can avoid these 4 lines. (client and server use same packets)
@@ -69,7 +64,7 @@ public class CommonClass {
         {
             if (!isInternalServer())
             {
-                PacketHandler.handlePacket(ctx);
+                ClientPacketHandler.handlePacket(ctx);
             } else {
                 ServerPacketHandler.handleIncomingActionCommand(ctx, ctx.sender());
             }
@@ -78,11 +73,11 @@ public class CommonClass {
         }
     }
 
-    private static void _determineHandshakePacketAction(PacketContext<JMWSHandshakePayload> ctx)
+    private static void determineHandshakePacketAction(PacketContext<JMWSHandshakePayload> ctx)
     {
         if (Side.CLIENT.equals(ctx.side()))
         {
-            PacketHandler.HandshakeHandler(ctx.message());
+            ClientPacketHandler.HandshakeHandler(ctx.message());
         } else {
             PlayerNetworkingHelper.sendHandshakeAndValidate(ctx.sender());
         }
@@ -104,8 +99,8 @@ public class CommonClass {
 
     public static void init() {
 
-        Network.registerPacket(JMWSActionPayload.type(), JMWSActionPayload.class, JMWSActionPayload.STREAM_CODEC, CommonClass::_determinePacketAction);
-        Network.registerPacket(JMWSHandshakePayload.type(), JMWSHandshakePayload.class, JMWSHandshakePayload.STREAM_CODEC, CommonClass::_determineHandshakePacketAction);
+        Network.registerPacket(JMWSActionPayload.type(), JMWSActionPayload.class, JMWSActionPayload.STREAM_CODEC, CommonClass::determinePacketAction);
+        Network.registerPacket(JMWSHandshakePayload.type(), JMWSHandshakePayload.class, JMWSHandshakePayload.STREAM_CODEC, CommonClass::determineHandshakePacketAction);
 
         if (Services.PLATFORM.side().equals("CLIENT") && Services.PLATFORM.getPlatformName().equals("Fabric"))
         {

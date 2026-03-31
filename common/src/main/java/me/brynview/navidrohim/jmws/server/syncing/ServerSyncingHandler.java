@@ -4,7 +4,8 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.api.CommonSyncHandler;
+import me.brynview.navidrohim.jmws.common.enums.MessageType;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
@@ -85,7 +86,7 @@ public class ServerSyncingHandler extends CommonSyncHandler {
 
     public void syncToUsers() {
         for (String playerUUID : this.sharedTo) {
-            ServerPlayer sharedUser = CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(UUID.fromString(playerUUID));
+            ServerPlayer sharedUser = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(UUID.fromString(playerUUID));
 
             if (sharedUser != null) {
                 ServerPacketHandler.sendUserSync(sharedUser, false, false, true);

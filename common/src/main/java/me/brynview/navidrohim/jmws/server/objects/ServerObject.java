@@ -9,8 +9,8 @@ import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.enums.ShareRequestDirection;
-import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
-import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
+import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
+import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
@@ -74,7 +74,7 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
             if (this.didTransitionToNewData) // If true, means object was using old customData.
             {
                 this.update();
-                Constants.getLogger().info("Transitioned old customData for object '%s' field to new customDataMap Hashmap (ID: %s). You can ignore this.".formatted(this.name, this.serverSyncingHandler.objectIdentifier));
+                Constants.getLogger().info("Transitioned old customData for object '%s' field to new customDataMap Hashmap (ID: %s). You can ignore this.".formatted(this.name, this.syncing.objectIdentifier));
             }
         }
     }
@@ -132,11 +132,10 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
     // General server operations
 
     public boolean delete(boolean stopSharing) {
-        if (this.currentObjectPath != null && !dataclass) {
-            if (stopSharing) {
-                this.stopSharingWithAll();
-            }
-            return CommonHelper.deleteFile(this.getCurrentObjectPath());
+        if (this.currentObjectPath != null && !dataclass)
+        {
+            if (stopSharing) {this.stopSharingWithAll();}
+            return CommonUtils.deleteFile(this.getCurrentObjectPath());
         }
         return false;
     }
