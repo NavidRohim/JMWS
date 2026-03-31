@@ -105,6 +105,12 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
         this.serverSyncingHandler.setGlobal(false);
     }
 
+    @Override
+    public boolean isGlobal()
+    {
+        return this.serverSyncingHandler.isGlobal();
+    }
+
     // Sharing
 
     @Override

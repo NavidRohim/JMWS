@@ -19,6 +19,7 @@ import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
+import me.brynview.navidrohim.jmws.client.objects.ClientObject;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncingHandler;
 import me.brynview.navidrohim.jmws.common.CommonClass;
@@ -99,33 +100,32 @@ public class JMWSPlugin implements IClientPlugin {
         if (ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled())
         {
             Waypoint waypoint = ObjectIdentifierMap.getWaypointFromContextMenu(waypointPopupMenuEvent.getWaypoint());
-            Constants.getLogger().info(waypoint.toString());
-            ClientSyncingHandler clientSyncingHandler = ClientSyncingHandler.getClientSyncingHandlerFromWaypoint(waypoint);
+            ClientObject syncableObject = ClientObject.fromWaypoint(waypoint);
 
 
-            if (!clientSyncingHandler.isGlobal())
+            if (!syncableObject.isGlobal())
             {
-                waypointPopupMenuEvent.getPopupMenu().addMenuItem("Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, clientSyncingHandler, blockPos, Action.GLOBAL);});
+                waypointPopupMenuEvent.getPopupMenu().addMenuItem("Global", (blockPos) -> {this.handleWaypointContextMenuClick(syncableObject, blockPos, Action.GLOBAL);});
             } else {
-                waypointPopupMenuEvent.getPopupMenu().addMenuItem("Remove Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, clientSyncingHandler, blockPos, Action.UNGLOBAL);});
+                waypointPopupMenuEvent.getPopupMenu().addMenuItem("Remove Global", (blockPos) -> {this.handleWaypointContextMenuClick(syncableObject, blockPos, Action.UNGLOBAL);});
             }
 
-            waypointPopupMenuEvent.getPopupMenu().addMenuItem("Share", (blockPos) -> {this.handleWaypointContextMenuClick(waypointPopupMenuEvent.getWaypoint(), clientSyncingHandler, blockPos, Action.SHARE);});
+            waypointPopupMenuEvent.getPopupMenu().addMenuItem("Share", (blockPos) -> {this.handleWaypointContextMenuClick(syncableObject, blockPos, Action.SHARE);});
         }
     }
 
-    private void handleWaypointContextMenuClick(Waypoint waypoint, ClientSyncingHandler waypointSyncingHandler, BlockPos blockPos, Action action)
+    private void handleWaypointContextMenuClick(ClientObject waypoint, BlockPos blockPos, Action action)
     {
 
         switch (action)
         {
             case GLOBAL ->
             {
-                waypointSyncingHandler.setGlobal(true);
+                waypoint.makeGlobal();
             }
             case UNGLOBAL ->
             {
-                waypointSyncingHandler.setGlobal(false);
+                waypoint.removeGlobal();
             }
             case SHARE ->
             {
