@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.client.objects;
+package me.brynview.navidrohim.jmws.client.syncing.objects;
 
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;

@@ -19,8 +19,8 @@ import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
-import me.brynview.navidrohim.jmws.client.objects.ClientObject;
-import me.brynview.navidrohim.jmws.client.objects.factory.ClientObjectFactory;
+import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
+import me.brynview.navidrohim.jmws.client.syncing.objects.factory.ClientObjectFactory;
 import me.brynview.navidrohim.jmws.client.screens.ShareScreen;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
@@ -34,7 +34,6 @@ import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.common.syncing.SyncUtils;
 import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.minecraft.client.player.LocalPlayer;
@@ -132,7 +131,7 @@ public class JMWSPlugin implements IClientPlugin {
             case SHARE ->
             {
 
-                minecraftClientInstance.setScreen(new ShareScreen(minecraftClientInstance.screen, Component.empty()));
+                minecraftClientInstance.setScreen(new ShareScreen(minecraftClientInstance.screen, minecraftClientInstance.getCurrentServer().players, waypoint, Component.empty()));
             }
         }
     }

@@ -1,9 +1,9 @@
-package me.brynview.navidrohim.jmws.client.objects.factory;
+package me.brynview.navidrohim.jmws.client.syncing.objects.factory;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.client.objects.ClientObject;
+import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
