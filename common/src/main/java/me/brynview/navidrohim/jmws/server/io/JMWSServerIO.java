@@ -6,6 +6,9 @@ import com.google.gson.JsonParser;
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
+import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.server.exceptions.ObjectError;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -56,7 +59,7 @@ public class JMWSServerIO {
 
     public static void removeObjectFromUser(ServerObject serverObject, UUID playerUUID, String objectIdentifier, ObjectType objectType) {
         UserSharingFile.removeObjectFromUser(playerUUID, objectIdentifier, serverObject.getObjectType());
-        ServerPlayer sharedPlayer = CommonClass.getMinecraftServerInstance().getPlayerList().getPlayer(playerUUID);
+        ServerPlayer sharedPlayer = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
         if (sharedPlayer != null) {
             if (objectType == ObjectType.WAYPOINT) {
                 Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteRequestJson(objectIdentifier, true, false)), sharedPlayer);

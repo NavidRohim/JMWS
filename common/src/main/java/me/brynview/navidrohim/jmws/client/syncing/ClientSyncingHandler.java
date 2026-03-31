@@ -5,14 +5,13 @@ import commonnetwork.api.Dispatcher;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.api.CommonSyncHandler;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
-import me.brynview.navidrohim.jmws.common.helper.CommonHelper;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
 import net.minecraft.network.chat.Component;
@@ -36,7 +35,7 @@ public class ClientSyncingHandler extends CommonSyncHandler {
 
             return handler;
         } catch (IllegalStateException | JsonSyntaxException reader) {
-            PlayerHelper.sendUserAlert(Component.literal("FATAL: You are on the wrong JMWS version! Update to JMWS v%s as soon as possible or you may suffer data loss!".formatted(Constants.SERVER_VERSION)), false, true, MessageType.FAILURE);
+            PlayerUtils.sendUserAlert(Component.literal("FATAL: You are on the wrong JMWS version! Update to JMWS v%s as soon as possible or you may suffer data loss!".formatted(Constants.SERVER_VERSION)), false, true, MessageType.FAILURE);
 
             return null;
         }

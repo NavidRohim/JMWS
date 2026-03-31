@@ -7,8 +7,8 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.api.PossessesIdentifier;
 import me.brynview.navidrohim.jmws.common.api.Synchronizable;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.helper.CommandFactory;
 import me.brynview.navidrohim.jmws.common.syncing.SyncUtils;
+import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
 
 import java.util.UUID;

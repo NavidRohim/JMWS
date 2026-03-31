@@ -51,6 +51,12 @@ import static me.brynview.navidrohim.jmws.common.CommonClass.*;
 @JourneyMapPlugin(apiVersion = "2.0.0")
 public class JMWSPlugin implements IClientPlugin {
 
+    enum Action{
+        GLOBAL,
+        UNGLOBAL,
+        SHARE
+
+    }
     // JourneyMap API
     private IClientAPI jmAPI = null;
     private static JMWSPlugin INSTANCE;
@@ -199,7 +205,7 @@ public class JMWSPlugin implements IClientPlugin {
                 ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
                 if (serverSyncingHandler != null)
                 {
-                    ClientNetworkDispatcher.sendString(CommandFactory.makeUpdateObjectRequest(syncing.objectIdentifier, syncing.isGlobal(), waypoint));
+                    ClientNetworkDispatcher.sendString(CommandFactory.makeUpdateObjectRequest(serverSyncingHandler.objectIdentifier, serverSyncingHandler.isGlobal(), waypoint));
                 } else {
                     this.createAction(waypoint, false);
                 }
@@ -224,7 +230,7 @@ public class JMWSPlugin implements IClientPlugin {
                 if (serverSyncingHandler != null) // Can be null if JMWS has no knowledge of a waypoint
                 {
                     ObjectIdentifierMap.removeWaypointFromMap(waypoint);
-                    String jsonPacketData = CommandFactory.makeDeleteRequestJson(syncing.objectIdentifier,false, false);
+                    String jsonPacketData = CommandFactory.makeDeleteRequestJson(serverSyncingHandler.objectIdentifier,false, false);
                     ClientNetworkDispatcher.sendString(jsonPacketData);
                     // removedWaypoint is called here because, yes, we do listen for the deletion with the event (meaning, the waypoint should be already gone by the time the event is called)
                     // But for some reason it bugs out and the waypoint stays and becomes persistent
@@ -356,7 +362,7 @@ public class JMWSPlugin implements IClientPlugin {
                 ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID));
                 if (serverSyncingHandler != null)
                 {
-                    ClientNetworkDispatcher.sendString(CommandFactory.makeUpdateObjectRequest(syncing.objectIdentifier, syncing.isGlobal(), waypointGroup));
+                    ClientNetworkDispatcher.sendString(CommandFactory.makeUpdateObjectRequest(serverSyncingHandler.objectIdentifier, serverSyncingHandler.isGlobal(), waypointGroup));
                 } else {
                     this.groupCreationHandler(waypointGroup, false);
                 }

@@ -1,5 +1,7 @@
 package me.brynview.navidrohim.jmws.common.utils;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;

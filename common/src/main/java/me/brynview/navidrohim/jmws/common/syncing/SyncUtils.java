@@ -1,7 +1,7 @@
 package me.brynview.navidrohim.jmws.common.syncing;
 
 import com.google.gson.JsonSyntaxException;
-import me.brynview.navidrohim.jmws.client.helper.PlayerHelper;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
 
@@ -16,7 +16,7 @@ public class SyncUtils {
         } catch (JsonSyntaxException syntaxException) // will throw if object hasn't been ported.
         {
             if (!returnNullIfError) {
-                return getSyncingInfo(getEmptySyncingInfoString(customDataField, PlayerHelper.ourUUID(), false));
+                return getSyncingInfo(getEmptySyncingInfoString(customDataField, PlayerUtils.ourUUID(), false));
             }
             return null;
         }

@@ -74,7 +74,7 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
             if (this.didTransitionToNewData) // If true, means object was using old customData.
             {
                 this.update();
-                Constants.getLogger().info("Transitioned old customData for object '%s' field to new customDataMap Hashmap (ID: %s). You can ignore this.".formatted(this.name, this.syncing.objectIdentifier));
+                Constants.getLogger().info("Transitioned old customData for object '%s' field to new customDataMap Hashmap (ID: %s). You can ignore this.".formatted(this.name, this.serverSyncingHandler.objectIdentifier));
             }
         }
     }
@@ -278,6 +278,6 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
     }
 
     public Boolean hasFile() {
-        return this.getCurrentObjectPath() != null && CommonHelper.fileExists(this.getCurrentObjectPath());
+        return this.getCurrentObjectPath() != null && CommonUtils.fileExists(this.getCurrentObjectPath());
     }
 }
