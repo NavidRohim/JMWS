@@ -16,21 +16,18 @@ import java.util.UUID;
 
 public class ServerCommands {
 
-    public static int share(ServerPlayer sender, ServerPlayer player, String waypointID, ObjectType objectType) {
+    public static int share(ServerPlayer sender, ServerPlayer player, @Nullable ServerObject object) {
         if (ServerConfig.serverConfig.sharingEnabled)
         {
             if (sender.equals(player) || (CommonClass.isInternalServer() && player.level().getServer().getSingleplayerProfile().id().equals(player.getUUID())))
             {
                 PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.cannot_share", true, false);
             } else {
-                HashMap<String, Path> userObjs = JMWSServerIO.getNameHashmapLookup(sender.getUUID(), objectType);
-                Path specifiedObj = userObjs.get(waypointID);
-                if (specifiedObj != null)
+                if (object != null)
                 {
-                    ServerObject objIns = JMWSServerIO.getObjectFromFile(specifiedObj, sender.getUUID(), objectType);
-                    if (!objIns.serverSyncingHandler.isGlobal())
+                    if (!object.serverSyncingHandler.isGlobal())
                     {
-                        objIns.shareWith(player.getUUID());
+                        object.shareWith(player.getUUID());
                     } else {
                         PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.cannot_share_global", true, MessageType.WARNING);
                     }
@@ -43,6 +40,19 @@ public class ServerCommands {
             PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.no_server_sharing", true, MessageType.FAILURE);
         }
         return 1;
+    }
+
+    public static int share(ServerPlayer sender, ServerPlayer player, String waypointID, ObjectType objectType)
+    {
+        HashMap<String, Path> userObjs = JMWSServerIO.getNameHashmapLookup(sender.getUUID(), objectType);
+        Path specifiedObj = userObjs.get(waypointID);
+        @Nullable ServerObject objIns = null;
+        if (specifiedObj != null)
+        {
+            objIns = JMWSServerIO.getObjectFromFile(specifiedObj, sender.getUUID(), objectType);
+        }
+
+        return share(sender, player, objIns);
     }
 
     public static int removeShare(ServerPlayer sender, String waypointID, ObjectType objectType) {

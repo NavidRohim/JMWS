@@ -10,6 +10,8 @@ import net.minecraft.network.protocol.status.ServerStatus;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static me.brynview.navidrohim.jmws.common.CommonClass.minecraftClientInstance;
+
 public class ShareScreen extends Screen {
 
     private final Screen parent;
@@ -47,5 +49,10 @@ public class ShareScreen extends Screen {
     public boolean shouldCloseOnEsc()
     {
         return true;
+    }
+
+    public static void openShare(ClientObject<ClientWaypointWrapper> waypoint)
+    {
+        minecraftClientInstance.setScreen(new ShareScreen(minecraftClientInstance.screen, minecraftClientInstance.getCurrentServer().players, waypoint, Component.empty()));
     }
 }

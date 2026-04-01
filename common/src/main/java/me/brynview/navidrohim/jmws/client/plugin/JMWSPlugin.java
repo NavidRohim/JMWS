@@ -131,7 +131,7 @@ public class JMWSPlugin implements IClientPlugin {
             case SHARE ->
             {
 
-                minecraftClientInstance.setScreen(new ShareScreen(minecraftClientInstance.screen, minecraftClientInstance.getCurrentServer().players, waypoint, Component.empty()));
+                ShareScreen.openShare(waypoint);
             }
         }
     }

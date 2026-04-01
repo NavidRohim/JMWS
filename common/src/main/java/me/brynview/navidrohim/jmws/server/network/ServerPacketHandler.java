@@ -10,6 +10,7 @@ import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
+import me.brynview.navidrohim.jmws.server.commands.ServerCommands;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -403,6 +404,15 @@ public class ServerPacketHandler {
                     ObjectType legacyObjectType = ObjectType.valueOf(arguments.getLast().getAsString());
 
                     JMWSServerIO.getObjectFromDisk(legacyObjectIdentifier, legacyOwnerUUID, legacyObjectType, false, isGlobal);
+                }
+
+                case SHARE_FROM_CLIENT ->
+                {
+                    UUID toPlayer = UUID.fromString(arguments.get(1).getAsString());
+                    String objectId =  arguments.get(2).getAsString();
+                    ObjectType objectType = ObjectType.valueOf(arguments.get(3).getAsString());
+
+                    ServerCommands.share(player, CommonClass.minecraftServerInstance.getPlayerList().getPlayer(toPlayer), JMWSServerIO.getObjectFromDisk(objectId, playerUUID, objectType));
                 }
 
                 default -> Constants.getLogger().warn("Unknown packet command -> {}", command);}

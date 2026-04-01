@@ -43,7 +43,8 @@ public class CommonSyncHandler
         this.sharedTo.clear();
     }
 
-    public boolean isGlobal() {
+    public boolean isGlobal()
+    {
         return this.isGlobal;
     }
 
