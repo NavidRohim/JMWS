@@ -6,7 +6,7 @@ import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
-import me.brynview.navidrohim.jmws.client.SyncCounter;
+import me.brynview.navidrohim.jmws.client.syncing.SyncCounter;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
@@ -255,7 +255,7 @@ public class ClientPacketHandler {
      * Handles handshake from the server.
      * @param handshakePayload -- Handshake packet from the server.
      */
-    public static void HandshakeHandler(JMWSHandshakePayload handshakePayload) {
+    public static void handleHandshake(JMWSHandshakePayload handshakePayload) {
         ClientCommonClass.serverConfig = handshakePayload.serverConfigData != null ? handshakePayload.serverConfigData : ClientSideServerConfigObject.serverOwner(); // Use serverOwner if on LAN, serverConfigData will be null if so (Because there is no physical server), so instantiate our own fake config just so shit don't crash.
         @Nullable Double serverVersion =  ClientCommonClass.serverConfig.getServerVersion();
         ClientCommonClass.setServerModStatus(true); // We have JMWS on server side

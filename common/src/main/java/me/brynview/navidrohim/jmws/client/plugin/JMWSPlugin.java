@@ -130,7 +130,6 @@ public class JMWSPlugin implements IClientPlugin {
             }
             case SHARE ->
             {
-
                 ShareScreen.openShare(waypoint);
             }
         }

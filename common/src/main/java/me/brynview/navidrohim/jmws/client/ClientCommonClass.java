@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.client;
 
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
+import me.brynview.navidrohim.jmws.client.syncing.SyncCounter;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;

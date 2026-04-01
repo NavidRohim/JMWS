@@ -1,5 +1,6 @@
-package me.brynview.navidrohim.jmws.client;
+package me.brynview.navidrohim.jmws.client.syncing;
 
+import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.common.CommonClass;

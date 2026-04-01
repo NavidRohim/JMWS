@@ -77,7 +77,7 @@ public class CommonClass {
     {
         if (Side.CLIENT.equals(ctx.side()))
         {
-            ClientPacketHandler.HandshakeHandler(ctx.message());
+            ClientPacketHandler.handleHandshake(ctx.message());
         } else {
             PlayerNetworkingHelper.sendHandshakeAndValidate(ctx.sender());
         }
