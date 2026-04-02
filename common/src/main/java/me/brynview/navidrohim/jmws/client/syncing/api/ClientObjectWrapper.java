@@ -17,4 +17,8 @@ public interface ClientObjectWrapper {
 
     void update();
     String getSerialization();
+
+    boolean isValid();
+    boolean isLegacy();
+    boolean isUsable();
 }

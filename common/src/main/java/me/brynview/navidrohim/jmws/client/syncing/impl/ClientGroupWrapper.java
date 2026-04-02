@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.client.syncing.impl;
 
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.syncing.api.JMObjectWrapper;
 
 public class ClientGroupWrapper extends JMObjectWrapper {
     private final WaypointGroup group;

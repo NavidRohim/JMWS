@@ -1,7 +1,9 @@
 package me.brynview.navidrohim.jmws.client.syncing.objects;
 
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
+import me.brynview.navidrohim.jmws.client.utils.LegacyUtils;
 import me.brynview.navidrohim.jmws.common.api.PossessesIdentifier;
 import me.brynview.navidrohim.jmws.common.api.Synchronizable;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
@@ -96,4 +98,36 @@ public class ClientObject <T extends ClientObjectWrapper> implements Synchroniza
     {
         return objectWrapper;
     }
+
+    public final boolean isValid()
+    {
+        return objectWrapper.isValid();
+    }
+
+    public final boolean isLegacy(boolean transitionIfLegacy)
+    {
+        boolean isLegacy = objectWrapper.isValid();
+        if (isLegacy && transitionIfLegacy) {
+            //LegacyUtils.transitionObject(); // TODO: TRANSITION FOR GENERICS
+        }
+        return isLegacy;
+    }
+
+    public final boolean isUsable(boolean transitionIfLegacy)
+    {
+        boolean isValid = objectWrapper.isValid();
+        boolean isLegacy = objectWrapper.isLegacy();
+        boolean isUsable = isValid && !isLegacy;
+
+        if (isLegacy && transitionIfLegacy) {
+            //LegacyUtils.transitionObject();
+            return false;
+        }
+
+        if (!isUsable) {
+            Constants.getLogger().warn("ClientObject<{}> is not valid. isValid={}, isLegacy={}, transitionIfLegacy={}. This warning is a sign of a bad implementation.", objectWrapper.getClass().getName(), isValid, isLegacy, transitionIfLegacy);
+        }
+        return isUsable;
+    }
+
 }

@@ -2,12 +2,7 @@ package me.brynview.navidrohim.jmws.client.syncing.impl;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
-import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
-import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
-
-import java.util.List;
-import java.util.UUID;
+import me.brynview.navidrohim.jmws.client.syncing.api.JMObjectWrapper;
 
 public class ClientWaypointWrapper extends JMObjectWrapper {
 

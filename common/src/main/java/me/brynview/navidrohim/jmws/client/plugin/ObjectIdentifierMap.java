@@ -3,6 +3,8 @@ package me.brynview.navidrohim.jmws.client.plugin;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
+import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.utils.LegacyUtils;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
@@ -15,7 +17,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import static me.brynview.navidrohim.jmws.common.CommonClass.*;
-import static me.brynview.navidrohim.jmws.common.utils.CommonUtils.isLegacyDataField;
+import static me.brynview.navidrohim.jmws.common.utils.SyncUtils.isLegacySyncField;
 
 /**
  * Note: the term "object" may be used. In this context is a generic term for waypoints or groups.
@@ -100,10 +102,10 @@ public class ObjectIdentifierMap {
      */
     public static boolean addWaypointToMap(Waypoint waypoint)
     {
-        String customDataField = waypoint.getCustomData(Constants.MODID);
-        if (isLegacyDataField(customDataField))
+
+        if (waypoint.getObjectWrapper().isValid())
         {
-            LegacyUtils.transitionObject(waypoint, PlayerUtils.ourUUID(), ObjectType.WAYPOINT);
+            LegacyUtils.transitionObject(waypoint., PlayerUtils.ourUUID(), ObjectType.WAYPOINT);
             return false;
         } else {
             String waypointIdentifier;
@@ -129,7 +131,7 @@ public class ObjectIdentifierMap {
     public static boolean addGroupToMap(WaypointGroup waypointGroup)
     {
         String customDataField = waypointGroup.getCustomData(Constants.MODID);
-        if (isLegacyDataField(customDataField))
+        if (isLegacySyncField(customDataField))
         {
             LegacyUtils.transitionObject(waypointGroup, PlayerUtils.ourUUID(), ObjectType.GROUP);
             return false;

@@ -448,7 +448,7 @@ public class JMWSPlugin implements IClientPlugin {
         {
             return true;
         }
-        return Constants.allowedMods.contains(waypoint.getModId()) && CommonUtils.isValidCustomDataField(waypoint.getCustomData(Constants.MODID)) && !waypoint.isPersistent();
+        return Constants.allowedMods.contains(waypoint.getModId()) && me.brynview.navidrohim.jmws.common.utils.SyncUtils.isValidSyncField(waypoint.getCustomData(Constants.MODID)) && !waypoint.isPersistent();
     }
 
     private static boolean isJmwsGroup(WaypointGroup waypointGroup)
@@ -458,7 +458,7 @@ public class JMWSPlugin implements IClientPlugin {
         {
             return true;
         }
-        return Constants.allowedMods.contains(waypointGroup.getModId()) && CommonUtils.isValidCustomDataField(customData) && !waypointGroup.isPersistent();
+        return Constants.allowedMods.contains(waypointGroup.getModId()) && me.brynview.navidrohim.jmws.common.utils.SyncUtils.isValidSyncField(customData) && !waypointGroup.isPersistent();
     }
 
     private static void portLegacyDataField(@Nullable String objectAsString, ObjectType transitionType)
@@ -471,7 +471,7 @@ public class JMWSPlugin implements IClientPlugin {
             String customDataString = customDataOld.getAsString();
             JsonObject customData = CommonUtils.parseStringToJsonObject(customDataString);
 
-            if (CommonUtils.isValidCustomDataField(customDataString))
+            if (me.brynview.navidrohim.jmws.common.utils.SyncUtils.isValidSyncField(customDataString))
             {
                 String legacyObjectIdentifier = customData.get("objectIdentifier").getAsString();
                 UUID legacyOwnerUUID = UUID.fromString(customData.get("owner").getAsString());

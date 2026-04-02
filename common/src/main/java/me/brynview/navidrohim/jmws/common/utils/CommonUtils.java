@@ -2,7 +2,6 @@ package me.brynview.navidrohim.jmws.common.utils;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
 import java.io.File;
@@ -56,27 +55,8 @@ public class CommonUtils {
         return new File(filePath.toUri()).exists();
     }
 
-    public static boolean isLegacyDataField(@Nullable String field) {
-        if (field != null && field.length() == 64)
-        {
-            for (int i = 0; i < field.length(); i++) {
-                char c = field.charAt(i);
-                if (!Character.isLetterOrDigit(c))
-                    return false;
-            }
-
-            return true;
-        }
-        return false;
-    }
-
     public static JsonObject parseStringToJsonObject(String jsonString) {
         return JsonParser.parseString(jsonString).getAsJsonObject();
     }
 
-    public static boolean isValidCustomDataField(@Nullable String input) {
-
-        if (input == null) { return true; }
-        return Arrays.stream(checkForCustomDataKeys).allMatch(input::contains);
-    }
 }

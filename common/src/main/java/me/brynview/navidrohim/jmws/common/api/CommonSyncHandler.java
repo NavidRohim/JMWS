@@ -1,8 +1,6 @@
 package me.brynview.navidrohim.jmws.common.api;
 
 import com.google.gson.annotations.Expose;
-import me.brynview.navidrohim.jmws.server.objects.ServerObject;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
