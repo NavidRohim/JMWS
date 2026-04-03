@@ -23,5 +23,8 @@ public interface ClientObjectWrapper {
     boolean isValid();
     boolean isLegacy();
     boolean isUsable();
+    boolean isNative();
+    ClientBaseObjectWrapper.WrapperType getType();
+
 
 }

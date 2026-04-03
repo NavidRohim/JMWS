@@ -12,8 +12,8 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
     private final WaypointGroup group;
     protected final ClientObject<ClientGroupWrapper> parent;
 
-    public ClientGroupWrapper(WaypointGroup group, ClientObject<ClientGroupWrapper> parent) {
-        super(group.getCustomData(Constants.MODID), group, parent);
+    public ClientGroupWrapper(WaypointGroup group, ClientObject<ClientGroupWrapper> parent, String plugin) {
+        super(group.getCustomData(Constants.MODID), group, parent, plugin);
         this.group = group;
         this.parent = parent;
     }

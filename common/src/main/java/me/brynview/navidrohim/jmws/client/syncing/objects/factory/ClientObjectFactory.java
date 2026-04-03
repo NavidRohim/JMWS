@@ -19,20 +19,16 @@ public class ClientObjectFactory {
 
         try
         {
-            if (isJmwsWaypoint(waypoint))
-            {
-                waypoint.setPersistent(false);
-                ClientObject<ClientWaypointWrapper> obj = new ClientObject<>(
-                        waypoint.getName(),
-                        waypoint.getCustomData(Constants.MODID),
-                        waypoint.getGuid(),
-                        ObjectType.WAYPOINT
-                );
-                obj.setWrapper(new ClientWaypointWrapper(waypoint, obj));
+            ClientObject<ClientWaypointWrapper> obj = new ClientObject<>(
+                    waypoint.getName(),
+                    waypoint.getCustomData(Constants.MODID),
+                    waypoint.getGuid(),
+                    ObjectType.WAYPOINT
+            );
+            obj.setWrapper(new ClientWaypointWrapper(waypoint, obj, Constants.MODID));
 
-                return obj;
-            }
-            return null;
+            return obj;
+
         } catch (NullPointerException e)
         {
             return null;
@@ -49,8 +45,9 @@ public class ClientObjectFactory {
                     group.getGuid(),
                     ObjectType.GROUP
             );
-            obj.setWrapper(new ClientGroupWrapper(group, obj));
+            obj.setWrapper(new ClientGroupWrapper(group, obj, Constants.MODID));
 
+            return obj;
         } catch (NullPointerException e)
         {
             return null;

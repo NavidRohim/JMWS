@@ -49,7 +49,7 @@ public class ObjectIdentifierMap {
      * @param objectName -- The name of the waypoint or group.
      * @return String -- The universal identifier.
      */
-    private static String makeWaypointHash(UUID playerUUID, String waypointGUID, String objectName)
+    public static String makeWaypointHash(UUID playerUUID, String waypointGUID, String objectName)
     {
         return DigestUtils.sha256Hex(playerUUID.toString() + waypointGUID + objectName);
     }
@@ -111,11 +111,16 @@ public class ObjectIdentifierMap {
         }
     }
 
-    public static boolean addObjectToMap(ClientObject<? extends ClientBaseObjectWrapper<Object>> object)
+    public static boolean addObjectToMap(ClientObject<? extends ClientBaseObjectWrapper<Object>> object, boolean silent)
     {
         if (object.isUsable(false))
         {
+            if (object.getObjectWrapper().getType() == ClientBaseObjectWrapper.WrapperType.NATIVE)
+            {
+                object.setSyncedCustomData();
+            }
             clientObjectMap.put(object.getObjectWrapper().getIdentifier(), object);
+            object.createRemotely(silent);
             return true;
         }
         return false;

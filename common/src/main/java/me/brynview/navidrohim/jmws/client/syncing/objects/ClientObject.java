@@ -2,17 +2,20 @@ package me.brynview.navidrohim.jmws.client.syncing.objects;
 
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
+import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.api.PossessesIdentifier;
 import me.brynview.navidrohim.jmws.common.api.Synchronizable;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class ClientObject <T extends ClientObjectWrapper> implements Synchronizable, PossessesIdentifier {
 
     private final String name;
-    private final String customDataForJMWS;
+    private String customDataForJMWS;
     private final String guid;
     private final ObjectType objectType;
 
@@ -46,6 +49,11 @@ public class ClientObject <T extends ClientObjectWrapper> implements Synchroniza
     @Override
     public String getSyncedCustomData() {
         return customDataForJMWS;
+    }
+
+    public final void setSyncedCustomData()
+    {
+        customDataForJMWS = ObjectIdentifierMap.makeWaypointHash(PlayerUtils.ourUUID(), guid, name);
     }
 
     @Override
@@ -97,8 +105,12 @@ public class ClientObject <T extends ClientObjectWrapper> implements Synchroniza
         return this.objectWrapper.getGlobal();
     }
 
+    @NotNull
     public ClientObjectWrapper getObjectWrapper()
     {
+        if (this.objectWrapper == null) {
+            throw new RuntimeException("objectWrapper is null. Usually means a bat implementation.");
+        }
         return objectWrapper;
     }
 

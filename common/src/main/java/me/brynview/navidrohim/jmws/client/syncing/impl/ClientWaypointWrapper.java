@@ -12,11 +12,16 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     private final Waypoint object;
     protected final ClientObject<ClientWaypointWrapper> parent;
 
-    public ClientWaypointWrapper(Waypoint waypoint, ClientObject<ClientWaypointWrapper> parent) throws NullPointerException
+    public ClientWaypointWrapper(Waypoint waypoint, ClientObject<ClientWaypointWrapper> parent, String plugin) throws NullPointerException
     {
-        super(waypoint.getCustomData(Constants.MODID), waypoint, parent);
+        super(waypoint.getCustomData(Constants.MODID), waypoint, parent, plugin);
         this.object = waypoint;
         this.parent = parent;
+
+        if (this.getType() == WrapperType.SYNCHRONISE || this.getType() == WrapperType.NATIVE)
+        {
+            waypoint.setPersistent(false);
+        }
     }
 
 
@@ -39,6 +44,17 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
 
     @Override
     public void updateRemotely() {
-        ClientNetworkDispatcher.updateWaypoint(this.parent);
+        if (getType() == ClientBaseObjectWrapper.WrapperType.SYNCHRONISE)
+        {
+            ClientNetworkDispatcher.updateWaypoint(this.parent);
+        } else if (getType() == ClientBaseObjectWrapper.WrapperType.NATIVE)
+        {
+            createRemotely(false);
+        }
+    }
+
+    @Override
+    public void deleteRemotely()
+    {
     }
 }

@@ -19,6 +19,7 @@ import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
+import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 import me.brynview.navidrohim.jmws.client.syncing.objects.factory.ClientObjectFactory;
 import me.brynview.navidrohim.jmws.client.screens.ShareScreen;
@@ -185,8 +186,7 @@ public class JMWSPlugin implements IClientPlugin {
 
             if (syncWaypoint != null)
             {
-                ObjectIdentifierMap.addObjectToMap(syncWaypoint);
-                syncWaypoint.createRemotely(silent);
+                ObjectIdentifierMap.addObjectToMap(syncWaypoint, silent);
                 //ObjectIdentifierMap.addWaypointToMap(waypoint);
                 //waypoint.setPersistent(false); // Persistence must be false so it does not stay upon leaving. If it did, there would be duplicate waypoints
             }
@@ -203,16 +203,18 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (ClientCommonClass.serverConfig.waypointsEnabled()) // Check config
         {
-            if (isJmwsWaypoint(waypoint))
+            @Nullable ClientObject<ClientWaypointWrapper> syncableObject = ClientObjectFactory.fromWaypoint(waypoint);
+            if (syncableObject != null)
             {
-                @Nullable ClientObject<ClientWaypointWrapper> syncableObject = ClientObjectFactory.fromWaypoint(waypoint);
-                if (syncableObject != null)
+                if (syncableObject.getObjectWrapper().getType() == ClientBaseObjectWrapper.WrapperType.SYNCHRONISE)
                 {
                     ClientNetworkDispatcher.updateWaypoint(syncableObject);
-                } else {
-                    this.createAction(waypoint, false);
+                } else if (syncableObject.getObjectWrapper().getType() == ClientBaseObjectWrapper.WrapperType.NATIVE)
+                {
+                    this.createAction(waypoint, true);
                 }
             }
+
         } else {
             PlayerUtils.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, MessageType.ONE_TIME_WARNING);
         }
@@ -226,22 +228,19 @@ public class JMWSPlugin implements IClientPlugin {
     private void deleteAction(Waypoint waypoint) {
         // Check if action is allowed by the server.
         if (ClientCommonClass.serverConfig.waypointsEnabled()) {
-            if (isJmwsWaypoint(waypoint))
+            //@Nullable ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
+
+            @Nullable ClientObject<ClientWaypointWrapper> syncWaypoint = ClientObjectFactory.fromWaypoint(waypoint);
+            if (syncWaypoint != null) // Can be null if JMWS has no knowledge of a waypoint
             {
-                //@Nullable ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
-
-                @Nullable ClientObject<ClientWaypointWrapper> syncWaypoint = ClientObjectFactory.fromWaypoint(waypoint);
-                if (syncWaypoint != null) // Can be null if JMWS has no knowledge of a waypoint
-                {
-                    ObjectIdentifierMap.removeWaypointFromMap(waypoint);
-                    ClientNetworkDispatcher.deleteWaypoint(syncWaypoint.getObjectWrapper().getIdentifier(), false, false);
-                    //CommandFactory.deleteWaypoint(serverSyncingHandler.objectIdentifier,false, false);
-                    // removedWaypoint is called here because, yes, we do listen for the deletion with the event (meaning, the waypoint should be already gone by the time the event is called)
-                    // But for some reason it bugs out and the waypoint stays and becomes persistent
-                    //jmAPI.removeWaypoint(waypoint.getModId(), waypoint);
-
-                }
+                ObjectIdentifierMap.removeWaypointFromMap(waypoint);
+                ClientNetworkDispatcher.deleteWaypoint(syncWaypoint.getObjectWrapper().getIdentifier(), false, false);
+                //CommandFactory.deleteWaypoint(serverSyncingHandler.objectIdentifier,false, false);
+                // removedWaypoint is called here because, yes, we do listen for the deletion with the event (meaning, the waypoint should be already gone by the time the event is called)
+                // But for some reason it bugs out and the waypoint stays and becomes persistent
+                //jmAPI.removeWaypoint(waypoint.getModId(), waypoint);
             }
+
         } else {
             PlayerUtils.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, MessageType.ONE_TIME_WARNING);
         }
@@ -290,7 +289,7 @@ public class JMWSPlugin implements IClientPlugin {
             {
                 this.groupDeletionHandler(waypointGroup, true, false);
             }
-            else if (sync!Constants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) { // If group is not in-built and can be deleted
+            else if (!Constants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) { // If group is not in-built and can be deleted
                 if (player == null) {
                     return;
                 }

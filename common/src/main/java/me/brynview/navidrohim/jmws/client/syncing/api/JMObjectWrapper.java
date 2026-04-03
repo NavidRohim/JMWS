@@ -9,8 +9,8 @@ import java.util.UUID;
 
 public abstract class JMObjectWrapper <T> extends ClientBaseObjectWrapper<Object> {
 
-    public JMObjectWrapper(String syncData, T object, ClientObject<? extends ClientBaseObjectWrapper<Object>> parent) {
-        super(syncData, object, parent);
+    public JMObjectWrapper(String syncData, T object, ClientObject<? extends ClientBaseObjectWrapper<Object>> parent, String plugin) {
+        super(syncData, object, parent, plugin);
     }
 
     @Override
