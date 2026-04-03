@@ -4,8 +4,6 @@ import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
-import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
-import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.utils.LegacyUtils;
@@ -39,7 +37,8 @@ public class ObjectIdentifierMap {
     private static final HashMap<String, ClientObject<? extends ClientBaseObjectWrapper<Object>>> clientObjectMap = new HashMap<>();
     private static final HashMap<String, Waypoint> waypointIdentifierMapForContextMenu = new HashMap<>();
 
-    private static String getContextMenuKey(Waypoint waypoint) {
+    private static String getContextMenuKey(Waypoint waypoint)
+    {
         return "%s%s%s".formatted(waypoint.getName(), waypoint.getColor(), waypoint.getX());
     }
 
@@ -55,26 +54,14 @@ public class ObjectIdentifierMap {
         return DigestUtils.sha256Hex(playerUUID.toString() + waypointGUID + objectName);
     }
 
-    /**
-     * Get an old waypoint from a new waypoint (unique identifier)
-     * @param newWaypoint -- The new waypoint being updated.
-     * @return Waypoint -- The old waypoint before update.
-     */
-    public static Waypoint getOldWaypoint(Waypoint newWaypoint) {
-        ServerSyncingHandler persistentWaypointID = SyncUtils.getSyncingInfo(newWaypoint.getCustomData(Constants.MODID));
-        if (persistentWaypointID != null)
-        {
-            return waypointIdentifierMap.get(persistentWaypointID.objectIdentifier);
-        }
-        return null;
-    }
+    // Getters
 
     /**
      * Get an old waypoint from a unique identifier.
      * @param waypointID -- The waypoints unique identifier.
      * @return Waypoint -- The old waypoint before update.
      */
-    public static Waypoint getOldWaypoint(String waypointID)
+    public static Waypoint getWaypoint(String waypointID)
     {
         return waypointIdentifierMap.get(waypointID);
     }
@@ -84,10 +71,17 @@ public class ObjectIdentifierMap {
      * @param groupID -- The groups unique identifier.
      * @return Waypoint -- The old group before update.
      */
-    public static WaypointGroup getOldGroup(String groupID)
+    public static WaypointGroup getGroup(String groupID)
     {
         return groupIdentifierMap.get(groupID);
     }
+
+    public static Waypoint getWaypointFromContextMenu(Waypoint waypoint)
+    {
+        return waypointIdentifierMapForContextMenu.get(getContextMenuKey(waypoint));
+    }
+
+    // Adding
 
     /**
      * Adds a waypoint to the identifier map.
@@ -153,6 +147,8 @@ public class ObjectIdentifierMap {
         }
     }
 
+    // Removing
+
     /**
      * Removes a waypoint from the identifier map.
      * @param waypoint -- The waypoint that will be removed from the map.
@@ -163,9 +159,7 @@ public class ObjectIdentifierMap {
         {
             waypointIdentifierMapForContextMenu.remove(getContextMenuKey(waypoint));
             waypointIdentifierMap.remove(SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID)).objectIdentifier);
-        } catch (NullPointerException noObjIgnore)
-        {
-        }
+        } catch (NullPointerException _) {}
     }
 
     /**
@@ -179,15 +173,7 @@ public class ObjectIdentifierMap {
             @Nullable ServerSyncingHandler groupSyncInfo = SyncUtils.getSyncingInfo(group.getCustomData(Constants.MODID));
             if (groupSyncInfo != null)
                 groupIdentifierMap.remove(groupSyncInfo.objectIdentifier);
-        } catch (NullPointerException noObjIgnore)
-        {
-            return;
-        }
-    }
-
-    public static Waypoint getWaypointFromContextMenu(Waypoint waypoint)
-    {
-        return waypointIdentifierMapForContextMenu.get(getContextMenuKey(waypoint));
+        } catch (NullPointerException _) {}
     }
 
     public static void removeAll(ObjectType objectType)

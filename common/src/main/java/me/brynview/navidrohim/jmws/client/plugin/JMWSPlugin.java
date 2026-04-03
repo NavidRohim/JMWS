@@ -277,18 +277,20 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
     {
-        if (ConfigInterface.getEnabledStatus() && ClientCommonClass.config.groupsEnabled() && ClientCommonClass.serverConfig.groupsEnabled()) // Check that user is in physical server, user config allows event, and server config allows event.
+        WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
+        @Nullable ClientObject<ClientGroupWrapper> syncGroup = ClientObjectFactory.fromGroup(waypointGroup);
+
+        if ( ConfigInterface.getEnabledStatus() && ClientCommonClass.config.groupsEnabled() && ClientCommonClass.serverConfig.groupsEnabled()) // Check that user is in physical server, user config allows event, and server config allows event.
         {
             LocalPlayer player = CommonClass.minecraftClientInstance.player;
-            WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
 
             // Check if group is JourneyMap build-in group. You can delete an in-built group with the JM API but things will crash.
             // Trying to delete an in-built group with JM will delete the waypoints inside the group. The following flow statement checks for that and does it on the server.
-            if (Constants.forbiddenGroups.contains(waypointGroup.getGuid()) && waypointGroupEvent.getContext().equals(WaypointGroupEvent.Context.DELETED))
+            if (Constants.forbiddenGroups.contains(waypointGroup.getGuid()) && waypointGroupEvent.getContext().equals(WaypointGroupEvent.Context.DELETED) && syncGroup == null)
             {
                 this.groupDeletionHandler(waypointGroup, true, false);
             }
-            else if (!Constants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) { // If group is not in-built and can be deleted
+            else if (sync!Constants.forbiddenGroups.contains(waypointGroupEvent.getGroup().getGuid())) { // If group is not in-built and can be deleted
                 if (player == null) {
                     return;
                 }
@@ -412,11 +414,11 @@ public class JMWSPlugin implements IClientPlugin {
         String deletionMessageConfirmationKey = "message.jmws.deletion_all_success";
 
         if (deletionType == ObjectType.WAYPOINT) {
-            Waypoint oldWp = ObjectIdentifierMap.getOldWaypoint(toDelete);
+            Waypoint oldWp = ObjectIdentifierMap.getWaypoint(toDelete);
             jmAPI.removeWaypoint(oldWp.getModId(), oldWp);
         } else {
             deletionMessageConfirmationKey = "message.jmws.deletion_group_all_success";
-            WaypointGroup oldGp = ObjectIdentifierMap.getOldGroup(toDelete);
+            WaypointGroup oldGp = ObjectIdentifierMap.getGroup(toDelete);
             jmAPI.removeWaypointGroup(oldGp, false);
         }
         if (!silent)
@@ -505,9 +507,10 @@ public class JMWSPlugin implements IClientPlugin {
             if (isJmwsGroup(waypointGroup))
             {
                 ObjectIdentifierMap.addGroupToMap(waypointGroup);
-                waypointGroup.setPersistent(false);
+
+                //waypointGroup.setPersistent(false);
                 //String creationData = CommandFactory.makeGroupCreationRequestJson(waypointGroup, silent);
-                ClientNetworkDispatcher.makeGroup(waypointGroup, silent);
+                //ClientNetworkDispatcher.makeGroup(waypointGroup, silent);
                 //ClientNetworkDispatcher.sendString(creationData);
             }
         } else {
@@ -734,16 +737,18 @@ public class JMWSPlugin implements IClientPlugin {
 
     public static void addWaypoint(Waypoint waypoint)
     {
-        if (ObjectIdentifierMap.addWaypointToMap(waypoint))
+        @Nullable ClientObject<ClientWaypointWrapper> wp = ClientObjectFactory.fromWaypoint(waypoint);
+
+        if (wp != null && ObjectIdentifierMap.addObjectToMap(wp))
         {
             getInstance().jmAPI.addWaypoint(waypoint.getModId(), waypoint);
         }
     }
 
-    public static void addGroup(WaypointGroup waypointGroup)
-    {
-        if (ObjectIdentifierMap.addGroupToMap(waypointGroup))
-        {
+    public static void addGroup(WaypointGroup waypointGroup) {
+        @Nullable ClientObject<ClientGroupWrapper> gp = ClientObjectFactory.fromGroup(waypointGroup);
+
+        if (gp != null && ObjectIdentifierMap.addGroupToMap(waypointGroup)) {
             getInstance().jmAPI.addWaypointGroup(waypointGroup);
         }
 
