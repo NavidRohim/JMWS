@@ -3,6 +3,8 @@ package me.brynview.navidrohim.jmws.client.plugin;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
+import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
@@ -31,10 +33,11 @@ public class ObjectIdentifierMap {
     // Waypoint identifier map (key is the universal identifier, value is the waypoint)
     private static final HashMap<String, Waypoint> waypointIdentifierMap = new HashMap<>();
 
-    private static final HashMap<String, Waypoint> waypointIdentifierMapForContextMenu = new HashMap<>();
-
     // Group identifier map
     private static final HashMap<String, WaypointGroup> groupIdentifierMap = new HashMap<>();
+
+    private static final HashMap<String, ClientObject<? extends ClientBaseObjectWrapper<Object>>> clientObjectMap = new HashMap<>();
+    private static final HashMap<String, Waypoint> waypointIdentifierMapForContextMenu = new HashMap<>();
 
     private static String getContextMenuKey(Waypoint waypoint) {
         return "%s%s%s".formatted(waypoint.getName(), waypoint.getColor(), waypoint.getX());
@@ -77,16 +80,6 @@ public class ObjectIdentifierMap {
     }
 
     /**
-     * Get an old group from a new group (unique identifier)
-     * @param newWaypointGroup -- The new group being updated.
-     * @return Waypoint -- The old group before update.
-     */
-    public static WaypointGroup getOldGroup(WaypointGroup newWaypointGroup)
-    {
-        return groupIdentifierMap.get(SyncUtils.getSyncingInfo(newWaypointGroup.getCustomData(Constants.MODID)).objectIdentifier);
-    }
-
-    /**
      * Get an old group from a unique identifier.
      * @param groupID -- The groups unique identifier.
      * @return Waypoint -- The old group before update.
@@ -102,10 +95,10 @@ public class ObjectIdentifierMap {
      */
     public static boolean addWaypointToMap(Waypoint waypoint)
     {
-
-        if (waypoint.getObjectWrapper().isValid())
+        String customDataField = waypoint.getCustomData(Constants.MODID);
+        if (isLegacySyncField(customDataField))
         {
-            LegacyUtils.transitionObject(waypoint., PlayerUtils.ourUUID(), ObjectType.WAYPOINT);
+            LegacyUtils.transitionObject(waypoint, PlayerUtils.ourUUID(), ObjectType.WAYPOINT);
             return false;
         } else {
             String waypointIdentifier;
@@ -124,6 +117,15 @@ public class ObjectIdentifierMap {
         }
     }
 
+    public static boolean addObjectToMap(ClientObject<? extends ClientBaseObjectWrapper<Object>> object)
+    {
+        if (object.isUsable(false))
+        {
+            clientObjectMap.put(object.getObjectWrapper().getIdentifier(), object);
+            return true;
+        }
+        return false;
+    }
     /**
      * Adds a group to the identifier map.
      * @param waypointGroup -- The group that will be added to the map.

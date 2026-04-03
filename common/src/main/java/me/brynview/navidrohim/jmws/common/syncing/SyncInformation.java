@@ -2,7 +2,6 @@ package me.brynview.navidrohim.jmws.common.syncing;
 
 import com.google.gson.JsonSyntaxException;
 import me.brynview.navidrohim.jmws.common.CommonClass;
-import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -15,7 +14,7 @@ public class SyncInformation {
     public boolean global;
 
     @Nullable
-    public static SyncInformation SyncInformationFromString(String info)
+    public static SyncInformation syncInformationFromString(String info)
     {
         try
         {

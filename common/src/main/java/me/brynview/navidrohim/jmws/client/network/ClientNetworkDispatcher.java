@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.client.network;
 import commonnetwork.api.Network;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
@@ -110,5 +111,4 @@ public class ClientNetworkDispatcher {
     {
         sendString(CommandFactory.makeGlobalRequestForServer(PlayerUtils.ourUUID(), globalObject.getObjectWrapper().getIdentifier(), globalObject.getObjectType(), global));
     }
-
 }

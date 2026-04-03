@@ -15,10 +15,13 @@ public interface ClientObjectWrapper {
     void removeSharedTo(String sharedTo);
     void clearSharedTo();
 
+    void createRemotely(boolean silent);
+    void updateRemotely();
     void update();
     String getSerialization();
 
     boolean isValid();
     boolean isLegacy();
     boolean isUsable();
+
 }

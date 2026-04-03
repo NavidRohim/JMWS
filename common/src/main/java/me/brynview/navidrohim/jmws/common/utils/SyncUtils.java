@@ -1,5 +1,8 @@
 package me.brynview.navidrohim.jmws.common.utils;
 
+import journeymap.api.v2.common.waypoint.Waypoint;
+import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -31,5 +34,11 @@ public class SyncUtils {
 
         if (input == null) { return true; }
         return Arrays.stream(syncFieldKeys).allMatch(input::contains);
+    }
+
+    @Nullable
+    public static SyncInformation getIdentifier(Waypoint waypoint)
+    {
+        return SyncInformation.syncInformationFromString(waypoint.getCustomData(Constants.MODID));
     }
 }

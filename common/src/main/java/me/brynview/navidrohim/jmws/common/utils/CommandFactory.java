@@ -164,6 +164,8 @@ public class CommandFactory {
 
         UPDATE,
         TRANSITION,
-        TRANSITION_NEW_DATA
+        TRANSITION_NEW_DATA,
+
+        CREATE,
     }
 }

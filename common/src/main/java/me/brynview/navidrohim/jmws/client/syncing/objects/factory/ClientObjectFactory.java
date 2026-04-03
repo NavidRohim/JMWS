@@ -9,6 +9,8 @@ import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import org.jetbrains.annotations.Nullable;
 
+import static me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin.isJmwsWaypoint;
+
 
 public class ClientObjectFactory {
     @Nullable
@@ -17,13 +19,20 @@ public class ClientObjectFactory {
 
         try
         {
-            return new ClientObject<>(
-                    waypoint.getName(),
-                    waypoint.getCustomData(Constants.MODID),
-                    waypoint.getGuid(),
-                    ObjectType.WAYPOINT,
-                    new ClientWaypointWrapper(waypoint)
-            );
+            if (isJmwsWaypoint(waypoint))
+            {
+                waypoint.setPersistent(false);
+                ClientObject<ClientWaypointWrapper> obj = new ClientObject<>(
+                        waypoint.getName(),
+                        waypoint.getCustomData(Constants.MODID),
+                        waypoint.getGuid(),
+                        ObjectType.WAYPOINT
+                );
+                obj.setWrapper(new ClientWaypointWrapper(waypoint, obj));
+
+                return obj;
+            }
+            return null;
         } catch (NullPointerException e)
         {
             return null;
@@ -34,13 +43,14 @@ public class ClientObjectFactory {
     public static ClientObject<ClientGroupWrapper> fromGroup(WaypointGroup group)
     {
         try {
-            return new ClientObject<>(
+            ClientObject<ClientGroupWrapper> obj = new ClientObject<>(
                     group.getName(),
                     group.getCustomData(Constants.MODID),
                     group.getGuid(),
-                    ObjectType.GROUP,
-                    new ClientGroupWrapper(group)
+                    ObjectType.GROUP
             );
+            obj.setWrapper(new ClientGroupWrapper(group, obj));
+
         } catch (NullPointerException e)
         {
             return null;

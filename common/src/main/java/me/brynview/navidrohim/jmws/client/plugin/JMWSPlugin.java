@@ -180,12 +180,15 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void createAction(Waypoint waypoint, boolean silent) {
         if (ClientCommonClass.serverConfig.waypointsEnabled()) {
-            if (isJmwsWaypoint(waypoint))
-            {
-                ObjectIdentifierMap.addWaypointToMap(waypoint);
-                waypoint.setPersistent(false); // Persistence must be false so it does not stay upon leaving. If it did, there would be duplicate waypoints
 
-                ClientNetworkDispatcher.makeWaypoint(waypoint, silent);
+            @Nullable ClientObject<ClientWaypointWrapper> syncWaypoint = ClientObjectFactory.fromWaypoint(waypoint);
+
+            if (syncWaypoint != null)
+            {
+                ObjectIdentifierMap.addObjectToMap(syncWaypoint);
+                syncWaypoint.createRemotely(silent);
+                //ObjectIdentifierMap.addWaypointToMap(waypoint);
+                //waypoint.setPersistent(false); // Persistence must be false so it does not stay upon leaving. If it did, there would be duplicate waypoints
             }
         } else {
             PlayerUtils.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, MessageType.ONE_TIME_WARNING);
@@ -226,6 +229,7 @@ public class JMWSPlugin implements IClientPlugin {
             if (isJmwsWaypoint(waypoint))
             {
                 //@Nullable ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
+
                 @Nullable ClientObject<ClientWaypointWrapper> syncWaypoint = ClientObjectFactory.fromWaypoint(waypoint);
                 if (syncWaypoint != null) // Can be null if JMWS has no knowledge of a waypoint
                 {
@@ -358,7 +362,7 @@ public class JMWSPlugin implements IClientPlugin {
                 @Nullable ClientObject<ClientGroupWrapper> syncableObject = ClientObjectFactory.fromGroup(waypointGroup);
                 if (syncableObject != null)
                 {
-                    ClientNetworkDispatcher.updateGroup(syncableObject);
+                    syncableObject.getObjectWrapper().updateRemotely();
                     //ClientNetworkDispatcher.sendString(CommandFactory.makeUpdateObjectRequest(serverSyncingHandler.objectIdentifier, serverSyncingHandler.isGlobal(), waypointGroup));
                 } else {
                     this.groupCreationHandler(waypointGroup, false);
@@ -442,7 +446,7 @@ public class JMWSPlugin implements IClientPlugin {
         sync(sendAlert, false);
     }
 
-    private static boolean isJmwsWaypoint(Waypoint waypoint)
+    public static boolean isJmwsWaypoint(Waypoint waypoint)
     {
         if (Constants.allowedMods.contains(waypoint.getModId()) && waypoint.getCustomData(Constants.MODID) == null && waypoint.isPersistent())
         {

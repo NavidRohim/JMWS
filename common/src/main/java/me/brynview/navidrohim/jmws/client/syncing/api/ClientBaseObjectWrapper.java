@@ -1,24 +1,27 @@
 package me.brynview.navidrohim.jmws.client.syncing.api;
 
+import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
-public abstract class ClientBaseObjectWrapper implements ClientObjectWrapper {
+public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper {
 
     private final SyncInformation info;
     private final boolean isValid;
     private final boolean isLegacy;
+    private final T object;
+    protected final ClientObject<? extends ClientBaseObjectWrapper<Object>> parent;
 
-    public ClientBaseObjectWrapper(String syncData)
+    public ClientBaseObjectWrapper(String syncData, T syncedObject, ClientObject<? extends ClientBaseObjectWrapper<Object>> parent)
     {
         this.isValid = SyncUtils.isValidSyncField(syncData);
         this.isLegacy = !this.isValid && SyncUtils.isLegacySyncField(syncData);
+        this.object = syncedObject;
+        this.parent = parent;
 
         if (this.isLegacy) {
-            this.info = SyncInformation.SyncInformationFromString(syncData);
+            this.info = SyncInformation.syncInformationFromString(syncData);
         } else {
             this.info = null;
         }
@@ -51,5 +54,14 @@ public abstract class ClientBaseObjectWrapper implements ClientObjectWrapper {
         } else {
             throw new IllegalStateException("ClientObjectWrapper is not valid.");
         }
+    }
+
+    @NotNull
+    public final T getObjectAsClass(Class<T> clazz)
+    {
+        if (clazz.isAssignableFrom(object.getClass()) && isUsable()) {
+            return object;
+        }
+        throw new IllegalStateException("ClientObjectWrapper is not valid.");
     }
 }

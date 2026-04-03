@@ -3,7 +3,6 @@ package me.brynview.navidrohim.jmws.client.syncing.objects;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
-import me.brynview.navidrohim.jmws.client.utils.LegacyUtils;
 import me.brynview.navidrohim.jmws.common.api.PossessesIdentifier;
 import me.brynview.navidrohim.jmws.common.api.Synchronizable;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
@@ -17,22 +16,26 @@ public class ClientObject <T extends ClientObjectWrapper> implements Synchroniza
     private final String guid;
     private final ObjectType objectType;
 
-    private final T objectWrapper;
+    private T objectWrapper = null;
 
     public ClientObject(
             String name,
             String customDataForJMWS,
             String guid,
-            ObjectType objectType,
-            T ownerObjectWrapper
-    )
-    {
+            ObjectType objectType
+    ) {
         this.name = name;
         this.customDataForJMWS = customDataForJMWS;
         this.guid = guid;
         this.objectType = objectType;
+    }
 
-        this.objectWrapper = ownerObjectWrapper;
+    public final void setWrapper(T wrapper)
+    {
+        if (this.objectWrapper != null) {
+            throw new IllegalStateException("Cannot set object wrapper after object has been set");
+        }
+        this.objectWrapper = wrapper;
     }
 
     @Override
@@ -130,4 +133,8 @@ public class ClientObject <T extends ClientObjectWrapper> implements Synchroniza
         return isUsable;
     }
 
+    public void createRemotely(boolean silent)
+    {
+        this.objectWrapper.createRemotely(silent);
+    }
 }

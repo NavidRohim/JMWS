@@ -1,14 +1,16 @@
 package me.brynview.navidrohim.jmws.client.syncing.api;
 
+import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
-public class JMObjectWrapper extends ClientBaseObjectWrapper {
+public abstract class JMObjectWrapper <T> extends ClientBaseObjectWrapper<Object> {
 
-    public JMObjectWrapper(String syncData) {
-        super(syncData);
+    public JMObjectWrapper(String syncData, T object, ClientObject<? extends ClientBaseObjectWrapper<Object>> parent) {
+        super(syncData, object, parent);
     }
 
     @Override
@@ -70,4 +72,7 @@ public class JMObjectWrapper extends ClientBaseObjectWrapper {
     public String getSerialization() {
         return "{}";
     }
+
+    public abstract void createRemotely(boolean silent);
+    public abstract void updateRemotely();
 }
