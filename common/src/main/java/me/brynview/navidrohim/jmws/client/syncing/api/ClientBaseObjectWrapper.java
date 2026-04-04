@@ -52,7 +52,14 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
             info1 = null;
         }
 
-        this.info = info1;
+        this.setInfo(info1);
+    }
+
+    @Override
+    public void setInfo(SyncInformation info)
+    {
+        this.info = info;
+        this.update();
     }
 
     @Override

@@ -1,5 +1,7 @@
 package me.brynview.navidrohim.jmws.client.syncing.api;
 
+import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +22,9 @@ public interface ClientObjectWrapper {
     void createRemotely(boolean silent);
     void removeRemotely(boolean silent);
     void updateRemotely();
+
+    void setInfo(SyncInformation info);
+    void update();
 
     boolean isValid();
     boolean isLegacy();

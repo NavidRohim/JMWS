@@ -11,8 +11,9 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     private final Waypoint object;
     public ClientWaypointWrapper(Waypoint waypoint, String plugin) throws NullPointerException
     {
-        super(waypoint.getCustomData(Constants.MODID), waypoint, waypoint.getName(), waypoint.getGuid(), plugin);
         this.object = waypoint;
+        super(waypoint.getCustomData(Constants.MODID), waypoint, waypoint.getName(), waypoint.getGuid(), plugin);
+
 
         if (this.getContext() == WrapperContext.SYNCHRONISE || this.getContext() == WrapperContext.NATIVE)
         {

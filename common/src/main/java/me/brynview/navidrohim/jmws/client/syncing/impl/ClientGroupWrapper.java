@@ -10,8 +10,9 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
     private final WaypointGroup group;
 
     public ClientGroupWrapper(WaypointGroup group, String plugin) {
-        super(group.getCustomData(Constants.MODID), group, group.getName(), group.getGuid(), plugin);
         this.group = group;
+
+        super(group.getCustomData(Constants.MODID), group, group.getName(), group.getGuid(), plugin);
 
         if (Constants.forbiddenGroups.contains(group.getGuid())) {
             this.info = null;
