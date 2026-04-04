@@ -10,7 +10,7 @@ import java.util.UUID;
 public class SyncInformation {
     public String objectIdentifier;
     public UUID owner;
-    public List<String> sharedTo;
+    public List<UUID> sharedTo;
     public boolean global;
 
     @Nullable

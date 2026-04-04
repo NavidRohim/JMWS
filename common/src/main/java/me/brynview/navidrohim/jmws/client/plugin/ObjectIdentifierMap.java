@@ -34,7 +34,7 @@ public class ObjectIdentifierMap {
     // Group identifier map
     private static final HashMap<String, WaypointGroup> groupIdentifierMap = new HashMap<>();
 
-    private static final HashMap<String, ClientObject<? extends ClientBaseObjectWrapper<Object>>> clientObjectMap = new HashMap<>();
+    private static final HashMap<String, ClientBaseObjectWrapper<Object>> clientObjectMap = new HashMap<>();
     private static final HashMap<String, Waypoint> waypointIdentifierMapForContextMenu = new HashMap<>();
 
     private static String getContextMenuKey(Waypoint waypoint)
@@ -83,43 +83,15 @@ public class ObjectIdentifierMap {
 
     // Adding
 
-    /**
-     * Adds a waypoint to the identifier map.
-     * @param waypoint -- The waypoint that will be added to the map.
-     */
-    public static boolean addWaypointToMap(Waypoint waypoint)
+    public static boolean addObjectToMap(ClientBaseObjectWrapper<Object> object, boolean silent)
     {
-        String customDataField = waypoint.getCustomData(Constants.MODID);
-        if (isLegacySyncField(customDataField))
+        if (object.isUsable())
         {
-            LegacyUtils.transitionObject(waypoint, PlayerUtils.ourUUID(), ObjectType.WAYPOINT);
-            return false;
-        } else {
-            String waypointIdentifier;
-            @Nullable ServerSyncingHandler waypointSyncInfo = SyncUtils.getSyncingInfo(customDataField, true);
-            if (waypointSyncInfo != null)
-            {
-                waypointIdentifier = waypointSyncInfo.objectIdentifier;
-            } else {
-                waypointIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypoint.getGuid(), waypoint.getName());
-                waypoint.setCustomData(Constants.MODID, SyncUtils.getEmptySyncingInfoString(waypointIdentifier, minecraftClientInstance.player.getUUID(), false));
-            }
-
-            waypointIdentifierMap.put(waypointIdentifier, waypoint);
-            waypointIdentifierMapForContextMenu.put(getContextMenuKey(waypoint), waypoint);
-            return true;
-        }
-    }
-
-    public static boolean addObjectToMap(ClientObject<? extends ClientBaseObjectWrapper<Object>> object, boolean silent)
-    {
-        if (object.isUsable(false))
-        {
-            if (object.getObjectWrapper().getType() == ClientBaseObjectWrapper.WrapperType.NATIVE)
+            if (object.getType() == ClientBaseObjectWrapper.WrapperType.NATIVE)
             {
                 object.setSyncedCustomData();
             }
-            clientObjectMap.put(object.getObjectWrapper().getIdentifier(), object);
+            clientObjectMap.put(object.getIdentifier(), object);
             object.createRemotely(silent);
             return true;
         }

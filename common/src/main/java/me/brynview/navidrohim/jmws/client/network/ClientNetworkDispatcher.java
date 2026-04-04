@@ -72,12 +72,12 @@ public class ClientNetworkDispatcher {
         sendString(CommandFactory.makeObjectShareRequestAccept(shareRequest));
     }
 
-    public static void updateWaypoint(ClientObject<ClientWaypointWrapper> waypoint)
+    public static void updateWaypoint(ClientWaypointWrapper waypoint)
     {
         sendString(CommandFactory.makeUpdateWaypointRequest(waypoint));
     }
 
-    public static void updateGroup(ClientObject<ClientGroupWrapper> group)
+    public static void updateGroup(ClientGroupWrapper group)
     {
         sendString(CommandFactory.makeUpdateGroupRequest(group));
     }
@@ -92,23 +92,23 @@ public class ClientNetworkDispatcher {
         sendString(CommandFactory.makeTransitionObjectRequest(filename, objectIdentifier, transitionType));
     }
 
-    public static void shareWith(UUID to, ClientObject<? extends ClientObjectWrapper> obj)
+    public static void shareWith(UUID to, ClientBaseObjectWrapper<Object> obj)
     {
-        sendString(CommandFactory.makeShareRequestForServer(PlayerUtils.ourUUID(), to, obj.getObjectWrapper().getIdentifier(), obj.getObjectType()));
+        sendString(CommandFactory.makeShareRequestForServer(PlayerUtils.ourUUID(), to, obj.getIdentifier(), ObjectType.GENERIC)); // PLACEHOLDER
     }
 
-    public static void removeShareWith(UUID subject, ClientObject<? extends ClientObjectWrapper> waypoint)
+    public static void removeShareWith(UUID subject, ClientObjectWrapper waypoint)
     {
-        sendString(CommandFactory.makeUnshareRequestForUserOnServer(PlayerUtils.ourUUID(), subject, waypoint.getObjectWrapper().getIdentifier(), waypoint.getObjectType()));
+        sendString(CommandFactory.makeUnshareRequestForUserOnServer(PlayerUtils.ourUUID(), subject, waypoint.getIdentifier(), ObjectType.GENERIC)); // TODO
     }
 
-    public static void removeShareFromAll(ClientObject<? extends ClientObjectWrapper> shareableObject)
+    public static void removeShareFromAll(ClientBaseObjectWrapper<Object> shareableObject)
     {
-        sendString(CommandFactory.makeUnshareRequestForAllOnServer(PlayerUtils.ourUUID(), shareableObject.getObjectWrapper().getIdentifier(), shareableObject.getObjectType()));
+        sendString(CommandFactory.makeUnshareRequestForAllOnServer(PlayerUtils.ourUUID(), shareableObject.getIdentifier(), ObjectType.GENERIC)); // TODO
     }
 
-    public static void makeGlobal(ClientObject<? extends ClientObjectWrapper> globalObject, boolean global)
+    public static void makeGlobal(ClientBaseObjectWrapper<Object> globalObject, boolean global)
     {
-        sendString(CommandFactory.makeGlobalRequestForServer(PlayerUtils.ourUUID(), globalObject.getObjectWrapper().getIdentifier(), globalObject.getObjectType(), global));
+        sendString(CommandFactory.makeGlobalRequestForServer(PlayerUtils.ourUUID(), globalObject.getIdentifier(), ObjectType.GENERIC, global)); // TODO
     }
 }

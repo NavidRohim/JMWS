@@ -10,12 +10,11 @@ import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
 
     private final WaypointGroup group;
-    protected final ClientObject<ClientGroupWrapper> parent;
 
-    public ClientGroupWrapper(WaypointGroup group, ClientObject<ClientGroupWrapper> parent, String plugin) {
-        super(group.getCustomData(Constants.MODID), group, parent, plugin);
+    public ClientGroupWrapper(WaypointGroup group, String plugin) {
+        super(group.getCustomData(Constants.MODID), group, plugin);
         this.group = group;
-        this.parent = parent;
+
     }
 
     @Override
@@ -30,6 +29,12 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
     }
 
     @Override
+    public String getGuid()
+    {
+        return group.getGuid();
+    }
+
+    @Override
     public void createRemotely(boolean silent) {
         ClientNetworkDispatcher.makeGroup(group, silent);
     }
@@ -37,6 +42,6 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
     @Override
     public void updateRemotely()
     {
-        ClientNetworkDispatcher.updateGroup(this.parent);
+        ClientNetworkDispatcher.updateGroup(this);
     }
 }

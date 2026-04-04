@@ -86,14 +86,14 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.AFFIRM_SHARE, shareRequest.originalSender, shareRequest.requestIdentifier, shareRequest.sharedObjectType, shareRequest.meantFor);
     }
 
-    public static String makeUpdateWaypointRequest(ClientObject<ClientWaypointWrapper> waypoint)
+    public static String makeUpdateWaypointRequest(ClientWaypointWrapper waypoint)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, waypoint.getObjectWrapper().getIdentifier(), ObjectType.WAYPOINT, waypoint.isGlobal(), waypoint.getObjectWrapper().getSerialization());
+        return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, waypoint.getIdentifier(), ObjectType.WAYPOINT, waypoint.getGlobal(), waypoint.getSerialization());
     }
 
-    public static String makeUpdateGroupRequest(ClientObject<ClientGroupWrapper> group)
+    public static String makeUpdateGroupRequest(ClientGroupWrapper group)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, group.getObjectWrapper().getIdentifier(), ObjectType.GROUP, group.isGlobal(), group.getObjectWrapper().getSerialization());
+        return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, group.getIdentifier(), ObjectType.GROUP, group.getGlobal(), group.getSerialization());
     }
 
     public static String makeTransitionObjectRequest(String objectIdentifier, String filename, ObjectType transitionType)

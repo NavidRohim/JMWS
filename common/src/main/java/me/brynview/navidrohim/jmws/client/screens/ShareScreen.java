@@ -17,14 +17,14 @@ public class ShareScreen extends Screen {
 
     private final Screen parent;
     private final ServerStatus.Players players;
-    private final ClientObject<ClientWaypointWrapper> waypoint;
+    private final ClientWaypointWrapper waypoint;
 
     private final static int BUTTON_WIDTH = 100;
     private final static int BUTTON_HEIGHT = 20;
 
     private final int BUTTON_CLOSE_X;
 
-    public ShareScreen(Screen parent, ServerStatus.Players players, ClientObject<ClientWaypointWrapper> waypoint, Component title) {
+    public ShareScreen(Screen parent, ServerStatus.Players players, ClientWaypointWrapper waypoint, Component title) {
         super(title);
         this.parent = parent;
         this.players = players;
@@ -45,13 +45,12 @@ public class ShareScreen extends Screen {
 
     private void addOnlinePlayers()
     {
-        Layout
         AtomicInteger iter = new AtomicInteger();
         Constants.getLogger().info("Adding online player list " + this.players.sample());
         this.players.sample().forEach(player -> {
             Constants.getLogger().info("PTEST"+player.name());
             iter.addAndGet(1);
-            this.addRenderableWidget(Button.builder(Component.literal(player.name()), (bnt) -> this.waypoint.shareWith(player.id())).bounds(20, BUTTON_CLOSE_X + 5 + BUTTON_HEIGHT * iter.get(), this.width - 40, BUTTON_HEIGHT).build());
+            this.addRenderableWidget(Button.builder(Component.literal(player.name()), (bnt) -> this.waypoint.addSharedTo(player.id())).bounds(20, BUTTON_CLOSE_X + 5 + BUTTON_HEIGHT * iter.get(), this.width - 40, BUTTON_HEIGHT).build());
         });
     }
 
@@ -61,7 +60,7 @@ public class ShareScreen extends Screen {
         return true;
     }
 
-    public static void openShare(ClientObject<ClientWaypointWrapper> waypoint)
+    public static void openShare(ClientWaypointWrapper waypoint)
     {
         minecraftClientInstance.setScreen(new ShareScreen(minecraftClientInstance.screen, minecraftClientInstance.getCurrentServer().players, waypoint, Component.empty()));
     }

@@ -10,13 +10,12 @@ import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
 
     private final Waypoint object;
-    protected final ClientObject<ClientWaypointWrapper> parent;
 
-    public ClientWaypointWrapper(Waypoint waypoint, ClientObject<ClientWaypointWrapper> parent, String plugin) throws NullPointerException
+
+    public ClientWaypointWrapper(Waypoint waypoint, String plugin) throws NullPointerException
     {
-        super(waypoint.getCustomData(Constants.MODID), waypoint, parent, plugin);
+        super(waypoint.getCustomData(Constants.MODID), waypoint, plugin);
         this.object = waypoint;
-        this.parent = parent;
 
         if (this.getType() == WrapperType.SYNCHRONISE || this.getType() == WrapperType.NATIVE)
         {
@@ -29,6 +28,12 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     public void update()
     {
         this.object.setCustomData(Constants.MODID, this.getInfo().getSyncInformationAsString());
+    }
+
+    @Override
+    public String getGuid()
+    {
+        return object.getGuid();
     }
 
     @Override
@@ -46,15 +51,11 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     public void updateRemotely() {
         if (getType() == ClientBaseObjectWrapper.WrapperType.SYNCHRONISE)
         {
-            ClientNetworkDispatcher.updateWaypoint(this.parent);
+            ClientNetworkDispatcher.updateWaypoint(this);
         } else if (getType() == ClientBaseObjectWrapper.WrapperType.NATIVE)
         {
             createRemotely(false);
         }
     }
 
-    @Override
-    public void deleteRemotely()
-    {
-    }
 }

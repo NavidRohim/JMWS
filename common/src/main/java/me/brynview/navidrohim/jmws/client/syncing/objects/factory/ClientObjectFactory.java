@@ -14,21 +14,12 @@ import static me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin.isJmwsWaypoin
 
 public class ClientObjectFactory {
     @Nullable
-    public static ClientObject<ClientWaypointWrapper> fromWaypoint(Waypoint waypoint)
+    public static ClientWaypointWrapper fromWaypoint(Waypoint waypoint)
     {
 
         try
         {
-            ClientObject<ClientWaypointWrapper> obj = new ClientObject<>(
-                    waypoint.getName(),
-                    waypoint.getCustomData(Constants.MODID),
-                    waypoint.getGuid(),
-                    ObjectType.WAYPOINT
-            );
-            obj.setWrapper(new ClientWaypointWrapper(waypoint, obj, Constants.MODID));
-
-            return obj;
-
+            return new ClientWaypointWrapper(waypoint, waypoint.getModId());
         } catch (NullPointerException e)
         {
             return null;
@@ -36,18 +27,11 @@ public class ClientObjectFactory {
     }
 
     @Nullable
-    public static ClientObject<ClientGroupWrapper> fromGroup(WaypointGroup group)
+    public static ClientGroupWrapper fromGroup(WaypointGroup group)
     {
         try {
-            ClientObject<ClientGroupWrapper> obj = new ClientObject<>(
-                    group.getName(),
-                    group.getCustomData(Constants.MODID),
-                    group.getGuid(),
-                    ObjectType.GROUP
-            );
-            obj.setWrapper(new ClientGroupWrapper(group, obj, Constants.MODID));
 
-            return obj;
+            return new ClientGroupWrapper(group, group.getModId());
         } catch (NullPointerException e)
         {
             return null;

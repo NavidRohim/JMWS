@@ -130,16 +130,16 @@ public class ClientPacketHandler {
                         if (sharedObjectType == ObjectType.WAYPOINT)
                         {
                             Waypoint objectWp = WaypointFactory.fromWaypointJsonString(objectString);
-                            ClientObject<ClientWaypointWrapper> JMWSWaypoint = ClientObjectFactory.fromWaypoint(objectWp);
+                            ClientWaypointWrapper JMWSWaypoint = ClientObjectFactory.fromWaypoint(objectWp);
 
-                            objectIdentifier = JMWSWaypoint.getObjectWrapper().getIdentifier();
+                            objectIdentifier = JMWSWaypoint.getIdentifier();
                             object = objectWp;
                             objName = objectWp.getName();
                         } else {
                             WaypointGroup objectGp = WaypointFactory.fromGroupJsonString(objectString);
-                            ClientObject<ClientGroupWrapper> JMWSGroup = ClientObjectFactory.fromGroup(objectGp);
+                            ClientGroupWrapper JMWSGroup = ClientObjectFactory.fromGroup(objectGp);
 
-                            objectIdentifier = JMWSGroup.getObjectWrapper().getIdentifier();
+                            objectIdentifier = JMWSGroup.getIdentifier();
                             object = objectGp;
                             objName = objectGp.getName();
                         }

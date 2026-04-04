@@ -1,10 +1,15 @@
 package me.brynview.navidrohim.jmws.client.syncing.api;
 
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
 import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+import java.util.UUID;
 
 public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper {
 
@@ -22,21 +27,27 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     private final T object;
 
     public final String pluginId;
-    protected final ClientObject<? extends ClientBaseObjectWrapper<Object>> parent;
 
-    public ClientBaseObjectWrapper(String syncData, T syncedObject, ClientObject<? extends ClientBaseObjectWrapper<Object>> parent, String plugin)
+    public ClientBaseObjectWrapper(String syncData, T syncedObject, String plugin)
     {
+        SyncInformation info1;
         this.isValid = SyncUtils.isValidSyncField(syncData);
         this.isLegacy = !this.isValid && SyncUtils.isLegacySyncField(syncData);
         this.object = syncedObject;
-        this.parent = parent;
         this.pluginId = plugin;
 
         if (this.isLegacy) {
-            this.info = SyncInformation.syncInformationFromString(syncData);
+            info1 = SyncInformation.syncInformationFromString(syncData);
         } else {
-            this.info = null;
+            info1 = null;
         }
+
+        if (getType() == WrapperType.NATIVE)
+        {
+            info1 = SyncInformation.syncInformationFromString(me.brynview.navidrohim.jmws.common.syncing.SyncUtils.getEmptySyncingInfoString(ObjectIdentifierMap.makeWaypointHash(PlayerUtils.ourUUID(), "g", "name"), UUID.fromString("me"), false));
+        }
+
+        this.info = info1;
     }
 
     @Override
@@ -75,6 +86,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
             return WrapperType.FOREIGN;
         }
     }
+
     @NotNull
     public final SyncInformation getInfo()
     {
@@ -93,5 +105,56 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
             return object;
         }
         throw new IllegalStateException("ClientObjectWrapper is not valid.");
+    }
+
+    @Override
+    public void setGlobal(boolean global)
+    {
+        this.getInfo().global = global;
+    }
+
+    @Override
+    public void addSharedTo(UUID sharedTo)
+    {
+        this.getInfo().sharedTo.add(sharedTo);
+    }
+
+    @Override
+    public void removeSharedTo(UUID sharedTo)
+    {
+        this.getInfo().sharedTo.remove(sharedTo);
+    }
+
+    @Override
+    public void clearSharedTo()
+    {
+        this.getInfo().sharedTo.clear();
+    }
+
+    @Override
+    public String getIdentifier() {
+        return this.getInfo().objectIdentifier;
+    }
+
+    @Override
+    public List<UUID> getSharedTo() {
+        return this.getInfo().sharedTo;
+    }
+
+    @Override
+    public UUID getOwner()
+    {
+        return this.getInfo().owner;
+    }
+
+    @Override
+    public boolean getGlobal()
+    {
+        return this.getInfo().global;
+    }
+
+    @Override
+    public String getSerialization() {
+        return object.toString();
     }
 }
