@@ -180,6 +180,7 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void createAction(ClientWaypointWrapper waypoint, boolean silent) {
         if (ClientCommonClass.serverConfig.waypointsEnabled()) {
+            Constants.getLogger().info(String.valueOf(waypoint.getContext()));
             if (waypoint.getContext() == ClientBaseObjectWrapper.WrapperContext.NATIVE)
             {
                 ObjectIdentifierMap.addObjectToMap(waypoint, silent);
@@ -242,11 +243,17 @@ public class JMWSPlugin implements IClientPlugin {
      * @param waypointEvent The event.
      */
     void waypointEventHandler(WaypointEvent waypointEvent) {
+
+        if (Constants.DEBUG) {
+            Constants.getLogger().info(String.valueOf((!ClientCommonClass.isBusy && ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled())));
+            Constants.getLogger().info(String.valueOf(ClientCommonClass.serverConfig.waypointsEnabled()));
+        }
         if (!ClientCommonClass.isBusy && ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled()) { // Check that user is in physical server, user config allows event, and server config allows event.
             // Get old waypoint if context is UPDATE (needed because server needs reference to waypoint before it was updated so it can be deleted on the server)
             ClientCommonClass.isBusy = true;
             ClientWaypointWrapper waypoint = ClientObjectFactory.fromWaypoint(waypointEvent.waypoint);
 
+            Constants.getLogger().info(waypoint.toString());
             switch (waypointEvent.getContext()) {
                 case CREATE ->
                     // Sends "create" packet | new = "SERVER_CREATE"
@@ -592,60 +599,68 @@ public class JMWSPlugin implements IClientPlugin {
      * @throws JsonSyntaxException -- If there is a syntax error with the JSON, usually from a corrupted waypoint.
      */
     private boolean handleUploadWaypoints(JsonObject jsonWaypoints, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException {
-        boolean hasLocalWaypoint = false;
+        try
+        {
+            boolean hasLocalWaypoint = false;
 
-        // Get existing waypoints (local) and get waypoint objects saved on server
-        List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
-        Set<Waypoint> savedWaypoints = JMWSPlugin.getSavedWaypoints(jsonWaypoints.deepCopy(), CommonClass.minecraftClientInstance.player.getUUID());
+            // Get existing waypoints (local) and get waypoint objects saved on server
+            List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
+            Set<Waypoint> savedWaypoints = JMWSPlugin.getSavedWaypoints(jsonWaypoints.deepCopy(), CommonClass.minecraftClientInstance.player.getUUID());
 
-        // Get an identifier of every waypoint (BlockPos, location), used to detect if the waypoint already exists
-        Set<BlockPos> remoteWaypointPositions = savedWaypoints.stream()
-                .map(Waypoint::getBlockPos)
-                .collect(Collectors.toSet());
+            // Get an identifier of every waypoint (BlockPos, location), used to detect if the waypoint already exists
+            Set<BlockPos> remoteWaypointPositions = savedWaypoints.stream()
+                    .map(Waypoint::getBlockPos)
+                    .collect(Collectors.toSet());
 
-        getInstance().jmAPI.removeAllWaypoints(Constants.MODID); // Delete all waypoints belonging to JMWS
-        getInstance().jmAPI.removeAllWaypoints("journeymap");
-        ObjectIdentifierMap.removeAll(ObjectType.WAYPOINT);
+            getInstance().jmAPI.removeAllWaypoints(Constants.MODID); // Delete all waypoints belonging to JMWS
+            getInstance().jmAPI.removeAllWaypoints("journeymap");
+            ObjectIdentifierMap.removeAll(ObjectType.WAYPOINT);
 
-        // Test if any existing waypoints (persistent, usually death waypoints or 3rd party waypoints from another add-on) have already been added to the server, if not, add them
-        for (Waypoint existing : existingWaypoints) {
-            @Nullable ClientWaypointWrapper existingWaypoint = ObjectIdentifierMap.getObjectFromMap(SyncUtils.getIdentifier(existing).objectIdentifier, ClientWaypointWrapper.class);
+            // Test if any existing waypoints (persistent, usually death waypoints or 3rd party waypoints from another add-on) have already been added to the server, if not, add them
+            for (Waypoint existing : existingWaypoints) {
+                @Nullable ClientWaypointWrapper existingWaypoint = ObjectIdentifierMap.getObjectFromMap(SyncUtils.getIdentifier(existing).objectIdentifier, ClientWaypointWrapper.class);
 
-            if (!remoteWaypointPositions.contains(existing.getBlockPos()) && (existingWaypoint == null || existingWaypoint.getContext() == ClientBaseObjectWrapper.WrapperContext.NATIVE)) {
-                if (existingWaypoint == null) {
-                    existingWaypoint = ClientObjectFactory.fromWaypoint(existing);
+                if (!remoteWaypointPositions.contains(existing.getBlockPos()) && (existingWaypoint == null || existingWaypoint.getContext() == ClientBaseObjectWrapper.WrapperContext.NATIVE)) {
+                    if (existingWaypoint == null) {
+                        existingWaypoint = ClientObjectFactory.fromWaypoint(existing);
+                    }
+                    getInstance().createAction(existingWaypoint, true);
+                    hasLocalWaypoint = true;
                 }
-                getInstance().createAction(existingWaypoint, true);
-                hasLocalWaypoint = true;
-            }
-        }
-
-        // Add server waypoints to the client
-        for (Waypoint savedWaypoint : savedWaypoints) {
-            ServerSyncingHandler wpSync = SyncUtils.getSyncingInfo(savedWaypoint.getCustomData(Constants.MODID));
-            if (wpSync == null) {
-                portLegacyDataField(savedWaypoint.toString(), ObjectType.WAYPOINT);
-                continue;
             }
 
-            if (!wpSync.isOwner(PlayerUtils.ourUUID()))
-            {
-                if (wpSync.isGlobal() && showGlobalLabels) // Global
-                {
-                    savedWaypoint.setIconResourceLoctaion(JMWSTextures.globalObjectAsset);
-                    savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(CommonUtils.globalStringTag));
-                } else if (showSharingLabels) // Shared
-                {
-                    String ownerUser = PlayerUtils.getUsernameFromUUID(wpSync.getOwner(), true);
-                    savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(ownerUser));
-                    savedWaypoint.setIconResourceLoctaion(JMWSTextures.sharedObjectAsset);
+            // Add server waypoints to the client
+            for (Waypoint savedWaypoint : savedWaypoints) {
+                ServerSyncingHandler wpSync = SyncUtils.getSyncingInfo(savedWaypoint.getCustomData(Constants.MODID));
+                if (wpSync == null) {
+                    portLegacyDataField(savedWaypoint.toString(), ObjectType.WAYPOINT);
+                    continue;
                 }
 
-            }
-            addWaypoint(savedWaypoint);
-        }
+                if (!wpSync.isOwner(PlayerUtils.ourUUID()))
+                {
+                    if (wpSync.isGlobal() && showGlobalLabels) // Global
+                    {
+                        savedWaypoint.setIconResourceLoctaion(JMWSTextures.globalObjectAsset);
+                        savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(CommonUtils.globalStringTag));
+                    } else if (showSharingLabels) // Shared
+                    {
+                        String ownerUser = PlayerUtils.getUsernameFromUUID(wpSync.getOwner(), true);
+                        savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(ownerUser));
+                        savedWaypoint.setIconResourceLoctaion(JMWSTextures.sharedObjectAsset);
+                    }
 
-        return hasLocalWaypoint;
+                }
+                addWaypoint(savedWaypoint);
+            }
+
+            return hasLocalWaypoint;
+        } catch (Exception e) {
+            ClientCommonClass.isBusy = false;
+            Constants.getLogger().error("Failed to sync. Exception thrown: ", e);
+
+            throw e;
+        }
     }
 
     /**

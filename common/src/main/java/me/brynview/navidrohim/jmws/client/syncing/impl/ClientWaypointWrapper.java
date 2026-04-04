@@ -9,8 +9,6 @@ import me.brynview.navidrohim.jmws.client.syncing.api.JMObjectWrapper;
 public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
 
     private final Waypoint object;
-
-
     public ClientWaypointWrapper(Waypoint waypoint, String plugin) throws NullPointerException
     {
         super(waypoint.getCustomData(Constants.MODID), waypoint, waypoint.getName(), waypoint.getGuid(), plugin);

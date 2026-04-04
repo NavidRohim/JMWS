@@ -16,9 +16,9 @@ public class Constants {
     }
 
     public static final String MODID = "jmws";
-    public static final String VERSION = "2.0-26.1"; // This is purely for display and is not needed
+    public static final String VERSION = "2.0-26.1-alpha.1"; // This is purely for display and is not needed
     public static final double SERVER_VERSION = 2.0;
-    public static final boolean DEBUG = VERSION.contains("-beta.");
+    public static final boolean DEBUG = VERSION.contains("-beta.") || VERSION.contains("-alpha.");
 
     public static final List<String> allowedMods = List.of(MODID, "journeymap"); // DO NOT CHANGE!
     public static final List<String> forgeModLoaders = List.of("Forge", "NeoForge"); // Do not edit unless there is another fork of Forge (would not be surprised)

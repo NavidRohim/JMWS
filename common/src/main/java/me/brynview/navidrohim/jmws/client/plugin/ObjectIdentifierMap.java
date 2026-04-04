@@ -82,7 +82,7 @@ public class ObjectIdentifierMap {
 
     public static boolean addObjectToMap(ClientBaseObjectWrapper<Object> object, boolean silent)
     {
-        if (object.isUsable())
+        if (object.isUsable() || object.isNative())
         {
             clientObjectMap.put(object.getIdentifier(), object);
             object.createRemotely(silent);

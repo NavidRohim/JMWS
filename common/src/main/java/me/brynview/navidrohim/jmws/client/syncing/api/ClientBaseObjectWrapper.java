@@ -34,20 +34,22 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     {
         SyncInformation info1;
 
-        this.isValid = SyncUtils.isValidSyncField(syncData);
+        this.isValid = syncData != null && SyncUtils.isValidSyncField(syncData);
         this.isLegacy = !this.isValid && SyncUtils.isLegacySyncField(syncData);
+
+        Constants.getLogger().info("valid: " + this.isValid);
+        Constants.getLogger().info("legacy: " + this.isLegacy);
+        Constants.getLogger().info("sync data" + syncData);
+
         this.object = syncedObject;
         this.pluginId = plugin;
 
-        if (this.isLegacy) {
+        if (this.getContext() == WrapperContext.SYNCHRONISE) {
             info1 = SyncInformation.syncInformationFromString(syncData);
+        } else if (getContext() == WrapperContext.NATIVE) {
+            info1 = SyncInformation.syncInformationFromString(SyncUtils.getEmptySyncingInfoString(ObjectIdentifierMap.makeWaypointHash(objectGuid, objectName), PlayerUtils.ourUUID(), false));
         } else {
             info1 = null;
-        }
-
-        if (getContext() == WrapperContext.NATIVE)
-        {
-            info1 = SyncInformation.syncInformationFromString(SyncUtils.getEmptySyncingInfoString(ObjectIdentifierMap.makeWaypointHash(objectGuid, objectName), PlayerUtils.ourUUID(), false));
         }
 
         this.info = info1;
