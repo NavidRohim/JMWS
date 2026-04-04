@@ -3,9 +3,8 @@ package me.brynview.navidrohim.jmws.client.syncing.impl;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
-import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
+import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
 import me.brynview.navidrohim.jmws.client.syncing.api.JMObjectWrapper;
-import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 
 public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
 
@@ -14,10 +13,10 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
 
     public ClientWaypointWrapper(Waypoint waypoint, String plugin) throws NullPointerException
     {
-        super(waypoint.getCustomData(Constants.MODID), waypoint, plugin);
+        super(waypoint.getCustomData(Constants.MODID), waypoint, waypoint.getName(), waypoint.getGuid(), plugin);
         this.object = waypoint;
 
-        if (this.getType() == WrapperType.SYNCHRONISE || this.getType() == WrapperType.NATIVE)
+        if (this.getContext() == WrapperContext.SYNCHRONISE || this.getContext() == WrapperContext.NATIVE)
         {
             waypoint.setPersistent(false);
         }
@@ -48,11 +47,17 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     }
 
     @Override
+    public void removeRemotely(boolean silent)
+    {
+        ObjectIdentifierMap.removeObjectFromMap(this, silent, true);
+    }
+
+    @Override
     public void updateRemotely() {
-        if (getType() == ClientBaseObjectWrapper.WrapperType.SYNCHRONISE)
+        if (getContext() == WrapperContext.SYNCHRONISE)
         {
             ClientNetworkDispatcher.updateWaypoint(this);
-        } else if (getType() == ClientBaseObjectWrapper.WrapperType.NATIVE)
+        } else if (getContext() == WrapperContext.NATIVE)
         {
             createRemotely(false);
         }

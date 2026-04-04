@@ -7,6 +7,7 @@ import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin.isJmwsWaypoint;
@@ -26,16 +27,10 @@ public class ClientObjectFactory {
         }
     }
 
-    @Nullable
-    public static ClientGroupWrapper fromGroup(WaypointGroup group)
+    @NotNull
+    public static ClientGroupWrapper fromGroup(@NotNull WaypointGroup group)
     {
-        try {
-
-            return new ClientGroupWrapper(group, group.getModId());
-        } catch (NullPointerException e)
-        {
-            return null;
-        }
+        return new ClientGroupWrapper(group, group.getModId());
     }
 
 }

@@ -6,8 +6,8 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 
-import me.brynview.navidrohim.jmws.common.syncing.SyncUtils;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
+import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 
 import java.lang.reflect.Constructor;

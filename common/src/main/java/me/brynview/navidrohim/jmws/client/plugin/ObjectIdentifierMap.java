@@ -4,17 +4,15 @@ import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
-import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.utils.LegacyUtils;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.syncing.SyncUtils;
+import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
 import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.UUID;
 
 import static me.brynview.navidrohim.jmws.common.CommonClass.*;
 import static me.brynview.navidrohim.jmws.common.utils.SyncUtils.isLegacySyncField;
@@ -44,14 +42,13 @@ public class ObjectIdentifierMap {
 
     /**
      * Creates a universal identifier from the players UUID, the waypoints GUID and name of the object.
-     * @param playerUUID -- UUID of the player who is creating a waypoint.
      * @param waypointGUID -- GUID of the object being created.
      * @param objectName -- The name of the waypoint or group.
      * @return String -- The universal identifier.
      */
-    public static String makeWaypointHash(UUID playerUUID, String waypointGUID, String objectName)
+    public static String makeWaypointHash(String waypointGUID, String objectName)
     {
-        return DigestUtils.sha256Hex(playerUUID.toString() + waypointGUID + objectName);
+        return DigestUtils.sha256Hex(PlayerUtils.ourUUID() + waypointGUID + objectName);
     }
 
     // Getters
@@ -87,12 +84,37 @@ public class ObjectIdentifierMap {
     {
         if (object.isUsable())
         {
-            if (object.getType() == ClientBaseObjectWrapper.WrapperType.NATIVE)
-            {
-                object.setSyncedCustomData();
-            }
             clientObjectMap.put(object.getIdentifier(), object);
             object.createRemotely(silent);
+
+            return true;
+        }
+        return false;
+    }
+
+    @Nullable
+    public static <T extends ClientBaseObjectWrapper<Object>> T getObjectFromMap(String identifier, Class<T> clazz)
+    {
+        ClientBaseObjectWrapper<Object> obj = clientObjectMap.get(identifier);
+        if ( obj != null && clazz.isAssignableFrom(obj.getClass()))
+        {
+            return (T) obj;
+        }
+        return null;
+
+    }
+
+    public static boolean removeObjectFromMap(ClientBaseObjectWrapper<Object> object, boolean silent, boolean deleteRemotely)
+    {
+        if (object.isUsable())
+        {
+            clientObjectMap.remove(object.getIdentifier());
+
+            if (deleteRemotely)
+            {
+                object.removeRemotely(silent);
+            }
+
             return true;
         }
         return false;
@@ -110,12 +132,12 @@ public class ObjectIdentifierMap {
             return false;
         } else {
             String groupIdentifier;
-            @Nullable ServerSyncingHandler groupSyncInfo = SyncUtils.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID), true);
+            @Nullable ServerSyncingHandler groupSyncInfo = me.brynview.navidrohim.jmws.common.utils.SyncUtils.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID), true);
             if (groupSyncInfo != null)
             {
                 groupIdentifier = groupSyncInfo.objectIdentifier;
             } else {
-                groupIdentifier = makeWaypointHash(minecraftClientInstance.player.getUUID(), waypointGroup.getGuid(), waypointGroup.getName());
+                groupIdentifier = makeWaypointHash(waypointGroup.getGuid(), waypointGroup.getName());
                 waypointGroup.setCustomData(Constants.MODID, SyncUtils.getEmptySyncingInfoString(groupIdentifier, minecraftClientInstance.player.getUUID(), false));
             }
 
@@ -135,7 +157,7 @@ public class ObjectIdentifierMap {
         try
         {
             waypointIdentifierMapForContextMenu.remove(getContextMenuKey(waypoint));
-            waypointIdentifierMap.remove(SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID)).objectIdentifier);
+            waypointIdentifierMap.remove(me.brynview.navidrohim.jmws.common.utils.SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID)).objectIdentifier);
         } catch (NullPointerException _) {}
     }
 
@@ -147,7 +169,7 @@ public class ObjectIdentifierMap {
     {
         try
         {
-            @Nullable ServerSyncingHandler groupSyncInfo = SyncUtils.getSyncingInfo(group.getCustomData(Constants.MODID));
+            @Nullable ServerSyncingHandler groupSyncInfo = me.brynview.navidrohim.jmws.common.utils.SyncUtils.getSyncingInfo(group.getCustomData(Constants.MODID));
             if (groupSyncInfo != null)
                 groupIdentifierMap.remove(groupSyncInfo.objectIdentifier);
         } catch (NullPointerException _) {}

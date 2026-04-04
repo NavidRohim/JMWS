@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class SyncInformation {
+
     public String objectIdentifier;
     public UUID owner;
     public List<UUID> sharedTo;

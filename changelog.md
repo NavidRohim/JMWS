@@ -1,5 +1,5 @@
-# 1.2.4 Changelog
-*Server version 1.11*
+# 2.0 Changelog
+*Server version 2.0*
 
 ## New
 

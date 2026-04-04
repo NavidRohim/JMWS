@@ -2,7 +2,6 @@ package me.brynview.navidrohim.jmws.client.syncing.api;
 
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
-import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
@@ -13,24 +12,28 @@ import java.util.UUID;
 
 public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper {
 
-    public enum WrapperType
+    public enum WrapperContext
     {
         SYNCHRONISE,
         NATIVE,
         FOREIGN,
-        LEGACY
+        LEGACY,
+        INBUILT
     }
 
-    private final SyncInformation info;
+    protected SyncInformation info;
+    private WrapperContext wrapperContext;
+
     private final boolean isValid;
     private final boolean isLegacy;
     private final T object;
 
     public final String pluginId;
 
-    public ClientBaseObjectWrapper(String syncData, T syncedObject, String plugin)
+    public ClientBaseObjectWrapper(String syncData, T syncedObject, String objectName, String objectGuid, String plugin)
     {
         SyncInformation info1;
+
         this.isValid = SyncUtils.isValidSyncField(syncData);
         this.isLegacy = !this.isValid && SyncUtils.isLegacySyncField(syncData);
         this.object = syncedObject;
@@ -42,28 +45,28 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
             info1 = null;
         }
 
-        if (getType() == WrapperType.NATIVE)
+        if (getContext() == WrapperContext.NATIVE)
         {
-            info1 = SyncInformation.syncInformationFromString(me.brynview.navidrohim.jmws.common.syncing.SyncUtils.getEmptySyncingInfoString(ObjectIdentifierMap.makeWaypointHash(PlayerUtils.ourUUID(), "g", "name"), UUID.fromString("me"), false));
+            info1 = SyncInformation.syncInformationFromString(SyncUtils.getEmptySyncingInfoString(ObjectIdentifierMap.makeWaypointHash(objectGuid, objectName), PlayerUtils.ourUUID(), false));
         }
 
         this.info = info1;
     }
 
     @Override
-    public final boolean isValid()
+    public boolean isValid()
     {
         return isValid;
     }
 
     @Override
-    public final boolean isLegacy()
+    public boolean isLegacy()
     {
         return isLegacy;
     }
 
     @Override
-    public final boolean isUsable()
+    public boolean isUsable()
     {
         return !isLegacy && isValid;
     }
@@ -74,17 +77,34 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         return !isLegacy && !isValid && Constants.allowedMods.contains(this.pluginId);
     }
 
-    public final WrapperType getType()
+    @Override
+    public final void setContext(WrapperContext context)
     {
-        if (isUsable()) {
-            return WrapperType.SYNCHRONISE;
-        } else if (isNative()) {
-            return WrapperType.NATIVE;
-        } else if (isLegacy()) {
-            return WrapperType.LEGACY;
-        } else {
-            return WrapperType.FOREIGN;
+        if (wrapperContext == WrapperContext.INBUILT)
+        {
+            return;
         }
+        this.wrapperContext = context;
+
+    }
+
+    @Override
+    public final WrapperContext getContext()
+    {
+        WrapperContext type;
+
+        if (isUsable()) {
+            type = WrapperContext.SYNCHRONISE;
+        } else if (isNative()) {
+            type = WrapperContext.NATIVE;
+        } else if (isLegacy()) {
+            type = WrapperContext.LEGACY;
+        } else {
+            type = WrapperContext.FOREIGN;
+        }
+
+        this.setContext(type);
+        return type;
     }
 
     @NotNull

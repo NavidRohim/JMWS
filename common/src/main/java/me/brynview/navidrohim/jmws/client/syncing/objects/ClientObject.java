@@ -11,7 +11,7 @@ import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
-
+/*
 public class ClientObject <T extends ClientObjectWrapper>{
 
     private final String name;
@@ -79,4 +79,6 @@ public class ClientObject <T extends ClientObjectWrapper>{
     {
         this.objectWrapper.createRemotely(silent);
     }
-}
+
+}*/
+public class ClientObject <T extends ClientObjectWrapper>{}

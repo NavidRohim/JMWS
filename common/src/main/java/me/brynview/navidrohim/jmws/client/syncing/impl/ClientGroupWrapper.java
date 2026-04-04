@@ -3,17 +3,20 @@ package me.brynview.navidrohim.jmws.client.syncing.impl;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
-import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.api.JMObjectWrapper;
-import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 
 public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
 
     private final WaypointGroup group;
 
     public ClientGroupWrapper(WaypointGroup group, String plugin) {
-        super(group.getCustomData(Constants.MODID), group, plugin);
+        super(group.getCustomData(Constants.MODID), group, group.getName(), group.getGuid(), plugin);
         this.group = group;
+
+        if (Constants.forbiddenGroups.contains(group.getGuid())) {
+            this.info = null;
+            this.setContext(WrapperContext.INBUILT);
+        }
 
     }
 
@@ -35,8 +38,50 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
     }
 
     @Override
-    public void createRemotely(boolean silent) {
+    public void createRemotely(boolean silent)
+    {
         ClientNetworkDispatcher.makeGroup(group, silent);
+    }
+
+    @Override
+    public void removeRemotely(boolean silent)
+    {
+        if (getContext() == WrapperContext.SYNCHRONISE)
+        {
+            ClientNetworkDispatcher.deleteGroup(
+                    getIdentifier(),
+                    getGuid(),
+                    false,
+                    false,
+                    true,
+                    getGlobal(),
+                    false
+            );
+        } else if (getContext() == WrapperContext.INBUILT)
+        {
+            ClientNetworkDispatcher.deleteGroup(
+                    "null",
+                    getGuid(),
+                    false,
+                    true,
+                    false,
+                    true,
+                    false
+            );
+        }
+    }
+
+    public void removeRemotely(boolean silent, boolean deleteAllWaypoints, boolean removeGroupItself)
+    {
+        ClientNetworkDispatcher.deleteGroup(
+                getIdentifier(),
+                getGuid(),
+                silent,
+                deleteAllWaypoints,
+                removeGroupItself,
+                getGlobal(),
+                false
+        );
     }
 
     @Override

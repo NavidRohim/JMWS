@@ -18,13 +18,16 @@ public interface ClientObjectWrapper {
     List<UUID> getSharedTo();
 
     void createRemotely(boolean silent);
+    void removeRemotely(boolean silent);
     void updateRemotely();
 
     boolean isValid();
     boolean isLegacy();
     boolean isUsable();
     boolean isNative();
-    ClientBaseObjectWrapper.WrapperType getType();
+
+    void setContext(ClientBaseObjectWrapper.WrapperContext context);
+    ClientBaseObjectWrapper.WrapperContext getContext();
 
 
 }

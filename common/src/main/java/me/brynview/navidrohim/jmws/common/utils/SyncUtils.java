@@ -1,11 +1,17 @@
 package me.brynview.navidrohim.jmws.common.utils;
 
+import com.google.gson.JsonSyntaxException;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
+import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
+import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 public class SyncUtils {
 
@@ -40,5 +46,25 @@ public class SyncUtils {
     public static SyncInformation getIdentifier(Waypoint waypoint)
     {
         return SyncInformation.syncInformationFromString(waypoint.getCustomData(Constants.MODID));
+    }
+
+    public static ServerSyncingHandler getSyncingInfo(String customDataField, boolean returnNullIfError) {
+        try {
+            return CommonClass.gson.fromJson(customDataField, ServerSyncingHandler.class);
+        } catch (JsonSyntaxException syntaxException) // will throw if object hasn't been ported.
+        {
+            if (!returnNullIfError) {
+                return getSyncingInfo(getEmptySyncingInfoString(customDataField, PlayerUtils.ourUUID(), false));
+            }
+            return null;
+        }
+    }
+
+    public static ServerSyncingHandler getSyncingInfo(String customDataField) {
+        return getSyncingInfo(customDataField, false);
+    }
+
+    public static String getEmptySyncingInfoString(String objectIdentifier, UUID owner, boolean isGlobal) {
+        return CommonClass.gson.toJson(new ServerSyncingHandler(List.of(), objectIdentifier, owner, isGlobal));
     }
 }
