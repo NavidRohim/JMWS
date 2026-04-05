@@ -6,6 +6,7 @@ import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,8 +25,8 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     protected SyncInformation info;
     private WrapperContext wrapperContext;
 
-    private final boolean isValid;
-    private final boolean isLegacy;
+    private boolean isValid;
+    private boolean isLegacy;
     private final T object;
 
     public final String pluginId;
@@ -53,6 +54,15 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         }
 
         this.setInfo(info1);
+    }
+
+    @Override
+    public void update()
+    {
+        @Nullable String syncData = this.info.getSyncInformationAsString();
+
+        this.isValid = syncData != null && SyncUtils.isValidSyncField(syncData);
+        this.isLegacy = !this.isValid && SyncUtils.isLegacySyncField(syncData);
     }
 
     @Override

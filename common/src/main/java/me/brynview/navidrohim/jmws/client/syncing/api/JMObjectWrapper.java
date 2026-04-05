@@ -44,10 +44,6 @@ public abstract class JMObjectWrapper <T> extends ClientBaseObjectWrapper<Object
         throw new NotImplementedException("Use child class.");
     }
 
-    public void update() {
-        throw new NotImplementedException("Use child class.");
-    }
-
     public boolean isUsableOrNative()
     {
         return List.of(WrapperContext.NATIVE, WrapperContext.SYNCHRONISE).contains(this.getContext());

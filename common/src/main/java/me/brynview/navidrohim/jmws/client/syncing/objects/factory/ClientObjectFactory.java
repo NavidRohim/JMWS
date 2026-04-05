@@ -42,10 +42,29 @@ public class ClientObjectFactory {
         }
     }
 
-    @NotNull
+    @Nullable
     public static ClientGroupWrapper fromGroup(@NotNull WaypointGroup group)
     {
-        return new ClientGroupWrapper(group, group.getModId());
+        try
+        {
+            @Nullable SyncInformation syncInfo = SyncInformation.syncInformationFromString(group.getCustomData(Constants.MODID));
+
+            if (syncInfo == null)
+            {
+                return new ClientGroupWrapper(group, group.getModId());
+            }
+
+            ClientGroupWrapper gp = ObjectIdentifierMap.getObjectFromMap(syncInfo.objectIdentifier, ClientGroupWrapper.class);
+
+            if (gp == null) {
+                return new ClientGroupWrapper(group, group.getModId());
+            }
+            return gp;
+
+        } catch (NullPointerException e)
+        {
+            return null;
+        }
     }
 
 }

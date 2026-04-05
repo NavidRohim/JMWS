@@ -207,6 +207,7 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
                 return false;
             }
         }
+        Constants.getLogger().warn("Could not create server object. hasFile {} (should be false) dataclass {} (should be false)", hasFile(), dataclass);
         return false;
     }
 

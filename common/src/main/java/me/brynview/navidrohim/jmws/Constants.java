@@ -7,8 +7,14 @@ import java.util.List;
 
 public class Constants {
 
-    private static class LoggerHolder {
+    public static class LoggerHolder {
         private static final Logger INSTANCE = LoggerFactory.getLogger(MODID);
+
+        public static void debug(String message, String value) {
+            if (DEBUG) {
+                INSTANCE.info("DEBUG: {} ({})", message, value);
+            }
+        }
     }
 
     public static Logger getLogger() {

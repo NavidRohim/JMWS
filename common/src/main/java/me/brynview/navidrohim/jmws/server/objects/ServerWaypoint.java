@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.server.objects;
 
 import com.google.gson.JsonObject;
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import org.jetbrains.annotations.Nullable;
@@ -43,6 +44,7 @@ public class ServerWaypoint extends ServerObject {
 
     public static boolean createWaypoint(JsonObject jsonObject, UUID playerUUID)
     {
+        Constants.getLogger().info(jsonObject.toString());
         ServerWaypoint wp = new ServerWaypoint(jsonObject, playerUUID);
         return wp.create();
     }

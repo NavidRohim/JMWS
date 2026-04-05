@@ -25,6 +25,7 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     @Override
     public void update()
     {
+        super.update();
         this.object.setCustomData(Constants.MODID, this.getInfo().getSyncInformationAsString());
     }
 

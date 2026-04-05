@@ -245,8 +245,8 @@ public class JMWSPlugin implements IClientPlugin {
     void waypointEventHandler(WaypointEvent waypointEvent) {
 
         if (Constants.DEBUG) {
-            Constants.getLogger().info(String.valueOf((!ClientCommonClass.isBusy && ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled())));
-            Constants.getLogger().info(String.valueOf(ClientCommonClass.serverConfig.waypointsEnabled()));
+            Constants.LoggerHolder.debug(String.valueOf((!ClientCommonClass.isBusy && ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled())), "can exec");
+            Constants.LoggerHolder.debug(String.valueOf(ClientCommonClass.serverConfig.waypointsEnabled()), "wp enable test");
         }
         if (!ClientCommonClass.isBusy && ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled()) { // Check that user is in physical server, user config allows event, and server config allows event.
             // Get old waypoint if context is UPDATE (needed because server needs reference to waypoint before it was updated so it can be deleted on the server)
@@ -561,7 +561,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Add server groups to the client
         for (WaypointGroup savedGroup : savedGroups) {
-            ServerSyncingHandler gpSync = me.brynview.navidrohim.jmws.common.utils.SyncUtils.getSyncingInfo(savedGroup.getCustomData(Constants.MODID));
+            ServerSyncingHandler gpSync = SyncUtils.getSyncingInfo(savedGroup.getCustomData(Constants.MODID));
 
             if (gpSync == null) {
                 portLegacyDataField(savedGroup.toString(), ObjectType.GROUP);
@@ -618,14 +618,13 @@ public class JMWSPlugin implements IClientPlugin {
 
             // Test if any existing waypoints (persistent, usually death waypoints or 3rd party waypoints from another add-on) have already been added to the server, if not, add them
             for (Waypoint existing : existingWaypoints) {
-                @Nullable ClientWaypointWrapper existingWaypoint = ObjectIdentifierMap.getObjectFromMap(SyncUtils.getIdentifier(existing).objectIdentifier, ClientWaypointWrapper.class);
-
-                if (!remoteWaypointPositions.contains(existing.getBlockPos()) && (existingWaypoint == null || existingWaypoint.getContext() == ClientBaseObjectWrapper.WrapperContext.NATIVE)) {
-                    if (existingWaypoint == null) {
-                        existingWaypoint = ClientObjectFactory.fromWaypoint(existing);
+                @Nullable ClientWaypointWrapper existingWaypoint = ClientObjectFactory.fromWaypoint(existing);
+                //Constants.getLogger().info(String.valueOf(existingWaypoint.getContext()));
+                if (existingWaypoint != null) {
+                    if (!remoteWaypointPositions.contains(existing.getBlockPos()) && (existingWaypoint.getContext() == ClientBaseObjectWrapper.WrapperContext.NATIVE)) {
+                        getInstance().createAction(existingWaypoint, true);
+                        hasLocalWaypoint = true;
                     }
-                    getInstance().createAction(existingWaypoint, true);
-                    hasLocalWaypoint = true;
                 }
             }
 
@@ -668,6 +667,7 @@ public class JMWSPlugin implements IClientPlugin {
      * @param waypointPayload -- The sync payload from the server.
      */
     public static void syncHandler(JMWSActionPayload waypointPayload) {
+
         boolean hasLocalGroup = false;
         boolean hasLocalWaypoint = false;
         boolean sendAlert = waypointPayload.arguments().get(2).getAsBoolean(); // If to send an alert

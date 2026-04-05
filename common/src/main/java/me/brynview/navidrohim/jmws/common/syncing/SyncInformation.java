@@ -26,6 +26,7 @@ public class SyncInformation {
         }
     }
 
+    @Nullable
     public String getSyncInformationAsString()
     {
         return CommonClass.gson.toJson(this);

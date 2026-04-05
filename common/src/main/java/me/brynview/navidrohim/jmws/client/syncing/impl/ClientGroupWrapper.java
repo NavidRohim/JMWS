@@ -24,6 +24,7 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
     @Override
     public void update()
     {
+        super.update();
         this.group.setCustomData(Constants.MODID, this.getInfo().getSyncInformationAsString());
     }
 
