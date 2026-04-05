@@ -1,10 +1,11 @@
-# 1.2.4 Changelog
+# 1.2.4 for 26.1.1 changelog (Direct port from 26.1, no changes)
+
 *Server version 1.11*
 
 ## New
 
 - New command
-  - `remove_global_no_op waypoint|group <object_identifier>` --> Removes a global object that was made by an opped player who is no longer opped. 
+  - `remove_global_no_op waypoint|group <object_identifier>` --> Removes a global object that was made by an opped player who is no longer opped.
 
 ## Bug fixes / changes
 
