@@ -1,29 +1,21 @@
 package me.brynview.navidrohim.jmws.client.syncing.api;
 
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
+import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
 
-public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper {
-
-    public enum WrapperContext
-    {
-        SYNCHRONISE,
-        NATIVE,
-        FOREIGN,
-        LEGACY,
-        INBUILT
-    }
+public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper<T> {
 
     @Nullable protected SyncInformation info;
-    private WrapperContext wrapperContext;
+    private Context context;
 
     private boolean isValid;
     private boolean isLegacy;
@@ -40,7 +32,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
 
         boolean isInbuilt = this.isInbuilt();
         if (isInbuilt) {
-            this.setContext(WrapperContext.INBUILT);
+            this.setContext(Context.INBUILT);
         }
 
         SyncInformation info1;
@@ -55,7 +47,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         this.object = syncedObject;
         this.pluginId = plugin;
 
-        if (this.getContext() == WrapperContext.SYNCHRONISE) {
+        if (this.getContext() == Context.SYNCHRONISE) {
             info1 = SyncInformation.syncInformationFromString(syncData);
         } else {
             info1 = null;
@@ -67,7 +59,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     @Override
     public void createRemotely(boolean silent)
     {
-        if (getContext() == WrapperContext.NATIVE) {
+        if (getContext() == Context.NATIVE) {
             this.setInfo(SyncInformation.syncInformationFromString(SyncUtils.getEmptySyncingInfoString(ObjectIdentifierMap.makeWaypointHash(objectGuid, objectName), PlayerUtils.ourUUID(), false)));
         }
     }
@@ -116,34 +108,34 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     }
 
     @Override
-    public final void setContext(WrapperContext context)
+    public final void setContext(Context context)
     {
-        if (wrapperContext == WrapperContext.INBUILT)
+        if (this.context == Context.INBUILT)
         {
             return;
         }
-        this.wrapperContext = context;
+        this.context = context;
 
     }
 
     @Override
-    public final WrapperContext getContext()
+    public final Context getContext()
     {
-        WrapperContext type;
+        Context type;
 
-        if (wrapperContext == WrapperContext.INBUILT)
+        if (context == Context.INBUILT)
         {
-            return WrapperContext.INBUILT;
+            return Context.INBUILT;
         }
 
         if (isUsable()) {
-            type = WrapperContext.SYNCHRONISE;
+            type = Context.SYNCHRONISE;
         } else if (isNative()) {
-            type = WrapperContext.NATIVE;
+            type = Context.NATIVE;
         } else if (isLegacy()) {
-            type = WrapperContext.LEGACY;
+            type = Context.LEGACY;
         } else {
-            type = WrapperContext.FOREIGN;
+            type = Context.FOREIGN;
         }
 
         this.setContext(type);
@@ -156,37 +148,38 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         return info;
     }
 
-    @NotNull
-    public final T getObjectAsClass(Class<T> clazz)
+    @Override
+    public T getNativeObject()
     {
-        if (clazz.isAssignableFrom(object.getClass()) && isUsable()) {
-            return object;
-        }
-        throw new IllegalStateException("ClientObjectWrapper is not valid.");
+        return object;
     }
 
     @Override
     public void setGlobal(boolean global)
     {
         this.getInfo().isGlobal = global;
+        ClientNetworkDispatcher.makeGlobal(this, global);
     }
 
     @Override
     public void addSharedTo(UUID sharedTo)
     {
         this.getInfo().sharedTo.add(sharedTo);
+        ClientNetworkDispatcher.shareWith(sharedTo, this);
     }
 
     @Override
     public void removeSharedTo(UUID sharedTo)
     {
         this.getInfo().sharedTo.remove(sharedTo);
+        ClientNetworkDispatcher.removeShareWith(sharedTo, this);
     }
 
     @Override
     public void clearSharedTo()
     {
         this.getInfo().sharedTo.clear();
+        ClientNetworkDispatcher.removeShareFromAll( this);
     }
 
     @Override

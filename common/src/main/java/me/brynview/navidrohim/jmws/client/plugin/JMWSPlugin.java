@@ -19,7 +19,7 @@ import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
-import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
+import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import me.brynview.navidrohim.jmws.client.syncing.objects.factory.ClientObjectFactory;
 import me.brynview.navidrohim.jmws.client.screens.ShareScreen;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
@@ -101,17 +101,16 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled())
         {
-            Waypoint waypoint = ObjectIdentifierMap.getWaypointFromContextMenu(waypointPopupMenuEvent.getWaypoint());
-            @Nullable ClientWaypointWrapper syncableObject = ClientObjectFactory.fromWaypoint(waypoint);
+            ClientWaypointWrapper waypoint = ObjectIdentifierMap.getWaypointFromContextMenu(waypointPopupMenuEvent.getWaypoint());
 
-            if (!syncableObject.getGlobal())
+            if (!waypoint.getGlobal())
             {
-                waypointPopupMenuEvent.getPopupMenu().addMenuItem("Global", (blockPos) -> {this.handleWaypointContextMenuClick(syncableObject, blockPos, Action.GLOBAL);});
+                waypointPopupMenuEvent.getPopupMenu().addMenuItem("Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.GLOBAL);});
             } else {
-                waypointPopupMenuEvent.getPopupMenu().addMenuItem("Remove Global", (blockPos) -> {this.handleWaypointContextMenuClick(syncableObject, blockPos, Action.UNGLOBAL);});
+                waypointPopupMenuEvent.getPopupMenu().addMenuItem("Remove Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.UNGLOBAL);});
             }
 
-            waypointPopupMenuEvent.getPopupMenu().addMenuItem("Share", (blockPos) -> {this.handleWaypointContextMenuClick(syncableObject, blockPos, Action.SHARE);});
+            waypointPopupMenuEvent.getPopupMenu().addMenuItem("Share", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.SHARE);});
         }
     }
 
@@ -181,7 +180,7 @@ public class JMWSPlugin implements IClientPlugin {
     private void createAction(ClientWaypointWrapper waypoint, boolean silent) {
         if (ClientCommonClass.serverConfig.waypointsEnabled()) {
             Constants.getLogger().info(String.valueOf(waypoint.getContext()));
-            if (waypoint.getContext() == ClientBaseObjectWrapper.WrapperContext.NATIVE)
+            if (waypoint.getContext() == Context.NATIVE)
             {
                 ObjectIdentifierMap.addObjectToMap(waypoint, silent, true);
                 //ObjectIdentifierMap.addWaypointToMap(waypoint);
@@ -200,10 +199,10 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (ClientCommonClass.serverConfig.waypointsEnabled()) // Check config
         {
-            if (waypoint.getContext() == ClientBaseObjectWrapper.WrapperContext.SYNCHRONISE)
+            if (waypoint.getContext() == Context.SYNCHRONISE)
             {
                 ClientNetworkDispatcher.updateWaypoint(waypoint);
-            } else if (waypoint.getContext() == ClientBaseObjectWrapper.WrapperContext.NATIVE)
+            } else if (waypoint.getContext() == Context.NATIVE)
             {
                 this.createAction(waypoint, true);
             }
@@ -223,7 +222,7 @@ public class JMWSPlugin implements IClientPlugin {
         if (ClientCommonClass.serverConfig.waypointsEnabled()) {
             //@Nullable ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
             Constants.LoggerHolder.debug(waypoint.getContext(), "DELETE CONTEXT");
-            if (waypoint.getContext() == ClientBaseObjectWrapper.WrapperContext.SYNCHRONISE) // Can be null if JMWS has no knowledge of a waypoint
+            if (waypoint.getContext() == Context.SYNCHRONISE) // Can be null if JMWS has no knowledge of a waypoint
             {
                 ObjectIdentifierMap.removeObjectFromMap(waypoint, false, true);
                 //ClientNetworkDispatcher.deleteWaypoint(syncWaypoint.getIdentifier(), false, false);
@@ -276,7 +275,7 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
     {
-        if ( ConfigInterface.getEnabledStatus() && ClientCommonClass.config.groupsEnabled() && ClientCommonClass.serverConfig.groupsEnabled()) // Check that user is in physical server, user config allows event, and server config allows event.
+        if (ConfigInterface.getEnabledStatus() && ClientCommonClass.config.groupsEnabled() && ClientCommonClass.serverConfig.groupsEnabled()) // Check that user is in physical server, user config allows event, and server config allows event.
         {
             WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
             ClientGroupWrapper syncGroup = ClientObjectFactory.fromGroup(waypointGroup);
@@ -336,7 +335,7 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (ClientCommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
         {
-            if (waypointGroup.getContext() == ClientBaseObjectWrapper.WrapperContext.SYNCHRONISE)
+            if (waypointGroup.getContext() == Context.SYNCHRONISE)
             {
                 waypointGroup.updateRemotely();
                 //ClientNetworkDispatcher.sendString(CommandFactory.makeUpdateObjectRequest(serverSyncingHandler.objectIdentifier, serverSyncingHandler.isGlobal(), waypointGroup));
@@ -476,15 +475,9 @@ public class JMWSPlugin implements IClientPlugin {
     private void groupCreationHandler(ClientGroupWrapper waypointGroup, boolean silent)
     {
         if (ClientCommonClass.serverConfig.groupsEnabled()) {
-            if (waypointGroup.getContext() == ClientBaseObjectWrapper.WrapperContext.SYNCHRONISE)
+            if (waypointGroup.getContext() == Context.SYNCHRONISE)
             {
                 ObjectIdentifierMap.addObjectToMap(waypointGroup, silent, true);
-                //ObjectIdentifierMap.addGroupToMap(waypointGroup);
-
-                //waypointGroup.setPersistent(false);
-                //String creationData = CommandFactory.makeGroupCreationRequestJson(waypointGroup, silent);
-                //ClientNetworkDispatcher.makeGroup(waypointGroup, silent);
-                //ClientNetworkDispatcher.sendString(creationData);
             }
         } else {
             PlayerUtils.sendUserAlert(Component.translatable("message.jmws.server_disabled_groups"), true, false, MessageType.ONE_TIME_WARNING);
@@ -555,7 +548,7 @@ public class JMWSPlugin implements IClientPlugin {
                 ClientGroupWrapper group = ClientObjectFactory.fromGroup(existingGroup);
                 String groupKey = existingGroup.getName() + existingGroup.getGuid();
                 Constants.LoggerHolder.debug("context %s key %s ".formatted(group.getContext(), groupKey), "ADD GROUP");
-                if (!remoteGroupKeys.contains(groupKey) && group.getContext() == ClientBaseObjectWrapper.WrapperContext.NATIVE) {
+                if (!remoteGroupKeys.contains(groupKey) && group.getContext() == Context.NATIVE) {
                     existingGroup.setPersistent(false);
                     getInstance().groupCreationHandler(group, true);
                     hasLocalGroup = true;
@@ -630,7 +623,7 @@ public class JMWSPlugin implements IClientPlugin {
                 @Nullable ClientWaypointWrapper existingWaypoint = ClientObjectFactory.fromWaypoint(existing);
                 Constants.getLogger().info(String.valueOf(existingWaypoint.getContext()));
                 if (existingWaypoint != null) {
-                    if (!remoteWaypointPositions.contains(existing.getBlockPos()) && (existingWaypoint.getContext() == ClientBaseObjectWrapper.WrapperContext.NATIVE)) {
+                    if (!remoteWaypointPositions.contains(existing.getBlockPos()) && (existingWaypoint.getContext() == Context.NATIVE)) {
                         getInstance().createAction(existingWaypoint, true);
                         hasLocalWaypoint = true;
                     }
@@ -734,16 +727,16 @@ public class JMWSPlugin implements IClientPlugin {
     {
         @Nullable ClientWaypointWrapper wp = ClientObjectFactory.fromWaypoint(waypoint);
 
-        if (ObjectIdentifierMap.addObjectToMap(wp, false, false))
+        if (ObjectIdentifierMap.addObjectToMap(wp, true, false))
         {
             getInstance().jmAPI.addWaypoint(waypoint.getModId(), waypoint);
         }
     }
 
     public static void addGroup(WaypointGroup waypointGroup) {
-        @Nullable ClientGroupWrapper gp = ClientObjectFactory.fromGroup(waypointGroup);
+        ClientGroupWrapper gp = ClientObjectFactory.fromGroup(waypointGroup);
 
-        if (gp != null && ObjectIdentifierMap.addGroupToMap(waypointGroup)) { // DEP
+        if (ObjectIdentifierMap.addObjectToMap(gp, true, false)) { // DEP
             getInstance().jmAPI.addWaypointGroup(waypointGroup);
         }
 

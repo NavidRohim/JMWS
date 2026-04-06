@@ -3,19 +3,21 @@ package me.brynview.navidrohim.jmws.client.syncing.impl;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
-import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
+import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
 import me.brynview.navidrohim.jmws.client.syncing.api.JMObjectWrapper;
+import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 
 public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
 
     private final Waypoint object;
+
     public ClientWaypointWrapper(Waypoint waypoint, String plugin) throws NullPointerException
     {
         this.object = waypoint;
         super(waypoint.getCustomData(Constants.MODID), waypoint, waypoint.getName(), waypoint.getGuid(), plugin);
 
 
-        if (this.getContext() == WrapperContext.SYNCHRONISE || this.getContext() == WrapperContext.NATIVE)
+        if (this.getContext() == Context.SYNCHRONISE || this.getContext() == Context.NATIVE)
         {
             waypoint.setPersistent(false);
         }
@@ -38,9 +40,21 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     }
 
     @Override
+    public SyncObjectType getType()
+    {
+        return SyncObjectType.WAYPOINT;
+    }
+
+    @Override
     public String getGuid()
     {
         return object.getGuid();
+    }
+
+    @Override
+    public Waypoint getNativeObject()
+    {
+        return object;
     }
 
     @Override
@@ -64,10 +78,10 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
 
     @Override
     public void updateRemotely() {
-        if (getContext() == WrapperContext.SYNCHRONISE)
+        if (getContext() == Context.SYNCHRONISE)
         {
             ClientNetworkDispatcher.updateWaypoint(this);
-        } else if (getContext() == WrapperContext.NATIVE)
+        } else if (getContext() == Context.NATIVE)
         {
             createRemotely(false);
         }

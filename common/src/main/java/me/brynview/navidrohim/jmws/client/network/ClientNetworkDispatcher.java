@@ -92,23 +92,23 @@ public class ClientNetworkDispatcher {
         sendString(CommandFactory.makeTransitionObjectRequest(filename, objectIdentifier, transitionType));
     }
 
-    public static void shareWith(UUID to, ClientBaseObjectWrapper<Object> obj)
+    public static void shareWith(UUID to, ClientBaseObjectWrapper<?> shareableObject)
     {
-        sendString(CommandFactory.makeShareRequestForServer(PlayerUtils.ourUUID(), to, obj.getIdentifier(), ObjectType.GENERIC)); // PLACEHOLDER
+        sendString(CommandFactory.makeShareRequestForServer(PlayerUtils.ourUUID(), to, shareableObject.getIdentifier(), shareableObject.getType())); // PLACEHOLDER
     }
 
-    public static void removeShareWith(UUID subject, ClientObjectWrapper waypoint)
+    public static void removeShareWith(UUID subject, ClientBaseObjectWrapper<?> shareableObject)
     {
-        sendString(CommandFactory.makeUnshareRequestForUserOnServer(PlayerUtils.ourUUID(), subject, waypoint.getIdentifier(), ObjectType.GENERIC)); // TODO
+        sendString(CommandFactory.makeUnshareRequestForUserOnServer(PlayerUtils.ourUUID(), subject, shareableObject.getIdentifier(), shareableObject.getType())); // TODO
     }
 
-    public static void removeShareFromAll(ClientBaseObjectWrapper<Object> shareableObject)
+    public static void removeShareFromAll(ClientBaseObjectWrapper<?> shareableObject)
     {
-        sendString(CommandFactory.makeUnshareRequestForAllOnServer(PlayerUtils.ourUUID(), shareableObject.getIdentifier(), ObjectType.GENERIC)); // TODO
+        sendString(CommandFactory.makeUnshareRequestForAllOnServer(PlayerUtils.ourUUID(), shareableObject.getIdentifier(), shareableObject.getType())); // TODO
     }
 
-    public static void makeGlobal(ClientBaseObjectWrapper<Object> globalObject, boolean global)
+    public static void makeGlobal(ClientBaseObjectWrapper<?> globalObject, boolean global)
     {
-        sendString(CommandFactory.makeGlobalRequestForServer(PlayerUtils.ourUUID(), globalObject.getIdentifier(), ObjectType.GENERIC, global)); // TODO
+        sendString(CommandFactory.makeGlobalRequestForServer(PlayerUtils.ourUUID(), globalObject.getIdentifier(), globalObject.getType(), global)); // TODO
     }
 }

@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.client.syncing.api;
 
+import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.List;
@@ -46,6 +47,6 @@ public abstract class JMObjectWrapper <T> extends ClientBaseObjectWrapper<Object
 
     public boolean isUsableOrNative()
     {
-        return List.of(WrapperContext.NATIVE, WrapperContext.SYNCHRONISE).contains(this.getContext());
+        return List.of(Context.NATIVE, Context.SYNCHRONISE).contains(this.getContext());
     }
 }

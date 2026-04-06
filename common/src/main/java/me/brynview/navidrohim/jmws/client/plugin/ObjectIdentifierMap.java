@@ -74,7 +74,7 @@ public class ObjectIdentifierMap {
         return groupIdentifierMap.get(groupID);
     }
 
-    public static Waypoint getWaypointFromContextMenu(Waypoint waypoint)
+    public static ClientWaypointWrapper getWaypointFromContextMenu(Waypoint waypoint)
     {
         return waypointIdentifierMapForContextMenu.get(getContextMenuKey(waypoint));
     }
@@ -89,10 +89,12 @@ public class ObjectIdentifierMap {
             {
                 object.createRemotely(silent);
             }
-            if (object instanceof ClientWaypointWrapper)
+
+            if (object instanceof ClientWaypointWrapper wp)
             {
-                waypointIdentifierMapForContextMenu.put(object.getIdentifier(), object);
+                waypointIdentifierMapForContextMenu.put(getContextMenuKey(wp.getNativeObject()), wp);
             }
+
             clientObjectMap.put(object.getIdentifier(), object);
 
             return true;
@@ -126,61 +128,6 @@ public class ObjectIdentifierMap {
             return true;
         }
         return false;
-    }
-    /**
-     * Adds a group to the identifier map.
-     * @param waypointGroup -- The group that will be added to the map.
-     */
-    public static boolean addGroupToMap(WaypointGroup waypointGroup)
-    {
-        String customDataField = waypointGroup.getCustomData(Constants.MODID);
-        if (isLegacySyncField(customDataField))
-        {
-            LegacyUtils.transitionObject(waypointGroup, PlayerUtils.ourUUID(), ObjectType.GROUP);
-            return false;
-        } else {
-            String groupIdentifier;
-            @Nullable ServerSyncingHandler groupSyncInfo = me.brynview.navidrohim.jmws.common.utils.SyncUtils.getSyncingInfo(waypointGroup.getCustomData(Constants.MODID), true);
-            if (groupSyncInfo != null)
-            {
-                groupIdentifier = groupSyncInfo.objectIdentifier;
-            } else {
-                groupIdentifier = makeWaypointHash(waypointGroup.getGuid(), waypointGroup.getName());
-                waypointGroup.setCustomData(Constants.MODID, SyncUtils.getEmptySyncingInfoString(groupIdentifier, minecraftClientInstance.player.getUUID(), false));
-            }
-
-            groupIdentifierMap.put(groupIdentifier, waypointGroup);
-            return true;
-        }
-    }
-
-    // Removing
-
-    /**
-     * Removes a waypoint from the identifier map.
-     * @param waypoint -- The waypoint that will be removed from the map.
-     */
-    public static void removeWaypointFromMap(Waypoint waypoint)
-    {
-        try
-        {
-            waypointIdentifierMapForContextMenu.remove(getContextMenuKey(waypoint));
-            waypointIdentifierMap.remove(me.brynview.navidrohim.jmws.common.utils.SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID)).objectIdentifier);
-        } catch (NullPointerException _) {}
-    }
-
-    /**
-     * Removes a group from the identifier map.
-     * @param group -- The group that will be removed from the map.
-     */
-    public static void removeGroupFromMap(WaypointGroup group)
-    {
-        try
-        {
-            @Nullable ServerSyncingHandler groupSyncInfo = me.brynview.navidrohim.jmws.common.utils.SyncUtils.getSyncingInfo(group.getCustomData(Constants.MODID));
-            if (groupSyncInfo != null)
-                groupIdentifierMap.remove(groupSyncInfo.objectIdentifier);
-        } catch (NullPointerException _) {}
     }
 
     public static void removeAll(ObjectType objectType)

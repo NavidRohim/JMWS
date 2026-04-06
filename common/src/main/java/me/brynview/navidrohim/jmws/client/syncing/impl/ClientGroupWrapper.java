@@ -3,7 +3,9 @@ package me.brynview.navidrohim.jmws.client.syncing.impl;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
+import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
 import me.brynview.navidrohim.jmws.client.syncing.api.JMObjectWrapper;
+import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 
 public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
 
@@ -19,6 +21,12 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
     public boolean isInbuilt()
     {
         return Constants.forbiddenGroups.contains(group.getGuid());
+    }
+
+    @Override
+    public SyncObjectType getType()
+    {
+        return SyncObjectType.GROUP;
     }
 
     @Override
@@ -43,6 +51,12 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
     }
 
     @Override
+    public WaypointGroup getNativeObject()
+    {
+        return group;
+    }
+
+    @Override
     public void createRemotely(boolean silent)
     {
         super.createRemotely(silent);
@@ -52,7 +66,7 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
     @Override
     public void removeRemotely(boolean silent)
     {
-        if (getContext() == WrapperContext.SYNCHRONISE)
+        if (getContext() == Context.SYNCHRONISE)
         {
             ClientNetworkDispatcher.deleteGroup(
                     getIdentifier(),
@@ -63,7 +77,7 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
                     getGlobal(),
                     false
             );
-        } else if (getContext() == WrapperContext.INBUILT)
+        } else if (getContext() == Context.INBUILT)
         {
             ClientNetworkDispatcher.deleteGroup(
                     "null",

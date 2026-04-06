@@ -1,15 +1,18 @@
 package me.brynview.navidrohim.jmws.client.syncing.api;
 
+import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
+import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 
 import java.util.List;
 import java.util.UUID;
 
-public interface ClientObjectWrapper {
+public interface ClientObjectWrapper<T> {
 
     String getSerialization();
     String getIdentifier();
     UUID getOwner();
+    T getNativeObject();
 
     boolean getGlobal();
     void setGlobal(boolean global);
@@ -33,8 +36,8 @@ public interface ClientObjectWrapper {
     boolean isInbuilt();
 
 
-    void setContext(ClientBaseObjectWrapper.WrapperContext context);
-    ClientBaseObjectWrapper.WrapperContext getContext();
-
+    void setContext(Context context);
+    Context getContext();
+    SyncObjectType getType();
 
 }

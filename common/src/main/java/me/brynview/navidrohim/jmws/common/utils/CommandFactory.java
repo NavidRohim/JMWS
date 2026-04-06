@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.common.utils;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
 import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
@@ -106,24 +107,24 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.TRANSITION_NEW_DATA, objectIdentifier, owner, isGlobal, transitionType);
     }
 
-    public static String makeShareRequestForServer(UUID from, UUID to, String objectIdentifier, ObjectType objectType)
+    public static String makeShareRequestForServer(UUID from, UUID to, String objectIdentifier, SyncObjectType syncObjectType)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.SHARE_FROM_CLIENT, from, to, objectIdentifier, objectType);
+        return CommandFactory.makeBaseJsonRequest(Commands.SHARE_FROM_CLIENT, from, to, objectIdentifier, syncObjectType.getId());
     }
 
-    public static String makeUnshareRequestForUserOnServer(UUID from, UUID subject, String objectIdentifier, ObjectType objectType)
+    public static String makeUnshareRequestForUserOnServer(UUID from, UUID subject, String objectIdentifier, SyncObjectType syncObjectType)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_FROM_CLIENT, from, subject, objectIdentifier, objectType);
+        return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_FROM_CLIENT, from, subject, objectIdentifier, syncObjectType.getId());
     }
 
-    public static String makeUnshareRequestForAllOnServer(UUID from, String objectIdentifier, ObjectType objectType)
+    public static String makeUnshareRequestForAllOnServer(UUID from, String objectIdentifier, SyncObjectType syncObjectType)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_FOR_ALL, from, objectIdentifier, objectType);
+        return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_FOR_ALL, from, objectIdentifier, syncObjectType.getId());
     }
 
-    public static String makeGlobalRequestForServer(UUID from, String objectIdentifier, ObjectType objectType, boolean global)
+    public static String makeGlobalRequestForServer(UUID from, String objectIdentifier, SyncObjectType syncObjectType, boolean global)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.MAKE_GLOBAL, from, objectIdentifier, objectType, global);
+        return CommandFactory.makeBaseJsonRequest(Commands.MAKE_GLOBAL, from, objectIdentifier, syncObjectType.getId(), global);
     }
 
     /*

@@ -366,12 +366,14 @@ public class ServerPacketHandler {
                 }
                 case MAKE_GLOBAL ->
                 {
+                    Constants.getLogger().info(arguments.toString());
+
                     UUID from = UUID.fromString(arguments.getFirst().getAsString());
                     String objectIdentifier = arguments.get(1).getAsString();
                     ObjectType objectType = ObjectType.valueOf(arguments.get(2).getAsString());
                     boolean global = arguments.getLast().getAsBoolean();
 
-                    ServerWaypoint globalObject = ServerWaypoint.getWaypointFromUniqueIdentifier(objectIdentifier, from);
+                    ServerWaypoint globalObject = JMWSServerIO.getObjectFromUniqueIdentifier(objectIdentifier, from, objectType);
                     Constants.getLogger().info("Making global " + global);
                     if (globalObject != null)
                     {
