@@ -9,7 +9,6 @@ import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.syncing.SyncCounter;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
-import me.brynview.navidrohim.jmws.client.syncing.objects.ClientObject;
 import me.brynview.navidrohim.jmws.client.syncing.objects.factory.ClientObjectFactory;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
@@ -94,7 +93,7 @@ public class ClientPacketHandler {
 
                     JMWSPlugin.getInstance().deleteSavedObjects(
                         silent,
-                        ObjectType.WAYPOINT,
+                        ClientWaypointWrapper.class,
                         waypointIdentifier
                     );
                 }
@@ -105,7 +104,7 @@ public class ClientPacketHandler {
 
                     JMWSPlugin.getInstance().deleteSavedObjects(
                             silent,
-                            ObjectType.GROUP,
+                            ClientGroupWrapper.class,
                             groupIdentifier
                     );
                 }
@@ -216,7 +215,7 @@ public class ClientPacketHandler {
                     }
                 }
                 
-                default -> Constants.getLogger().warn("Unknown packet command -> " + waypointPayload.command());
+                default -> Constants.getLogger().warn("Unknown packet command -> {} ", waypointPayload.command);
              }
         }
         ClientCommonClass.isBusy = false;

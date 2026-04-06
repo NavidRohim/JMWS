@@ -19,6 +19,7 @@ import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
+import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import me.brynview.navidrohim.jmws.client.syncing.objects.factory.ClientObjectFactory;
 import me.brynview.navidrohim.jmws.client.screens.ShareScreen;
@@ -377,21 +378,18 @@ public class JMWSPlugin implements IClientPlugin {
 
     /**
      * Delete a synced object (waypoint or group). This method is only called by COMMON_DELETE_WAYPOINT in the packet handler on the client-side.
-     * @param deletionType -- What saved object to delete (waypoint or group)
-     * @param toDelete -- ObjectIdentifierMap ID, this is stored on the server only in the "customData" field (example; 38ab19a2e6544389265e40ad23b49983d9620b199c111e20b2b9a5159458b519)
+     *
+     * @param toDelete     -- ObjectIdentifierMap ID, this is stored on the server only in the "customData" field (example; 38ab19a2e6544389265e40ad23b49983d9620b199c111e20b2b9a5159458b519)
      */
-    public void deleteSavedObjects(boolean silent, ObjectType deletionType, String toDelete)
+    public <T extends ClientBaseObjectWrapper<Object>> void deleteSavedObjects(boolean silent, Class<T> objectClass, String toDelete)
     {
         String deletionMessageConfirmationKey = "message.jmws.deletion_all_success";
+        @Nullable ClientBaseObjectWrapper<Object> obj = ObjectIdentifierMap.getObjectFromMap(toDelete, objectClass);
 
-        if (deletionType == ObjectType.WAYPOINT) {
-            Waypoint oldWp = ObjectIdentifierMap.getWaypoint(toDelete);
-            jmAPI.removeWaypoint(oldWp.getModId(), oldWp);
-        } else {
-            deletionMessageConfirmationKey = "message.jmws.deletion_group_all_success";
-            WaypointGroup oldGp = ObjectIdentifierMap.getGroup(toDelete);
-            jmAPI.removeWaypointGroup(oldGp, false);
+        if (obj != null) {
+            ObjectIdentifierMap.removeObjectFromMap(obj, false, false);
         }
+
         if (!silent)
         {
             PlayerUtils.sendUserAlert(Component.translatable(deletionMessageConfirmationKey), true, false, MessageType.NEUTRAL);
@@ -419,25 +417,6 @@ public class JMWSPlugin implements IClientPlugin {
         sync(sendAlert, false);
     }
 
-    public static boolean isJmwsWaypoint(Waypoint waypoint)
-    {
-        if (Constants.allowedMods.contains(waypoint.getModId()) && waypoint.getCustomData(Constants.MODID) == null && waypoint.isPersistent())
-        {
-            return true;
-        }
-        return Constants.allowedMods.contains(waypoint.getModId()) && me.brynview.navidrohim.jmws.common.utils.SyncUtils.isValidSyncField(waypoint.getCustomData(Constants.MODID)) && !waypoint.isPersistent();
-    }
-
-    private static boolean isJmwsGroup(WaypointGroup waypointGroup)
-    {
-        @Nullable String customData = waypointGroup.getCustomData(Constants.MODID);
-        if (Constants.allowedMods.contains(waypointGroup.getModId()) && customData == null && waypointGroup.isPersistent())
-        {
-            return true;
-        }
-        return Constants.allowedMods.contains(waypointGroup.getModId()) && me.brynview.navidrohim.jmws.common.utils.SyncUtils.isValidSyncField(customData) && !waypointGroup.isPersistent();
-    }
-
     private static void portLegacyDataField(@Nullable String objectAsString, ObjectType transitionType)
     {
         JsonObject legacy = CommonUtils.parseStringToJsonObject(objectAsString);
@@ -448,14 +427,13 @@ public class JMWSPlugin implements IClientPlugin {
             String customDataString = customDataOld.getAsString();
             JsonObject customData = CommonUtils.parseStringToJsonObject(customDataString);
 
-            if (me.brynview.navidrohim.jmws.common.utils.SyncUtils.isValidSyncField(customDataString))
+            if (SyncUtils.isValidSyncField(customDataString))
             {
                 String legacyObjectIdentifier = customData.get("objectIdentifier").getAsString();
                 UUID legacyOwnerUUID = UUID.fromString(customData.get("owner").getAsString());
                 boolean isGlobal = customData.get("isGlobal").getAsBoolean();
 
                 ClientNetworkDispatcher.transitionToNewCustomData(legacyObjectIdentifier, legacyOwnerUUID, isGlobal, transitionType);
-                // ClientNetworkDispatcher.sendString(CommandFactory.makeTransitionObjectRequestForLegacyCustomData(legacyObjectIdentifier, legacyOwnerUUID, isGlobal, transitionType));
                 Constants.getLogger().info("Detected legacy customData from an object not belonging to this client. Sent porting packet. Please use '/jmws sync' to resync.");
             } else {
                 Constants.getLogger().error("Error transitioning customData to customDataMap. Trace: {} {} {}", customDataOld, customDataString, customData);
@@ -475,7 +453,8 @@ public class JMWSPlugin implements IClientPlugin {
     private void groupCreationHandler(ClientGroupWrapper waypointGroup, boolean silent)
     {
         if (ClientCommonClass.serverConfig.groupsEnabled()) {
-            if (waypointGroup.getContext() == Context.SYNCHRONISE)
+            Constants.getLogger().info(String.valueOf(waypointGroup.getContext()));
+            if (waypointGroup.getContext() == Context.NATIVE)
             {
                 ObjectIdentifierMap.addObjectToMap(waypointGroup, silent, true);
             }
@@ -491,7 +470,7 @@ public class JMWSPlugin implements IClientPlugin {
      * @throws JsonSyntaxException If waypoint is malformed or does not parse.
      * @throws IllegalStateException Cannot remember why this can be thrown.
      */
-    private static Set<Waypoint> getSavedWaypoints(JsonObject jsonData, UUID playerUUID) throws JsonSyntaxException, IllegalStateException {
+    private static Set<Waypoint> getSavedWaypoints(JsonObject jsonData) throws JsonSyntaxException, IllegalStateException {
         Set<Waypoint> waypoints = new HashSet<>();
 
         for (Map.Entry<String, JsonElement> entry : jsonData.entrySet()) {
@@ -528,7 +507,7 @@ public class JMWSPlugin implements IClientPlugin {
      * @return boolean -- If the user had any local groups to upload.
      * @throws JsonSyntaxException -- If there is a syntax error with the Json, usually from a corrupted group.
      */
-    private boolean handleUploadGroups(JsonObject jsonGroupsRaw, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException, IllegalStateException, NullPointerException {
+    private static boolean handleUploadGroups(JsonObject jsonGroupsRaw, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException, IllegalStateException, NullPointerException {
         boolean hasLocalGroup = false;
 
         try
@@ -539,17 +518,16 @@ public class JMWSPlugin implements IClientPlugin {
 
             // Get an identifier of every group, used to detect if the group already exists
             Set<String> remoteGroupKeys = savedGroups.stream()
-                    .map(g -> g.getName() + g.getGuid())
+                    .map(g -> g.getName() + g.getGuid() + g.getColor())
                     .collect(Collectors.toSet());
 
             // Test if any existing groups (persistent) have already been added to the server, if not, add them
 
             for (WaypointGroup existingGroup : existingGroups) {
                 ClientGroupWrapper group = ClientObjectFactory.fromGroup(existingGroup);
-                String groupKey = existingGroup.getName() + existingGroup.getGuid();
-                Constants.LoggerHolder.debug("context %s key %s ".formatted(group.getContext(), groupKey), "ADD GROUP");
+                String groupKey = existingGroup.getName() + existingGroup.getGuid() + existingGroup.getColor();
+
                 if (!remoteGroupKeys.contains(groupKey) && group.getContext() == Context.NATIVE) {
-                    existingGroup.setPersistent(false);
                     getInstance().groupCreationHandler(group, true);
                     hasLocalGroup = true;
                 }
@@ -600,14 +578,14 @@ public class JMWSPlugin implements IClientPlugin {
      * @return boolean -- If the user had any local waypoints to upload.
      * @throws JsonSyntaxException -- If there is a syntax error with the JSON, usually from a corrupted waypoint.
      */
-    private boolean handleUploadWaypoints(JsonObject jsonWaypoints, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException, NullPointerException {
+    private static boolean handleUploadWaypoints(JsonObject jsonWaypoints, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException, NullPointerException {
         try
         {
             boolean hasLocalWaypoint = false;
 
             // Get existing waypoints (local) and get waypoint objects saved on server
             List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
-            Set<Waypoint> savedWaypoints = JMWSPlugin.getSavedWaypoints(jsonWaypoints.deepCopy(), CommonClass.minecraftClientInstance.player.getUUID());
+            Set<Waypoint> savedWaypoints = JMWSPlugin.getSavedWaypoints(jsonWaypoints.deepCopy());
 
             // Get an identifier of every waypoint (BlockPos, location), used to detect if the waypoint already exists
             Set<BlockPos> remoteWaypointPositions = savedWaypoints.stream()
@@ -616,17 +594,15 @@ public class JMWSPlugin implements IClientPlugin {
 
             getInstance().jmAPI.removeAllWaypoints(Constants.MODID); // Delete all waypoints belonging to JMWS
             getInstance().jmAPI.removeAllWaypoints("journeymap");
-            ObjectIdentifierMap.removeAll(ObjectType.WAYPOINT);
+            ObjectIdentifierMap.removeAllOfObjectFromMap(ClientWaypointWrapper.class);
 
             // Test if any existing waypoints (persistent, usually death waypoints or 3rd party waypoints from another add-on) have already been added to the server, if not, add them
             for (Waypoint existing : existingWaypoints) {
                 @Nullable ClientWaypointWrapper existingWaypoint = ClientObjectFactory.fromWaypoint(existing);
-                Constants.getLogger().info(String.valueOf(existingWaypoint.getContext()));
-                if (existingWaypoint != null) {
-                    if (!remoteWaypointPositions.contains(existing.getBlockPos()) && (existingWaypoint.getContext() == Context.NATIVE)) {
-                        getInstance().createAction(existingWaypoint, true);
-                        hasLocalWaypoint = true;
-                    }
+
+                if (!remoteWaypointPositions.contains(existing.getBlockPos()) && (existingWaypoint.getContext() == Context.NATIVE)) {
+                    getInstance().createAction(existingWaypoint, true);
+                    hasLocalWaypoint = true;
                 }
             }
 
@@ -681,12 +657,12 @@ public class JMWSPlugin implements IClientPlugin {
         try {
             // Sync remote and local groups if server and client permits
             if (ClientCommonClass.config.uploadGroups.get() && ClientCommonClass.serverConfig.groupsEnabled()) {
-                hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), showSharingLabels, showGlobalLabels);
+                hasLocalGroup = handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), showSharingLabels, showGlobalLabels);
             }
 
             // Sync remote and local waypoints if server and client permits
             if (ClientCommonClass.config.uploadGroups.get() && ClientCommonClass.serverConfig.waypointsEnabled()) {
-                hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), showSharingLabels, showGlobalLabels);
+                hasLocalWaypoint = handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), showSharingLabels, showGlobalLabels);
             }
 
             // Send alerts if there were any local waypoints and or groups
@@ -750,5 +726,25 @@ public class JMWSPlugin implements IClientPlugin {
         } else {
             addGroup((WaypointGroup) request.currentSharedObject);
         }
+    }
+
+    public void addWaypointFromWrapper(ClientWaypointWrapper waypointWrapper)
+    {
+        jmAPI.addWaypoint(waypointWrapper.getNativeObject().getModId(),  waypointWrapper.getNativeObject());
+    }
+
+    public void removeWaypointFromWrapper(ClientWaypointWrapper waypointWrapper)
+    {
+        jmAPI.removeWaypoint(waypointWrapper.getNativeObject().getModId(),  waypointWrapper.getNativeObject());
+    }
+
+    public void addGroupFromWrapper(ClientGroupWrapper waypointWrapper)
+    {
+        jmAPI.addWaypointGroup(waypointWrapper.getNativeObject());
+    }
+
+    public void removeGroupFromWrapper(ClientGroupWrapper groupWrapper)
+    {
+        jmAPI.removeWaypointGroup(groupWrapper.getNativeObject(),  false);
     }
 }

@@ -2,11 +2,11 @@ package me.brynview.navidrohim.jmws.client.syncing.api;
 
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
-import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -24,6 +24,17 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     public final String pluginId;
     private final String objectName;
     private final String objectGuid;
+
+    /**
+     * Creates a universal identifier from the players UUID, the waypoints GUID and name of the object.
+     * @param waypointGUID -- GUID of the object being created.
+     * @param objectName -- The name of the waypoint or group.
+     * @return String -- The universal identifier.
+     */
+    private static String makeWaypointHash(String waypointGUID, String objectName)
+    {
+        return DigestUtils.sha256Hex(PlayerUtils.ourUUID() + waypointGUID + objectName);
+    }
 
     public ClientBaseObjectWrapper(String syncData, T syncedObject, String objectName, String objectGuid, String plugin)
     {
@@ -60,7 +71,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     public void createRemotely(boolean silent)
     {
         if (getContext() == Context.NATIVE) {
-            this.setInfo(SyncInformation.syncInformationFromString(SyncUtils.getEmptySyncingInfoString(ObjectIdentifierMap.makeWaypointHash(objectGuid, objectName), PlayerUtils.ourUUID(), false)));
+            this.setInfo(SyncInformation.syncInformationFromString(SyncUtils.getEmptySyncingInfoString(makeWaypointHash(objectGuid, objectName), PlayerUtils.ourUUID(), false)));
         }
     }
 
@@ -77,9 +88,10 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     @Override
     public void setInfo(@Nullable SyncInformation info)
     {
-        this.info = info;
-
-        this.update();
+        if (getContext() != Context.INBUILT) {
+            this.info = info;
+            this.update();
+        }
     }
 
     @Override

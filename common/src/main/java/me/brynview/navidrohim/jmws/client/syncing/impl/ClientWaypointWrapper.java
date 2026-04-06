@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.client.syncing.impl;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
+import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
 import me.brynview.navidrohim.jmws.client.syncing.api.JMObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
@@ -63,6 +64,17 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     }
 
     @Override
+    public void createLocally()
+    {
+        JMWSPlugin.getInstance().addWaypointFromWrapper(this);
+    }
+
+    @Override
+    public void removeLocally()
+    {
+        JMWSPlugin.getInstance().removeWaypointFromWrapper(this);
+    }
+    @Override
     public void createRemotely(boolean silent)
     {
         super.createRemotely(silent);
@@ -72,7 +84,6 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     @Override
     public void removeRemotely(boolean silent)
     {
-        //ObjectIdentifierMap.removeObjectFromMap(this, silent, true);
         ClientNetworkDispatcher.deleteWaypoint(this.getIdentifier(), silent, false);
     }
 

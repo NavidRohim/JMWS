@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.client.syncing.impl;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
+import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
 import me.brynview.navidrohim.jmws.client.syncing.api.JMObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
@@ -35,6 +36,7 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
         super.update();
         if (this.info != null)
         {
+            Constants.LoggerHolder.debug("GUID %s".formatted(this.group.getGuid()), "GUID CHECK");
             this.group.setCustomData(Constants.MODID, this.getInfo().getSyncInformationAsString());
         }
     }
@@ -108,5 +110,15 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
     public void updateRemotely()
     {
         ClientNetworkDispatcher.updateGroup(this);
+    }
+
+    @Override
+    public void createLocally() {
+        JMWSPlugin.getInstance().addGroupFromWrapper(this);
+    }
+
+    @Override
+    public void removeLocally() {
+        JMWSPlugin.getInstance().removeGroupFromWrapper(this);
     }
 }

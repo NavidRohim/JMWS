@@ -26,6 +26,9 @@ public interface ClientObjectWrapper<T> {
     void removeRemotely(boolean silent);
     void updateRemotely();
 
+    void createLocally();
+    void removeLocally();
+
     void setInfo(SyncInformation info);
     void update();
 
