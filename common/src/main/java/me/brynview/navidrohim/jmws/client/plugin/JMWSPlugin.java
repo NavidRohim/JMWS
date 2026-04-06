@@ -183,7 +183,7 @@ public class JMWSPlugin implements IClientPlugin {
             Constants.getLogger().info(String.valueOf(waypoint.getContext()));
             if (waypoint.getContext() == ClientBaseObjectWrapper.WrapperContext.NATIVE)
             {
-                ObjectIdentifierMap.addObjectToMap(waypoint, silent);
+                ObjectIdentifierMap.addObjectToMap(waypoint, silent, true);
                 //ObjectIdentifierMap.addWaypointToMap(waypoint);
                 //waypoint.setPersistent(false); // Persistence must be false so it does not stay upon leaving. If it did, there would be duplicate waypoints
             }
@@ -222,7 +222,7 @@ public class JMWSPlugin implements IClientPlugin {
         // Check if action is allowed by the server.
         if (ClientCommonClass.serverConfig.waypointsEnabled()) {
             //@Nullable ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
-
+            Constants.LoggerHolder.debug(waypoint.getContext(), "DELETE CONTEXT");
             if (waypoint.getContext() == ClientBaseObjectWrapper.WrapperContext.SYNCHRONISE) // Can be null if JMWS has no knowledge of a waypoint
             {
                 ObjectIdentifierMap.removeObjectFromMap(waypoint, false, true);
@@ -253,7 +253,7 @@ public class JMWSPlugin implements IClientPlugin {
             ClientCommonClass.isBusy = true;
             ClientWaypointWrapper waypoint = ClientObjectFactory.fromWaypoint(waypointEvent.waypoint);
 
-            Constants.getLogger().info(waypoint.toString());
+            Constants.getLogger().info(waypoint.getSerialization());
             switch (waypointEvent.getContext()) {
                 case CREATE ->
                     // Sends "create" packet | new = "SERVER_CREATE"
@@ -478,7 +478,7 @@ public class JMWSPlugin implements IClientPlugin {
         if (ClientCommonClass.serverConfig.groupsEnabled()) {
             if (waypointGroup.getContext() == ClientBaseObjectWrapper.WrapperContext.SYNCHRONISE)
             {
-                ObjectIdentifierMap.addObjectToMap(waypointGroup, silent);
+                ObjectIdentifierMap.addObjectToMap(waypointGroup, silent, true);
                 //ObjectIdentifierMap.addGroupToMap(waypointGroup);
 
                 //waypointGroup.setPersistent(false);
@@ -535,61 +535,70 @@ public class JMWSPlugin implements IClientPlugin {
      * @return boolean -- If the user had any local groups to upload.
      * @throws JsonSyntaxException -- If there is a syntax error with the Json, usually from a corrupted group.
      */
-    private boolean handleUploadGroups(JsonObject jsonGroupsRaw, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException, IllegalStateException {
+    private boolean handleUploadGroups(JsonObject jsonGroupsRaw, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException, IllegalStateException, NullPointerException {
         boolean hasLocalGroup = false;
 
-        // Get existing groups (local) and get group objects saved on server
-        List<? extends WaypointGroup> existingGroups = getInstance().jmAPI.getAllWaypointGroups();
-        Set<WaypointGroup> savedGroups = JMWSPlugin.getSavedGroups(jsonGroupsRaw.deepCopy());
+        try
+        {
+            // Get existing groups (local) and get group objects saved on server
+            List<? extends WaypointGroup> existingGroups = getInstance().jmAPI.getAllWaypointGroups();
+            Set<WaypointGroup> savedGroups = JMWSPlugin.getSavedGroups(jsonGroupsRaw.deepCopy());
 
-        // Get an identifier of every group, used to detect if the group already exists
-        Set<String> remoteGroupKeys = savedGroups.stream()
-                .map(g -> g.getName() + g.getGuid())
-                .collect(Collectors.toSet());
+            // Get an identifier of every group, used to detect if the group already exists
+            Set<String> remoteGroupKeys = savedGroups.stream()
+                    .map(g -> g.getName() + g.getGuid())
+                    .collect(Collectors.toSet());
 
-        // Test if any existing groups (persistent) have already been added to the server, if not, add them
+            // Test if any existing groups (persistent) have already been added to the server, if not, add them
 
-        for (WaypointGroup existingGroup : existingGroups) {
-            ClientGroupWrapper group = ClientObjectFactory.fromGroup(existingGroup);
-
-            if (group.getContext() == ClientBaseObjectWrapper.WrapperContext.NATIVE) {
-                existingGroup.setPersistent(false);
-                getInstance().groupCreationHandler(group, true);
-                hasLocalGroup = true;
-            }
-        }
-
-        // Add server groups to the client
-        for (WaypointGroup savedGroup : savedGroups) {
-            ServerSyncingHandler gpSync = SyncUtils.getSyncingInfo(savedGroup.getCustomData(Constants.MODID));
-
-            if (gpSync == null) {
-                portLegacyDataField(savedGroup.toString(), ObjectType.GROUP);
-                continue;
-            }
-
-            if (gpSync.isGlobal() && gpSync.isOwner(PlayerUtils.ourUUID()))
-            {
-                savedGroup.setLocked(false);
-            }
-
-            if (!gpSync.isOwner(PlayerUtils.ourUUID()))
-            {
-                savedGroup.setLocked(true);
-                if (gpSync.isGlobal() && showGlobalLabels)
-                {
-                    savedGroup.setName(savedGroup.getName() + " (%s)".formatted(CommonUtils.globalStringTag));
-                } else if (showSharingLabels)
-                {
-                    String ownerUser = PlayerUtils.getUsernameFromUUID(gpSync.getOwner());
-                    savedGroup.setName(savedGroup.getName() + " (%s)".formatted(ownerUser));
+            for (WaypointGroup existingGroup : existingGroups) {
+                ClientGroupWrapper group = ClientObjectFactory.fromGroup(existingGroup);
+                String groupKey = existingGroup.getName() + existingGroup.getGuid();
+                Constants.LoggerHolder.debug("context %s key %s ".formatted(group.getContext(), groupKey), "ADD GROUP");
+                if (!remoteGroupKeys.contains(groupKey) && group.getContext() == ClientBaseObjectWrapper.WrapperContext.NATIVE) {
+                    existingGroup.setPersistent(false);
+                    getInstance().groupCreationHandler(group, true);
+                    hasLocalGroup = true;
                 }
             }
-            addGroup(savedGroup);
-        }
 
-        // return this because need to give an alert
-        return hasLocalGroup;
+            // Add server groups to the client
+            for (WaypointGroup savedGroup : savedGroups) {
+                ServerSyncingHandler gpSync = SyncUtils.getSyncingInfo(savedGroup.getCustomData(Constants.MODID));
+
+                if (gpSync == null) {
+                    portLegacyDataField(savedGroup.toString(), ObjectType.GROUP);
+                    continue;
+                }
+
+                if (gpSync.isGlobal() && gpSync.isOwner(PlayerUtils.ourUUID()))
+                {
+                    savedGroup.setLocked(false);
+                }
+
+                if (!gpSync.isOwner(PlayerUtils.ourUUID()))
+                {
+                    savedGroup.setLocked(true);
+                    if (gpSync.isGlobal() && showGlobalLabels)
+                    {
+                        savedGroup.setName(savedGroup.getName() + " (%s)".formatted(CommonUtils.globalStringTag));
+                    } else if (showSharingLabels)
+                    {
+                        String ownerUser = PlayerUtils.getUsernameFromUUID(gpSync.getOwner());
+                        savedGroup.setName(savedGroup.getName() + " (%s)".formatted(ownerUser));
+                    }
+                }
+                addGroup(savedGroup);
+            }
+
+            // return this because need to give an alert
+            return hasLocalGroup;
+        } catch (Exception exc)
+        {
+            ClientCommonClass.isBusy = false;
+            Constants.getLogger().error("Failed to sync groups. Exception thrown: ", exc);
+            throw exc;
+        }
     }
 
     /**
@@ -598,7 +607,7 @@ public class JMWSPlugin implements IClientPlugin {
      * @return boolean -- If the user had any local waypoints to upload.
      * @throws JsonSyntaxException -- If there is a syntax error with the JSON, usually from a corrupted waypoint.
      */
-    private boolean handleUploadWaypoints(JsonObject jsonWaypoints, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException {
+    private boolean handleUploadWaypoints(JsonObject jsonWaypoints, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException, NullPointerException {
         try
         {
             boolean hasLocalWaypoint = false;
@@ -619,7 +628,7 @@ public class JMWSPlugin implements IClientPlugin {
             // Test if any existing waypoints (persistent, usually death waypoints or 3rd party waypoints from another add-on) have already been added to the server, if not, add them
             for (Waypoint existing : existingWaypoints) {
                 @Nullable ClientWaypointWrapper existingWaypoint = ClientObjectFactory.fromWaypoint(existing);
-                //Constants.getLogger().info(String.valueOf(existingWaypoint.getContext()));
+                Constants.getLogger().info(String.valueOf(existingWaypoint.getContext()));
                 if (existingWaypoint != null) {
                     if (!remoteWaypointPositions.contains(existing.getBlockPos()) && (existingWaypoint.getContext() == ClientBaseObjectWrapper.WrapperContext.NATIVE)) {
                         getInstance().createAction(existingWaypoint, true);
@@ -725,7 +734,7 @@ public class JMWSPlugin implements IClientPlugin {
     {
         @Nullable ClientWaypointWrapper wp = ClientObjectFactory.fromWaypoint(waypoint);
 
-        if (wp != null && ObjectIdentifierMap.addObjectToMap(wp, false))
+        if (ObjectIdentifierMap.addObjectToMap(wp, false, false))
         {
             getInstance().jmAPI.addWaypoint(waypoint.getModId(), waypoint);
         }

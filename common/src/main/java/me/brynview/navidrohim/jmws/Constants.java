@@ -10,7 +10,7 @@ public class Constants {
     public static class LoggerHolder {
         private static final Logger INSTANCE = LoggerFactory.getLogger(MODID);
 
-        public static void debug(String message, String value) {
+        public static void debug(Object message, String value) {
             if (DEBUG) {
                 INSTANCE.info("DEBUG: {} ({})", message, value);
             }

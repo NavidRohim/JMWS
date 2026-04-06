@@ -16,7 +16,7 @@ import static me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin.isJmwsWaypoin
 
 
 public class ClientObjectFactory {
-    @Nullable
+    @NotNull
     public static ClientWaypointWrapper fromWaypoint(Waypoint waypoint)
     {
 
@@ -38,33 +38,27 @@ public class ClientObjectFactory {
 
         } catch (NullPointerException e)
         {
-            return null;
+            throw e;
         }
     }
 
-    @Nullable
+    @NotNull
     public static ClientGroupWrapper fromGroup(@NotNull WaypointGroup group)
     {
-        try
+
+        @Nullable SyncInformation syncInfo = SyncInformation.syncInformationFromString(group.getCustomData(Constants.MODID));
+
+        if (syncInfo == null)
         {
-            @Nullable SyncInformation syncInfo = SyncInformation.syncInformationFromString(group.getCustomData(Constants.MODID));
-
-            if (syncInfo == null)
-            {
-                return new ClientGroupWrapper(group, group.getModId());
-            }
-
-            ClientGroupWrapper gp = ObjectIdentifierMap.getObjectFromMap(syncInfo.objectIdentifier, ClientGroupWrapper.class);
-
-            if (gp == null) {
-                return new ClientGroupWrapper(group, group.getModId());
-            }
-            return gp;
-
-        } catch (NullPointerException e)
-        {
-            return null;
+            return new ClientGroupWrapper(group, group.getModId());
         }
+
+        ClientGroupWrapper gp = ObjectIdentifierMap.getObjectFromMap(syncInfo.objectIdentifier, ClientGroupWrapper.class);
+
+        if (gp == null) {
+            return new ClientGroupWrapper(group, group.getModId());
+        }
+        return gp;
     }
 
 }

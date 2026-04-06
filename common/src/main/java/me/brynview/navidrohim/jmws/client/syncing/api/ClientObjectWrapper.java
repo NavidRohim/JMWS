@@ -30,6 +30,8 @@ public interface ClientObjectWrapper {
     boolean isLegacy();
     boolean isUsable();
     boolean isNative();
+    boolean isInbuilt();
+
 
     void setContext(ClientBaseObjectWrapper.WrapperContext context);
     ClientBaseObjectWrapper.WrapperContext getContext();

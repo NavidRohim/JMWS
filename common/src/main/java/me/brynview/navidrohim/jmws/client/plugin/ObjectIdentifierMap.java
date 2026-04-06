@@ -4,6 +4,7 @@ import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
+import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.utils.LegacyUtils;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
@@ -33,7 +34,7 @@ public class ObjectIdentifierMap {
     private static final HashMap<String, WaypointGroup> groupIdentifierMap = new HashMap<>();
 
     private static final HashMap<String, ClientBaseObjectWrapper<Object>> clientObjectMap = new HashMap<>();
-    private static final HashMap<String, Waypoint> waypointIdentifierMapForContextMenu = new HashMap<>();
+    private static final HashMap<String, ClientWaypointWrapper> waypointIdentifierMapForContextMenu = new HashMap<>();
 
     private static String getContextMenuKey(Waypoint waypoint)
     {
@@ -80,12 +81,19 @@ public class ObjectIdentifierMap {
 
     // Adding
 
-    public static boolean addObjectToMap(ClientBaseObjectWrapper<Object> object, boolean silent)
+    public static boolean addObjectToMap(ClientBaseObjectWrapper<Object> object, boolean silent, boolean createRemotely)
     {
         if (object.isUsable() || object.isNative())
         {
+            if (createRemotely)
+            {
+                object.createRemotely(silent);
+            }
+            if (object instanceof ClientWaypointWrapper)
+            {
+                waypointIdentifierMapForContextMenu.put(object.getIdentifier(), object);
+            }
             clientObjectMap.put(object.getIdentifier(), object);
-            object.createRemotely(silent);
 
             return true;
         }

@@ -26,7 +26,15 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     public void update()
     {
         super.update();
-        this.object.setCustomData(Constants.MODID, this.getInfo().getSyncInformationAsString());
+        if (this.info != null) {
+            this.object.setCustomData(Constants.MODID, this.getInfo().getSyncInformationAsString());
+        }
+    }
+
+    @Override
+    public boolean isInbuilt()
+    {
+        return false;
     }
 
     @Override
@@ -43,13 +51,15 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     @Override
     public void createRemotely(boolean silent)
     {
+        super.createRemotely(silent);
         ClientNetworkDispatcher.makeWaypoint(object, silent);
     }
 
     @Override
     public void removeRemotely(boolean silent)
     {
-        ObjectIdentifierMap.removeObjectFromMap(this, silent, true);
+        //ObjectIdentifierMap.removeObjectFromMap(this, silent, true);
+        ClientNetworkDispatcher.deleteWaypoint(this.getIdentifier(), silent, false);
     }
 
     @Override

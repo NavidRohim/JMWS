@@ -13,19 +13,22 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
         this.group = group;
 
         super(group.getCustomData(Constants.MODID), group, group.getName(), group.getGuid(), plugin);
+    }
 
-        if (Constants.forbiddenGroups.contains(group.getGuid())) {
-            this.info = null;
-            this.setContext(WrapperContext.INBUILT);
-        }
-
+    @Override
+    public boolean isInbuilt()
+    {
+        return Constants.forbiddenGroups.contains(group.getGuid());
     }
 
     @Override
     public void update()
     {
         super.update();
-        this.group.setCustomData(Constants.MODID, this.getInfo().getSyncInformationAsString());
+        if (this.info != null)
+        {
+            this.group.setCustomData(Constants.MODID, this.getInfo().getSyncInformationAsString());
+        }
     }
 
     @Override
@@ -42,6 +45,7 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
     @Override
     public void createRemotely(boolean silent)
     {
+        super.createRemotely(silent);
         ClientNetworkDispatcher.makeGroup(group, silent);
     }
 

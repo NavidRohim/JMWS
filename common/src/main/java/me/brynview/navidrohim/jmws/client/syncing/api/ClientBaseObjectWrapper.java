@@ -22,7 +22,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         INBUILT
     }
 
-    protected SyncInformation info;
+    @Nullable protected SyncInformation info;
     private WrapperContext wrapperContext;
 
     private boolean isValid;
@@ -30,11 +30,21 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     private final T object;
 
     public final String pluginId;
+    private final String objectName;
+    private final String objectGuid;
 
     public ClientBaseObjectWrapper(String syncData, T syncedObject, String objectName, String objectGuid, String plugin)
     {
-        SyncInformation info1;
+        this.objectName = objectName;
+        this.objectGuid = objectGuid;
 
+        boolean isInbuilt = this.isInbuilt();
+        if (isInbuilt) {
+            this.setContext(WrapperContext.INBUILT);
+        }
+
+        SyncInformation info1;
+        Constants.LoggerHolder.debug(syncData, "SYNC DATA");
         this.isValid = syncData != null && SyncUtils.isValidSyncField(syncData);
         this.isLegacy = !this.isValid && SyncUtils.isLegacySyncField(syncData);
 
@@ -47,8 +57,6 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
 
         if (this.getContext() == WrapperContext.SYNCHRONISE) {
             info1 = SyncInformation.syncInformationFromString(syncData);
-        } else if (getContext() == WrapperContext.NATIVE) {
-            info1 = SyncInformation.syncInformationFromString(SyncUtils.getEmptySyncingInfoString(ObjectIdentifierMap.makeWaypointHash(objectGuid, objectName), PlayerUtils.ourUUID(), false));
         } else {
             info1 = null;
         }
@@ -57,18 +65,28 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     }
 
     @Override
-    public void update()
+    public void createRemotely(boolean silent)
     {
-        @Nullable String syncData = this.info.getSyncInformationAsString();
-
-        this.isValid = syncData != null && SyncUtils.isValidSyncField(syncData);
-        this.isLegacy = !this.isValid && SyncUtils.isLegacySyncField(syncData);
+        if (getContext() == WrapperContext.NATIVE) {
+            this.setInfo(SyncInformation.syncInformationFromString(SyncUtils.getEmptySyncingInfoString(ObjectIdentifierMap.makeWaypointHash(objectGuid, objectName), PlayerUtils.ourUUID(), false)));
+        }
     }
 
     @Override
-    public void setInfo(SyncInformation info)
+    public void update()
+    {
+        @Nullable String syncData = this.info != null ? this.info.getSyncInformationAsString() : null;
+        this.isValid = syncData != null && SyncUtils.isValidSyncField(syncData);
+        this.isLegacy = !this.isValid && SyncUtils.isLegacySyncField(syncData);
+
+        this.getContext();
+    }
+
+    @Override
+    public void setInfo(@Nullable SyncInformation info)
     {
         this.info = info;
+
         this.update();
     }
 
@@ -87,6 +105,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     @Override
     public boolean isUsable()
     {
+        Constants.LoggerHolder.debug("legacy: %s valid: %s".formatted(isLegacy, isValid), "USABLE");
         return !isLegacy && isValid;
     }
 
@@ -112,6 +131,11 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     {
         WrapperContext type;
 
+        if (wrapperContext == WrapperContext.INBUILT)
+        {
+            return WrapperContext.INBUILT;
+        }
+
         if (isUsable()) {
             type = WrapperContext.SYNCHRONISE;
         } else if (isNative()) {
@@ -126,15 +150,10 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         return type;
     }
 
-    @NotNull
+    @Nullable
     public final SyncInformation getInfo()
     {
-        if (info != null)
-        {
-            return info;
-        } else {
-            throw new IllegalStateException("ClientObjectWrapper is not valid.");
-        }
+        return info;
     }
 
     @NotNull
@@ -149,7 +168,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     @Override
     public void setGlobal(boolean global)
     {
-        this.getInfo().global = global;
+        this.getInfo().isGlobal = global;
     }
 
     @Override
@@ -172,24 +191,36 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
 
     @Override
     public String getIdentifier() {
-        return this.getInfo().objectIdentifier;
+        if (this.info != null) {
+            return this.getInfo().objectIdentifier;
+        }
+        throw new IllegalStateException("getInfo() is null. Was the object created using createRemotely() before calling this?");
     }
 
     @Override
     public List<UUID> getSharedTo() {
-        return this.getInfo().sharedTo;
+        if (this.info != null) {
+            return this.getInfo().sharedTo;
+        }
+        throw new IllegalStateException("getInfo() is null. Was the object created using createRemotely() before calling this?");
     }
 
     @Override
     public UUID getOwner()
     {
-        return this.getInfo().owner;
+        if (this.info != null) {
+            return this.getInfo().owner;
+        }
+        throw new IllegalStateException("getInfo() is null. Was the object created using createRemotely() before calling this?");
     }
 
     @Override
     public boolean getGlobal()
     {
-        return this.getInfo().global;
+        if (this.info != null) {
+            return this.getInfo().isGlobal;
+        }
+        throw new IllegalStateException("getInfo() is null. Was the object created using createRemotely() before calling this?");
     }
 
     @Override

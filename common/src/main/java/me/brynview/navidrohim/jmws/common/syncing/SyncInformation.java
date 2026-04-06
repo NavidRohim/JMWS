@@ -12,7 +12,7 @@ public class SyncInformation {
     public String objectIdentifier;
     public UUID owner;
     public List<UUID> sharedTo;
-    public boolean global;
+    public boolean isGlobal;
 
     @Nullable
     public static SyncInformation syncInformationFromString(String info)
