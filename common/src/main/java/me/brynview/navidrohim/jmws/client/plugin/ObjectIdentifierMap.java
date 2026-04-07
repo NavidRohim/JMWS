@@ -59,21 +59,18 @@ public class ObjectIdentifierMap {
     }
 
     @Nullable
-    public static <T extends ClientBaseObjectWrapper<Object>> T getObjectFromMap(String identifier, Class<T> clazz)
+    public static <T extends ClientBaseObjectWrapper<Object>> T getObjectFromMap(@Nullable String identifier, Class<T> clazz)
     {
-        if (!clientObjectMap.containsKey(clazz))
+        if (identifier != null && clientObjectMap.containsKey(clazz))
         {
-            return null;
-        }
+            ClientBaseObjectWrapper<Object> obj = clientObjectMap.get(clazz).get(identifier);
 
-        ClientBaseObjectWrapper<Object> obj = clientObjectMap.get(clazz).get(identifier);
-
-        if ( obj != null && clazz.isAssignableFrom(obj.getClass()))
-        {
-            return (T) obj;
+            if ( obj != null && clazz.isAssignableFrom(obj.getClass()))
+            {
+                return (T) obj;
+            }
         }
         return null;
-
     }
 
     @Nullable

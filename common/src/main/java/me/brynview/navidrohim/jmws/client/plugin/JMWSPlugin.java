@@ -31,6 +31,7 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.assets.JMWSSounds;
+import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
 import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
@@ -282,20 +283,15 @@ public class JMWSPlugin implements IClientPlugin {
             ClientGroupWrapper syncGroup = ClientObjectFactory.fromGroup(waypointGroup);
             LocalPlayer player = CommonClass.minecraftClientInstance.player;
 
-            // Check if group is JourneyMap build-in group. You can delete an in-built group with the JM API but things will crash.
-            // Trying to delete an in-built group with JM will delete the waypoints inside the group. The following flow statement checks for that and does it on the server.
+            if (player == null) {
+                return;
+            }
+            // Get old group if context is UPDATE (needed because server needs reference to group before it was updated so it can be deleted on the server)
 
-            if (true) { // If group is not in-built and can be deleted
-                if (player == null) {
-                    return;
-                }
-                // Get old group if context is UPDATE (needed because server needs reference to group before it was updated so it can be deleted on the server)
-
-                switch (waypointGroupEvent.getContext()) {
-                    case CREATE -> this.groupCreationHandler(syncGroup, false);
-                    case DELETED -> this.groupDeletionHandler(syncGroup, waypointGroupEvent.deleteWaypoints(), true);
-                    case UPDATE -> {this.groupUpdateHandler(syncGroup);}
-                }
+            switch (waypointGroupEvent.getContext()) {
+                case CREATE -> this.groupCreationHandler(syncGroup, false);
+                case DELETED -> this.groupDeletionHandler(syncGroup, waypointGroupEvent.deleteWaypoints());
+                case UPDATE -> {this.groupUpdateHandler(syncGroup);}
             }
         }
     }
@@ -305,13 +301,13 @@ public class JMWSPlugin implements IClientPlugin {
      *
      * @param waypointGroup -- What group needs deleting
      */
-    private void groupDeletionHandler(ClientGroupWrapper waypointGroup, boolean isInbuilt, boolean removeAll)
+    private void groupDeletionHandler(ClientGroupWrapper waypointGroup, boolean removeAll)
     {
         if (ClientCommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
         {
             if (waypointGroup.isUsableOrNative())
             {
-                if (!isInbuilt) {
+                if (waypointGroup.getContext() == Context.SYNCHRONISE) {
                     if (!waypointGroup.getGlobal())
                     {
                         ObjectIdentifierMap.removeObjectFromMap(waypointGroup, false, false);
@@ -319,7 +315,7 @@ public class JMWSPlugin implements IClientPlugin {
                     } else {
                         PlayerUtils.sendUserAlert(Component.translatable("global.jmws.cannot_delete_global"), true, false, MessageType.ONE_TIME_WARNING);
                     }
-                } else {
+                } else if (waypointGroup.getContext() == Context.INBUILT) {
                     waypointGroup.removeRemotely(false, removeAll, false);
                 }
             }
@@ -353,12 +349,14 @@ public class JMWSPlugin implements IClientPlugin {
     private void waypointDragHandler(WaypointGroupTransferEvent waypointGroupTransferEvent) {
         // Do not do on LAN, since there is no physical server.
         Waypoint subjectedChangeWp = waypointGroupTransferEvent.getWaypoint();
-        ClientWaypointWrapper waypoint = ObjectIdentifierMap.getObjectFromMap(SyncUtils.getIdentifier(subjectedChangeWp).objectIdentifier, ClientWaypointWrapper.class);
-        if (!isInternalServer())
+        @Nullable String identifier = SyncInformation.getOnlyIdentifier(subjectedChangeWp.getCustomData(Constants.MODID));
+        @Nullable ClientWaypointWrapper waypoint = ObjectIdentifierMap.getObjectFromMap(identifier, ClientWaypointWrapper.class);
+
+        if (!isInternalServer() && waypoint != null)
         {
-            //waypointGroupTransferEvent.getGroupTo().addWaypoint(subjectedChangeWp);
             updateAction(waypoint);
         }
+        //waypointGroupTransferEvent.getGroupTo().addWaypoint(subjectedChangeWp);
     }
 
     /**
@@ -524,10 +522,10 @@ public class JMWSPlugin implements IClientPlugin {
             // Test if any existing groups (persistent) have already been added to the server, if not, add them
 
             for (WaypointGroup existingGroup : existingGroups) {
-                ClientGroupWrapper group = ClientObjectFactory.fromGroup(existingGroup);
                 String groupKey = existingGroup.getName() + existingGroup.getGuid() + existingGroup.getColor();
 
-                if (!remoteGroupKeys.contains(groupKey) && group.getContext() == Context.NATIVE) {
+                if (!remoteGroupKeys.contains(groupKey) && existingGroup.isPersistent() && Constants.allowedMods.contains(existingGroup.getModId()) && !Constants.forbiddenGroups.contains(existingGroup.getGuid())) {
+                    ClientGroupWrapper group = ClientObjectFactory.fromGroup(existingGroup);
                     getInstance().groupCreationHandler(group, true);
                     hasLocalGroup = true;
                 }
@@ -535,14 +533,14 @@ public class JMWSPlugin implements IClientPlugin {
 
             // Add server groups to the client
             for (WaypointGroup savedGroup : savedGroups) {
-                ServerSyncingHandler gpSync = SyncUtils.getSyncingInfo(savedGroup.getCustomData(Constants.MODID));
+                SyncInformation gpSync = SyncInformation.syncInformationFromString(savedGroup.getCustomData(Constants.MODID));
 
                 if (gpSync == null) {
                     portLegacyDataField(savedGroup.toString(), ObjectType.GROUP);
                     continue;
                 }
 
-                if (gpSync.isGlobal() && gpSync.isOwner(PlayerUtils.ourUUID()))
+                if (gpSync.isGlobal && gpSync.isOwner(PlayerUtils.ourUUID()))
                 {
                     savedGroup.setLocked(false);
                 }
@@ -550,12 +548,12 @@ public class JMWSPlugin implements IClientPlugin {
                 if (!gpSync.isOwner(PlayerUtils.ourUUID()))
                 {
                     savedGroup.setLocked(true);
-                    if (gpSync.isGlobal() && showGlobalLabels)
+                    if (gpSync.isGlobal && showGlobalLabels)
                     {
                         savedGroup.setName(savedGroup.getName() + " (%s)".formatted(CommonUtils.globalStringTag));
                     } else if (showSharingLabels)
                     {
-                        String ownerUser = PlayerUtils.getUsernameFromUUID(gpSync.getOwner());
+                        String ownerUser = PlayerUtils.getUsernameFromUUID(gpSync.owner);
                         savedGroup.setName(savedGroup.getName() + " (%s)".formatted(ownerUser));
                     }
                 }
@@ -608,21 +606,22 @@ public class JMWSPlugin implements IClientPlugin {
 
             // Add server waypoints to the client
             for (Waypoint savedWaypoint : savedWaypoints) {
-                ServerSyncingHandler wpSync = SyncUtils.getSyncingInfo(savedWaypoint.getCustomData(Constants.MODID));
+                @Nullable SyncInformation wpSync = SyncInformation.syncInformationFromString(savedWaypoint.getCustomData(Constants.MODID));
+
                 if (wpSync == null) {
-                    portLegacyDataField(savedWaypoint.toString(), ObjectType.WAYPOINT);
+                    //portLegacyDataField(savedWaypoint.toString(), ObjectType.WAYPOINT);
                     continue;
                 }
 
                 if (!wpSync.isOwner(PlayerUtils.ourUUID()))
                 {
-                    if (wpSync.isGlobal() && showGlobalLabels) // Global
+                    if (wpSync.isGlobal && showGlobalLabels) // Global
                     {
                         savedWaypoint.setIconResourceLoctaion(JMWSTextures.globalObjectAsset);
                         savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(CommonUtils.globalStringTag));
                     } else if (showSharingLabels) // Shared
                     {
-                        String ownerUser = PlayerUtils.getUsernameFromUUID(wpSync.getOwner(), true);
+                        String ownerUser = PlayerUtils.getUsernameFromUUID(wpSync.owner, true);
                         savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(ownerUser));
                         savedWaypoint.setIconResourceLoctaion(JMWSTextures.sharedObjectAsset);
                     }

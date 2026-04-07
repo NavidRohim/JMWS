@@ -1,5 +1,7 @@
 package me.brynview.navidrohim.jmws.common.syncing;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import org.jetbrains.annotations.Nullable;
@@ -14,6 +16,17 @@ public class SyncInformation {
     public List<UUID> sharedTo;
     public boolean isGlobal;
 
+    public boolean isOwner(UUID user)
+    {
+        return owner.equals(user);
+    }
+
+    @Nullable
+    public String getSyncInformationAsString()
+    {
+        return CommonClass.gson.toJson(this);
+    }
+
     @Nullable
     public static SyncInformation syncInformationFromString(String info)
     {
@@ -27,8 +40,14 @@ public class SyncInformation {
     }
 
     @Nullable
-    public String getSyncInformationAsString()
+    public static String getOnlyIdentifier(@Nullable String syncInformation)
     {
-        return CommonClass.gson.toJson(this);
+        if (syncInformation != null)
+        {
+            JsonObject obj = JsonParser.parseString(syncInformation).getAsJsonObject();
+            return obj.get("objectIdentifier").getAsString();
+        }
+        return null;
     }
 }
+
