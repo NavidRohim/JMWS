@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.common.events;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.client.commands.ClientCommands;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
+import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
@@ -50,5 +51,6 @@ public class CommonEvents {
         ClientCommonClass.isMapping = false;
         ClientCommonClass.didHandshake = false;
         ClientCommonClass.isBusy = false;
+        ObjectIdentifierMap.clear();
     }
 }

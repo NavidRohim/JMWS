@@ -279,10 +279,12 @@ public class JMWSPlugin implements IClientPlugin {
     {
         if (ConfigInterface.getEnabledStatus() && ClientCommonClass.config.groupsEnabled() && ClientCommonClass.serverConfig.groupsEnabled()) // Check that user is in physical server, user config allows event, and server config allows event.
         {
+            Constants.LoggerHolder.debug(waypointGroupEvent.getGroup().toString(), "STRINGGROUP");
             WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
             ClientGroupWrapper syncGroup = ClientObjectFactory.fromGroup(waypointGroup);
             LocalPlayer player = CommonClass.minecraftClientInstance.player;
 
+            Constants.LoggerHolder.debug(syncGroup.getContext().toString(), "GROUP TYPE");
             if (player == null) {
                 return;
             }
@@ -335,7 +337,6 @@ public class JMWSPlugin implements IClientPlugin {
             if (waypointGroup.getContext() == Context.SYNCHRONISE)
             {
                 waypointGroup.updateRemotely();
-                //ClientNetworkDispatcher.sendString(CommandFactory.makeUpdateObjectRequest(serverSyncingHandler.objectIdentifier, serverSyncingHandler.isGlobal(), waypointGroup));
             }
         } else {
             PlayerUtils.sendUserAlert(Component.translatable("message.jmws.server_disabled_groups"), true, false, MessageType.ONE_TIME_WARNING);

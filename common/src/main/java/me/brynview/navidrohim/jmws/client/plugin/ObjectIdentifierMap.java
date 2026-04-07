@@ -100,4 +100,10 @@ public class ObjectIdentifierMap {
     {
         clientObjectMap.remove(clazz);
     }
+
+    public static void clear()
+    {
+        ObjectIdentifierMap.waypointIdentifierMapForContextMenu.clear();
+        ObjectIdentifierMap.clientObjectMap.clear();
+    }
 }
