@@ -14,7 +14,6 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
 
     public ClientGroupWrapper(WaypointGroup group, String plugin) {
         this.group = group;
-
         super(group.getCustomData(Constants.MODID), group, group.getName(), group.getGuid(), plugin);
     }
 
@@ -37,6 +36,7 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
         if (this.info != null)
         {
             Constants.LoggerHolder.debug("GUID %s".formatted(this.group.getGuid()), "GUID CHECK");
+            Constants.LoggerHolder.debug("CONTEXT %s".formatted(this.getContext()), "CONTEXT CHECK");
             this.group.setCustomData(Constants.MODID, this.getInfo().getSyncInformationAsString());
         }
     }
