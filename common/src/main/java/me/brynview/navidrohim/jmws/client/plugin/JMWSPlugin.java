@@ -254,7 +254,6 @@ public class JMWSPlugin implements IClientPlugin {
             ClientCommonClass.isBusy = true;
             ClientWaypointWrapper waypoint = ClientObjectFactory.fromWaypoint(waypointEvent.waypoint);
 
-            Constants.getLogger().info(waypoint.getSerialization());
             switch (waypointEvent.getContext()) {
                 case CREATE ->
                     // Sends "create" packet | new = "SERVER_CREATE"
@@ -277,9 +276,9 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
     {
-        if (ConfigInterface.getEnabledStatus() && ClientCommonClass.config.groupsEnabled() && ClientCommonClass.serverConfig.groupsEnabled()) // Check that user is in physical server, user config allows event, and server config allows event.
+        if (!ClientCommonClass.isBusy && ConfigInterface.getEnabledStatus() && ClientCommonClass.config.groupsEnabled() && ClientCommonClass.serverConfig.groupsEnabled()) // Check that user is in physical server, user config allows event, and server config allows event.
         {
-            Constants.LoggerHolder.debug(waypointGroupEvent.getGroup().toString(), "STRINGGROUP");
+            ClientCommonClass.isBusy = true;
             WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
             ClientGroupWrapper syncGroup = ClientObjectFactory.fromGroup(waypointGroup);
             LocalPlayer player = CommonClass.minecraftClientInstance.player;
@@ -295,6 +294,7 @@ public class JMWSPlugin implements IClientPlugin {
                 case DELETED -> this.groupDeletionHandler(syncGroup, waypointGroupEvent.deleteWaypoints());
                 case UPDATE -> {this.groupUpdateHandler(syncGroup);}
             }
+            ClientCommonClass.isBusy = false;
         }
     }
 
@@ -309,16 +309,17 @@ public class JMWSPlugin implements IClientPlugin {
         {
             if (waypointGroup.isUsableOrNative())
             {
+                Constants.LoggerHolder.debug(waypointGroup.getContext().toString(), "GROUP TYPE");
                 if (waypointGroup.getContext() == Context.SYNCHRONISE) {
                     if (!waypointGroup.getGlobal())
                     {
                         ObjectIdentifierMap.removeObjectFromMap(waypointGroup, false, false);
-                        waypointGroup.removeRemotely(false, removeAll, true);
+                        waypointGroup.removeRemotely(false, false, true);
                     } else {
                         PlayerUtils.sendUserAlert(Component.translatable("global.jmws.cannot_delete_global"), true, false, MessageType.ONE_TIME_WARNING);
                     }
                 } else if (waypointGroup.getContext() == Context.INBUILT) {
-                    waypointGroup.removeRemotely(false, removeAll, false);
+                    waypointGroup.removeRemotely(false, false, false);
                 }
             }
         } else {

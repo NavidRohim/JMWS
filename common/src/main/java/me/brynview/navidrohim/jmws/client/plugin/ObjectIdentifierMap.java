@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.client.plugin;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import org.jetbrains.annotations.Nullable;
@@ -83,6 +84,11 @@ public class ObjectIdentifierMap {
     {
         if (object.isUsable())
         {
+            Constants.LoggerHolder.debug(object.getClass(), "OBJ CLASS");
+            if (object.getClass() == ClientWaypointWrapper.class)
+            {
+                Constants.LoggerHolder.debug(object.getClass(), "OBJ CLASS WP");
+            }
             if (clientObjectMap.containsKey(object.getClass()))
             {
                 clientObjectMap.get(object.getClass()).remove(object.getIdentifier());

@@ -176,6 +176,7 @@ public class ServerPacketHandler {
                             if (deleteAllWaypointsInGroup)
                             {
                                 result = group.deleteWaypoints();
+                                Constants.LoggerHolder.debug(String.valueOf(result), "DELETE RESULT");
                                 if (!removeGroupItself && result)
                                 {
                                     sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false, silent);
@@ -184,7 +185,6 @@ public class ServerPacketHandler {
                             }
                             group.stopSharingWithAll();
                             result = group.delete(false);
-
                             if (result) {
                                 sendUserMessage(player, "message.jmws.deletion_group_success", true, false, silent);
                             } else {
