@@ -1,6 +1,6 @@
-# 1.2.4 for 26.1.1 changelog (Direct port from 26.1, no changes)
+# 1.2.4 for 1.21.11 changelog (Direct port from 26.1.1, no changes)
 
-*Server version 1.11*
+*Server version 1.11*Ï
 
 ## New
 
@@ -18,7 +18,7 @@
 I realise the config screen inside JourneyMap is very messy. JourneyMap is supposed to have categories so it looks much cleaner, but currently they are broken.
 When they are fixed in JourneyMap, so will the config screen in my mod (E.g. I won't have to release a bug fix)
 
->### Server
+>### ServerÏ
 >
 >Server version is now `1.11` up from `1.103`
 
