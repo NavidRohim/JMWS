@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.client.screens;
+package me.brynview.navidrohim.jmws.client.ui.screen;
 
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;

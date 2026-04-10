@@ -2,7 +2,7 @@ package me.brynview.navidrohim.jmws.client;
 
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.commands.CommonClientPlatformCommands;
-import me.brynview.navidrohim.jmws.client.screens.MissingJourneyMapScreen;
+import me.brynview.navidrohim.jmws.client.ui.screen.MissingJourneyMapScreen;
 import me.brynview.navidrohim.jmws.common.events.CommonEvents;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 
