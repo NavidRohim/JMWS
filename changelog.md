@@ -1,4 +1,4 @@
-# 1.2.4 for 26.1.1 changelog (Direct port from 26.1, no changes)
+# JMWS 1.2.4 for 26.1.x
 
 *Server version 1.11*
 
@@ -15,7 +15,9 @@
 
 ## Pre-existing bugs
 
-I realise the config screen inside JourneyMap is very messy. JourneyMap is supposed to have categories so it looks much cleaner, but currently they are broken.
+- JMWS client fails to receive handshake when joining server of different mod-loader.
+
+Technically not a bug with JMWS, but I realise the config screen inside JourneyMap is very messy. JourneyMap is supposed to have categories so it looks much cleaner, but currently they are broken.
 When they are fixed in JourneyMap, so will the config screen in my mod (E.g. I won't have to release a bug fix)
 
 >### Server
