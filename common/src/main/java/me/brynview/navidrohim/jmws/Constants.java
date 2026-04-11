@@ -16,8 +16,8 @@ public class Constants {
     }
 
     public static final String MODID = "jmws";
-    public static final String VERSION = "1.2.4-26.1.x"; // This is purely for display and is not needed
-    public static final double SERVER_VERSION = 1.11;
+    public static final String VERSION = "1.2.5-26.1.x"; // This is purely for display and is not needed
+    public static final double SERVER_VERSION = 1.12;
     public static final boolean DEBUG = VERSION.contains("-beta.");
 
     public static final List<String> allowedMods = List.of(MODID, "journeymap"); // DO NOT CHANGE!

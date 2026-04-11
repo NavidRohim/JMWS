@@ -53,9 +53,9 @@ public class CommonClass {
         // so far deep now, I cannot reengineer everything just so I can avoid these 4 lines. (client and server use same packets)
         // also ctx.sender() can usually never be null, but it is here.
         if (
-                isInternalServer() &&
-                Constants.forgeModLoaders.contains(Services.PLATFORM.getPlatformName()) &&
-                (ctx.sender() == null || ctx.sender().getUUID() == CommonClass.minecraftClientInstance.player.getUUID()))
+            isInternalServer() &&
+            Constants.forgeModLoaders.contains(Services.PLATFORM.getPlatformName()) &&
+            (ctx.sender() == null || ctx.sender().getUUID() == CommonClass.minecraftClientInstance.player.getUUID()))
         {
             return;
         }
@@ -77,7 +77,7 @@ public class CommonClass {
     {
         if (Side.CLIENT.equals(ctx.side()))
         {
-            ClientPacketHandler.HandshakeHandler(ctx.message());
+            ClientPacketHandler.handleHandshake(ctx.message());
         } else {
             PlayerNetworkingHelper.sendHandshakeAndValidate(ctx.sender());
         }
