@@ -1,4 +1,4 @@
-# JMWS 1.2.5 for 1.21.11
+# JMWS 1.2.5 for 1.21.1
 
 *Server version 1.12*
 
