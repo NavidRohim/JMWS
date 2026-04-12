@@ -16,9 +16,8 @@
 Technically not a bug with JMWS, but I realise the config screen inside JourneyMap is very messy. JourneyMap is supposed to have categories so it looks much cleaner, but currently they are broken.
 When they are fixed in JourneyMap, so will the config screen in my mod (E.g. I won't have to release a bug fix)
 
->### Server
->
->Server version remains `1.12` up from `1.11`
+> ### Server
+> Server version remains `1.12` up from `1.11`
 
 - Added new command stated above.
 - Changed how packets are sent from server to client.
