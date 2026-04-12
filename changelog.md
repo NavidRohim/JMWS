@@ -1,30 +1,25 @@
-# 1.2.4 for 1.21.11 changelog (Direct port from 26.1.1, no changes)
+# JMWS 1.2.5 for 26.1.x
 
-*Server version 1.11*Ï
+*Server version 1.12*
 
 ## New
 
-- New command
-  - `remove_global_no_op waypoint|group <object_identifier>` --> Removes a global object that was made by an opped player who is no longer opped.
+- Added new server-side command: /jmws_handshake
+  - Tries to resend handshake to client.
 
 ## Bug fixes / changes
 
-- Added text response if a global object is already global.
-- Added server-side config option for handshake packet delay, before, some clients may not have been able to sync if on a lower-end computer. This can now be fixed by extending the handshake packet delay. Default is 250.
-- Internal changes
+- Fixed issue where joining server with different mod-loader than the client or vice versa would not properly process JMWS handshake packet on the client and said client couldn't sync.
 
 ## Pre-existing bugs
 
-I realise the config screen inside JourneyMap is very messy. JourneyMap is supposed to have categories so it looks much cleaner, but currently they are broken.
+Technically not a bug with JMWS, but I realise the config screen inside JourneyMap is very messy. JourneyMap is supposed to have categories so it looks much cleaner, but currently they are broken.
 When they are fixed in JourneyMap, so will the config screen in my mod (E.g. I won't have to release a bug fix)
 
->### ServerÏ
->
->Server version is now `1.11` up from `1.103`
+> ### Server
+> Server version remains `1.12` up from `1.11`
 
 - Added new command stated above.
-- Added new client text.
+- Changed how packets are sent from server to client.
 
-Due to the new client text and server changes, plus changes with JourneyMap, all clients connecting to a 1.11 server **MUST** also be on 1.11.
-
-If a client isn't on the correct version, it could cause catastrophic side effects for said client.
+1.12 is fully backwards compatible with 1.11, but it is recommended to update both client and server for QOL reasons. 
