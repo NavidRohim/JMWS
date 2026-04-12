@@ -14,6 +14,7 @@ import me.brynview.navidrohim.jmws.common.syncing.Syncing;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
+import me.brynview.navidrohim.jmws.server.network.ServerNetworkDispatcher;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -145,12 +146,15 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
         ServerPlayer sharedPlayer = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
         if (sharedPlayer != null)
         {
+            String packet;
             if (this.getObjectType() == ObjectType.WAYPOINT)
             {
-                Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteRequestJson(objectIdentifier, true, false)), sharedPlayer);
+                packet = CommandFactory.makeDeleteRequestJson(objectIdentifier, true, false);
             } else {
-                Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeDeleteGroupRequestJson(this.syncing.objectIdentifier, null, true, true, true, false, false)), sharedPlayer);
+                packet = CommandFactory.makeDeleteGroupRequestJson(this.syncing.objectIdentifier, null, true, true, true, false, false);
             }
+
+            ServerNetworkDispatcher.sendStringToClient(packet, sharedPlayer);
         }
     }
 
@@ -262,9 +266,9 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
 
     public void share(ServerPlayer us, ServerPlayer player) {
 
-        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, this.ownerUUID, player.getUUID(), ShareRequestDirection.FOR_CLIENT, getObjectType())), player); // Send share request to player
+        ServerNetworkDispatcher.sendStringToClient(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, this.ownerUUID, player.getUUID(), ShareRequestDirection.FOR_CLIENT, getObjectType()), player);
         // Send information of the share to the sender. This is needed because this command is server-side only and the client will have no knowledge of the shared obj.
-        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, player.getUUID(), this.ownerUUID, ShareRequestDirection.FOR_HOST, getObjectType())), us);
+        ServerNetworkDispatcher.sendStringToClient(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, player.getUUID(), this.ownerUUID, ShareRequestDirection.FOR_HOST, getObjectType()), us);
     }
     public void stopSharing(UUID user)
     {

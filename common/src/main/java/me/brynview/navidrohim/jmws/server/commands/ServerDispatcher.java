@@ -10,6 +10,8 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
+import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
+import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -26,6 +28,7 @@ public class ServerDispatcher {
 
 
     public static void addCommandsToDispatcher(CommandDispatcher<CommandSourceStack> dispatcher) {
+
         dispatcher.register(Commands.literal("share_waypoint")
                 .requires(ServerDispatcher::isValidCommandUser)
                 .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("waypointName", StringArgumentType.greedyString()).suggests(ServerDispatcher::suggestWaypoints).executes(ServerDispatcher::doShareWaypoint)))
@@ -41,6 +44,11 @@ public class ServerDispatcher {
         dispatcher.register(Commands.literal("stop_sharing_waypoint")
                 .requires(ServerDispatcher::isValidCommandUser)
                 .then(Commands.argument("waypointName", StringArgumentType.greedyString()).suggests(ServerDispatcher::suggestSharedWaypoints).executes(ServerDispatcher::doRemoveShareWaypoint))
+        );
+
+        dispatcher.register(Commands.literal("jmws_handshake")
+                .requires(ServerDispatcher::isValidCommandUser)
+                        .executes(ServerDispatcher::sendHandshake)
         );
 
         dispatcher.register(Commands.literal("jmws_admin")
@@ -72,6 +80,17 @@ public class ServerDispatcher {
                             .executes(ServerDispatcher::removeServerGpFromBadOp)))
                 )
         );
+    }
+
+    private static int sendHandshake(CommandContext<CommandSourceStack> commandSourceStackCommandContext)
+    {
+        ServerPlayer senderPlayer = commandSourceStackCommandContext.getSource().getPlayer();
+        if (senderPlayer != null)
+        {
+            PlayerNetworkingHelper.sendHandshakeAndValidate(senderPlayer);
+            return 1;
+        }
+        return 0;
     }
 
     private static int removeServerGpFromBadOp(CommandContext<CommandSourceStack> commandSourceStackCommandContext)

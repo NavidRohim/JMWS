@@ -127,8 +127,7 @@ public class ServerPacketHandler {
                 if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit, but I got nowhere near.
                     sendUserMessage(player, "error.jmws.error_packet_size", false, true);
                 } else {
-                    JMWSActionPayload waypointPayloadOutbound = new JMWSActionPayload(jsonData);
-                    Dispatcher.sendToClient(waypointPayloadOutbound, player);
+                    ServerNetworkDispatcher.sendStringToClient(jsonData, player);
                 }
             } catch (IOException ioe) {
                 Constants.getLogger().error("Error on server when trying to process sync from %s ERROR: %s".formatted(player.getUUID(), ioe.toString()));
@@ -331,7 +330,7 @@ public class ServerPacketHandler {
                 case CommandFactory.Commands.USER_ALREADY_PROCESSING_SHARE, CommandFactory.Commands.REJECT_SHARE ->
                 {
                     UUID forUser = UUID.fromString(Context.message().arguments().getFirst().getAsString());
-                    Dispatcher.sendToClient(Context.message(), Context.sender().level().getServer().getPlayerList().getPlayer(forUser));
+                    ServerNetworkDispatcher.sendPacketToClient(Context.message(), Context.sender().level().getServer().getPlayerList().getPlayer(forUser));
                 }
 
                 case CommandFactory.Commands.AFFIRM_SHARE ->
@@ -348,7 +347,7 @@ public class ServerPacketHandler {
                             usf.addToShared(objectIdentifier, objType);
                         }
                         sharedWp.syncing.addUserToShare(playerUUID);
-                        Dispatcher.sendToClient(waypointActionPayload, CommonClass.minecraftServerInstance.getPlayerList().getPlayer(ownerUUID));
+                        ServerNetworkDispatcher.sendPacketToClient(waypointActionPayload, CommonClass.minecraftServerInstance.getPlayerList().getPlayer(ownerUUID));
                     } else {
                         sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
                     }
@@ -374,7 +373,7 @@ public class ServerPacketHandler {
                     JMWSServerIO.getObjectFromDisk(legacyObjectIdentifier, legacyOwnerUUID, legacyObjectType, false, isGlobal);
                 }
 
-                default -> Constants.getLogger().warn("Unknown packet command -> {}", command);}
+                default -> Constants.getLogger().warn("Unknown packet command -> {}. Usually a sign of an outdated server.", command);}
 
         } catch (UnsupportedOperationException error)
         {
