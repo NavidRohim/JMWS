@@ -21,3 +21,6 @@ When they are fixed in JourneyMap, so will the config screen in my mod (E.g. I w
 >Server version remains `1.12` up from `1.11`
 
 - Added new command stated above.
+- Changed how packets are sent from server to client.
+
+1.12 is fully backwards compatible with 1.11, but it is recommended to update both client and server for QOL reasons. 
