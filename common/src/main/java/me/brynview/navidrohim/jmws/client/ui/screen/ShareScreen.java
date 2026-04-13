@@ -39,7 +39,7 @@ public class ShareScreen <T extends ClientObjectWrapper<?>> extends Screen {
     protected void init()
     {
         // Define the sharing panel and add all shared objects on this client to panel
-        this.sharePanel = new ObjectSharePanel<>(minecraftClientInstance,  width / 4 * 3, this.height, 0, 64, minecraft.getCurrentServer().players.sample(), waypoint);
+        this.sharePanel = new ObjectSharePanel<>(minecraftClientInstance,  width / 4 * 3, this.height, 0, 64, waypoint);
         this.sharePanel.addSelf(0);
         this.sharePanel.addWidgets();
 

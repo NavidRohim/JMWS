@@ -7,7 +7,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.PlayerFaceExtractor;
+import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.PlayerSkinRenderCache;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.NameAndId;
@@ -18,19 +20,28 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends ObjectSelectionList<ObjectSharePanel.Entry> {
 
     public final static int PLAYER_HEAD_SIZE = 32;
 
     private final static int PLAYER_HEAD_SIZE_HALFED = PLAYER_HEAD_SIZE / 2;
-    private final List<NameAndId> players = new ArrayList<>();
+    private final List<PlayerInfo> players = new ArrayList<>();
     private final T sharedObject;
 
-    public ObjectSharePanel(Minecraft minecraft, int width, int height, int y, int itemHeight, List<NameAndId> players, T clientObjectWrapper) {
+    public ObjectSharePanel(Minecraft minecraft, int width, int height, int y, int itemHeight, T clientObjectWrapper) {
         super(minecraft, width, height, y, itemHeight);
-        this.players.addAll(players);
+        this.players.addAll(getPlayers());
         this.sharedObject = clientObjectWrapper;
+    }
+
+    private List<PlayerInfo> getPlayers()
+    {
+        List<PlayerInfo> onlinePlayers = new ArrayList<>(this.minecraft.player.connection.getOnlinePlayers().stream().toList());
+        onlinePlayers.removeIf(player -> player.getProfile().equals(minecraft.player.getGameProfile()));
+
+        return onlinePlayers;
     }
 
     public void addSelf(int x)
@@ -40,10 +51,11 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
             // Loop for x times
             for (int i = 0; i < x; i++)
             {
-                players.add(minecraft.player.nameAndId());
+                players.add(minecraft.getConnection().getPlayerInfo(minecraft.player.getGameProfile().id()));
             }
         }
     }
+
     public void addWidgets()
     {
 
@@ -57,15 +69,16 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
 
     public static class Entry extends ObjectSelectionList.Entry<Entry>
     {
-        private final @Nullable NameAndId user;
-        private final @NotNull String displayName;
-        private final @NotNull ObjectSharePanel sharePanel;
+        private final @Nullable PlayerInfo user;
+        private final @NotNull Component displayName;
+        private final @NotNull ObjectSharePanel<?> sharePanel;
 
-        public Entry(NameAndId user, @NonNull ObjectSharePanel<? extends ClientObjectWrapper<?>> owner)
+        public Entry(@NotNull PlayerInfo user, @NonNull ObjectSharePanel<? extends ClientObjectWrapper<?>> owner)
         {
             super();
+
             this.user = user;
-            this.displayName = user.name();
+            this.displayName = Component.literal(user.getProfile().name());
             this.sharePanel = owner;
 
         }
@@ -74,7 +87,7 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
         {
             super();
             this.user = null;
-            this.displayName = text;
+            this.displayName = Component.literal(text);
             this.sharePanel = owner;
         }
 
@@ -82,7 +95,7 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
         @Override
         public @NonNull Component getNarration()
         {
-            return Component.literal(this.displayName);
+            return displayName;
         }
 
         @Override
@@ -91,7 +104,7 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
 
             if (doubleClick && user != null)
             {
-                this.sharePanel.sharedObject.addSharedTo(user.id());
+                this.sharePanel.sharedObject.addSharedTo(user.getProfile().id());
             }
 
             return c;
@@ -103,12 +116,11 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
         {
             if (this.user != null)
             {
-                PlayerSkinRenderCache.RenderInfo skin = Minecraft.getInstance().playerSkinRenderCache().getOrDefault(ResolvableProfile.createUnresolved(this.user.id()));
-                PlayerFaceExtractor.extractRenderState(guiGraphicsExtractor, skin.playerSkin(), PLAYER_HEAD_SIZE_HALFED, this.getContentYMiddle() - PLAYER_HEAD_SIZE_HALFED, PLAYER_HEAD_SIZE);
+                PlayerFaceExtractor.extractRenderState(guiGraphicsExtractor, user.getSkin(), PLAYER_HEAD_SIZE_HALFED, this.getContentYMiddle() - PLAYER_HEAD_SIZE_HALFED, PLAYER_HEAD_SIZE);
             }
             guiGraphicsExtractor.horizontalLine(0, getContentRight(), getContentY() , -8355712);
             guiGraphicsExtractor.horizontalLine(0, getContentRight(), getContentY() + getContentHeight() , -8355712);
-            guiGraphicsExtractor.text(CommonClass.minecraftClientInstance.font, Component.literal(this.displayName), PLAYER_HEAD_SIZE * 2, this.getContentYMiddle(), -1);
+            guiGraphicsExtractor.text(CommonClass.minecraftClientInstance.font, this.displayName, PLAYER_HEAD_SIZE * 2, this.getContentYMiddle() - 2, -1);
         }
     }
 }
