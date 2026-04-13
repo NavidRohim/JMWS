@@ -7,6 +7,7 @@ public enum MessageType {
     FAILURE("§C"), // Red
     SUCCESS("§2"), // Green
     WARNING("§e"), // Orange
+    PENDING("§6"),
     ONE_TIME_WARNING(WARNING.text), // Orange, will only show once
     NEUTRAL(""); // White
 

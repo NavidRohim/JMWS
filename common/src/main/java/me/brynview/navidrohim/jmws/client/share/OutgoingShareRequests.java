@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class OutgoingShareRequests {
-    private static final HashMap<UUID, OutgoingShareRequest> outgoingShareRequestList = new HashMap<>();
+    public static final HashMap<UUID, OutgoingShareRequest> outgoingShareRequestList = new HashMap<>();
+
     public static boolean hasShareRequestFor(UUID player)
     {
         return outgoingShareRequestList.containsKey(player);
