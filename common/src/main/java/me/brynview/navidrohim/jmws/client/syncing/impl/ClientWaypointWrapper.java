@@ -59,6 +59,11 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     }
 
     @Override
+    public String getName() {
+        return object.getName();
+    }
+
+    @Override
     public String getSerialization() {
         return object.toString();
     }

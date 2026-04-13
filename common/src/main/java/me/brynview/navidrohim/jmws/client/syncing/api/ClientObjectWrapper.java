@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public interface ClientObjectWrapper<T> {
 
+    String getName();
     String getSerialization();
     String getIdentifier();
     UUID getOwner();

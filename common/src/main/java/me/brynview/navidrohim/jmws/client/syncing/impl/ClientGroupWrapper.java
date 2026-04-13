@@ -42,6 +42,12 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
     }
 
     @Override
+    public String getName()
+    {
+        return group.getName();
+    }
+
+    @Override
     public String getSerialization() {
         return group.toString();
     }
