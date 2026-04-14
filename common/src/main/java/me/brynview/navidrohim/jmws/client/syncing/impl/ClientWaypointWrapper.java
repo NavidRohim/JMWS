@@ -69,6 +69,11 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     }
 
     @Override
+    public int getColour() {
+        return object.getColor();
+    }
+
+    @Override
     public void createLocally()
     {
         JMWSPlugin.getInstance().addWaypointFromWrapper(this);

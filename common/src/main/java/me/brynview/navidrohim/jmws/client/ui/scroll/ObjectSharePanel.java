@@ -1,8 +1,6 @@
 package me.brynview.navidrohim.jmws.client.ui.scroll;
 
-import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
-import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
@@ -14,7 +12,6 @@ import net.minecraft.client.gui.components.PlayerFaceExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
@@ -26,12 +23,7 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
 
     public final static int PLAYER_HEAD_SIZE = 32;
 
-    private static final Identifier MENU_LIST_BACKGROUND = Identifier.withDefaultNamespace("textures/gui/menu_list_background.png");
-    private static final Identifier INWORLD_MENU_LIST_BACKGROUND = Identifier.withDefaultNamespace("textures/gui/inworld_menu_list_background.png");
-    private static final Identifier SCROLLER_SPRITE = Identifier.withDefaultNamespace("widget/scroller");
-    private static final Identifier SCROLLER_BACKGROUND_SPRITE = Identifier.withDefaultNamespace("widget/scroller_background");
-
-    private final static int PLAYER_HEAD_SIZE_HALFED = PLAYER_HEAD_SIZE / 2;
+    private final static int PLAYER_HEAD_SIZE_HALVED = PLAYER_HEAD_SIZE / 2;
     private final List<PlayerInfo> players = new ArrayList<>();
     private final T sharedObject;
 
@@ -69,21 +61,8 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
         this.addWidgets();
     }
 
-    public void addSelf(int x)
-    {
-        if (Constants.DEBUG)
-        {
-            // Loop for x times
-            for (int i = 0; i < x; i++)
-            {
-                players.add(minecraft.getConnection().getPlayerInfo(minecraft.player.getGameProfile().id()));
-            }
-        }
-    }
-
     public void addWidgets()
     {
-
         if (!this.players.isEmpty())
         {
             players.forEach(p -> this.addEntryToTop(new PlayerEntry(p, this)));
@@ -100,44 +79,110 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
         }
     }
 
+    public record Subtitle(Component component, MessageType messageType)
+    {
+        public Component getDisplayableComponent()
+        {
+            return Component.literal( messageType.toString() + "§o" + component.getString());
+        }
+    }
+
     public static class Entry extends ObjectSelectionList.Entry<Entry>
     {
-        protected final @NotNull Component displayName;
-        protected final @NotNull Component pendingText;
-        protected final @NotNull Component alreadyShared;
+        protected @NotNull Component title;
+        protected @NotNull Subtitle subtitle;
 
-        protected final @NotNull ObjectSharePanel<?> sharePanel;
-
-        public Entry(@NotNull Component displayName, @NotNull ObjectSharePanel<?> sharePanel) {
+        public Entry(@NotNull Component title, @NotNull Subtitle subtitle) {
             super();
+            this.title = title;
+            this.subtitle = subtitle;
+        }
 
-            this.displayName = displayName;
-            this.sharePanel = sharePanel;
-            this.pendingText = Component.literal("%s %s".formatted(displayName.getString(), MessageType.PENDING + "(pending)"));
-            this.alreadyShared = Component.literal("%s %s".formatted(displayName.getString(), MessageType.SUCCESS + "(already shared)"));
+        public void setSubtitle(@NotNull Subtitle subtitle)
+        {
+            this.subtitle = subtitle;
         }
 
         @Override
         public @NonNull Component getNarration() {
-            return displayName;
+            return title;
         }
 
         @Override
-        public void extractContent(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v)
+        public void extractContent(@NonNull GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v)
         {
+            extractMainlineString(guiGraphicsExtractor, i, i1, b, v);
+            extractSubtitleText(guiGraphicsExtractor, i, i1, b, v);
+            extractThumbnailImage(guiGraphicsExtractor, i, i1, b, v);
+        }
+
+        public void extractThumbnailImage(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v)
+        {
+
+        }
+
+        public void extractSubtitleText(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v)
+        {
+            guiGraphicsExtractor.text(JMWSCommon.minecraftClientInstance.font, subtitle.getDisplayableComponent(), this.getContentX() + PLAYER_HEAD_SIZE * 2, this.getContentYMiddle() + 3, -1);
+        }
+
+        public void extractMainlineString(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v)
+        {
+            guiGraphicsExtractor.text(JMWSCommon.minecraftClientInstance.font, title, this.getContentX() + PLAYER_HEAD_SIZE * 2, this.getContentYMiddle() - 8, -1);
         }
     }
 
     public static class PlayerEntry extends Entry
     {
+        protected final @NotNull ObjectSharePanel<?> sharePanel;
+
         private final @NonNull PlayerInfo user;
         private final @NotNull UUID userUuid;
 
+        protected final static @NotNull Subtitle PENDING_SHARE = new Subtitle(Component.literal("pending"), MessageType.PENDING);
+        protected final static @NotNull Subtitle ALREADY_SHARED = new Subtitle(Component.literal("already shared"), MessageType.SUCCESS);
+        protected final static @NotNull Subtitle EMPTY = new Subtitle(Component.literal("not shared"), MessageType.GREY);
+
         public PlayerEntry(@NotNull PlayerInfo user, @NonNull ObjectSharePanel<? extends ClientObjectWrapper<?>> owner)
         {
-            super(Component.literal(user.getProfile().name()), owner);
+            super(Component.literal(user.getProfile().name()), EMPTY);
+
+            this.sharePanel = owner;
             this.user = user;
             this.userUuid = user.getProfile().id();
+
+            setSubtitle(getSubtitleText());
+        }
+
+        public Subtitle getSubtitleText()
+        {
+            Subtitle display;
+            if (JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(userUuid))
+            {
+                display = PENDING_SHARE;
+            } else if (this.sharePanel.sharedObject.getSharedTo().contains(userUuid))
+            {
+                display = ALREADY_SHARED;
+            } else {
+                display = EMPTY;
+            }
+
+            return display;
+        }
+
+        public void extractSharingStatusBar(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v)
+        {
+            // minus half width
+            int barWidth = 6;
+            int middle = (this.getContentX() + ((4 + PLAYER_HEAD_SIZE_HALVED) / 2));
+
+            int startX = middle - (barWidth / 2);
+            int endX = middle + (barWidth / 2);
+
+            int startY = this.getContentYMiddle() - PLAYER_HEAD_SIZE_HALVED;
+            int endY = this.getContentYMiddle() + PLAYER_HEAD_SIZE_HALVED;
+
+            guiGraphicsExtractor.fill(startX, startY, endX, endY, this.subtitle.messageType.getNumericalColour());
         }
 
         @Override
@@ -158,29 +203,29 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
                     PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.share_busy", this.user.getProfile().name()), true, true, MessageType.PENDING);
                 }
             }
-
             return c;
         }
 
+        @Override
+        public void extractThumbnailImage(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v)
+        {
+            int headPlacementX = this.getContentX() + PLAYER_HEAD_SIZE_HALVED + 4;
+            int headPlacementY = this.getContentYMiddle() - PLAYER_HEAD_SIZE_HALVED;
+            PlayerFaceExtractor.extractRenderState(guiGraphicsExtractor, user.getSkin(), headPlacementX, headPlacementY, PLAYER_HEAD_SIZE);
+            guiGraphicsExtractor.outline(headPlacementX - 1, headPlacementY - 1, PLAYER_HEAD_SIZE + 2, PLAYER_HEAD_SIZE + 2, this.sharePanel.sharedObject.getColour());
+        }
+
+        @Override
+        public void extractSubtitleText(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
+            setSubtitle(getSubtitleText());
+            super.extractSubtitleText(guiGraphicsExtractor, i, i1, b, v);
+        }
 
         @Override
         public void extractContent(@NonNull GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v)
         {
             super.extractContent(guiGraphicsExtractor, i, i1, b, v);
-            Component display;
-
-            if (JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(userUuid))
-            {
-                display = this.pendingText;
-            } else if (this.sharePanel.sharedObject.getSharedTo().contains(userUuid))
-            {
-                display = this.alreadyShared;
-            } else {
-                display = this.displayName;
-            }
-
-            guiGraphicsExtractor.text(JMWSCommon.minecraftClientInstance.font, display, this.getContentX() + PLAYER_HEAD_SIZE * 2, this.getContentYMiddle() - 2, -1);
-            PlayerFaceExtractor.extractRenderState(guiGraphicsExtractor, user.getSkin(), this.getContentX() + PLAYER_HEAD_SIZE_HALFED + 4, this.getContentYMiddle() - PLAYER_HEAD_SIZE_HALFED, PLAYER_HEAD_SIZE);
+            this.extractSharingStatusBar(guiGraphicsExtractor, i, i1, b, v);
         }
     }
 }

@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.client.syncing.api;
 import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
+import net.minecraft.util.ARGB;
 
 import java.util.List;
 import java.util.Set;
@@ -13,6 +14,12 @@ public interface ClientObjectWrapper<T> {
     String getName();
     String getSerialization();
     String getIdentifier();
+
+    /*
+    Note; in ARGB format
+     */
+    int getColour();
+
     UUID getOwner();
     T getNativeObject();
 

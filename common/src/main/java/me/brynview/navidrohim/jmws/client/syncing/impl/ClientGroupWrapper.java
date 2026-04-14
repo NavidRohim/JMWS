@@ -7,6 +7,7 @@ import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
 import me.brynview.navidrohim.jmws.client.syncing.api.JMObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
+import net.minecraft.util.ARGB;
 
 public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
 
@@ -50,6 +51,12 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
     @Override
     public String getSerialization() {
         return group.toString();
+    }
+
+    @Override
+    public int getColour()
+    {
+        return this.group.getColor();
     }
 
     @Override
