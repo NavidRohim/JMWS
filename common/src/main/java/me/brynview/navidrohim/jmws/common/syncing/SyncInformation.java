@@ -3,17 +3,17 @@ package me.brynview.navidrohim.jmws.common.syncing;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class SyncInformation {
 
     public String objectIdentifier;
     public UUID owner;
-    public List<UUID> sharedTo;
+    public Set<UUID> sharedTo;
     public boolean isGlobal;
 
     public boolean isOwner(UUID user)
@@ -24,7 +24,7 @@ public class SyncInformation {
     @Nullable
     public String getSyncInformationAsString()
     {
-        return CommonClass.gson.toJson(this);
+        return JMWSCommon.gson.toJson(this);
     }
 
     @Nullable
@@ -32,7 +32,7 @@ public class SyncInformation {
     {
         try
         {
-            return CommonClass.gson.fromJson(info, SyncInformation.class);
+            return JMWSCommon.gson.fromJson(info, SyncInformation.class);
         } catch (JsonSyntaxException e)
         {
             return null;

@@ -5,18 +5,18 @@ import commonnetwork.networking.data.PacketContext;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
+import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.client.syncing.SyncCounter;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
+import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.factory.ClientObjectFactory;
-import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
-import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.assets.JMWSSounds;
@@ -46,12 +46,12 @@ public class ClientPacketHandler {
     public static void handlePacket(PacketContext<JMWSActionPayload> Context) {
         JMWSActionPayload waypointPayload = Context.message();
         List<JsonElement> arguments = waypointPayload.arguments();
-        ClientCommonClass.isBusy = true;
+        JMWSClientCommon.isBusy = true;
 
         // Check if command should be processed (must be a client of a server)
         if (ConfigInterface.getEnabledStatus()) {
 
-            if (CommonClass.minecraftClientInstance.player == null)
+            if (JMWSCommon.minecraftClientInstance.player == null)
             {
                 return;
             }
@@ -125,20 +125,21 @@ public class ClientPacketHandler {
                         Object object;
                         String objName;
                         String objectIdentifier;
+                        ClientObjectWrapper<?> objectWrapper;
 
                         if (sharedObjectType == ObjectType.WAYPOINT)
                         {
                             Waypoint objectWp = WaypointFactory.fromWaypointJsonString(objectString);
-                            ClientWaypointWrapper JMWSWaypoint = ClientObjectFactory.fromWaypoint(objectWp);
+                            objectWrapper = ClientObjectFactory.fromWaypoint(objectWp);
 
-                            objectIdentifier = JMWSWaypoint.getIdentifier();
+                            objectIdentifier = objectWrapper.getIdentifier();
                             object = objectWp;
                             objName = objectWp.getName();
                         } else {
                             WaypointGroup objectGp = WaypointFactory.fromGroupJsonString(objectString);
-                            ClientGroupWrapper JMWSGroup = ClientObjectFactory.fromGroup(objectGp);
+                            objectWrapper = ClientObjectFactory.fromGroup(objectGp);
 
-                            objectIdentifier = JMWSGroup.getIdentifier();
+                            objectIdentifier = objectWrapper.getIdentifier();
                             object = objectGp;
                             objName = objectGp.getName();
                         }
@@ -146,29 +147,29 @@ public class ClientPacketHandler {
                         if (direction.equals(ShareRequestDirection.FOR_CLIENT))
                         {
                             UUID sender = UUID.fromString(arguments.get(1).getAsString());
-                            if (!ClientCommonClass.config.enableSharing.get())
+                            if (!JMWSClientCommon.config.enableSharing.get())
                             {
                                 ShareRequest.disabled(sender);
                             }
-                            else if (!IncomingShareRequests.hasShareRequestFrom(sender))
+                            else if (!JMWSClientCommon.incomingShareRequests.hasShareRequestFrom(sender))
                             {
                                 ShareRequest request = new ShareRequest(
                                         sender,
                                         PlayerUtils.ourUUID(),
-                                        object,
+                                        objectWrapper,
                                         sharedObjectType,
                                         objectIdentifier,
                                         objName
                                 );
 
-                                IncomingShareRequests.addRequest(sender, request);
+                                JMWSClientCommon.incomingShareRequests.addRequest(sender, request);
                                 sendUserAlert(Component.translatable("sharing.jmws.share_request", request.getSenderName()), false, true, MessageType.SUCCESS);
                             } else {
                                 ShareRequest.busy(sender);
                             }
                         } else {
                             UUID incoming = UUID.fromString(arguments.get(1).getAsString());
-                            OutgoingShareRequests.addRequest(incoming, new OutgoingShareRequest(PlayerUtils.ourUUID(), incoming, object, sharedObjectType, objectIdentifier, objName));
+                            JMWSClientCommon.outgoingShareRequests.addRequest(incoming, new OutgoingShareRequest(PlayerUtils.ourUUID(), incoming, objectWrapper, sharedObjectType, objectIdentifier, objName));
                             sendUserAlert(Component.translatable("sharing.jmws.share_sent"), true, false, MessageType.SUCCESS);
                         }
                     } catch (NullPointerException e)
@@ -180,7 +181,7 @@ public class ClientPacketHandler {
                 case REJECT_SHARE ->
                 {
                     UUID incoming = UUID.fromString(arguments.get(1).getAsString());
-                    @Nullable OutgoingShareRequest request = OutgoingShareRequests.getRequest(incoming);
+                    @Nullable OutgoingShareRequest request = JMWSClientCommon.outgoingShareRequests.getRequest(incoming);
 
                     if (request != null)
                     {
@@ -193,7 +194,7 @@ public class ClientPacketHandler {
                 {
                     UUID incoming = UUID.fromString(arguments.get(1).getAsString());
                     String declineMessage = arguments.getLast().getAsString();
-                    @Nullable OutgoingShareRequest request = OutgoingShareRequests.getRequest(incoming);
+                    @Nullable OutgoingShareRequest request = JMWSClientCommon.outgoingShareRequests.getRequest(incoming);
 
                     if (request != null)
                     {
@@ -206,9 +207,12 @@ public class ClientPacketHandler {
                 case AFFIRM_SHARE ->
                 {
                     UUID incoming = UUID.fromString(arguments.getLast().getAsString());
-                    if (OutgoingShareRequests.hasShareRequestFor(incoming))
+                    if (JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(incoming))
                     {
-                        OutgoingShareRequest request = OutgoingShareRequests.getRequest(incoming).resolve();
+                        OutgoingShareRequest request = JMWSClientCommon.outgoingShareRequests.getRequest(incoming).resolve();
+                        request.currentSharedObject.addSharedTo(incoming);
+                        request.resolve();
+
                         sendUserAlert(Component.translatable("sharing.jmws.sharing_host", request.objectDisplayName, request.getRecipientName()), true, false, MessageType.SUCCESS);
                     } else {
                         sendUserAlert(Component.translatable("sharing.jmws.no_longer_valid"), true, true, MessageType.SUCCESS);
@@ -218,7 +222,7 @@ public class ClientPacketHandler {
                 default -> Constants.getLogger().warn("Unknown packet command -> {} ", waypointPayload.command);
              }
         }
-        ClientCommonClass.isBusy = false;
+        JMWSClientCommon.isBusy = false;
     }
 
     /**
@@ -239,14 +243,14 @@ public class ClientPacketHandler {
             sendUserAlert(Component.translatable("warning.jmws.server.newer_server_version"), true, false, MessageType.WARNING);
             Constants.getLogger().warn("Got server version; %s expected; %s".formatted(serverVersion, Constants.SERVER_VERSION));
 
-        } else if (!ClientCommonClass.serverConfig.jmwsEnabled) {
+        } else if (!JMWSClientCommon.serverConfig.jmwsEnabled) {
             sendUserAlert(Component.translatable("warning.jmws.server.disabled_jmws"), true, false, MessageType.WARNING);
-        } else if (!ClientCommonClass.serverConfig.waypointsEnabled) {
+        } else if (!JMWSClientCommon.serverConfig.waypointsEnabled) {
             sendUserAlert(Component.translatable("warning.jmws.server.disabled_waypoint"), true, false, MessageType.WARNING);
-        } else if (!ClientCommonClass.serverConfig.groupsEnabled) {
+        } else if (!JMWSClientCommon.serverConfig.groupsEnabled) {
             sendUserAlert(Component.translatable("warning.jmws.server.disabled_group"), true, false, MessageType.WARNING);
         } else {
-            sendUserAlert(Component.translatable("message.jmws.has_jmws", (ClientCommonClass.serverConfig.getServerVersion())), true, false, MessageType.SUCCESS);
+            sendUserAlert(Component.translatable("message.jmws.has_jmws", (JMWSClientCommon.serverConfig.getServerVersion())), true, false, MessageType.SUCCESS);
         }
     }
 
@@ -255,16 +259,16 @@ public class ClientPacketHandler {
      * @param handshakePayload -- Handshake packet from the server.
      */
     public static void handleHandshake(JMWSHandshakePayload handshakePayload) {
-        ClientCommonClass.serverConfig = handshakePayload.serverConfigData != null ? handshakePayload.serverConfigData : ClientSideServerConfigObject.serverOwner(); // Use serverOwner if on LAN, serverConfigData will be null if so (Because there is no physical server), so instantiate our own fake config just so shit don't crash.
-        @Nullable Double serverVersion =  ClientCommonClass.serverConfig.getServerVersion();
-        ClientCommonClass.setServerModStatus(true); // We have JMWS on server side
+        JMWSClientCommon.serverConfig = handshakePayload.serverConfigData != null ? handshakePayload.serverConfigData : ClientSideServerConfigObject.serverOwner(); // Use serverOwner if on LAN, serverConfigData will be null if so (Because there is no physical server), so instantiate our own fake config just so shit don't crash.
+        @Nullable Double serverVersion =  JMWSClientCommon.serverConfig.getServerVersion();
+        JMWSClientCommon.setServerModStatus(true); // We have JMWS on server side
         sendUserJoinAlert(serverVersion);
 
-        if (ClientCommonClass.isMapping)
+        if (JMWSClientCommon.isMapping)
         {
             JMWSPlugin.sync(false);
         } else {
-            ClientCommonClass.didHandshake = true;
+            JMWSClientCommon.didHandshake = true;
         }
     }
 }

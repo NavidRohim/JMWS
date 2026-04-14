@@ -2,9 +2,9 @@ package me.brynview.navidrohim.jmws.client.plugin;
 
 import journeymap.api.v2.client.event.FullscreenDisplayEvent;
 import journeymap.api.v2.client.fullscreen.IThemeButton;
-import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import net.minecraft.network.chat.Component;
 
@@ -19,7 +19,7 @@ public class JMButtonAddon {
      */
     public static void addJMButtons(FullscreenDisplayEvent.AddonButtonDisplayEvent addonButtonDisplayEvent) {
 
-        if (!CommonClass.isInternalServer()) {
+        if (!JMWSCommon.isInternalServer()) {
 
             // Button for enabling and disabling JMWS
             IThemeButton buttonEnabled = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
@@ -53,10 +53,10 @@ public class JMButtonAddon {
         );
 
         if (ConfigInterface.getEnabledStatus()) { // Turn off
-            ClientCommonClass.config.enabled.set(false);
+            JMWSClientCommon.config.enabled.set(false);
             iThemeButton.setToggled(false);
         } else { // Turn on
-            ClientCommonClass.config.enabled.set(true);
+            JMWSClientCommon.config.enabled.set(true);
             iThemeButton.setToggled(true);
         }
     }

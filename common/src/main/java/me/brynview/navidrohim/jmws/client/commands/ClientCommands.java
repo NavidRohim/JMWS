@@ -1,12 +1,10 @@
 package me.brynview.navidrohim.jmws.client.commands;
 
-import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
-import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import net.minecraft.network.chat.Component;
@@ -22,7 +20,7 @@ public class ClientCommands {
      * @return boolean -- If the player is in singleplayer.
      */
     private static boolean isNotInSingleplayer() {
-        return !CommonClass.isInternalServer();
+        return !JMWSCommon.isInternalServer();
     }
 
     /**
@@ -52,7 +50,7 @@ public class ClientCommands {
      */
     public static int getSyncInterval()
     {
-        PlayerUtils.sendUserAlert(Component.translatable("message.jmws.sync_frequency", ClientCommonClass.syncCounter.getTickCounterUpdateThreshold() / 20), true, false, MessageType.NEUTRAL);
+        PlayerUtils.sendUserAlert(Component.translatable("message.jmws.sync_frequency", JMWSClientCommon.syncCounter.getTickCounterUpdateThreshold() / 20), true, false, MessageType.NEUTRAL);
         return 1;
     }
 
@@ -103,9 +101,9 @@ public class ClientCommands {
     public static int nextSync()
     {
         if (isNotInSingleplayer()) {
-            if (ClientCommonClass.config.autoSync.get())
+            if (JMWSClientCommon.config.autoSync.get())
             {
-                PlayerUtils.sendUserAlert(Component.translatable("message.jmws.next_sync", (ClientCommonClass.syncCounter.getTickCounterUpdateThreshold() - ClientCommonClass.syncCounter.getCurrentTickCount()) / 20), true, false, MessageType.NEUTRAL);
+                PlayerUtils.sendUserAlert(Component.translatable("message.jmws.next_sync", (JMWSClientCommon.syncCounter.getTickCounterUpdateThreshold() - JMWSClientCommon.syncCounter.getCurrentTickCount()) / 20), true, false, MessageType.NEUTRAL);
             } else {
                 PlayerUtils.sendUserAlert(Component.translatable("message.jmws.auto_sync_disabled"), true, false, MessageType.WARNING);
             }
@@ -129,7 +127,7 @@ public class ClientCommands {
 
     public static int accept(@Nullable String name)
     {
-        @Nullable ShareRequest request = IncomingShareRequests.getAllUserKey().get(name);
+        @Nullable ShareRequest request = JMWSClientCommon.incomingShareRequests.getAllUserKey().get(name);
         return accept(request);
     }
 
@@ -148,7 +146,7 @@ public class ClientCommands {
     public static int decline(@Nullable String from)
     {
 
-        @Nullable ShareRequest request = IncomingShareRequests.getAllUserKey().get(from);
+        @Nullable ShareRequest request = JMWSClientCommon.incomingShareRequests.getAllUserKey().get(from);
         return decline(request);
     }
 }

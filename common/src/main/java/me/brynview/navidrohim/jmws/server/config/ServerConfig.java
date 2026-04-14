@@ -1,7 +1,7 @@
 package me.brynview.navidrohim.jmws.server.config;
 
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.server.exceptions.ServerConfigurationException;
 
@@ -28,7 +28,7 @@ public class ServerConfig {
 
             if (didCreateNew)
             {
-                String configJsonString = CommonClass.gsonExcludeNoExpose.toJson(new ServerConfigObject(
+                String configJsonString = JMWSCommon.gsonExcludeNoExpose.toJson(new ServerConfigObject(
                                 true,
                                 true,
                                 true,
@@ -44,7 +44,7 @@ public class ServerConfig {
 
             } else {
                 rawServerConfigData = getConfigJson();
-                serverConfig = CommonClass.gson.fromJson(rawServerConfigData, ServerConfigObject.class);
+                serverConfig = JMWSCommon.gson.fromJson(rawServerConfigData, ServerConfigObject.class);
 
                 if (!serverConfig.isValid())
                 {

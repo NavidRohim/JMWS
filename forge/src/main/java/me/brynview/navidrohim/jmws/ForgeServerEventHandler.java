@@ -2,12 +2,11 @@ package me.brynview.navidrohim.jmws;
 
 import com.mojang.brigadier.CommandDispatcher;
 import me.brynview.navidrohim.jmws.common.events.CommonEvents;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.server.commands.ServerDispatcher;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -22,7 +21,7 @@ public class ForgeServerEventHandler {
     @SubscribeEvent
     public static void onServerStart(ServerStartedEvent event)
     {
-        CommonClass.minecraftServerInstance = event.getServer();
+        JMWSCommon.minecraftServerInstance = event.getServer();
     }
 
     @SubscribeEvent

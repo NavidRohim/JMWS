@@ -7,7 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -153,8 +153,8 @@ public class ServerDispatcher {
         HashMap<String, ServerObject> stringServerObjectHashMap = new HashMap<>();
 
         objs.forEach(obj -> {
-            Optional<GameProfile> oldOpPlayerProfile = CommonClass.minecraftServerInstance.services().profileResolver().fetchById(obj.getOwnerUUID());
-            boolean isOp = oldOpPlayerProfile.isPresent() && CommonClass.minecraftServerInstance.getPlayerList().isOp(new NameAndId(oldOpPlayerProfile.get()));
+            Optional<GameProfile> oldOpPlayerProfile = JMWSCommon.minecraftServerInstance.services().profileResolver().fetchById(obj.getOwnerUUID());
+            boolean isOp = oldOpPlayerProfile.isPresent() && JMWSCommon.minecraftServerInstance.getPlayerList().isOp(new NameAndId(oldOpPlayerProfile.get()));
 
             if (!isOp)
             {
@@ -220,6 +220,6 @@ public class ServerDispatcher {
 
     private static boolean isValidCommandUser(CommandSourceStack commandSourceStack)
     {
-        return !CommonClass.isInternalServer() || (!CommonClass.minecraftServerInstance.isSingleplayerOwner(commandSourceStack.getPlayer().nameAndId())); // No host user
+        return !JMWSCommon.isInternalServer() || (!JMWSCommon.minecraftServerInstance.isSingleplayerOwner(commandSourceStack.getPlayer().nameAndId())); // No host user
     }
 }

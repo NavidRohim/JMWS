@@ -3,15 +3,17 @@ package me.brynview.navidrohim.jmws.common.api;
 import com.google.gson.annotations.Expose;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class CommonSyncHandler
 {
+    // TODO: Extend from SyncInformation? And no need for expose I don't believe.
     @Expose
     public String objectIdentifier;
 
     @Expose
-    public List<String> sharedTo;
+    public Set<String> sharedTo;
 
     @Expose
     protected UUID owner;
@@ -19,7 +21,7 @@ public class CommonSyncHandler
     @Expose
     protected boolean isGlobal;
 
-    public CommonSyncHandler(List<String> sharedTo, String identifier, UUID owner, boolean isGlobal) {
+    public CommonSyncHandler(Set<String> sharedTo, String identifier, UUID owner, boolean isGlobal) {
         this.objectIdentifier = identifier;
         this.sharedTo = sharedTo;
         this.owner = owner;

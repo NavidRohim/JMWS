@@ -2,12 +2,14 @@ package me.brynview.navidrohim.jmws.client;
 
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
+import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
+import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.client.syncing.SyncCounter;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
-public class ClientCommonClass {
+public class JMWSClientCommon {
 
     public static boolean clientHasJM = false;
     public static boolean serverHasMod = false;
@@ -21,9 +23,12 @@ public class ClientCommonClass {
     public static SyncCounter syncCounter = null;
     public static ConfigInterface config = null;
 
+    public static final OutgoingShareRequests outgoingShareRequests = new OutgoingShareRequests();
+    public static final IncomingShareRequests incomingShareRequests = new IncomingShareRequests();
+
     public static void setupMinecraftClientInstance()
     {
-        CommonClass.minecraftClientInstance = Minecraft.getInstance();
+        JMWSCommon.minecraftClientInstance = Minecraft.getInstance();
         syncCounter = new SyncCounter();
     }
 

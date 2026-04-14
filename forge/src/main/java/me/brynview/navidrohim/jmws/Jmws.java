@@ -1,6 +1,6 @@
 package me.brynview.navidrohim.jmws;
 
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import net.minecraftforge.fml.common.Mod;
 
 
@@ -14,7 +14,7 @@ public class Jmws {
 
         // Use Forge to bootstrap the Common mod.
         //Constants.LOGGER.info("Hello Forge world!");
-        CommonClass.init();
+        JMWSCommon.init();
 
     }
 }

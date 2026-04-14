@@ -1,10 +1,11 @@
 package me.brynview.navidrohim.jmws.client.ui.scroll;
 
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
-import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -17,7 +18,6 @@ import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -96,7 +96,7 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
         super.extractWidgetRenderState(graphics, mouseX, mouseY, a);
         if (this.players.isEmpty())
         {
-            graphics.text(CommonClass.minecraftClientInstance.font, "No online players!", this.getX(), this.getY() / 2, -1);
+            graphics.text(JMWSCommon.minecraftClientInstance.font, "No online players!", this.getX(), this.getY() / 2, -1);
         }
     }
 
@@ -146,7 +146,17 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
 
             if (doubleClick)
             {
-                this.sharePanel.sharedObject.addSharedTo(user.getProfile().id());
+                if (!JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(this.userUuid))
+                {
+                    if (!sharePanel.sharedObject.getSharedTo().contains(this.userUuid))
+                    {
+                        this.sharePanel.sharedObject.sendShareRequest(this.userUuid);
+                    } else {
+                        PlayerUtils.sendUserAlert(Component.literal("You are already sharing %s with %s".formatted(this.sharePanel.sharedObject.getName(), this.user.getProfile().name())), true, true, MessageType.WARNING);
+                    }
+                } else {
+                    PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.share_busy", this.user.getProfile().name()), true, true, MessageType.PENDING);
+                }
             }
 
             return c;
@@ -159,17 +169,17 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
             super.extractContent(guiGraphicsExtractor, i, i1, b, v);
             Component display;
 
-            if (this.sharePanel.sharedObject.getSharedTo().contains(userUuid))
-            {
-                display = this.alreadyShared;
-            } else if (OutgoingShareRequests.hasShareRequestFor(userUuid))
+            if (JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(userUuid))
             {
                 display = this.pendingText;
+            } else if (this.sharePanel.sharedObject.getSharedTo().contains(userUuid))
+            {
+                display = this.alreadyShared;
             } else {
                 display = this.displayName;
             }
 
-            guiGraphicsExtractor.text(CommonClass.minecraftClientInstance.font, display, this.getContentX() + PLAYER_HEAD_SIZE * 2, this.getContentYMiddle() - 2, -1);
+            guiGraphicsExtractor.text(JMWSCommon.minecraftClientInstance.font, display, this.getContentX() + PLAYER_HEAD_SIZE * 2, this.getContentYMiddle() - 2, -1);
             PlayerFaceExtractor.extractRenderState(guiGraphicsExtractor, user.getSkin(), this.getContentX() + PLAYER_HEAD_SIZE_HALFED + 4, this.getContentYMiddle() - PLAYER_HEAD_SIZE_HALFED, PLAYER_HEAD_SIZE);
         }
     }

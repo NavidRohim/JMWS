@@ -1,7 +1,7 @@
 package me.brynview.navidrohim.jmws.server.commands;
 
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
@@ -19,7 +19,7 @@ public class ServerCommands {
     public static int share(ServerPlayer sender, ServerPlayer player, @Nullable ServerObject object) {
         if (ServerConfig.serverConfig.sharingEnabled)
         {
-            if (sender.equals(player) || (CommonClass.isInternalServer() && player.level().getServer().getSingleplayerProfile().id().equals(player.getUUID())))
+            if (sender.equals(player) || (JMWSCommon.isInternalServer() && player.level().getServer().getSingleplayerProfile().id().equals(player.getUUID())))
             {
                 PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.cannot_share", true, false);
             } else {

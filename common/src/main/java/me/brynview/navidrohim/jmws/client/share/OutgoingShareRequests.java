@@ -1,39 +1,51 @@
 package me.brynview.navidrohim.jmws.client.share;
 
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
+import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
+import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
+import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.UUID;
 
-public class OutgoingShareRequests {
-    public static final HashMap<UUID, OutgoingShareRequest> outgoingShareRequestList = new HashMap<>();
+public class OutgoingShareRequests extends HashMap<UUID, OutgoingShareRequest> {
 
-    public static boolean hasShareRequestFor(UUID player)
+    public boolean hasShareRequestFor(UUID player)
     {
-        return outgoingShareRequestList.containsKey(player);
+        return this.containsKey(player);
     }
 
-    public static void addRequest(UUID to, OutgoingShareRequest request)
+    public void addRequest(UUID to, OutgoingShareRequest request)
     {
-        outgoingShareRequestList.put(to, request);
+        this.put(to, request);
     }
 
-    public static void removeRequest(UUID from)
+    public void removeRequest(UUID from)
     {
-        outgoingShareRequestList.remove(from);
+        this.remove(from);
     }
 
     @Nullable
-    public static OutgoingShareRequest getRequest(UUID from)
+    public OutgoingShareRequest getRequest(UUID from)
     {
-        return outgoingShareRequestList.get(from);
+        return this.get(from);
     }
 
-    public static void clearAll() {
-        for (OutgoingShareRequest request : outgoingShareRequestList.values())
+    public void clearAll() {
+        for (OutgoingShareRequest request : this.values())
         {
             request.resolve();
         }
+        this.clear();
+    }
+
+    public void sendRequest(UUID sharedTo, ClientBaseObjectWrapper<?> sharedObject)
+    {
+        this.addRequest(sharedTo, new OutgoingShareRequest(PlayerUtils.ourUUID(), sharedTo, sharedObject, ObjectType.valueOf(sharedObject.getType().getId()), sharedObject.getIdentifier(), sharedObject.getName()));
+        ClientNetworkDispatcher.shareWith(sharedTo, sharedObject);
     }
 }

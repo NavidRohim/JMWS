@@ -4,7 +4,7 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.commands.CommonClientPlatformCommands;
 import me.brynview.navidrohim.jmws.client.ui.screen.MissingJourneyMapScreen;
 import me.brynview.navidrohim.jmws.common.events.CommonEvents;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -39,13 +39,13 @@ public class JMWSClient implements ClientModInitializer {
 
         // New
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            CommonClass.minecraftServerInstance = server;
+            JMWSCommon.minecraftServerInstance = server;
         });
     }
 
     private void waitForStartScreenRegister(Minecraft minecraft, Screen screen, int i, int i1) {
 
-        if (screen instanceof TitleScreen && !ClientCommonClass.clientHasJM)
+        if (screen instanceof TitleScreen && !JMWSClientCommon.clientHasJM)
         {
             Constants.getLogger().error("JourneyMap is missing or the wrong version is installed!");
             minecraft.setScreen(new MissingJourneyMapScreen(Component.translatable("text.config.jmws-config.title"), Component.translatable("warning.jmws.jm_not_installed")));
@@ -55,9 +55,9 @@ public class JMWSClient implements ClientModInitializer {
 
     private void handleTick(Minecraft _minecraftClient)
     {
-        if (ClientCommonClass.syncCounter != null)
+        if (JMWSClientCommon.syncCounter != null)
         {
-            ClientCommonClass.syncCounter.iterateCounter();
+            JMWSClientCommon.syncCounter.iterateCounter();
         }
     }
 

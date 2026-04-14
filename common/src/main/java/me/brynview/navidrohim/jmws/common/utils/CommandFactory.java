@@ -8,7 +8,7 @@ import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.enums.ShareRequestDirection;
 
@@ -28,7 +28,7 @@ public class CommandFactory {
     }
 
     public static String makeBaseJsonRequest(Commands command, Object... arguments) {
-       return CommonClass.gson.toJson(new PacketCommand(command, arguments));
+       return JMWSCommon.gson.toJson(new PacketCommand(command, arguments));
     }
 
     public static String deleteWaypoint(String waypointIdentifier, boolean silent, boolean all) {

@@ -1,7 +1,7 @@
 package me.brynview.navidrohim.jmws.server;
 
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.events.CommonEvents;
 
 import net.fabricmc.api.DedicatedServerModInitializer;
@@ -23,7 +23,7 @@ public class JMWSServer implements DedicatedServerModInitializer {
             CommonEvents.handleJoin(handler.player, false, false);
         }));
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            CommonClass.minecraftServerInstance = server;
+            JMWSCommon.minecraftServerInstance = server;
         });
     }
 }

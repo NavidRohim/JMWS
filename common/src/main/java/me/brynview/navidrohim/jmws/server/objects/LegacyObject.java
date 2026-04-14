@@ -3,7 +3,7 @@ package me.brynview.navidrohim.jmws.server.objects;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
@@ -77,7 +77,7 @@ public class LegacyObject
                 }
             } else {
                 Constants.getLogger().debug("Possible issue translating server object. If issue arises please report.");
-                Constants.getLogger().debug("Diagnostic \nObject Path: %s\nOwner UUID: %s\nObjectType: %s\nInternal Server: %s\n\nIf in an internal server, you can likely ignore this message.\n\n".formatted(path, owner, newType, CommonClass.isInternalServer()));
+                Constants.getLogger().debug("Diagnostic \nObject Path: %s\nOwner UUID: %s\nObjectType: %s\nInternal Server: %s\n\nIf in an internal server, you can likely ignore this message.\n\n".formatted(path, owner, newType, JMWSCommon.isInternalServer()));
             }
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | IllegalStateException initExc)
         {

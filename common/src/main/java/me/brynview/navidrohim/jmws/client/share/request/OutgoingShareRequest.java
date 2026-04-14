@@ -1,8 +1,10 @@
 package me.brynview.navidrohim.jmws.client.share.request;
 
+import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
+import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
-import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -11,10 +13,8 @@ import java.util.UUID;
 
 public class OutgoingShareRequest extends ShareRequest {
 
-    public static final boolean isOutgoing = true; // kinda useless
-
-    public OutgoingShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, Object waypointOrGroup, ObjectType sharedObjectType, String requestIdentifier, String objectDisplayName) {
-        super(uuid, meantForPlayerUUID, waypointOrGroup, sharedObjectType, requestIdentifier, objectDisplayName);
+    public OutgoingShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, ClientObjectWrapper<?> sharedObject, ObjectType sharedObjectType, String requestIdentifier, String objectDisplayName) {
+        super(uuid, meantForPlayerUUID, sharedObject, sharedObjectType, requestIdentifier, objectDisplayName);
     }
 
     @Override
@@ -27,13 +27,13 @@ public class OutgoingShareRequest extends ShareRequest {
     @Override
     protected void timeout()
     {
-        OutgoingShareRequests.removeRequest(this.meantFor);
+        JMWSClientCommon.outgoingShareRequests.removeRequest(this.meantFor);
         PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.request_timeout_to", this.getRecipientName()), true, false, MessageType.WARNING);
     }
 
     private void finishRequest()
     {
-        OutgoingShareRequests.removeRequest(this.originalSender);
+        JMWSClientCommon.outgoingShareRequests.removeRequest(this.meantFor);
         this.timeout.cancel(true);
     }
 }

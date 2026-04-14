@@ -1,8 +1,8 @@
 package me.brynview.navidrohim.jmws.client.utils;
 
 import com.mojang.authlib.GameProfile;
-import me.brynview.navidrohim.jmws.client.ClientCommonClass;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -29,19 +29,19 @@ public class PlayerUtils {
     public static void sendUserAlert(Component text, boolean overlayText, boolean ignoreConfig, MessageType messageType) {
 
         // Check if player allows alerts, check if player exists, and make sure it has not been sent before if one-time message
-        if (!sentWarningsInServer.contains(text.getString()) && (ClientCommonClass.config.showAlerts.get() || ignoreConfig) && CommonClass.minecraftClientInstance.player != null)
+        if (!sentWarningsInServer.contains(text.getString()) && (JMWSClientCommon.config.showAlerts.get() || ignoreConfig) && JMWSCommon.minecraftClientInstance.player != null)
         {
             String finalText = text.getString();
 
             // Check if user allows coloured text, add colour tag if so
-            if (ClientCommonClass.config.colouredText.get()) {
+            if (JMWSClientCommon.config.colouredText.get()) {
                 finalText = messageType.toString() + text.getString();
             }
 
             if (overlayText) {
-                CommonClass.minecraftClientInstance.gui.setOverlayMessage(Component.literal(finalText), false); // Action bar
+                JMWSCommon.minecraftClientInstance.gui.setOverlayMessage(Component.literal(finalText), false); // Action bar
             } else {
-                CommonClass.minecraftClientInstance.gui.getChat().addClientSystemMessage(Component.literal(finalText)); // Chat
+                JMWSCommon.minecraftClientInstance.gui.getChat().addClientSystemMessage(Component.literal(finalText)); // Chat
             }
 
             // Add alert to cache if it's one-time
@@ -68,14 +68,14 @@ public class PlayerUtils {
      */
     public static void sendUserSoundAlert(SoundEvent sound) {
 
-        if (ClientCommonClass.config.playEffects.get() && CommonClass.minecraftClientInstance.player != null) {
-            CommonClass.minecraftClientInstance.player.playSound(sound, 0.09f, 1f); // Lower volume so it becomes background noise
+        if (JMWSClientCommon.config.playEffects.get() && JMWSCommon.minecraftClientInstance.player != null) {
+            JMWSCommon.minecraftClientInstance.player.playSound(sound, 0.09f, 1f); // Lower volume so it becomes background noise
         }
     }
 
     public static Optional<GameProfile> getUserFromUUID(UUID user)
     {
-        ClientPacketListener clientPacketListener = Objects.requireNonNull(CommonClass.minecraftClientInstance.getConnection());
+        ClientPacketListener clientPacketListener = Objects.requireNonNull(JMWSCommon.minecraftClientInstance.getConnection());
         @Nullable PlayerInfo playerInfo = clientPacketListener.getPlayerInfo(user);
 
         if (playerInfo != null)
@@ -99,6 +99,6 @@ public class PlayerUtils {
 
     public static UUID ourUUID()
     {
-        return CommonClass.minecraftClientInstance.player.getUUID();
+        return JMWSCommon.minecraftClientInstance.player.getUUID();
     }
 }

@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.client.ui.screen;
 
+import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.client.ui.scroll.ObjectSharePanel;
@@ -12,7 +13,7 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 
-import static me.brynview.navidrohim.jmws.common.CommonClass.minecraftClientInstance;
+import static me.brynview.navidrohim.jmws.common.JMWSCommon.minecraftClientInstance;
 
 public class ShareScreen <T extends ClientObjectWrapper<?>> extends Screen {
 
@@ -57,6 +58,7 @@ public class ShareScreen <T extends ClientObjectWrapper<?>> extends Screen {
 
         // Add close button and share panel
         this.addRenderableWidget(this.sharePanel);
+        this.addRenderableWidget(Button.builder(Component.literal("Sync"), (bnt) -> JMWSPlugin.sync(false)).bounds(getCornerXWithSpacing(DONE_BUTTON_WIDTH, ELEMENT_SPACING), getCornerYWithSpacing(DONE_BUTTON_HEIGHT, ELEMENT_SPACING, 3), DONE_BUTTON_WIDTH, DONE_BUTTON_HEIGHT).build());
         this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (bnt) -> minecraftClientInstance.setScreen(parent)).bounds(getCornerXWithSpacing(DONE_BUTTON_WIDTH, ELEMENT_SPACING), getCornerYWithSpacing(DONE_BUTTON_HEIGHT, ELEMENT_SPACING, 1), DONE_BUTTON_WIDTH, DONE_BUTTON_HEIGHT).build());
         this.addRenderableWidget(Button.builder(Component.translatable("Reload"), (bnt) -> this.sharePanel.refresh()).bounds(getCornerXWithSpacing(DONE_BUTTON_WIDTH, ELEMENT_SPACING), getCornerYWithSpacing(DONE_BUTTON_HEIGHT, ELEMENT_SPACING, 2), DONE_BUTTON_WIDTH, DONE_BUTTON_HEIGHT).build());
 

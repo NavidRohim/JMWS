@@ -1,15 +1,22 @@
 package me.brynview.navidrohim.jmws.client.syncing.api;
 
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
+import me.brynview.navidrohim.jmws.client.commands.ClientCommands;
+import me.brynview.navidrohim.jmws.client.exceptions.NoInfoException;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
+import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
+import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper<T> {
@@ -169,29 +176,56 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     @Override
     public void setGlobal(boolean global)
     {
-        this.getInfo().isGlobal = global;
-        ClientNetworkDispatcher.makeGlobal(this, global);
+        if (this.info != null)
+        {
+            this.getInfo().isGlobal = global;
+            ClientNetworkDispatcher.makeGlobal(this, global);
+        } else {
+            throw new NoInfoException();
+        }
+    }
+
+    @Override
+    public void sendShareRequest(UUID sharedTo)
+    {
+        JMWSClientCommon.outgoingShareRequests.sendRequest(sharedTo, this);
     }
 
     @Override
     public void addSharedTo(UUID sharedTo)
     {
-        this.getInfo().sharedTo.add(sharedTo);
-        ClientNetworkDispatcher.shareWith(sharedTo, this);
+        if (this.info != null)
+        {
+            this.getInfo().sharedTo.add(sharedTo);
+        } else {
+            throw new NoInfoException();
+        }
+
     }
 
     @Override
     public void removeSharedTo(UUID sharedTo)
     {
-        this.getInfo().sharedTo.remove(sharedTo);
-        ClientNetworkDispatcher.removeShareWith(sharedTo, this);
+        if (this.info != null)
+        {
+            this.getInfo().sharedTo.remove(sharedTo);
+            ClientNetworkDispatcher.removeShareWith(sharedTo, this);
+        } else {
+            throw new NoInfoException();
+        }
+
     }
 
     @Override
     public void clearSharedTo()
     {
-        this.getInfo().sharedTo.clear();
-        ClientNetworkDispatcher.removeShareFromAll( this);
+        if (this.info != null)
+        {
+            this.getInfo().sharedTo.clear();
+            ClientNetworkDispatcher.removeShareFromAll( this);
+        } else {
+            throw new NoInfoException();
+        }
     }
 
     @Override
@@ -199,15 +233,15 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         if (this.info != null) {
             return this.getInfo().objectIdentifier;
         }
-        throw new IllegalStateException("getInfo() is null. Was the object created using createRemotely() before calling this?");
+        throw new NoInfoException();
     }
 
     @Override
-    public List<UUID> getSharedTo() {
+    public Set<UUID> getSharedTo() {
         if (this.info != null) {
             return this.getInfo().sharedTo;
         }
-        throw new IllegalStateException("getInfo() is null. Was the object created using createRemotely() before calling this?");
+        throw new NoInfoException();
     }
 
     @Override
@@ -216,7 +250,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         if (this.info != null) {
             return this.getInfo().owner;
         }
-        throw new IllegalStateException("getInfo() is null. Was the object created using createRemotely() before calling this?");
+        throw new NoInfoException();
     }
 
     @Override
@@ -225,7 +259,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         if (this.info != null) {
             return this.getInfo().isGlobal;
         }
-        throw new IllegalStateException("getInfo() is null. Was the object created using createRemotely() before calling this?");
+        throw new NoInfoException();
     }
 
     @Override

@@ -1,7 +1,7 @@
 package me.brynview.navidrohim.jmws;
 
 import com.mojang.brigadier.CommandDispatcher;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.events.CommonEvents;
 import me.brynview.navidrohim.jmws.server.commands.ServerDispatcher;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
@@ -20,7 +20,7 @@ public class NeoforgeServerEventHandler {
     @SubscribeEvent
     public static void onServerStart(ServerStartedEvent event)
     {
-        CommonClass.minecraftServerInstance = event.getServer();
+        JMWSCommon.minecraftServerInstance = event.getServer();
     }
 
     @SubscribeEvent

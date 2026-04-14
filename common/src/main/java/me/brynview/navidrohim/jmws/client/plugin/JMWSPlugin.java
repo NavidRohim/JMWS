@@ -16,7 +16,7 @@ import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
@@ -26,7 +26,7 @@ import me.brynview.navidrohim.jmws.client.ui.screen.ShareScreen;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
@@ -47,7 +47,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static me.brynview.navidrohim.jmws.common.CommonClass.*;
+import static me.brynview.navidrohim.jmws.common.JMWSCommon.*;
 
 /**
  * Main JMWS plugin which interfaces with JourneyMap.
@@ -79,20 +79,20 @@ public class JMWSPlugin implements IClientPlugin {
         FullscreenEventRegistry.WAYPOINT_POPUP_MENU_EVENT.subscribe(Constants.MODID, this::addOptionForContextMenu);
         FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(Constants.MODID, JMButtonAddon::addJMButtons);
         FullscreenEventRegistry.FULLSCREEN_RENDER_EVENT.subscribe(Constants.MODID, (renderEvent) -> {
-            ClientCommonClass.config.serverEnabled.set(ClientCommonClass.serverConfig.serverEnabled());
-            ClientCommonClass.config.serverUploadWaypoints.set(ClientCommonClass.serverConfig.waypointsEnabled());
-            ClientCommonClass.config.serverUploadGroups.set(ClientCommonClass.serverConfig.groupsEnabled());
-            ClientCommonClass.config.serverAllowsSharing.set(ClientCommonClass.serverConfig.sharingEnabled);
+            JMWSClientCommon.config.serverEnabled.set(JMWSClientCommon.serverConfig.serverEnabled());
+            JMWSClientCommon.config.serverUploadWaypoints.set(JMWSClientCommon.serverConfig.waypointsEnabled());
+            JMWSClientCommon.config.serverUploadGroups.set(JMWSClientCommon.serverConfig.groupsEnabled());
+            JMWSClientCommon.config.serverAllowsSharing.set(JMWSClientCommon.serverConfig.sharingEnabled);
         });
 
         ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe(Constants.MODID, this::handleUserDeath);
-        ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe(Constants.MODID, (_ -> ClientCommonClass.config = new ConfigInterface()));
+        ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe(Constants.MODID, (_ -> JMWSClientCommon.config = new ConfigInterface()));
         ClientEventRegistry.MAPPING_EVENT.subscribe(Constants.MODID, (MappingEvent event) -> {
-            if (ClientCommonClass.didHandshake)
+            if (JMWSClientCommon.didHandshake)
             {
                 JMWSPlugin.sync(false);
             } else {
-                ClientCommonClass.isMapping = true;
+                JMWSClientCommon.isMapping = true;
             }
             });
 
@@ -100,7 +100,7 @@ public class JMWSPlugin implements IClientPlugin {
 
     private void addOptionForContextMenu(PopupMenuEvent.WaypointPopupMenuEvent waypointPopupMenuEvent)
     {
-        if (ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled())
+        if (ConfigInterface.getEnabledStatus() && JMWSClientCommon.config.waypointsEnabled() && JMWSClientCommon.serverConfig.waypointsEnabled())
         {
             ClientWaypointWrapper waypoint = ObjectIdentifierMap.getWaypointFromContextMenu(waypointPopupMenuEvent.getWaypoint());
 
@@ -179,7 +179,7 @@ public class JMWSPlugin implements IClientPlugin {
      * @param silent   -- If the creation should happen silently (no text alert on the client)
      */
     private void createAction(ClientWaypointWrapper waypoint, boolean silent) {
-        if (ClientCommonClass.serverConfig.waypointsEnabled()) {
+        if (JMWSClientCommon.serverConfig.waypointsEnabled()) {
             Constants.getLogger().info(String.valueOf(waypoint.getContext()));
             if (waypoint.getContext() == Context.NATIVE)
             {
@@ -198,7 +198,7 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void updateAction(ClientWaypointWrapper waypoint)
     {
-        if (ClientCommonClass.serverConfig.waypointsEnabled()) // Check config
+        if (JMWSClientCommon.serverConfig.waypointsEnabled()) // Check config
         {
             if (waypoint.getContext() == Context.SYNCHRONISE)
             {
@@ -220,7 +220,7 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void deleteAction(ClientWaypointWrapper waypoint) {
         // Check if action is allowed by the server.
-        if (ClientCommonClass.serverConfig.waypointsEnabled()) {
+        if (JMWSClientCommon.serverConfig.waypointsEnabled()) {
             //@Nullable ServerSyncingHandler serverSyncingHandler = SyncUtils.getSyncingInfo(waypoint.getCustomData(Constants.MODID));
             Constants.LoggerHolder.debug(waypoint.getContext(), "DELETE CONTEXT");
             if (waypoint.getContext() == Context.SYNCHRONISE) // Can be null if JMWS has no knowledge of a waypoint
@@ -245,12 +245,12 @@ public class JMWSPlugin implements IClientPlugin {
     void waypointEventHandler(WaypointEvent waypointEvent) {
 
         if (Constants.DEBUG) {
-            Constants.LoggerHolder.debug(String.valueOf((!ClientCommonClass.isBusy && ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled())), "can exec");
-            Constants.LoggerHolder.debug(String.valueOf(ClientCommonClass.serverConfig.waypointsEnabled()), "wp enable test");
+            Constants.LoggerHolder.debug(String.valueOf((!JMWSClientCommon.isBusy && ConfigInterface.getEnabledStatus() && JMWSClientCommon.config.waypointsEnabled() && JMWSClientCommon.serverConfig.waypointsEnabled())), "can exec");
+            Constants.LoggerHolder.debug(String.valueOf(JMWSClientCommon.serverConfig.waypointsEnabled()), "wp enable test");
         }
-        if (!ClientCommonClass.isBusy && ConfigInterface.getEnabledStatus() && ClientCommonClass.config.waypointsEnabled() && ClientCommonClass.serverConfig.waypointsEnabled()) { // Check that user is in physical server, user config allows event, and server config allows event.
+        if (!JMWSClientCommon.isBusy && ConfigInterface.getEnabledStatus() && JMWSClientCommon.config.waypointsEnabled() && JMWSClientCommon.serverConfig.waypointsEnabled()) { // Check that user is in physical server, user config allows event, and server config allows event.
             // Get old waypoint if context is UPDATE (needed because server needs reference to waypoint before it was updated so it can be deleted on the server)
-            ClientCommonClass.isBusy = true;
+            JMWSClientCommon.isBusy = true;
             ClientWaypointWrapper waypoint = ClientObjectFactory.fromWaypoint(waypointEvent.waypoint);
 
             switch (waypointEvent.getContext()) {
@@ -265,7 +265,7 @@ public class JMWSPlugin implements IClientPlugin {
                         this.updateAction(waypoint);
                 }
             }
-            ClientCommonClass.isBusy = false;
+            JMWSClientCommon.isBusy = false;
         }
     }
 
@@ -275,12 +275,12 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
     {
-        if (!ClientCommonClass.isBusy && ConfigInterface.getEnabledStatus() && ClientCommonClass.config.groupsEnabled() && ClientCommonClass.serverConfig.groupsEnabled()) // Check that user is in physical server, user config allows event, and server config allows event.
+        if (!JMWSClientCommon.isBusy && ConfigInterface.getEnabledStatus() && JMWSClientCommon.config.groupsEnabled() && JMWSClientCommon.serverConfig.groupsEnabled()) // Check that user is in physical server, user config allows event, and server config allows event.
         {
-            ClientCommonClass.isBusy = true;
+            JMWSClientCommon.isBusy = true;
             WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
             ClientGroupWrapper syncGroup = ClientObjectFactory.fromGroup(waypointGroup);
-            LocalPlayer player = CommonClass.minecraftClientInstance.player;
+            LocalPlayer player = JMWSCommon.minecraftClientInstance.player;
 
             Constants.LoggerHolder.debug(syncGroup.getContext().toString(), "GROUP TYPE");
             if (player == null) {
@@ -293,7 +293,7 @@ public class JMWSPlugin implements IClientPlugin {
                 case DELETED -> this.groupDeletionHandler(syncGroup, waypointGroupEvent.deleteWaypoints());
                 case UPDATE -> {this.groupUpdateHandler(syncGroup);}
             }
-            ClientCommonClass.isBusy = false;
+            JMWSClientCommon.isBusy = false;
         }
     }
 
@@ -304,7 +304,7 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void groupDeletionHandler(ClientGroupWrapper waypointGroup, boolean removeAll)
     {
-        if (ClientCommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
+        if (JMWSClientCommon.serverConfig.groupsEnabled()) // Make sure config allows it
         {
             if (waypointGroup.isUsableOrNative())
             {
@@ -332,7 +332,7 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void groupUpdateHandler(ClientGroupWrapper waypointGroup)
     {
-        if (ClientCommonClass.serverConfig.groupsEnabled()) // Make sure config allows it
+        if (JMWSClientCommon.serverConfig.groupsEnabled()) // Make sure config allows it
         {
             if (waypointGroup.getContext() == Context.SYNCHRONISE)
             {
@@ -451,7 +451,7 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void groupCreationHandler(ClientGroupWrapper waypointGroup, boolean silent)
     {
-        if (ClientCommonClass.serverConfig.groupsEnabled()) {
+        if (JMWSClientCommon.serverConfig.groupsEnabled()) {
             Constants.getLogger().info(String.valueOf(waypointGroup.getContext()));
             if (waypointGroup.getContext() == Context.NATIVE)
             {
@@ -565,7 +565,7 @@ public class JMWSPlugin implements IClientPlugin {
             return hasLocalGroup;
         } catch (Exception exc)
         {
-            ClientCommonClass.isBusy = false;
+            JMWSClientCommon.isBusy = false;
             Constants.getLogger().error("Failed to sync groups. Exception thrown: ", exc);
             throw exc;
         }
@@ -633,7 +633,7 @@ public class JMWSPlugin implements IClientPlugin {
 
             return hasLocalWaypoint;
         } catch (Exception e) {
-            ClientCommonClass.isBusy = false;
+            JMWSClientCommon.isBusy = false;
             Constants.getLogger().error("Failed to sync. Exception thrown: ", e);
 
             throw e;
@@ -651,17 +651,17 @@ public class JMWSPlugin implements IClientPlugin {
         boolean sendAlert = waypointPayload.arguments().get(2).getAsBoolean(); // If to send an alert
         boolean isDeathSync = waypointPayload.arguments().getLast().getAsBoolean(); // If the sync was from a death waypoint creation
 
-        boolean showSharingLabels = ClientCommonClass.config.showSharingLabels.get();
-        boolean showGlobalLabels = ClientCommonClass.config.showGlobalLabels.get();
+        boolean showSharingLabels = JMWSClientCommon.config.showSharingLabels.get();
+        boolean showGlobalLabels = JMWSClientCommon.config.showGlobalLabels.get();
 
         try {
             // Sync remote and local groups if server and client permits
-            if (ClientCommonClass.config.uploadGroups.get() && ClientCommonClass.serverConfig.groupsEnabled()) {
+            if (JMWSClientCommon.config.uploadGroups.get() && JMWSClientCommon.serverConfig.groupsEnabled()) {
                 hasLocalGroup = handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), showSharingLabels, showGlobalLabels);
             }
 
             // Sync remote and local waypoints if server and client permits
-            if (ClientCommonClass.config.uploadGroups.get() && ClientCommonClass.serverConfig.waypointsEnabled()) {
+            if (JMWSClientCommon.config.uploadGroups.get() && JMWSClientCommon.serverConfig.waypointsEnabled()) {
                 hasLocalWaypoint = handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), showSharingLabels, showGlobalLabels);
             }
 
@@ -682,16 +682,16 @@ public class JMWSPlugin implements IClientPlugin {
                 String updateMessageKey = "message.jmws.synced_success";
 
                 // Sync message can change depending on what client permissions there are
-                if (ClientCommonClass.config.uploadGroups.get() && ClientCommonClass.config.uploadGroups.get()) {
+                if (JMWSClientCommon.config.uploadGroups.get() && JMWSClientCommon.config.uploadGroups.get()) {
                     updateMessageKey = "message.jmws.synced_both_success";
-                } else if (ClientCommonClass.config.uploadGroups.get()) {
+                } else if (JMWSClientCommon.config.uploadGroups.get()) {
                     updateMessageKey = "message.jmws.synced_group_success";
                 }
                 PlayerUtils.sendUserAlert(Component.translatable(updateMessageKey), true, false, MessageType.NEUTRAL);
             }
 
             PlayerUtils.sendUserSoundAlert(JMWSSounds.ACTION_SUCCEED);
-            ClientCommonClass.syncCounter.resetSyncThreshold(); // Reset auto-sync timer
+            JMWSClientCommon.syncCounter.resetSyncThreshold(); // Reset auto-sync timer
 
         } catch (IllegalStateException | JsonSyntaxException exception) {
             PlayerUtils.sendUserAlert(Component.translatable("error.jmws.error_corrupted_waypoint"), true, false, MessageType.FAILURE);

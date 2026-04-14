@@ -2,7 +2,7 @@ package me.brynview.navidrohim.jmws.server.network;
 
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
@@ -31,7 +31,7 @@ public class PlayerNetworkingHelper {
 
     public static void sendUserMessage(UUID player, String messageKey, Boolean overlay, MessageType messageType) {
         JMWSActionPayload messagePayload = new JMWSActionPayload(CommandFactory.makeClientAlertRequestJson(messageKey, overlay, messageType));
-        Dispatcher.sendToClient(messagePayload, CommonClass.minecraftServerInstance.getPlayerList().getPlayer(player));
+        Dispatcher.sendToClient(messagePayload, JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(player));
     }
 
     public static void sendHandshakeAndValidate(ServerPlayer joinedUser)

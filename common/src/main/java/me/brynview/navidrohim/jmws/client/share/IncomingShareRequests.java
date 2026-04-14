@@ -7,49 +7,44 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class IncomingShareRequests {
-    private static final HashMap<UUID, ShareRequest> incomingShareRequestList = new HashMap<>();
-
-    public static boolean hasShareRequestFrom(UUID player)
-    {
-        return incomingShareRequestList.containsKey(player);
-    }
+public class IncomingShareRequests extends HashMap<UUID, ShareRequest> {
     public final static ScheduledExecutorService requestScheduler =  Executors.newScheduledThreadPool(1);
 
-    public static void addRequest(UUID from, ShareRequest shareRequest)
+    public boolean hasShareRequestFrom(UUID player)
     {
-        incomingShareRequestList.put(from, shareRequest);
+        return this.containsKey(player);
     }
 
-    public static void removeRequest(UUID from)
+    public void addRequest(UUID from, ShareRequest shareRequest)
     {
-        if (incomingShareRequestList.containsKey(from)) {
-            ShareRequest shareRequest = incomingShareRequestList.remove(from);
+        this.put(from, shareRequest);
+    }
+
+    public void removeRequest(UUID from)
+    {
+        if (this.containsKey(from)) {
+            ShareRequest shareRequest = this.remove(from);
             if (!shareRequest.isResolved()) {
                 shareRequest.resolve();
             }
         }
     }
 
-    public static HashMap<UUID, ShareRequest> getAll()
-    {
-        return incomingShareRequestList;
-    }
-
-    public static HashMap<String, ShareRequest> getAllUserKey()
+    public HashMap<String, ShareRequest> getAllUserKey()
     {
         HashMap<String, ShareRequest> r = new HashMap<>();
-        for (Map.Entry<UUID, ShareRequest> s : getAll().entrySet())
+        for (Map.Entry<UUID, ShareRequest> s : this.entrySet())
         {
             r.put(PlayerUtils.getUsernameFromUUID(s.getKey()), s.getValue());
         }
         return r;
     }
 
-    public static void clearAll() {
-        for (ShareRequest request : incomingShareRequestList.values())
+    public void clearAll() {
+        for (ShareRequest request : this.values())
         {
             request.resolve();
         }
+        this.clear();
     }
 }

@@ -6,7 +6,7 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.api.PossessesIdentifier;
 import me.brynview.navidrohim.jmws.common.api.Synchronizable;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.enums.ShareRequestDirection;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
@@ -116,9 +116,9 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
     @Override
     public void shareWith(UUID toUser) {
 
-        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, this.ownerUUID, toUser, ShareRequestDirection.FOR_CLIENT, getObjectType())), CommonClass.minecraftServerInstance.getPlayerList().getPlayer(toUser)); // Send shareWith request to player
+        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, this.ownerUUID, toUser, ShareRequestDirection.FOR_CLIENT, getObjectType())), JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(toUser)); // Send shareWith request to player
         // Send information of the shareWith to the sender. This is needed because this command is server-side only and the client will have no knowledge of the shared obj.
-        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, toUser, this.ownerUUID, ShareRequestDirection.FOR_HOST, getObjectType())), CommonClass.minecraftServerInstance.getPlayerList().getPlayer(this.ownerUUID));
+        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, toUser, this.ownerUUID, ShareRequestDirection.FOR_HOST, getObjectType())), JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(this.ownerUUID));
     }
 
     @Override
@@ -194,7 +194,7 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
                 }
 
             } catch (NoSuchFileException noSuchFileException) {
-                CommonClass.createServerResources();
+                JMWSCommon.createServerResources();
                 Constants.getLogger().warn("`jmws` folder was not found so another was made (%s error)".formatted(getObjectType()));
                 return create();
 

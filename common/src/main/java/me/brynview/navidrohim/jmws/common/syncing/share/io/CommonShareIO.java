@@ -1,10 +1,9 @@
 package me.brynview.navidrohim.jmws.common.syncing.share.io;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 
@@ -61,7 +60,7 @@ public class CommonShareIO implements AutoCloseable {
 
     protected void writeSharedList()
     {
-        String permissionsJson = CommonClass.gson.toJson(new SharedObjectUsers(WpData, GpData));
+        String permissionsJson = JMWSCommon.gson.toJson(new SharedObjectUsers(WpData, GpData));
 
         try (FileWriter permissionsListFileWriter = new FileWriter(this.objectPath.toFile()))
         {

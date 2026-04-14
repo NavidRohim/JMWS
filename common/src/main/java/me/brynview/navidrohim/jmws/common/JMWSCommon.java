@@ -7,7 +7,7 @@ import commonnetwork.api.Network;
 import commonnetwork.networking.data.PacketContext;
 import commonnetwork.networking.data.Side;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.platform.Services;
@@ -32,7 +32,7 @@ import java.util.concurrent.ScheduledExecutorService;
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
 // common compatible binaries. This means common code can not directly use loader specific concepts such as Forge events
 // however it will be compatible with all supported mod loaders.
-public class CommonClass {
+public class JMWSCommon {
 
     // The loader specific projects are able to import and use any code from the common project. This allows you to
     // write the majority of your code here and load it from your loader specific projects. This example has some
@@ -55,7 +55,7 @@ public class CommonClass {
         if (
                 isInternalServer() &&
                 Constants.forgeModLoaders.contains(Services.PLATFORM.getPlatformName()) &&
-                (ctx.sender() == null || ctx.sender().getUUID() == CommonClass.minecraftClientInstance.player.getUUID()))
+                (ctx.sender() == null || ctx.sender().getUUID() == JMWSCommon.minecraftClientInstance.player.getUUID()))
         {
             return;
         }
@@ -91,20 +91,20 @@ public class CommonClass {
 
 
     public static boolean isInternalServer() {
-        if (CommonClass.minecraftClientInstance != null) {
-            return CommonClass.minecraftClientInstance.isLocalServer() && CommonClass.minecraftClientInstance.getSingleplayerServer() instanceof IntegratedServer;
+        if (JMWSCommon.minecraftClientInstance != null) {
+            return JMWSCommon.minecraftClientInstance.isLocalServer() && JMWSCommon.minecraftClientInstance.getSingleplayerServer() instanceof IntegratedServer;
         }
         return false;
     }
 
     public static void init() {
 
-        Network.registerPacket(JMWSActionPayload.type(), JMWSActionPayload.class, JMWSActionPayload.STREAM_CODEC, CommonClass::determinePacketAction);
-        Network.registerPacket(JMWSHandshakePayload.type(), JMWSHandshakePayload.class, JMWSHandshakePayload.STREAM_CODEC, CommonClass::determineHandshakePacketAction);
+        Network.registerPacket(JMWSActionPayload.type(), JMWSActionPayload.class, JMWSActionPayload.STREAM_CODEC, JMWSCommon::determinePacketAction);
+        Network.registerPacket(JMWSHandshakePayload.type(), JMWSHandshakePayload.class, JMWSHandshakePayload.STREAM_CODEC, JMWSCommon::determineHandshakePacketAction);
 
         if (Services.PLATFORM.side().equals("CLIENT") && Services.PLATFORM.getPlatformName().equals("Fabric"))
         {
-            ClientCommonClass.setupMinecraftClientInstance();
+            JMWSClientCommon.setupMinecraftClientInstance();
         }
 
         Constants.getLogger().info("Creating server resources..");

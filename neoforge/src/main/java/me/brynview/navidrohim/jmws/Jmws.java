@@ -2,7 +2,7 @@ package me.brynview.navidrohim.jmws;
 
 
 
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 
@@ -17,6 +17,6 @@ public class Jmws {
 
         // Use NeoForge to bootstrap the Common mod.
 
-        CommonClass.init();
+        JMWSCommon.init();
     }
 }

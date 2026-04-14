@@ -1,7 +1,7 @@
 package me.brynview.navidrohim.jmws.client.commands;
 
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
-import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ public class ShareSuggestions {
     public static List<String> getIncomingShareRequestNames()
     {
         List<String> names = new ArrayList<>();
-        for (UUID user : IncomingShareRequests.getAll().keySet())
+        for (UUID user : JMWSClientCommon.incomingShareRequests.keySet())
         {
             String username = PlayerUtils.getUsernameFromUUID(user);
             if (!username.equals(CommonUtils.unknownUser))

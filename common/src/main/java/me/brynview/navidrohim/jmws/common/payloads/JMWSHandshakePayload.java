@@ -5,7 +5,7 @@ import com.google.gson.*;
 import me.brynview.navidrohim.jmws.Constants;
 
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.platform.Services;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 
@@ -28,12 +28,12 @@ public class JMWSHandshakePayload
      */
     public JMWSHandshakePayload(FriendlyByteBuf friendlyByteBuf)
     {
-        if ((Services.PLATFORM.side().equals("CLIENT") || !CommonClass.isInternalServer()) && friendlyByteBuf.readableBytes() != 0)
+        if ((Services.PLATFORM.side().equals("CLIENT") || !JMWSCommon.isInternalServer()) && friendlyByteBuf.readableBytes() != 0)
         {
             try
             {
                 serverConfigDataJson = friendlyByteBuf.readUtf(512);
-                serverConfigData = CommonClass.gson.fromJson(serverConfigDataJson, ClientSideServerConfigObject.class);
+                serverConfigData = JMWSCommon.gson.fromJson(serverConfigDataJson, ClientSideServerConfigObject.class);
             }
             catch (IndexOutOfBoundsException | JsonSyntaxException malformed) {
                 Constants.getLogger().error("Missing or corrupted server data! Usually means a server version mismatch.");
@@ -66,7 +66,7 @@ public class JMWSHandshakePayload
      */
     public void encode(FriendlyByteBuf buf)
     {
-        if (Services.PLATFORM.side().equals("SERVER") || CommonClass.isInternalServer())
+        if (Services.PLATFORM.side().equals("SERVER") || JMWSCommon.isInternalServer())
         {
             buf.writeUtf(serverConfigDataJson);
         }

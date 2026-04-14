@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
@@ -58,7 +58,7 @@ public class JMWSServerIO {
 
     public static void removeObjectFromUser(ServerObject serverObject, UUID playerUUID, String objectIdentifier, ObjectType objectType) {
         UserSharingFile.removeObjectFromUser(playerUUID, objectIdentifier, serverObject.getObjectType());
-        ServerPlayer sharedPlayer = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
+        ServerPlayer sharedPlayer = JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
         if (sharedPlayer != null) {
             if (objectType == ObjectType.WAYPOINT) {
                 Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.deleteWaypoint(objectIdentifier, true, false)), sharedPlayer); // TODO: SERVER
@@ -136,7 +136,7 @@ public class JMWSServerIO {
                 }
             });
         } catch (NoSuchFileException exc) {
-            CommonClass.createServerResources();
+            JMWSCommon.createServerResources();
             return getObjectPathsForUser(uuid, objectType, global);
         } catch (IOException err) {
             Constants.getLogger().error("Got error trying to get user objects: {}", err.getMessage());

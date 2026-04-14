@@ -1,8 +1,8 @@
 package me.brynview.navidrohim.jmws;
 
 
-import me.brynview.navidrohim.jmws.client.ClientCommonClass;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.server.commands.ServerDispatcher;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
@@ -63,18 +63,18 @@ public class Jmws implements ModInitializer {
                         int jarVersionString = Integer.parseInt(regexBetaVersionPatternJarMatcher.group(1));
                         int minVersionString = Integer.parseInt(regexBetaVersionPatternMinMatcher.group(1));
 
-                        ClientCommonClass.clientJMVersion = versionString;
+                        JMWSClientCommon.clientJMVersion = versionString;
                         if ((mcVersionMinor == minMcVersionMinor && mcVersionPatch >= minMcVersionPatch && jarVersionString >= minVersionString)) {
                             Constants.getLogger().info("Good to go. JMWS Version %s with JourneyMap Version %s on client-side.".formatted(Constants.VERSION, versionString));
-                            ClientCommonClass.clientHasJM = true;
-                            CommonClass.init();
+                            JMWSClientCommon.clientHasJM = true;
+                            JMWSCommon.init();
                         }
                     }
                 }
 
             } else {
                 Constants.getLogger().info("JourneyMap is optional on the server. If you get a warning about it, you can safely ignore it.");
-                CommonClass.init();
+                JMWSCommon.init();
             }
         } catch (NoSuchElementException | VersionParsingException | IllegalStateException ignored) {
 

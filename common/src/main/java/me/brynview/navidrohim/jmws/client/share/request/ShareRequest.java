@@ -1,14 +1,14 @@
 package me.brynview.navidrohim.jmws.client.share.request;
 
 import com.mojang.authlib.GameProfile;
-import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
+import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +22,7 @@ public class ShareRequest {
     public UUID originalSender;
     public UUID meantFor;
 
-    public Object currentSharedObject;
+    public ClientObjectWrapper<?> currentSharedObject;
     public ObjectType sharedObjectType;
     public String requestIdentifier;
     public String objectDisplayName;
@@ -32,7 +32,7 @@ public class ShareRequest {
 
     public final ScheduledFuture<?> timeout;
 
-    public ShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, @Nullable Object waypointOrGroup, ObjectType sharedObjectType, String requestIdentifier, String objectDisplayName) {
+    public ShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, @Nullable ClientObjectWrapper<?> waypointOrGroup, ObjectType sharedObjectType, String requestIdentifier, String objectDisplayName) {
         this.originalSender = uuid;
         this.meantFor = meantForPlayerUUID;
         this.currentSharedObject = waypointOrGroup;
@@ -72,24 +72,24 @@ public class ShareRequest {
 
     public void accept()
     {
-        ClientCommonClass.isBusy = true;
+        JMWSClientCommon.isBusy = true;
         ClientNetworkDispatcher.acceptShare(this);
         JMWSPlugin.getInstance().addObjectFromRequest(this);
 
         this.finishRequest();
-        ClientCommonClass.isBusy = false;
+        JMWSClientCommon.isBusy = false;
     }
 
     protected void timeout()
     {
-        IncomingShareRequests.removeRequest(this.originalSender);
+        JMWSClientCommon.incomingShareRequests.removeRequest(this.originalSender);
         PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.request_timeout_from", this.getSenderName()), true, false, MessageType.WARNING);
     }
 
     private void finishRequest()
     {
         this.timeout.cancel(true);
-        IncomingShareRequests.removeRequest(this.originalSender);
+        JMWSClientCommon.incomingShareRequests.removeRequest(this.originalSender);
     }
 
     public boolean isResolved()

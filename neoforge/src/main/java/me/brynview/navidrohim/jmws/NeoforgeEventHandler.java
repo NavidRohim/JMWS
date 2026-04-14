@@ -1,6 +1,6 @@
 package me.brynview.navidrohim.jmws;
 
-import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.commands.CommonClientPlatformCommands;
 import me.brynview.navidrohim.jmws.common.events.CommonEvents;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
@@ -18,9 +18,9 @@ public class NeoforgeEventHandler
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post clientTickEvent)
     {
-        if (ClientCommonClass.syncCounter != null)
+        if (JMWSClientCommon.syncCounter != null)
         {
-            ClientCommonClass.syncCounter.iterateCounter();
+            JMWSClientCommon.syncCounter.iterateCounter();
         }
     }
 

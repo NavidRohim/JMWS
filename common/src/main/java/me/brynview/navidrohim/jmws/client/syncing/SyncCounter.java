@@ -1,9 +1,9 @@
 package me.brynview.navidrohim.jmws.client.syncing;
 
-import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import net.minecraft.client.multiplayer.ClientLevel;
 
 import static me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin.sync;
@@ -22,12 +22,12 @@ public class SyncCounter {
     {
         // syncCounter can be null but the chance of it ever being null while this method is being called is none.
         // Same with getSyncFrequency
-        return (ClientCommonClass.syncCounter.getTickCounterUpdateThreshold() - ClientCommonClass.syncCounter.getCurrentTickCount()) / 20;
+        return (JMWSClientCommon.syncCounter.getTickCounterUpdateThreshold() - JMWSClientCommon.syncCounter.getCurrentTickCount()) / 20;
     }
 
     public static int getSyncFrequency()
     {
-        return ClientCommonClass.syncCounter.getTickCounterUpdateThreshold() / 20;
+        return JMWSClientCommon.syncCounter.getTickCounterUpdateThreshold() / 20;
     }
 
     /**
@@ -53,7 +53,7 @@ public class SyncCounter {
      */
     public void resetSyncThreshold()
     {
-        tickCounterUpdateThreshold = ClientCommonClass.config.getUpdateWaypointFrequencyAsTicks();
+        tickCounterUpdateThreshold = JMWSClientCommon.config.getUpdateWaypointFrequencyAsTicks();
     }
 
     /**
@@ -68,10 +68,10 @@ public class SyncCounter {
     public void iterateCounter()
     {
         // Get clients current world
-        ClientLevel world = CommonClass.minecraftClientInstance.level;
+        ClientLevel world = JMWSCommon.minecraftClientInstance.level;
 
         // Check if player is in a world, if the player is in a valid server and auto-sync is enabled
-        if (world != null && ConfigInterface.getEnabledStatus() && ClientCommonClass.config.autoSync.get()) {
+        if (world != null && ConfigInterface.getEnabledStatus() && JMWSClientCommon.config.autoSync.get()) {
             // Check if the world is still equal to the world of the last counter tick. If not, we have changed dimension.
             if (world != oldWorld) {
                 if (oldWorld != null) { // This can be false if this is the first tick being in a new server.
@@ -88,7 +88,7 @@ public class SyncCounter {
                     tickCounter = 0;
                 }
             }
-            oldWorld = CommonClass.minecraftClientInstance.level;
+            oldWorld = JMWSCommon.minecraftClientInstance.level;
         } else {
 
             tickCounter = 0;

@@ -7,7 +7,7 @@ import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.server.commands.ServerCommands;
@@ -349,7 +349,7 @@ public class ServerPacketHandler {
                             usf.addToShared(objectIdentifier, objType);
                         }
                         sharedWp.serverSyncingHandler.addUserToShare(playerUUID);
-                        Dispatcher.sendToClient(waypointActionPayload, CommonClass.minecraftServerInstance.getPlayerList().getPlayer(ownerUUID));
+                        Dispatcher.sendToClient(waypointActionPayload, JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(ownerUUID));
                     } else {
                         sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
                     }
@@ -414,7 +414,7 @@ public class ServerPacketHandler {
                     String objectId =  arguments.get(2).getAsString();
                     ObjectType objectType = ObjectType.valueOf(arguments.get(3).getAsString());
 
-                    ServerCommands.share(player, CommonClass.minecraftServerInstance.getPlayerList().getPlayer(toPlayer), JMWSServerIO.getObjectFromDisk(objectId, playerUUID, objectType));
+                    ServerCommands.share(player, JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(toPlayer), JMWSServerIO.getObjectFromDisk(objectId, playerUUID, objectType));
                 }
 
                 default -> Constants.getLogger().warn("Unknown packet command -> {}", command);}
