@@ -139,7 +139,7 @@ public class JMWSServerIO {
             JMWSCommon.createServerResources();
             return getObjectPathsForUser(uuid, objectType, global);
         } catch (IOException err) {
-            Constants.getLogger().error("Got error trying to get user objects: {}", err.getMessage());
+            Constants.getLogger().error("Got error trying to of user objects: {}", err.getMessage());
             return List.of();
             }
         return waypointFileList;

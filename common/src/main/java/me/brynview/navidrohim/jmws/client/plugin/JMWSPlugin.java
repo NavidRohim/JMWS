@@ -240,7 +240,7 @@ public class JMWSPlugin implements IClientPlugin {
     }
 
     /**
-     * Only called from WAYPOINT_EVENT (when waypoint is created, updated, or deleted) Do not call.
+     * Only called from WAYPOINT_EVENT (when a waypoint is created, updated, or deleted) Do not call.
      * @param waypointEvent The event.
      */
     void waypointEventHandler(WaypointEvent waypointEvent) {
@@ -249,8 +249,8 @@ public class JMWSPlugin implements IClientPlugin {
             Constants.LoggerHolder.debug(String.valueOf((!JMWSClientCommon.isBusy && ConfigInterface.getEnabledStatus() && JMWSClientCommon.config.waypointsEnabled() && JMWSClientCommon.serverConfig.waypointsEnabled())), "can exec");
             Constants.LoggerHolder.debug(String.valueOf(JMWSClientCommon.serverConfig.waypointsEnabled()), "wp enable test");
         }
-        if (!JMWSClientCommon.isBusy && ConfigInterface.getEnabledStatus() && JMWSClientCommon.config.waypointsEnabled() && JMWSClientCommon.serverConfig.waypointsEnabled()) { // Check that user is in physical server, user config allows event, and server config allows event.
-            // Get old waypoint if context is UPDATE (needed because server needs reference to waypoint before it was updated so it can be deleted on the server)
+        if (!JMWSClientCommon.isBusy && ConfigInterface.getEnabledStatus() && JMWSClientCommon.config.waypointsEnabled() && JMWSClientCommon.serverConfig.waypointsEnabled()) { // Check that the user is in the physical server, user config allows event, and server config allows event.
+            // Get old waypoint if context is UPDATE (needed because the server needs reference to the waypoint before it was updated so it can be deleted on the server)
             JMWSClientCommon.isBusy = true;
             ClientWaypointWrapper waypoint = ClientObjectFactory.fromWaypoint(waypointEvent.waypoint);
             switch (waypointEvent.getContext()) {
@@ -518,7 +518,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         try
         {
-            // Get existing groups (local) and get group objects saved on server
+            // Get existing groups (local) and of group objects saved on server
             List<? extends WaypointGroup> existingGroups = getInstance().jmAPI.getAllWaypointGroups();
             Set<WaypointGroup> savedGroups = JMWSPlugin.getSavedGroups(jsonGroupsRaw.deepCopy());
 
@@ -589,7 +589,7 @@ public class JMWSPlugin implements IClientPlugin {
         {
             boolean hasLocalWaypoint = false;
 
-            // Get existing waypoints (local) and get waypoint objects saved on server
+            // Get existing waypoints (local) and of waypoint objects saved on server
             List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
             Set<Waypoint> savedWaypoints = JMWSPlugin.getSavedWaypoints(jsonWaypoints.deepCopy());
 

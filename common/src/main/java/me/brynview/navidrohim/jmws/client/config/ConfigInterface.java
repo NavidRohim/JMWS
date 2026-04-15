@@ -99,7 +99,7 @@ public class ConfigInterface {
      */
     public int getUpdateWaypointFrequencyAsTicks()
     {
-        int sc = Integer.parseInt(String.valueOf(updateWaypointFrequency.get())); // Have to do this because with CustomIntegerOption .get() crashes when trying to directly cast to int. It's wacky I know, but it's the only way it works.
+        int sc = Integer.parseInt(String.valueOf(updateWaypointFrequency.get())); // Have to do this because with CustomIntegerOption .of() crashes when trying to directly cast to int. It's wacky I know, but it's the only way it works.
         return sc * 20;
     }
 

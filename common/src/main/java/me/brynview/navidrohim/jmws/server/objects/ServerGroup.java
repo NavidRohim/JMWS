@@ -95,7 +95,7 @@ public class ServerGroup extends ServerObject {
         return groupWaypoints;
     }
 
-    // Following static methods are ways to get instances of ServerGroup from files
+    // Following static methods are ways to of instances of ServerGroup from files
 
     public static boolean createGroup(JsonObject jsonObject, UUID playerUUID)
     {

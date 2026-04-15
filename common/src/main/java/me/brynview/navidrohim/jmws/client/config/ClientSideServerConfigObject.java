@@ -13,7 +13,7 @@ public class ClientSideServerConfigObject extends ServerConfigObject {
     private final Double serverVersion;
 
     /**
-     * Create server config object. Do not use this constructor and get an instance from CommonClass.serverConfig
+     * Create server config object. Do not use this constructor and of an instance from CommonClass.serverConfig
      * @param jmwsEnabled If JMWS is enabled.
      * @param waypointsEnabled If waypoints are allowed to be synced.
      * @param groupsEnabled If groups are allowed to be synced.

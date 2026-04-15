@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.client.share.request;
 
 import com.mojang.authlib.GameProfile;
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
@@ -88,6 +89,7 @@ public class ShareRequest {
 
     private void finishRequest()
     {
+        Constants.LoggerHolder.debug("Finished share request for " + this.originalSender, "SHARE FINISH");
         this.timeout.cancel(true);
         JMWSClientCommon.incomingShareRequests.removeRequest(this.originalSender);
     }

@@ -5,16 +5,17 @@
 
 ## -- Sharing UI --
 - ~~Add UI colour indicator for object status (shared (green), awaiting share (orange), not shared (grey), cannot share (red))~~
-- Add selection box so you can send share requests for multiple players.
+- Add selection boxes so you can send share requests for multiple players.
 
-## -- General / other UI -- 
-- Add screen for waiting share requests.
+## -- General / Other UI -- 
+- Add a screen for waiting share requests.
 - ~~Compartmentalise UI classes so they are more dynamic and can be used in more places.~~
 - Fix UI internals to how things are positioned (Use layouts and grids, much more dynamic I have heard.)
+- Refactor the ObjectSharePanel class (split it) so it can be used in more places. For example, the checkbox behaviour in Entries will need to rely on a subclass of it and I plan to use this Entry class in more areas.
 
 ## -- General bugs --
-- Sharing status label does not update when an object is successfully shared
-- ~~Waypoint context menu breaks after updating already existing object~~
+- ~~Sharing status label does not update when an object is successfully shared~~
+- ~~Waypoint context menu breaks after updating an already existing object~~
 - Timeout is not cancelled when an object is successfully shared.
 
 ## -- Todo tomorrow --

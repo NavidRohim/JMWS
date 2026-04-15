@@ -35,7 +35,7 @@
   "sharing.jmws.no_longer_sharing": "This will no longer be shared.",
   "sharing.jmws.no_longer_valid": "Shared request is no longer valid!",
   "sharing.jmws.share_request": " %s has sent a sync request, accept? (/share_accept, /share_decline)",
-  "sharing.jmws.share_sent": "Sent request",
+  "sharing.jmws.share_sent": "Sent request(s)",
   "sharing.jmws.share_rejected": "Your share request to %s was rejected.",
   "sharing.jmws.share_busy": "%s is already processing a share request from you.",
   "sharing.jmws.sharing_host": "Now sharing %s with %s",
@@ -172,8 +172,10 @@
   "jmws.ui.sharing.not_shared": "not shared",
   "jmws.ui.sharing.pending": "pending",
   "jmws.ui.sharing.already_shared": "shared",
+  "jmws.ui.sharing.selected": "selected",
   "jmws.ui.sharing.share_object": "Share %s \"%s\"",
   "jmws.ui.sharing.no_players": "No players with JMWS!",
-
+  "jmws.ui.sharing.no_selected_players": "No players selected!",
+  "jmws.ui.sharing.send_requests": "Send Requests",
   "jmws.ui.sharing.reload": "Reload"
 }

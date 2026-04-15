@@ -4,6 +4,7 @@ import journeymap.api.v2.client.event.FullscreenDisplayEvent;
 import journeymap.api.v2.client.fullscreen.IThemeButton;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
+import me.brynview.navidrohim.jmws.client.ui.screen.ViewAllObjectScreen;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import net.minecraft.network.chat.Component;
@@ -35,6 +36,13 @@ public class JMButtonAddon {
                     true,
                     JMButtonAddon::updateFromButton);
 
+            IThemeButton buttonViewObjectsForSharing = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
+                    "button.jmws.view_objects_for_sharing_button",
+                    JMWSTextures.enableButtonAsset,
+                    ConfigInterface.getEnabledStatus(),
+                    (IThemeButton iThemeButton) -> ViewAllObjectScreen.open()
+            );
+
             buttonSync.setEnabled(ConfigInterface.getEnabledStatus()); // Sync button will only be functional if JMWS is enabled.
             buttonSync.setTooltip(Component.translatable("button.jmws.tooltip.update_button").getString());
 
@@ -62,8 +70,8 @@ public class JMButtonAddon {
     }
 
     /**
-     * Called when manual sync button is pressed.
-     * @param iThemeButton the button, will be the manual sync button
+     * Called when the manual sync button is pressed.
+     * @param iThemeButton the button. Will be the manual sync button
      */
     private static void updateFromButton(IThemeButton iThemeButton) {
         JMWSPlugin.sync(true);

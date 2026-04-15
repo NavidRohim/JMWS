@@ -73,7 +73,7 @@ public class Jmws implements ModInitializer {
                 }
 
             } else {
-                Constants.getLogger().info("JourneyMap is optional on the server. If you get a warning about it, you can safely ignore it.");
+                Constants.getLogger().info("JourneyMap is optional on the server. If you of a warning about it, you can safely ignore it.");
                 JMWSCommon.init();
             }
         } catch (NoSuchElementException | VersionParsingException | IllegalStateException ignored) {

@@ -24,7 +24,7 @@ public class NotificationAlertScreen extends Screen {
     private long alertStartTime = 0;
 
     private final Screen parent;
-    protected @Nullable Component alertText = Component.empty();
+    private @Nullable Component alertText = Component.empty();
 
     public NotificationAlertScreen(Screen parent)
     {
