@@ -14,7 +14,8 @@
 
 ## -- General bugs --
 - Sharing status label does not update when an object is successfully shared
-- Waypoint context menu breaks after updating already existing object
+- ~~Waypoint context menu breaks after updating already existing object~~
+- Timeout is not cancelled when an object is successfully shared.
 
 ## -- Todo tomorrow --
 - Find out if I can change the focus / highlight outline colour from white to whatever the current colour is for an object.

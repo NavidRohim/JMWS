@@ -103,15 +103,17 @@ public class JMWSPlugin implements IClientPlugin {
         if (ConfigInterface.getEnabledStatus() && JMWSClientCommon.config.waypointsEnabled() && JMWSClientCommon.serverConfig.waypointsEnabled())
         {
             ClientWaypointWrapper waypoint = ObjectIdentifierMap.getWaypointFromContextMenu(waypointPopupMenuEvent.getWaypoint());
-
-            if (!waypoint.getGlobal())
+            if (waypoint.getOwner().equals(PlayerUtils.ourUUID()))
             {
-                waypointPopupMenuEvent.getPopupMenu().addMenuItem("Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.GLOBAL);});
-            } else {
-                waypointPopupMenuEvent.getPopupMenu().addMenuItem("Remove Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.UNGLOBAL);});
-            }
+                if (!waypoint.getGlobal())
+                {
+                    waypointPopupMenuEvent.getPopupMenu().addMenuItem("Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.GLOBAL);});
+                } else {
+                    waypointPopupMenuEvent.getPopupMenu().addMenuItem("Remove Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.UNGLOBAL);});
+                }
 
-            waypointPopupMenuEvent.getPopupMenu().addMenuItem("Share", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.SHARE);});
+                waypointPopupMenuEvent.getPopupMenu().addMenuItem("Share", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.SHARE);});
+            }
         }
     }
 
@@ -627,7 +629,7 @@ public class JMWSPlugin implements IClientPlugin {
                         savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(CommonUtils.globalStringTag));
                     } else if (showSharingLabels) // Shared
                     {
-                        String ownerUser = PlayerUtils.getUsernameFromUUID(wpSync.owner, true);
+                        String ownerUser = PlayerUtils.getUsernameFromUUIDForShare(wpSync.owner);
                         savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(ownerUser));
                         savedWaypoint.setIconResourceLoctaion(JMWSTextures.sharedObjectAsset);
                     }

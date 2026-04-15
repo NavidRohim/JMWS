@@ -24,7 +24,7 @@ public class ObjectIdentifierMap {
 
     private static String getContextMenuKey(Waypoint waypoint)
     {
-        return "%s%s%s%s".formatted(waypoint.getX(), waypoint.getY(), waypoint.getZ(), waypoint.getIconColor());
+        return "%s%s%s%s".formatted(waypoint.getX(), waypoint.getY(), waypoint.getZ(), waypoint.getIconIdentifier());
     }
 
     public static ClientWaypointWrapper getWaypointFromContextMenu(Waypoint waypoint)

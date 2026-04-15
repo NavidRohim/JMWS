@@ -22,8 +22,8 @@ public class PlayerUtils {
     /**
      * Send an alert to the user.
      * @param text What text to send the user. Make it an i18n key if possible.
-     * @param overlayText If to overlay text on to the action bar, if `false` it will be put in the users chat.
-     * @param ignoreConfig If to ignore the users set config value. If they have alerts turned off but ignoreConfig is true, the alert will be sent regardless.
+     * @param overlayText If to overlay text on to the action bar, if `false` it will be put in the user's chat.
+     * @param ignoreConfig If to ignore the users, set config value. If they have alerts turned off but ignoreConfig is true, the alert will be sent regardless.
      * @param messageType What colour the message will be. Named with importance instead of colour.
      */
     public static void sendUserAlert(Component text, boolean overlayText, boolean ignoreConfig, MessageType messageType) {
@@ -38,7 +38,11 @@ public class PlayerUtils {
                 finalText = messageType.toString() + text.getString();
             }
 
-            if (overlayText) {
+            if (JMWSClientCommon.currentShareScreen != null)
+            {
+                JMWSClientCommon.currentShareScreen.sendAlert(Component.literal(finalText));
+            }
+            else if (overlayText) {
                 JMWSCommon.minecraftClientInstance.gui.setOverlayMessage(Component.literal(finalText), false); // Action bar
             } else {
                 JMWSCommon.minecraftClientInstance.gui.getChat().addClientSystemMessage(Component.literal(finalText)); // Chat
@@ -91,7 +95,7 @@ public class PlayerUtils {
         return profile.isPresent() ? profile.get().name() : CommonUtils.unknownUser;
     }
 
-    public static String getUsernameFromUUID(UUID user, boolean withTag)
+    public static String getUsernameFromUUIDForShare(UUID user)
     {
         Optional<GameProfile> profile = getUserFromUUID(user);
         return profile.isPresent() ? profile.get().name() : "S";

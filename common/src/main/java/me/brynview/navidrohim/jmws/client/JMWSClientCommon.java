@@ -5,6 +5,7 @@ import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.client.syncing.SyncCounter;
+import me.brynview.navidrohim.jmws.client.ui.screen.ShareScreen;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
@@ -25,6 +26,8 @@ public class JMWSClientCommon {
 
     public static final OutgoingShareRequests outgoingShareRequests = new OutgoingShareRequests();
     public static final IncomingShareRequests incomingShareRequests = new IncomingShareRequests();
+
+    public static @Nullable ShareScreen<?> currentShareScreen = null;
 
     public static void setupMinecraftClientInstance()
     {

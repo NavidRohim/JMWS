@@ -52,6 +52,7 @@
   "sharing.jmws.no_server_sharing": "You cannot share on this server.",
   "sharing.jmws.unknown_player": "Unknown Soldier",
   "sharing.jmws.stopped_sharing": "Stopped sharing",
+  "sharing.jmws.already_sharing": "You are already sharing %s with %s",
 
   "__comment__": "Global object language strings",
   "global.jmws.cannot_edit_global": "You cannot edit global waypoints / groups",
@@ -155,8 +156,8 @@
   "warning.jmws.jm_not_installed": "Sorry! JourneyMap is not installed or the version is wrong!",
 
   "__comment__": "JourneyMap Buttons",
-  "button.jmws.update_button": "Sync waypoints",
-  "button.jmws.tooltip.update_button": "Synchronizes waypoints from the server",
+  "button.jmws.update_button": "Sync",
+  "button.jmws.tooltip.update_button": "Synchronizes from the server",
   "button.jmws.enable_button": "On / Off JMWS",
   "button.jmws.tooltip.enable_button": "Turn on / off waypoint syncing",
 
@@ -165,5 +166,14 @@
 
   "__comment__": "Subtitles for sounds",
   "subtitle.jmws.waypoint_sync": "Syncing",
-  "subtitle.jmws.generic_error": "JMWS error"
+  "subtitle.jmws.generic_error": "JMWS error",
+
+  "__comment__": "Sharing UI strings",
+  "jmws.ui.sharing.not_shared": "not shared",
+  "jmws.ui.sharing.pending": "pending",
+  "jmws.ui.sharing.already_shared": "shared",
+  "jmws.ui.sharing.share_object": "Share %s \"%s\"",
+  "jmws.ui.sharing.no_players": "No players with JMWS!",
+
+  "jmws.ui.sharing.reload": "Reload"
 }

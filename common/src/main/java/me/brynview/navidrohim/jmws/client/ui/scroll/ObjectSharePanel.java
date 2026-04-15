@@ -11,6 +11,7 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.PlayerFaceExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
@@ -75,22 +76,49 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
         super.extractWidgetRenderState(graphics, mouseX, mouseY, a);
         if (this.players.isEmpty())
         {
-            graphics.text(JMWSCommon.minecraftClientInstance.font, "No online players!", this.getX(), this.getY() / 2, -1);
+            graphics.text(JMWSCommon.minecraftClientInstance.font, Component.translatable("jmws.ui.sharing.no_players"), this.getX(), this.getY() / 2, -1);
         }
     }
 
-    public record Subtitle(Component component, MessageType messageType)
+    @Override
+    protected void extractListSeparators(GuiGraphicsExtractor graphics)
     {
+        graphics.outline(this.getX() - 2, this.getY() - 2, this.width + 4, this.height + 4, this.sharedObject.getColour());
+    }
+
+    @Override
+    protected void extractListBackground(@NonNull GuiGraphicsExtractor graphics)
+    {
+        super.extractListBackground(graphics);
+    }
+
+
+    public static class Subtitle
+    {
+        private final Component displayable;
+        private final MessageType messageType;
+
+        public Subtitle(Component component, MessageType messageType)
+        {
+            this.displayable = Component.literal( messageType.toString() + "§o" + component.getString());
+            this.messageType = messageType;
+        }
+
         public Component getDisplayableComponent()
         {
-            return Component.literal( messageType.toString() + "§o" + component.getString());
+            return displayable;
+        }
+
+        public MessageType getMessageType()
+        {
+            return messageType;
         }
     }
 
     public static class Entry extends ObjectSelectionList.Entry<Entry>
     {
         protected @NotNull Component title;
-        protected @NotNull Subtitle subtitle;
+        public @NotNull Subtitle subtitle;
 
         public Entry(@NotNull Component title, @NotNull Subtitle subtitle) {
             super();
@@ -139,9 +167,9 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
         private final @NonNull PlayerInfo user;
         private final @NotNull UUID userUuid;
 
-        protected final static @NotNull Subtitle PENDING_SHARE = new Subtitle(Component.literal("pending"), MessageType.PENDING);
-        protected final static @NotNull Subtitle ALREADY_SHARED = new Subtitle(Component.literal("already shared"), MessageType.SUCCESS);
-        protected final static @NotNull Subtitle EMPTY = new Subtitle(Component.literal("not shared"), MessageType.GREY);
+        protected final static @NotNull Subtitle PENDING_SHARE = new Subtitle(Component.translatable("jmws.ui.sharing.pending"), MessageType.PENDING);
+        protected final static @NotNull Subtitle ALREADY_SHARED = new Subtitle(Component.translatable("jmws.ui.sharing.already_shared"), MessageType.SUCCESS);
+        protected final static @NotNull Subtitle EMPTY = new Subtitle(Component.translatable("jmws.ui.sharing.not_shared"), MessageType.GREY);
 
         public PlayerEntry(@NotNull PlayerInfo user, @NonNull ObjectSharePanel<? extends ClientObjectWrapper<?>> owner)
         {
@@ -197,7 +225,7 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
                     {
                         this.sharePanel.sharedObject.sendShareRequest(this.userUuid);
                     } else {
-                        PlayerUtils.sendUserAlert(Component.literal("You are already sharing %s with %s".formatted(this.sharePanel.sharedObject.getName(), this.user.getProfile().name())), true, true, MessageType.WARNING);
+                        PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.already_sharing", this.sharePanel.sharedObject.getName(), this.user.getProfile().name()), true, true, MessageType.WARNING);
                     }
                 } else {
                     PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.share_busy", this.user.getProfile().name()), true, true, MessageType.PENDING);
@@ -212,7 +240,6 @@ public final class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends O
             int headPlacementX = this.getContentX() + PLAYER_HEAD_SIZE_HALVED + 4;
             int headPlacementY = this.getContentYMiddle() - PLAYER_HEAD_SIZE_HALVED;
             PlayerFaceExtractor.extractRenderState(guiGraphicsExtractor, user.getSkin(), headPlacementX, headPlacementY, PLAYER_HEAD_SIZE);
-            guiGraphicsExtractor.outline(headPlacementX - 1, headPlacementY - 1, PLAYER_HEAD_SIZE + 2, PLAYER_HEAD_SIZE + 2, this.sharePanel.sharedObject.getColour());
         }
 
         @Override
