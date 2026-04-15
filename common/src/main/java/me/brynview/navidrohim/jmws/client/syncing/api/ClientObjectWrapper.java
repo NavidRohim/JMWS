@@ -4,6 +4,7 @@ import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import net.minecraft.util.ARGB;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Set;
@@ -49,7 +50,7 @@ public interface ClientObjectWrapper<T> {
     boolean isNative();
     boolean isInbuilt();
 
-
+    void setNativeObject(@NotNull T nativeObject);
     void setContext(Context context);
     Context getContext();
     SyncObjectType getType();

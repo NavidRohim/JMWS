@@ -2,7 +2,9 @@ package me.brynview.navidrohim.jmws.common.utils;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
+import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
@@ -89,6 +91,11 @@ public class CommandFactory {
     public static String makeUpdateWaypointRequest(ClientWaypointWrapper waypoint)
     {
         return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, waypoint.getIdentifier(), ObjectType.WAYPOINT, waypoint.getGlobal(), waypoint.getSerialization());
+    }
+
+    public static String makeUpdateObjectRequest(ClientBaseObjectWrapper<?> objectWrapper)
+    {
+        return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectWrapper.getIdentifier(), objectWrapper.getType().toString(), objectWrapper.getGlobal(), objectWrapper.getSerialization());
     }
 
     public static String makeUpdateGroupRequest(ClientGroupWrapper group)

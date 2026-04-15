@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.client.syncing.api;
 
+import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -38,6 +39,12 @@ public abstract class JMObjectWrapper <T> extends ClientBaseObjectWrapper<Object
     {
         super.clearSharedTo();
         this.update();
+    }
+
+    @Override
+    public void updateRemotely()
+    {
+        ClientNetworkDispatcher.updateObject(this);
     }
 
     public String getGuid()

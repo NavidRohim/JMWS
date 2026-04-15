@@ -18,7 +18,7 @@
 
 ## -- Todo tomorrow --
 - Find out if I can change the focus / highlight outline colour from white to whatever the current colour is for an object.
-- 
+
 Should start with UI class refactoring. Will make everything else much easier. Then probably fixing layouts
 
 *Already finished*

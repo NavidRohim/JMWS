@@ -10,17 +10,14 @@ import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 
 public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
 
-    private final Waypoint object;
-
     public ClientWaypointWrapper(Waypoint waypoint, String plugin) throws NullPointerException
     {
-        this.object = waypoint;
         super(waypoint.getCustomData(Constants.MODID), waypoint, waypoint.getName(), waypoint.getGuid(), plugin);
 
 
         if (this.getContext() == Context.SYNCHRONISE || this.getContext() == Context.NATIVE)
         {
-            waypoint.setPersistent(false);
+            getNativeObject().setPersistent(false);
         }
     }
 
@@ -30,7 +27,7 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     {
         super.update();
         if (this.info != null) {
-            this.object.setCustomData(Constants.MODID, this.getInfo().getSyncInformationAsString());
+            getNativeObject().setCustomData(Constants.MODID, this.getInfo().getSyncInformationAsString());
         }
     }
 
@@ -49,28 +46,23 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     @Override
     public String getGuid()
     {
-        return object.getGuid();
+        return getNativeObject().getGuid();
     }
 
     @Override
     public Waypoint getNativeObject()
     {
-        return object;
+        return (Waypoint) super.getNativeObject();
     }
 
     @Override
     public String getName() {
-        return object.getName();
-    }
-
-    @Override
-    public String getSerialization() {
-        return object.toString();
+        return getNativeObject().getName();
     }
 
     @Override
     public int getColour() {
-        return object.getColor();
+        return getNativeObject().getColor();
     }
 
     @Override
@@ -84,11 +76,12 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     {
         JMWSPlugin.getInstance().removeWaypointFromWrapper(this);
     }
+
     @Override
     public void createRemotely(boolean silent)
     {
         super.createRemotely(silent);
-        ClientNetworkDispatcher.makeWaypoint(object, silent);
+        ClientNetworkDispatcher.makeWaypoint(getNativeObject(), silent);
     }
 
     @Override
@@ -96,16 +89,4 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     {
         ClientNetworkDispatcher.deleteWaypoint(this.getIdentifier(), silent, false);
     }
-
-    @Override
-    public void updateRemotely() {
-        if (getContext() == Context.SYNCHRONISE)
-        {
-            ClientNetworkDispatcher.updateWaypoint(this);
-        } else if (getContext() == Context.NATIVE)
-        {
-            createRemotely(false);
-        }
-    }
-
 }

@@ -80,6 +80,11 @@ public class ClientNetworkDispatcher {
         sendString(CommandFactory.makeUpdateGroupRequest(group));
     }
 
+    public static void updateObject(ClientBaseObjectWrapper<?> object)
+    {
+        sendString(CommandFactory.makeUpdateObjectRequest(object));
+    }
+
     public static void transitionToNewCustomData(String objectIdentifier, UUID owner, boolean isGlobal, ObjectType transitionType)
     {
         sendString(CommandFactory.makeTransitionObjectRequestForLegacyCustomData(objectIdentifier, owner, isGlobal, transitionType));

@@ -312,6 +312,7 @@ public class ServerPacketHandler {
 
                             if (modifyingType == ObjectType.WAYPOINT)
                             {
+
                                 PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_waypoint_success", true, MessageType.NEUTRAL);
                             } else {
                                 PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_group_success", true, MessageType.NEUTRAL);

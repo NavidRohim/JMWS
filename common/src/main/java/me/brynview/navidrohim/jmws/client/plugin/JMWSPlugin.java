@@ -202,7 +202,7 @@ public class JMWSPlugin implements IClientPlugin {
         {
             if (waypoint.getContext() == Context.SYNCHRONISE)
             {
-                ClientNetworkDispatcher.updateWaypoint(waypoint);
+                waypoint.updateRemotely();
             } else if (waypoint.getContext() == Context.NATIVE)
             {
                 this.createAction(waypoint, true);
@@ -252,7 +252,6 @@ public class JMWSPlugin implements IClientPlugin {
             // Get old waypoint if context is UPDATE (needed because server needs reference to waypoint before it was updated so it can be deleted on the server)
             JMWSClientCommon.isBusy = true;
             ClientWaypointWrapper waypoint = ClientObjectFactory.fromWaypoint(waypointEvent.waypoint);
-
             switch (waypointEvent.getContext()) {
                 case CREATE ->
                     // Sends "create" packet | new = "SERVER_CREATE"
@@ -262,6 +261,7 @@ public class JMWSPlugin implements IClientPlugin {
                         this.deleteAction(waypoint);
                 case UPDATE ->
                 {
+                        waypoint.setNativeObject(waypointEvent.waypoint);
                         this.updateAction(waypoint);
                 }
             }
@@ -291,7 +291,10 @@ public class JMWSPlugin implements IClientPlugin {
             switch (waypointGroupEvent.getContext()) {
                 case CREATE -> this.groupCreationHandler(syncGroup, false);
                 case DELETED -> this.groupDeletionHandler(syncGroup, waypointGroupEvent.deleteWaypoints());
-                case UPDATE -> {this.groupUpdateHandler(syncGroup);}
+                case UPDATE -> {
+                    syncGroup.setNativeObject(waypointGroupEvent.getGroup());
+                    this.groupUpdateHandler(syncGroup);
+                }
             }
             JMWSClientCommon.isBusy = false;
         }
@@ -337,6 +340,9 @@ public class JMWSPlugin implements IClientPlugin {
             if (waypointGroup.getContext() == Context.SYNCHRONISE)
             {
                 waypointGroup.updateRemotely();
+            } else if (waypointGroup.getContext() == Context.NATIVE)
+            {
+                waypointGroup.createRemotely(false);
             }
         } else {
             PlayerUtils.sendUserAlert(Component.translatable("message.jmws.server_disabled_groups"), true, false, MessageType.ONE_TIME_WARNING);
@@ -483,7 +489,7 @@ public class JMWSPlugin implements IClientPlugin {
 
     /**
      * Helper for syncHandler, do not use.
-     * @param jsonData Json data from the server
+     * @param jsonData JSON data from the server
      * @return A set of SavedGroups from the server.
      * @throws JsonSyntaxException If group is malformed or does not parse.
      * @throws IllegalStateException Cannot remember why this can be thrown.
@@ -593,7 +599,6 @@ public class JMWSPlugin implements IClientPlugin {
 
             getInstance().jmAPI.removeAllWaypoints(Constants.MODID); // Delete all waypoints belonging to JMWS
             getInstance().jmAPI.removeAllWaypoints("journeymap");
-            ObjectIdentifierMap.removeAllOfObjectFromMap(ClientWaypointWrapper.class);
 
             // Test if any existing waypoints (persistent, usually death waypoints or 3rd party waypoints from another add-on) have already been added to the server, if not, add them
             for (Waypoint existing : existingWaypoints) {

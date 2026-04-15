@@ -2,20 +2,16 @@ package me.brynview.navidrohim.jmws.client.syncing.api;
 
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
-import me.brynview.navidrohim.jmws.client.commands.ClientCommands;
 import me.brynview.navidrohim.jmws.client.exceptions.NoInfoException;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
-import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
-import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,7 +22,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
 
     private boolean isValid;
     private boolean isLegacy;
-    private final T object;
+    private T object;
 
     public final String pluginId;
     private final String objectName;
@@ -45,6 +41,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
 
     public ClientBaseObjectWrapper(String syncData, T syncedObject, String objectName, String objectGuid, String plugin)
     {
+        this.object = syncedObject;
         this.objectName = objectName;
         this.objectGuid = objectGuid;
 
@@ -62,7 +59,6 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         Constants.getLogger().info("legacy: " + this.isLegacy);
         Constants.getLogger().info("sync data" + syncData);
 
-        this.object = syncedObject;
         this.pluginId = plugin;
 
         if (this.getContext() == Context.SYNCHRONISE) {
@@ -186,6 +182,12 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     }
 
     @Override
+    public void setNativeObject(@NonNull T nativeObject)
+    {
+        this.object = nativeObject;
+    }
+
+    @Override
     public void sendShareRequest(UUID sharedTo)
     {
         JMWSClientCommon.outgoingShareRequests.sendRequest(sharedTo, this);
@@ -264,6 +266,6 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
 
     @Override
     public String getSerialization() {
-        return object.toString();
+        return getNativeObject().toString();
     }
 }

@@ -11,17 +11,14 @@ import net.minecraft.util.ARGB;
 
 public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
 
-    private final WaypointGroup group;
-
     public ClientGroupWrapper(WaypointGroup group, String plugin) {
-        this.group = group;
         super(group.getCustomData(Constants.MODID), group, group.getName(), group.getGuid(), plugin);
     }
 
     @Override
     public boolean isInbuilt()
     {
-        return Constants.forbiddenGroups.contains(group.getGuid());
+        return Constants.forbiddenGroups.contains(getNativeObject().getGuid());
     }
 
     @Override
@@ -36,46 +33,41 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
         super.update();
         if (this.info != null)
         {
-            Constants.LoggerHolder.debug("GUID %s".formatted(this.group.getGuid()), "GUID CHECK");
+            Constants.LoggerHolder.debug("GUID %s".formatted(getNativeObject().getGuid()), "GUID CHECK");
             Constants.LoggerHolder.debug("CONTEXT %s".formatted(this.getContext()), "CONTEXT CHECK");
-            this.group.setCustomData(Constants.MODID, this.getInfo().getSyncInformationAsString());
+            getNativeObject().setCustomData(Constants.MODID, this.getInfo().getSyncInformationAsString());
         }
     }
 
     @Override
     public String getName()
     {
-        return group.getName();
-    }
-
-    @Override
-    public String getSerialization() {
-        return group.toString();
+        return getNativeObject().getName();
     }
 
     @Override
     public int getColour()
     {
-        return this.group.getColor();
+        return getNativeObject().getColor();
     }
 
     @Override
     public String getGuid()
     {
-        return group.getGuid();
+        return getNativeObject().getGuid();
     }
 
     @Override
     public WaypointGroup getNativeObject()
     {
-        return group;
+        return (WaypointGroup) super.getNativeObject();
     }
 
     @Override
     public void createRemotely(boolean silent)
     {
         super.createRemotely(silent);
-        ClientNetworkDispatcher.makeGroup(group, silent);
+        ClientNetworkDispatcher.makeGroup(getNativeObject(), silent);
     }
 
     @Override
@@ -117,12 +109,6 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
                 getGlobal(),
                 false
         );
-    }
-
-    @Override
-    public void updateRemotely()
-    {
-        ClientNetworkDispatcher.updateGroup(this);
     }
 
     @Override

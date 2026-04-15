@@ -24,7 +24,7 @@ public class ObjectIdentifierMap {
 
     private static String getContextMenuKey(Waypoint waypoint)
     {
-        return "%s%s%s".formatted(waypoint.getName(), waypoint.getColor(), waypoint.getX());
+        return "%s%s%s%s".formatted(waypoint.getX(), waypoint.getY(), waypoint.getZ(), waypoint.getIconColor());
     }
 
     public static ClientWaypointWrapper getWaypointFromContextMenu(Waypoint waypoint)
@@ -65,12 +65,16 @@ public class ObjectIdentifierMap {
         if (identifier != null && clientObjectMap.containsKey(clazz))
         {
             ClientBaseObjectWrapper<Object> obj = clientObjectMap.get(clazz).get(identifier);
-
+            Constants.LoggerHolder.debug(obj, "OBJ FROM CACHE");
             if ( obj != null && clazz.isAssignableFrom(obj.getClass()))
             {
                 return (T) obj;
             }
+        } else {
+            Constants.LoggerHolder.debug(identifier, "IDENTIFIER");
+            Constants.LoggerHolder.debug(clientObjectMap, "CACHE");
         }
+
         return null;
     }
 
