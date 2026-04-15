@@ -22,6 +22,7 @@ import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import me.brynview.navidrohim.jmws.client.syncing.objects.factory.ClientObjectFactory;
+import me.brynview.navidrohim.jmws.client.ui.screen.GenericScreen;
 import me.brynview.navidrohim.jmws.client.ui.screen.ShareScreen;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
@@ -78,7 +79,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         FullscreenEventRegistry.WAYPOINT_POPUP_MENU_EVENT.subscribe(Constants.MODID, this::addOptionForContextMenu);
         FullscreenEventRegistry.ADDON_BUTTON_DISPLAY_EVENT.subscribe(Constants.MODID, JMButtonAddon::addJMButtons);
-        FullscreenEventRegistry.FULLSCREEN_RENDER_EVENT.subscribe(Constants.MODID, (renderEvent) -> {
+        FullscreenEventRegistry.FULLSCREEN_RENDER_EVENT.subscribe(Constants.MODID, (_) -> {
             JMWSClientCommon.config.serverEnabled.set(JMWSClientCommon.serverConfig.serverEnabled());
             JMWSClientCommon.config.serverUploadWaypoints.set(JMWSClientCommon.serverConfig.waypointsEnabled());
             JMWSClientCommon.config.serverUploadGroups.set(JMWSClientCommon.serverConfig.groupsEnabled());
@@ -117,7 +118,7 @@ public class JMWSPlugin implements IClientPlugin {
         }
     }
 
-    private void handleWaypointContextMenuClick(ClientWaypointWrapper waypoint, BlockPos blockPos, Action action)
+    private void handleWaypointContextMenuClick(ClientWaypointWrapper waypoint, BlockPos ignoredBlockPos, Action action)
     {
 
         switch (action)
@@ -186,8 +187,6 @@ public class JMWSPlugin implements IClientPlugin {
             if (waypoint.getContext() == Context.NATIVE)
             {
                 ObjectIdentifierMap.addObjectToMap(waypoint, silent, true);
-                //ObjectIdentifierMap.addWaypointToMap(waypoint);
-                //waypoint.setPersistent(false); // Persistence must be false so it does not stay upon leaving. If it did, there would be duplicate waypoints
             }
         } else {
             PlayerUtils.sendUserAlert(Component.translatable( "message.jmws.server_disabled_waypoints"), true, false, MessageType.ONE_TIME_WARNING);
