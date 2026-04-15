@@ -64,7 +64,7 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends ObjectS
         this.refreshPlayers();
         this.addWidgets();
         this.unselectAll();
-        this.addSelfDebug(5);
+        //this.addSelfDebug(5);
     }
 
     public Set<SelectableLabelEntry> getSelectedPlayers()
@@ -285,7 +285,7 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends ObjectS
         @Override
         public boolean canSelect()
         {
-            return !JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(userUuid);
+            return !JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(userUuid) && !this.listOwner.sharedObject.getSharedTo().contains(userUuid);
         }
 
         @Override

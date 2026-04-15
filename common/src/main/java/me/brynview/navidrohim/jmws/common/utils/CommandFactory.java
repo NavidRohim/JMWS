@@ -65,7 +65,7 @@ public class CommandFactory {
     }
 
     public static String makeClientAlertRequestJson(String message, boolean overlay, MessageType messageType) { // SERVER ONLY
-        return CommandFactory.makeBaseJsonRequest(Commands.CLIENT_ALERT, message, overlay, messageType);
+        return CommandFactory.makeBaseJsonRequest(Commands.CLIENT_ALERT, message, overlay, messageType.toString());
     }
 
     public static String makeObjectShareRequestForUser(String waypoint, UUID to, UUID from, ShareRequestDirection direction, ObjectType objectType) // SERVER ONLY

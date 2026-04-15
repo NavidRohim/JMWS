@@ -17,9 +17,10 @@
 - ~~Sharing status label does not update when an object is successfully shared~~
 - ~~Waypoint context menu breaks after updating an already existing object~~
 - Timeout is not cancelled when an object is successfully shared.
+- Timeout alert is not sent after the first timeout.
+- When accepting a share request, the recieving client cannot display the object. A casting error is thrown.
 
 ## -- Todo tomorrow --
-- Find out if I can change the focus / highlight outline colour from white to whatever the current colour is for an object.
 
 Should start with UI class refactoring. Will make everything else much easier. Then probably fixing layouts
 
