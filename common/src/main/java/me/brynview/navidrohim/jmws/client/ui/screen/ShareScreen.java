@@ -1,23 +1,21 @@
 package me.brynview.navidrohim.jmws.client.ui.screen;
 
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
-import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
-import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
+import me.brynview.navidrohim.jmws.client.ui.PlayerEntry;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
-import me.brynview.navidrohim.jmws.client.ui.scroll.ObjectSharePanel;
+import me.brynview.navidrohim.jmws.client.ui.generic.screen.NotificationAlertScreen;
+import me.brynview.navidrohim.jmws.client.ui.share_panel.ObjectSharePanel;
+import me.brynview.navidrohim.jmws.client.ui.generic.entry.SelectableLabelEntry;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Checkbox;
-import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 import org.jspecify.annotations.NonNull;
 
@@ -61,13 +59,13 @@ public class ShareScreen<T extends ClientObjectWrapper<?>> extends NotificationA
 
     private void sendRequests()
     {
-        Set<ObjectSharePanel.SelectableLabelEntry> players = this.sharePanel.getSelectedPlayers();
+        Set<SelectableLabelEntry> players = this.sharePanel.getSelectedEntries();
         if (players.isEmpty())
         {
             PlayerUtils.sendUserAlert(Component.translatable("jmws.ui.sharing.no_selected_players"), true, true, MessageType.PENDING);
         } else {
-            for (ObjectSharePanel.SelectableLabelEntry selectedPlayer : players) {
-                if (selectedPlayer instanceof ObjectSharePanel.PlayerEntry playerEntry)
+            for (SelectableLabelEntry selectedPlayer : players) {
+                if (selectedPlayer instanceof PlayerEntry playerEntry)
                 {
                     OutgoingShareRequest.sendShareRequest(this.object, playerEntry.user.getProfile());
                 }

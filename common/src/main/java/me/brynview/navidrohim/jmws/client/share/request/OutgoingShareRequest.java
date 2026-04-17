@@ -5,6 +5,7 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
@@ -45,7 +46,12 @@ public class OutgoingShareRequest extends ShareRequest {
         {
             if (!shareableObject.getSharedTo().contains(user.id()))
             {
-                shareableObject.sendShareRequest(user.id());
+                if (!user.equals(JMWSCommon.minecraftClientInstance.player.getGameProfile()))
+                {
+                    shareableObject.sendShareRequest(user.id());
+                } else {
+                    PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.cannot_share"), true, true, MessageType.WARNING);
+                }
             } else {
                 PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.already_sharing", shareableObject.getName(), user.name()), true, true, MessageType.WARNING);
             }

@@ -49,7 +49,7 @@ public class PlayerUtils {
             }
 
             // Add alert to cache if it's one-time
-            if (messageType.equals(MessageType.ONE_TIME_WARNING))
+            if (messageType.oneTimeOnly)
             {
                 sentWarningsInServer.add(text.getString());
             }

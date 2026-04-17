@@ -5,7 +5,7 @@ import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
 import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.client.syncing.SyncCounter;
-import me.brynview.navidrohim.jmws.client.ui.screen.NotificationAlertScreen;
+import me.brynview.navidrohim.jmws.client.ui.generic.screen.NotificationAlertScreen;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;

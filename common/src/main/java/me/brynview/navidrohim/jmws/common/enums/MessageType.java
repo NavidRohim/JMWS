@@ -20,17 +20,19 @@ public class MessageType {
 
     public static final MessageType GREY = register("§7", 0xFF555555);
 
-    public static final MessageType ONE_TIME_WARNING = register(WARNING.text, WARNING.numericalColour);
+    public static final MessageType ONE_TIME_WARNING = register(WARNING.text, WARNING.numericalColour, true);
     public static final MessageType NEUTRAL = register("", 0xFFFFFFFF);
     public static final MessageType INVISIBLE = register("", 0x00000000);
 
     private final String text;
     private final int numericalColour;
+    public final boolean oneTimeOnly;
 
-    MessageType(final String text, int numericalColour)
+    private MessageType(final String text, int numericalColour, boolean oneTimeOnly)
     {
         this.text = text;
         this.numericalColour = numericalColour;
+        this.oneTimeOnly = oneTimeOnly;
     }
 
     public int getNumericalColour()
@@ -43,16 +45,21 @@ public class MessageType {
         return text;
     }
 
-    public static MessageType register(String id, int numericalColour)
+    public static MessageType register(String id, int numericalColour, boolean oneTimeOnly)
     {
         if (REGISTRY.containsKey(id))
         {
             return REGISTRY.get(id);
         } else {
-            MessageType type = new MessageType(id, numericalColour);
+            MessageType type = new MessageType(id, numericalColour, oneTimeOnly);
             REGISTRY.put(id, type);
             return type;
         }
+    }
+
+    public static MessageType register(String id, int numericalColour)
+    {
+        return register(id, numericalColour, false);
     }
 
     public static MessageType valueOf(String id)
@@ -71,7 +78,7 @@ public class MessageType {
             id = "";
         }
 
-        return new MessageType(id, numericalColour);
+        return new MessageType(id, numericalColour, false);
     }
 }
 

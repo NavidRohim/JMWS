@@ -1,7 +1,6 @@
-package me.brynview.navidrohim.jmws.client.ui.screen;
+package me.brynview.navidrohim.jmws.client.ui.generic.screen;
 
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
-import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -15,12 +14,12 @@ import org.joml.Vector2i;
 import org.joml.Vector4f;
 import org.jspecify.annotations.NonNull;
 
+import static me.brynview.navidrohim.jmws.client.ui.UIConstants.ALERT_DURATION_MS;
+import static me.brynview.navidrohim.jmws.client.ui.UIConstants.ALERT_FADE_DURATION_MS;
 import static me.brynview.navidrohim.jmws.common.JMWSCommon.minecraftClientInstance;
 
 public class NotificationAlertScreen extends Screen {
 
-    private static final int ALERT_DURATION_MS = 4000;
-    private static final int ALERT_FADE_DURATION_MS = 800;
     private long alertStartTime = 0;
 
     private final Screen parent;

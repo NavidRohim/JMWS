@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.client.ui.screen;
 
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
+import me.brynview.navidrohim.jmws.client.ui.generic.screen.NotificationAlertScreen;
 import net.minecraft.client.gui.screens.Screen;
 
 public class ViewAllObjectScreen extends NotificationAlertScreen

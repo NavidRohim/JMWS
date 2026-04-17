@@ -9,4 +9,6 @@ public class UIConstants
     public static final int PLAYER_LIST_WIDTH = 200;
     public static final int ALERT_DURATION_MS = 4000;
     public static final int ALERT_FADE_DURATION_MS = 800;
+    public final static int PLAYER_HEAD_SIZE = 32;
+    public final static int PLAYER_HEAD_SIZE_HALVED = PLAYER_HEAD_SIZE / 2;
 }
