@@ -211,7 +211,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         if (this.info != null)
         {
             this.getInfo().sharedTo.remove(sharedTo);
-            ClientNetworkDispatcher.removeShareWith(sharedTo, this);
+            ClientNetworkDispatcher.PeerToPeer.removeShare(sharedTo, this);
         } else {
             throw new NoInfoException();
         }

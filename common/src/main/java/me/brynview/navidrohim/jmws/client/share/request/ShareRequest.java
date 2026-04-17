@@ -4,12 +4,12 @@ import com.mojang.authlib.GameProfile;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
+import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.share.IncomingShareRequests;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +24,7 @@ public class ShareRequest {
     public UUID meantFor;
 
     public ClientObjectWrapper<?> currentSharedObject;
-    public ObjectType sharedObjectType;
+    public SyncObjectType sharedObjectType;
     public String requestIdentifier;
     public String objectDisplayName;
 
@@ -33,17 +33,18 @@ public class ShareRequest {
 
     public final ScheduledFuture<?> timeout;
 
-    public ShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, @Nullable ClientObjectWrapper<?> waypointOrGroup, ObjectType sharedObjectType, String requestIdentifier, String objectDisplayName) {
+    public ShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, @Nullable ClientObjectWrapper<?> waypointOrGroup) {
         this.originalSender = uuid;
         this.meantFor = meantForPlayerUUID;
         this.currentSharedObject = waypointOrGroup;
-        this.sharedObjectType = sharedObjectType;
-        this.requestIdentifier = requestIdentifier;
-        this.objectDisplayName = objectDisplayName;
+        this.sharedObjectType = waypointOrGroup.getType();
+        this.requestIdentifier = waypointOrGroup.getIdentifier();
+        this.objectDisplayName = waypointOrGroup.getName();
 
         PlayerUtils.getUserFromUUID(uuid).ifPresentOrElse(p -> {this.sender = p;}, () -> {this.sender = null;});
         PlayerUtils.getUserFromUUID(meantForPlayerUUID).ifPresentOrElse(pFor -> {this.to = pFor;}, () -> {this.sender = null;});
 
+        Constants.LoggerHolder.debug("creating timeout future", "TIMEOUT FUTURE CREATION");
         this.timeout = IncomingShareRequests.requestScheduler.schedule(this::timeout, 20, TimeUnit.SECONDS);
     }
 
@@ -55,19 +56,19 @@ public class ShareRequest {
 
     public void decline()
     {
-        ClientNetworkDispatcher.declineShare(this.originalSender);
+        ClientNetworkDispatcher.PeerToPeer.declineShare(this.originalSender);
         //ClientNetworkDispatcher.sendString(CommandFactory.makeObjectShareRequestDecline(this.originalSender));
         this.finishRequest();
     }
 
     public static void busy(UUID originalSender)
     {
-        ClientNetworkDispatcher.declineShare(originalSender, "sharing.jmws.share_busy");
+        ClientNetworkDispatcher.PeerToPeer.declineShare(originalSender, "sharing.jmws.share_busy");
         //ClientNetworkDispatcher.sendString(CommandFactory.makeObjectShareRequestDeclineWithMessage(originalSender, "sharing.jmws.share_busy"));
     }
 
     public static void disabled(UUID originalSender) {
-        ClientNetworkDispatcher.declineShare(originalSender, "sharing.jmws.disabled");
+        ClientNetworkDispatcher.PeerToPeer.declineShare(originalSender, "sharing.jmws.disabled");
         //ClientNetworkDispatcher.sendString(CommandFactory.makeObjectShareRequestDeclineWithMessage(originalSender, "sharing.jmws.disabled"));
     }
 

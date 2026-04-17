@@ -1,5 +1,7 @@
 package me.brynview.navidrohim.jmws.client.syncing.impl;
 
+import journeymap.api.v2.common.waypoint.Waypoint;
+import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
@@ -120,4 +122,5 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
     public void removeLocally() {
         JMWSPlugin.getInstance().removeGroupFromWrapper(this);
     }
+
 }

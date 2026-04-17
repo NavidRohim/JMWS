@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.client.network;
 
+import com.mojang.brigadier.Command;
 import commonnetwork.api.Network;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
@@ -55,16 +56,6 @@ public class ClientNetworkDispatcher {
         sendString(CommandFactory.makeGroupCreationRequestJson(waypointGroup, silent));
     }
 
-    public static void declineShare(UUID originalSender)
-    {
-        sendString(CommandFactory.makeBaseJsonRequest(CommandFactory.Commands.REJECT_SHARE, originalSender, PlayerUtils.ourUUID()));
-    }
-
-    public static void declineShare(UUID originalSender, String messageKey)
-    {
-        sendString(CommandFactory.makeObjectShareRequestDeclineWithMessage(originalSender, messageKey));
-    }
-
     public static void acceptShare(ShareRequest shareRequest)
     {
         sendString(CommandFactory.makeObjectShareRequestAccept(shareRequest));
@@ -95,16 +86,6 @@ public class ClientNetworkDispatcher {
         sendString(CommandFactory.makeTransitionObjectRequest(filename, objectIdentifier, transitionType));
     }
 
-    public static void shareWith(UUID to, ClientBaseObjectWrapper<?> shareableObject)
-    {
-        sendString(CommandFactory.makeShareRequestForServer(PlayerUtils.ourUUID(), to, shareableObject.getIdentifier(), shareableObject.getType())); // PLACEHOLDER
-    }
-
-    public static void removeShareWith(UUID subject, ClientBaseObjectWrapper<?> shareableObject)
-    {
-        sendString(CommandFactory.makeUnshareRequestForUserOnServer(PlayerUtils.ourUUID(), subject, shareableObject.getIdentifier(), shareableObject.getType())); // TODO
-    }
-
     public static void removeShareFromAll(ClientBaseObjectWrapper<?> shareableObject)
     {
         sendString(CommandFactory.makeUnshareRequestForAllOnServer(PlayerUtils.ourUUID(), shareableObject.getIdentifier(), shareableObject.getType())); // TODO
@@ -113,5 +94,28 @@ public class ClientNetworkDispatcher {
     public static void makeGlobal(ClientBaseObjectWrapper<?> globalObject, boolean global)
     {
         sendString(CommandFactory.makeGlobalRequestForServer(PlayerUtils.ourUUID(), globalObject.getIdentifier(), globalObject.getType(), global)); // TODO
+    }
+
+    public static class PeerToPeer
+    {
+        public static void shareWith(UUID to, ClientBaseObjectWrapper<?> shareableObject)
+        {
+            sendString(CommandFactory.PeerToPeer.shareToUser(to, shareableObject)); // PLACEHOLDER
+        }
+
+        public static void declineShare(UUID originalSender, String messageKey)
+        {
+            sendString(CommandFactory.PeerToPeer.declineWithReason(originalSender, messageKey));
+        }
+
+        public static void declineShare(UUID originalSender)
+        {
+            sendString(CommandFactory.PeerToPeer.declineWithReason(originalSender, "sharing.jmws.declined_by_server"));
+        }
+
+        public static void removeShare(UUID with, ClientBaseObjectWrapper<?> shareableObject)
+        {
+            sendString(CommandFactory.PeerToPeer.removeShareWith(with, shareableObject.getIdentifier(), shareableObject.getType()));
+        }
     }
 }

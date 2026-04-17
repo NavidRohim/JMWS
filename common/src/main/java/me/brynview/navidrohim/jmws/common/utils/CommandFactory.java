@@ -2,7 +2,6 @@ package me.brynview.navidrohim.jmws.common.utils;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
@@ -73,16 +72,6 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.OBJECT_SHARE, waypoint, to, from, objectType, direction);
     }
 
-    public static String makeObjectShareRequestDecline(UUID originalSender)
-    {
-        return CommandFactory.makeBaseJsonRequest(Commands.REJECT_SHARE, originalSender, PlayerUtils.ourUUID());
-    }
-
-    public static String makeObjectShareRequestDeclineWithMessage(UUID originalSender, String messageKey)
-    {
-        return CommandFactory.makeBaseJsonRequest(Commands.USER_ALREADY_PROCESSING_SHARE, originalSender, PlayerUtils.ourUUID(), messageKey);
-    }
-
     public static String makeObjectShareRequestAccept(ShareRequest shareRequest)
     {
         return CommandFactory.makeBaseJsonRequest(Commands.AFFIRM_SHARE, shareRequest.originalSender, shareRequest.requestIdentifier, shareRequest.sharedObjectType, shareRequest.meantFor);
@@ -113,19 +102,9 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.TRANSITION_NEW_DATA, objectIdentifier, owner, isGlobal, transitionType);
     }
 
-    public static String makeShareRequestForServer(UUID from, UUID to, String objectIdentifier, SyncObjectType syncObjectType)
-    {
-        return CommandFactory.makeBaseJsonRequest(Commands.SHARE_FROM_CLIENT, from, to, objectIdentifier, syncObjectType.getId());
-    }
-
-    public static String makeUnshareRequestForUserOnServer(UUID from, UUID subject, String objectIdentifier, SyncObjectType syncObjectType)
-    {
-        return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_FROM_CLIENT, from, subject, objectIdentifier, syncObjectType.getId());
-    }
-
     public static String makeUnshareRequestForAllOnServer(UUID from, String objectIdentifier, SyncObjectType syncObjectType)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_FOR_ALL, from, objectIdentifier, syncObjectType.getId());
+        return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_WITH_ALL, from, objectIdentifier, syncObjectType.getId());
     }
 
     public static String makeGlobalRequestForServer(UUID from, String objectIdentifier, SyncObjectType syncObjectType, boolean global)
@@ -133,6 +112,33 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.MAKE_GLOBAL, from, objectIdentifier, syncObjectType.getId(), global);
     }
 
+    public static class PeerToPeer
+    {
+        public static String makeBaseRequestForUser(UUID to, PeerToPeerCommand command, Object... arguments)
+        {
+            return CommandFactory.makeBaseJsonRequest(Commands.SPECIAL_FORWARD_TO_CLIENT, command, to, arguments);
+        }
+
+        public static String shareToUser(UUID to, ClientBaseObjectWrapper<?> shareableObject)
+        {
+            return makeBaseRequestForUser(to, PeerToPeerCommand.CLIENT_SHARE_REQUEST, shareableObject.getSerialization(), shareableObject.getType().getId());
+        }
+
+        public static String declineWithReason(UUID to, String translationKeyReason)
+        {
+            return makeBaseRequestForUser(to, PeerToPeerCommand.CLIENT_REJECTED_SHARE_WITH_REASON, translationKeyReason);
+        }
+
+        public static String removeShareWith(UUID with, String identifier, SyncObjectType type)
+        {
+            return makeBaseRequestForUser(with, PeerToPeerCommand.CLIENT_REMOVE_SHARE_WITH, identifier, type.getId());
+        }
+
+        public static String removeShareWithAll(String identifier, SyncObjectType type)
+        {
+            return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_WITH_ALL, PlayerUtils.ourUUID(), identifier, type.getId());
+        }
+    }
     /*
      * Enums for different packet commands
      */
@@ -153,26 +159,30 @@ public class CommandFactory {
         CLIENT_ALERT,
         COMMON_DISPLAY_INTERVAL,
         COMMON_DISPLAY_NEXT_UPDATE,
+        UPDATE,
 
-        // Object sharing
+        // Object sharing (server)
         OBJECT_SHARE, // Share waypoint / group
         AFFIRM_SHARE, // Confirm user wants shared object
         REJECT_SHARE, // User doesnt want shared object.
+        REMOVE_SHARE_WITH_ALL,
 
-        // Object sharing from client
-        SHARE_FROM_CLIENT,
-        REMOVE_SHARE_FROM_CLIENT,
-        REMOVE_SHARE_FOR_ALL,
-
+        // Global
         MAKE_GLOBAL,
 
-        // Object sharing errors
-        USER_ALREADY_PROCESSING_SHARE, // User is already processing another shareWith request
-
-        UPDATE,
+        // Legacy
         TRANSITION,
         TRANSITION_NEW_DATA,
 
-        CREATE,
+        // Special
+        SPECIAL_FORWARD_TO_CLIENT,
+        UNKNOWN
+    }
+
+    public enum PeerToPeerCommand {
+        CLIENT_SHARE_REQUEST,
+        CLIENT_REJECTED_SHARE_WITH_REASON,
+        CLIENT_ACCEPTED_SHARE,
+        CLIENT_REMOVE_SHARE_WITH
     }
 }

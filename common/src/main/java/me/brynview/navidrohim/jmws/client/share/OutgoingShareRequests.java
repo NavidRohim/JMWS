@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.client.share;
 
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
@@ -24,9 +25,17 @@ public class OutgoingShareRequests extends HashMap<UUID, OutgoingShareRequest> {
         this.put(to, request);
     }
 
-    public void removeRequest(UUID from)
+    public boolean removeRequest(UUID from)
     {
-        this.remove(from);
+        @Nullable OutgoingShareRequest valueRemoved = this.remove(from);
+        if (valueRemoved == null)
+        {
+            Constants.getLogger().warn("No request found for player " + from + " to remove.");
+            return false;
+        } else {
+            Constants.getLogger().info("Removed request for player " + from + "Thread state: " + valueRemoved.timeout.state());
+            return true;
+        }
     }
 
     @Nullable
@@ -46,6 +55,6 @@ public class OutgoingShareRequests extends HashMap<UUID, OutgoingShareRequest> {
     public void sendRequest(UUID sharedTo, ClientBaseObjectWrapper<?> sharedObject)
     {
         this.addRequest(sharedTo, new OutgoingShareRequest(PlayerUtils.ourUUID(), sharedTo, sharedObject, ObjectType.valueOf(sharedObject.getType().getId()), sharedObject.getIdentifier(), sharedObject.getName()));
-        ClientNetworkDispatcher.shareWith(sharedTo, sharedObject);
+        ClientNetworkDispatcher.PeerToPeer.shareWith(sharedTo, sharedObject);
     }
 }

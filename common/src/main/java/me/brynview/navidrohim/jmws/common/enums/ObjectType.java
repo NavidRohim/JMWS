@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.common.enums;
 
+import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
@@ -30,5 +31,10 @@ public enum ObjectType {
     public String getObjectPathPrefix()
     {
         return this.objectPathPrefix;
+    }
+
+    public boolean equalsNew(SyncObjectType obj)
+    {
+        return this.toString().equals(obj.getId());
     }
 }

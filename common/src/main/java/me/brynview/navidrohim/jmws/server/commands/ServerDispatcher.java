@@ -27,14 +27,6 @@ public class ServerDispatcher {
 
 
     public static void addCommandsToDispatcher(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("share_waypoint")
-                .requires(ServerDispatcher::isValidCommandUser)
-                .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("waypointName", StringArgumentType.greedyString()).suggests(ServerDispatcher::suggestWaypoints).executes(ServerDispatcher::doShareWaypoint)))
-        );
-        dispatcher.register(Commands.literal("share_group")
-                .requires(ServerDispatcher::isValidCommandUser)
-                .then(Commands.argument("username", EntityArgument.player()).then(Commands.argument("groupName", StringArgumentType.greedyString()).suggests(ServerDispatcher::suggestGroups).executes(ServerDispatcher::doShareGroup)))
-        );
         dispatcher.register(Commands.literal("stop_sharing_group")
                 .requires(ServerDispatcher::isValidCommandUser)
                 .then(Commands.argument("groupName", StringArgumentType.greedyString()).suggests(ServerDispatcher::suggestSharedGroups).executes(ServerDispatcher::doRemoveShareGroup))
@@ -96,20 +88,6 @@ public class ServerDispatcher {
         String groupID = StringArgumentType.getString(context1, "groupName");
 
         return ServerCommands.removeShare(context1.getSource().getPlayer(), groupID, ObjectType.GROUP);
-    }
-
-    private static int doShareWaypoint(CommandContext<CommandSourceStack> context1) throws CommandSyntaxException {
-        ServerPlayer player = EntityArgument.getPlayer(context1, "username");
-        String waypointID = StringArgumentType.getString(context1, "waypointName");
-
-        return ServerCommands.share(context1.getSource().getPlayer(), player, waypointID, ObjectType.WAYPOINT);
-    }
-
-    private static int doShareGroup(CommandContext<CommandSourceStack> commandSourceStackCommandContext) throws CommandSyntaxException {
-        ServerPlayer player = EntityArgument.getPlayer(commandSourceStackCommandContext, "username");
-        String groupName = StringArgumentType.getString(commandSourceStackCommandContext, "groupName");
-
-        return ServerCommands.share(commandSourceStackCommandContext.getSource().getPlayer(), player, groupName, ObjectType.GROUP);
     }
 
     private static int createServerWp(CommandContext<CommandSourceStack> commandSourceStackCommandContext) {

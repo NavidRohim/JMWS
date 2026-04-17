@@ -51,21 +51,26 @@ public class JMWSActionPayload
         buf.writeUtf(rawData, PACKET_SIZE);
     }
 
-    private void _setCommandAndArguments()
+    private void setCommandAndArguments()
     {
         JsonObject jsonifyied = CommonUtils.parseStringToJsonObject(rawData);
-
-        command = CommandFactory.Commands.valueOf(jsonifyied.asMap().get("command").getAsString());
+        String commandString = jsonifyied.asMap().get("command").getAsString().toUpperCase();
+        try {
+            command = CommandFactory.Commands.valueOf(commandString);
+        } catch (IllegalArgumentException e) {
+            Constants.getLogger().error("Unknown command: {}", commandString);
+            command = CommandFactory.Commands.UNKNOWN;
+        }
         argumentList = jsonifyied.asMap().get("arguments").getAsJsonArray().asList();
     }
 
     public CommandFactory.Commands command() {
-        _setCommandAndArguments();
+        setCommandAndArguments();
         return command;
     }
 
     public List<JsonElement> arguments() {
-        _setCommandAndArguments();
+        setCommandAndArguments();
         return argumentList;
     }
 }

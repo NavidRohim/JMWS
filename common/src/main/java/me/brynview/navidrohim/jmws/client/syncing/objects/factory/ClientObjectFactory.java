@@ -4,6 +4,9 @@ import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
+import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
+import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
+import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
@@ -49,4 +52,9 @@ public class ClientObjectFactory {
         return gp;
     }
 
+    @Nullable
+    public static ClientObjectWrapper<?> fromType(SyncObjectType type, String data)
+    {
+        return type.getDecoder().decodeStringToWrapper(data);
+    }
 }

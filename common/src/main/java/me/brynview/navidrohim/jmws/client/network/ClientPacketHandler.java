@@ -10,6 +10,8 @@ import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.client.syncing.SyncCounter;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
+import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
+import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.factory.ClientObjectFactory;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
@@ -26,10 +28,12 @@ import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.enums.ShareRequestDirection;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static me.brynview.navidrohim.jmws.client.utils.PlayerUtils.sendUserAlert;
@@ -113,116 +117,87 @@ public class ClientPacketHandler {
                 // No outbound data
                 case COMMON_DISPLAY_NEXT_UPDATE -> sendUserAlert(Component.translatable("message.jmws.next_sync", (SyncCounter.timeUntilNextSync())), true, false, MessageType.NEUTRAL);
 
-                case OBJECT_SHARE ->
+                case SPECIAL_FORWARD_TO_CLIENT ->
                 {
-                    try
-                    {
-                        ShareRequestDirection direction = ShareRequestDirection.valueOf(arguments.getLast().getAsString());
 
-                        ObjectType sharedObjectType = ObjectType.valueOf(arguments.get(3).getAsString());
-                        String objectString = arguments.getFirst().getAsString();
+                    Constants.getLogger().info(arguments.toString());
+                    UUID senderUUID = UUID.fromString(arguments.getFirst().getAsString());
+                    CommandFactory.PeerToPeerCommand sentCommand = CommandFactory.PeerToPeerCommand.valueOf(arguments.get(1).getAsString());
+                    List<JsonElement> argumentsForClient = arguments.subList(2, arguments.size());
 
-                        Object object;
-                        String objName;
-                        String objectIdentifier;
-                        ClientObjectWrapper<?> objectWrapper;
-
-                        if (sharedObjectType == ObjectType.WAYPOINT)
-                        {
-                            Waypoint objectWp = WaypointFactory.fromWaypointJsonString(objectString);
-                            objectWrapper = ClientObjectFactory.fromWaypoint(objectWp);
-
-                            objectIdentifier = objectWrapper.getIdentifier();
-                            object = objectWp;
-                            objName = objectWp.getName();
-                        } else {
-                            WaypointGroup objectGp = WaypointFactory.fromGroupJsonString(objectString);
-                            objectWrapper = ClientObjectFactory.fromGroup(objectGp);
-
-                            objectIdentifier = objectWrapper.getIdentifier();
-                            object = objectGp;
-                            objName = objectGp.getName();
-                        }
-
-                        if (direction.equals(ShareRequestDirection.FOR_CLIENT))
-                        {
-                            UUID sender = UUID.fromString(arguments.get(1).getAsString());
-                            if (!JMWSClientCommon.config.enableSharing.get())
-                            {
-                                ShareRequest.disabled(sender);
-                            }
-                            else if (!JMWSClientCommon.incomingShareRequests.hasShareRequestFrom(sender))
-                            {
-                                ShareRequest request = new ShareRequest(
-                                        sender,
-                                        PlayerUtils.ourUUID(),
-                                        objectWrapper,
-                                        sharedObjectType,
-                                        objectIdentifier,
-                                        objName
-                                );
-
-                                JMWSClientCommon.incomingShareRequests.addRequest(sender, request);
-                                sendUserAlert(Component.translatable("sharing.jmws.share_request", request.getSenderName()), false, true, MessageType.SUCCESS);
-                            } else {
-                                ShareRequest.busy(sender);
-                            }
-                        } else {
-                            UUID incoming = UUID.fromString(arguments.get(1).getAsString());
-                            JMWSClientCommon.outgoingShareRequests.addRequest(incoming, new OutgoingShareRequest(PlayerUtils.ourUUID(), incoming, objectWrapper, sharedObjectType, objectIdentifier, objName));
-                            sendUserAlert(Component.translatable("sharing.jmws.share_sent"), true, false, MessageType.SUCCESS);
-                        }
-                    } catch (NullPointerException e)
-                    {
-                        throw new RuntimeException("Got corrupt object when sharing.");
-                    }
-                }
-
-                case REJECT_SHARE ->
-                {
-                    UUID incoming = UUID.fromString(arguments.get(1).getAsString());
-                    @Nullable OutgoingShareRequest request = JMWSClientCommon.outgoingShareRequests.getRequest(incoming);
-
-                    if (request != null)
-                    {
-                        request.resolve();
-                        sendUserAlert(Component.translatable("sharing.jmws.share_rejected", request.getRecipientName()), true, false, MessageType.FAILURE);
-                    }
-                }
-
-                case USER_ALREADY_PROCESSING_SHARE ->
-                {
-                    UUID incoming = UUID.fromString(arguments.get(1).getAsString());
-                    String declineMessage = arguments.getLast().getAsString();
-                    @Nullable OutgoingShareRequest request = JMWSClientCommon.outgoingShareRequests.getRequest(incoming);
-
-                    if (request != null)
-                    {
-                        request.resolve();
-                        sendUserAlert(Component.translatable(declineMessage, request.getRecipientName()), true, false, MessageType.WARNING);
-                    }
-
-                }
-
-                case AFFIRM_SHARE ->
-                {
-                    UUID incoming = UUID.fromString(arguments.getLast().getAsString());
-                    if (JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(incoming))
-                    {
-                        OutgoingShareRequest request = JMWSClientCommon.outgoingShareRequests.getRequest(incoming).resolve();
-                        request.currentSharedObject.addSharedTo(incoming);
-                        request.resolve();
-
-                        sendUserAlert(Component.translatable("sharing.jmws.sharing_host", request.objectDisplayName, request.getRecipientName()), true, false, MessageType.SUCCESS);
-                    } else {
-                        sendUserAlert(Component.translatable("sharing.jmws.no_longer_valid"), true, true, MessageType.SUCCESS);
-                    }
+                    Constants.LoggerHolder.debug(argumentsForClient, "ARGS FOR CLIENT");
+                    ClientPacketHandler.handlePeerToPeerPacket(sentCommand, senderUUID, argumentsForClient.getFirst().getAsJsonArray().asList());
                 }
                 
                 default -> Constants.getLogger().warn("Unknown packet command -> {} ", waypointPayload.command);
              }
         }
         JMWSClientCommon.isBusy = false;
+    }
+
+    private static void handlePeerToPeerPacket(CommandFactory.PeerToPeerCommand sentCommand, UUID senderUUID, List<JsonElement> argumentsForClient)
+    {
+        argumentsForClient = argumentsForClient.get(2).getAsJsonArray().asList();
+        switch (sentCommand)
+        {
+            case CommandFactory.PeerToPeerCommand.CLIENT_SHARE_REQUEST ->
+            {
+                Constants.LoggerHolder.debug(argumentsForClient, "PROCESSING");
+                String data = argumentsForClient.getFirst().getAsString();
+                Optional<SyncObjectType> possibleType = SyncObjectType.of(argumentsForClient.get(1).getAsString());
+
+                if (possibleType.isPresent())
+                {
+                    SyncObjectType type = possibleType.get();
+                    ClientObjectWrapper<?> objectWrapper = ClientObjectFactory.fromType(type, data);
+
+                    Constants.LoggerHolder.debug(objectWrapper, "OBJECT WRAPPER");
+                    
+                    if (!JMWSClientCommon.config.enableSharing.get())
+                    {
+                        ShareRequest.disabled(senderUUID);
+                    }
+                    else if (!JMWSClientCommon.incomingShareRequests.hasShareRequestFrom(senderUUID))
+                    {
+                        ShareRequest request = new ShareRequest(
+                                senderUUID,
+                                PlayerUtils.ourUUID(),
+                                objectWrapper
+                        );
+
+                        JMWSClientCommon.incomingShareRequests.addRequest(senderUUID, request);
+                        sendUserAlert(Component.translatable("sharing.jmws.share_request", request.getSenderName()), false, true, MessageType.SUCCESS);
+                    } else {
+                        ShareRequest.busy(senderUUID);
+                    }
+                }
+            }
+
+            case CLIENT_REJECTED_SHARE_WITH_REASON ->
+            {
+                String declineMessage = argumentsForClient.getFirst().getAsString();
+                @Nullable OutgoingShareRequest request = JMWSClientCommon.outgoingShareRequests.getRequest(senderUUID);
+
+                if (request != null)
+                {
+                    request.resolve();
+                    sendUserAlert(Component.translatable(declineMessage, request.getRecipientName()), true, false, MessageType.FAILURE);
+                }
+            }
+
+            case CLIENT_ACCEPTED_SHARE -> {
+                if (JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(senderUUID))
+                {
+                    OutgoingShareRequest request = JMWSClientCommon.outgoingShareRequests.getRequest(senderUUID).resolve();
+                    request.currentSharedObject.addSharedTo(senderUUID);
+
+                    sendUserAlert(Component.translatable("sharing.jmws.sharing_host", request.objectDisplayName, request.getRecipientName()), true, false, MessageType.SUCCESS);
+                } else {
+                    sendUserAlert(Component.translatable("sharing.jmws.no_longer_valid"), true, true, MessageType.SUCCESS);
+                }
+            }
+            default -> Constants.getLogger().warn("Unknown peer to peer command -> {} ", sentCommand);
+        }
     }
 
     /**

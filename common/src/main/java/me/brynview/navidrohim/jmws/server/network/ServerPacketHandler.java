@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.server.network;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
@@ -330,12 +331,6 @@ public class ServerPacketHandler {
                     sendUserSync(player, sendAlert, isDeathSync, false);
                 }
 
-                case CommandFactory.Commands.USER_ALREADY_PROCESSING_SHARE, CommandFactory.Commands.REJECT_SHARE ->
-                {
-                    UUID forUser = UUID.fromString(Context.message().arguments().getFirst().getAsString());
-                    Dispatcher.sendToClient(Context.message(), Context.sender().level().getServer().getPlayerList().getPlayer(forUser));
-                }
-
                 case CommandFactory.Commands.AFFIRM_SHARE ->
                 {
                     UUID ownerUUID = UUID.fromString(arguments.getFirst().getAsString());
@@ -409,20 +404,25 @@ public class ServerPacketHandler {
                     JMWSServerIO.getObjectFromDisk(legacyObjectIdentifier, legacyOwnerUUID, legacyObjectType, false, isGlobal);
                 }
 
-                case SHARE_FROM_CLIENT ->
+                case SPECIAL_FORWARD_TO_CLIENT ->
                 {
+                    CommandFactory.PeerToPeerCommand commandForClient = CommandFactory.PeerToPeerCommand.valueOf(arguments.getFirst().getAsString());
                     UUID toPlayer = UUID.fromString(arguments.get(1).getAsString());
-                    String objectId =  arguments.get(2).getAsString();
-                    ObjectType objectType = ObjectType.valueOf(arguments.get(3).getAsString());
+                    @Nullable ServerPlayer toPlayerObject = JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(toPlayer);
 
-                    ServerCommands.share(player, JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(toPlayer), JMWSServerIO.getObjectFromDisk(objectId, playerUUID, objectType));
+                    if (toPlayerObject != null)
+                    {
+                        Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeBaseJsonRequest(CommandFactory.Commands.SPECIAL_FORWARD_TO_CLIENT, playerUUID, commandForClient, arguments)), toPlayerObject);
+                    } else {
+                        PlayerNetworkingHelper.sendUserMessage(player, "error.jmws.player_offline", true, MessageType.WARNING);
+                    }
                 }
 
                 default -> Constants.getLogger().warn("Unknown packet command -> {}", command);}
 
         } catch (UnsupportedOperationException error)
         {
-            // Thrown if arguments cannot be parsed by Gson. Usually a corrupt packet but ideally this should never be called as it is
+            // Thrown if arguments cannot be parsed by Gson. Usually a corrupt packet, but ideally this should never be called as it is
             // Handled on the client. Other errors will just have a normal traceback.
             debugLogCorruptPacket(command, playerUUID, arguments, error);
         }

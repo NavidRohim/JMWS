@@ -19,10 +19,10 @@ import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
+import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import me.brynview.navidrohim.jmws.client.syncing.objects.factory.ClientObjectFactory;
-import me.brynview.navidrohim.jmws.client.ui.screen.GenericScreen;
 import me.brynview.navidrohim.jmws.client.ui.screen.ShareScreen;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
@@ -726,11 +726,11 @@ public class JMWSPlugin implements IClientPlugin {
 
     public void addObjectFromRequest(ShareRequest request)
     {
-        if (request.sharedObjectType == ObjectType.WAYPOINT)
+        if (request.sharedObjectType.equals(SyncObjectType.WAYPOINT))
         {
-            addWaypoint((Waypoint) request.currentSharedObject);
+            addWaypoint((Waypoint) request.currentSharedObject.getNativeObject());
         } else {
-            addGroup((WaypointGroup) request.currentSharedObject);
+            addGroup((WaypointGroup) request.currentSharedObject.getNativeObject());
         }
     }
 

@@ -17,7 +17,7 @@ import java.util.UUID;
 public class OutgoingShareRequest extends ShareRequest {
 
     public OutgoingShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, ClientObjectWrapper<?> sharedObject, ObjectType sharedObjectType, String requestIdentifier, String objectDisplayName) {
-        super(uuid, meantForPlayerUUID, sharedObject, sharedObjectType, requestIdentifier, objectDisplayName);
+        super(uuid, meantForPlayerUUID, sharedObject);
     }
 
     @Override
@@ -30,14 +30,21 @@ public class OutgoingShareRequest extends ShareRequest {
     @Override
     protected void timeout()
     {
-        JMWSClientCommon.outgoingShareRequests.removeRequest(this.meantFor);
-        PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.request_timeout_to", this.getRecipientName()), true, false, MessageType.WARNING);
+        Constants.LoggerHolder.debug(JMWSClientCommon.outgoingShareRequests, "OUTGOING SHARE REQUEST");
+        boolean didRemove = JMWSClientCommon.outgoingShareRequests.removeRequest(this.meantFor);
+        if (didRemove)
+        {
+            PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.request_timeout_to", this.getRecipientName()), true, false, MessageType.WARNING);
+        }
     }
 
     private void finishRequest()
     {
+        Constants.LoggerHolder.debug(JMWSClientCommon.outgoingShareRequests, "OUTGOING SHARE REQUEST");
         JMWSClientCommon.outgoingShareRequests.removeRequest(this.meantFor);
+        Constants.LoggerHolder.debug(JMWSClientCommon.outgoingShareRequests, "OUTGOING SHARE REQUEST");
         this.timeout.cancel(true);
+        Constants.LoggerHolder.debug(this.timeout.state(), "SR TIMEOUT STATE");
     }
 
     public static void sendShareRequest(ClientObjectWrapper<?> shareableObject, GameProfile user)

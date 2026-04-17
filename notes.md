@@ -21,14 +21,20 @@
 - ~~Waypoint context menu breaks after updating an already existing object~~
 - Timeout is not cancelled when an object is successfully shared.
 - ~~Timeout alert is not sent after the first timeout.~~
-- When accepting a share request, the recieving client cannot display the object. A casting error is thrown.
-
+- ~~When accepting a share request, the recieving client cannot display the object. A casting error is thrown.~~
+- ~~If a client or server does not have a packet registered, the game will crash.~~
+- 
 ## -- Todo tomorrow --
 
-~~Should start with UI class refactoring. Will make everything else much easier. Then probably fixing layouts~~
-
+- Fix the timeout bug
+- Fix share request not being added
+- Add select / deselect all buttons
+  - Position these buttons in the top right corner of the scroll list. Make a part of the CheckableSelectionList class. Though, buttons cannot be natively added to ObjectSelectionList or children of it, so maybe make a generic abstract screen class for this behaviour (CheckableSelectionList will need to be passed to this generic screen class for button placement)
 *Already finished*
 
+## -- Done --
+
+- ~~Should start with UI class refactoring. Will make everything else much easier. Then probably fixing layouts~~
 - ~~Fix player list only updating when disconnecting and rejoining.~~
 - ~~Add logic to check on client if a share request has already been sent out~~
 - ~~Add indicator if player already has a pending share request from client~~

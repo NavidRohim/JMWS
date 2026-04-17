@@ -75,7 +75,7 @@ public class PlayerEntry extends TitleLabelEntry {
         return c;
     }
 
-    public void extractThumbnailImage(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
+    protected void extractThumbnailImage(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
         int headPlacementX = this.getContentX() + PLAYER_HEAD_SIZE_HALVED + 4;
         int headPlacementY = this.getContentYMiddle() - PLAYER_HEAD_SIZE_HALVED;
         PlayerFaceExtractor.extractRenderState(guiGraphicsExtractor, user.getSkin(), headPlacementX, headPlacementY, UIConstants.PLAYER_HEAD_SIZE);
@@ -94,5 +94,6 @@ public class PlayerEntry extends TitleLabelEntry {
     public void extractContent(@NonNull GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
         super.extractContent(guiGraphicsExtractor, i, i1, b, v);
         this.extractSharingStatusBar(guiGraphicsExtractor, i, i1, b, v);
+        this.extractThumbnailImage(guiGraphicsExtractor, i, i1, b, v);
     }
 }
