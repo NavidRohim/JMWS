@@ -2,16 +2,11 @@ package me.brynview.navidrohim.jmws.client.network;
 
 import com.google.gson.JsonElement;
 import commonnetwork.networking.data.PacketContext;
-import journeymap.api.v2.common.waypoint.Waypoint;
-import journeymap.api.v2.common.waypoint.WaypointFactory;
-import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
-import me.brynview.navidrohim.jmws.client.share.OutgoingShareRequests;
 import me.brynview.navidrohim.jmws.client.syncing.SyncCounter;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
-import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.factory.ClientObjectFactory;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
@@ -24,8 +19,6 @@ import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.assets.JMWSSounds;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.enums.ShareRequestDirection;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
@@ -142,7 +135,6 @@ public class ClientPacketHandler {
         {
             case CommandFactory.PeerToPeerCommand.CLIENT_SHARE_REQUEST ->
             {
-                Constants.LoggerHolder.debug(argumentsForClient, "PROCESSING");
                 String data = argumentsForClient.getFirst().getAsString();
                 Optional<SyncObjectType> possibleType = SyncObjectType.of(argumentsForClient.get(1).getAsString());
 
@@ -151,25 +143,21 @@ public class ClientPacketHandler {
                     SyncObjectType type = possibleType.get();
                     ClientObjectWrapper<?> objectWrapper = ClientObjectFactory.fromType(type, data);
 
-                    Constants.LoggerHolder.debug(objectWrapper, "OBJECT WRAPPER");
-                    
                     if (!JMWSClientCommon.config.enableSharing.get())
                     {
                         ShareRequest.disabled(senderUUID);
                     }
                     else if (!JMWSClientCommon.incomingShareRequests.hasShareRequestFrom(senderUUID))
                     {
-                        ShareRequest request = new ShareRequest(
-                                senderUUID,
-                                PlayerUtils.ourUUID(),
-                                objectWrapper
-                        );
-
+                        ShareRequest request = new ShareRequest(senderUUID, PlayerUtils.ourUUID(), objectWrapper);
                         JMWSClientCommon.incomingShareRequests.addRequest(senderUUID, request);
+
                         sendUserAlert(Component.translatable("sharing.jmws.share_request", request.getSenderName()), false, true, MessageType.SUCCESS);
                     } else {
                         ShareRequest.busy(senderUUID);
                     }
+                } else {
+                    sendUserAlert(Component.translatable("sharing.jmws.invalid_type"), true, true, MessageType.FAILURE);
                 }
             }
 

@@ -9,8 +9,10 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.rmi.server.ExportException;
 import java.util.*;
 
 /**
@@ -104,5 +106,25 @@ public class PlayerUtils {
     public static UUID ourUUID()
     {
         return JMWSCommon.minecraftClientInstance.player.getUUID();
+    }
+
+    public static @Nullable PlayerInfo getPlayerInfoFromUUID(UUID player)
+    {
+        try {
+            return JMWSCommon.minecraftClientInstance.getConnection().getPlayerInfo(player);
+        } catch (Exception e)
+        {
+            return null;
+        }
+    }
+
+    public static @NotNull PlayerInfo getOurPlayerInfo()
+    {
+        @Nullable PlayerInfo ourPlayerInfo = getPlayerInfoFromUUID(ourUUID());
+        if (ourPlayerInfo != null)
+        {
+            return ourPlayerInfo;
+        }
+        throw new RuntimeException("Our player info is null! This should never happen. Was this called at the wrong time?");
     }
 }

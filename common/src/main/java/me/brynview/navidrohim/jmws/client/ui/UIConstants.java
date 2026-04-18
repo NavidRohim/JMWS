@@ -1,5 +1,9 @@
 package me.brynview.navidrohim.jmws.client.ui;
 
+import me.brynview.navidrohim.jmws.client.ui.generic.Subtitle;
+import me.brynview.navidrohim.jmws.common.enums.MessageType;
+import net.minecraft.network.chat.Component;
+
 public class UIConstants
 {
     public static final int DONE_BUTTON_HEIGHT = 20;
@@ -9,6 +13,9 @@ public class UIConstants
     public static final int PLAYER_LIST_WIDTH = 200;
     public static final int ALERT_DURATION_MS = 4000;
     public static final int ALERT_FADE_DURATION_MS = 800;
-    public final static int PLAYER_HEAD_SIZE = 32;
-    public final static int PLAYER_HEAD_SIZE_HALVED = PLAYER_HEAD_SIZE / 2;
+    public static final int PLAYER_HEAD_SIZE = 32;
+    public static final int PLAYER_HEAD_SIZE_HALVED = PLAYER_HEAD_SIZE / 2;
+
+    public static final Subtitle GENERIC_SELECTED = new Subtitle(Component.translatable("jmws.ui.generic.selected"), MessageType.GREY);
+    public static final Component EMPTY_TEXT = Component.translatable("jmws.ui.generic.empty");
 }

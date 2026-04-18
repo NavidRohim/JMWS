@@ -10,14 +10,16 @@ import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
-public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends CheckableSelectionList {
+public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends CheckableSelectionList<ObjectSharePanel<T>> {
 
+    private static final Component NO_PLAYERS_TEXT = Component.translatable("jmws.ui.sharing.no_players");
     private final List<PlayerInfo> players = new ArrayList<>();
     public final T sharedObject;
 
@@ -27,8 +29,8 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
     }
 
     public ObjectSharePanel(Minecraft minecraft, int width, int height, int x, int y, int itemHeight, T clientObjectWrapper) {
-        super(minecraft, width, height, y, itemHeight);
-        this.setX(x);
+        super(minecraft, width, height, x, y, itemHeight);
+
 
         this.players.addAll(getPlayers());
         this.sharedObject = clientObjectWrapper;
@@ -62,7 +64,7 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
     {
         if (!this.players.isEmpty())
         {
-            players.forEach(p -> this.addEntryToTop(new PlayerEntry(p, this)));
+            players.forEach(p -> this.addEntryToTop(new PlayerEntry<>(p, this, this.sharedObject)));
         }
     }
 
@@ -71,18 +73,14 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
         for (int i = 0; i < times; i++)
         {
             Constants.getLogger().info("Adding self to list");
-            this.addEntryToTop(new PlayerEntry(minecraft.getConnection().getPlayerInfo(PlayerUtils.ourUUID()), this));
+            this.addEntryToTop(new PlayerEntry<>(PlayerUtils.getOurPlayerInfo(), this, this.sharedObject));
         }
     }
 
     @Override
-    public void extractWidgetRenderState(final @NonNull GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a)
+    public Component getEmptyStateText()
     {
-        super.extractWidgetRenderState(graphics, mouseX, mouseY, a);
-        if (this.players.isEmpty())
-        {
-            graphics.text(JMWSCommon.minecraftClientInstance.font, Component.translatable("jmws.ui.sharing.no_players"), this.getX(), this.getY() / 2, -1);
-        }
+        return NO_PLAYERS_TEXT;
     }
 
     @Override
@@ -90,34 +88,4 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
     {
         graphics.outline(this.getX() - 2, this.getY() - 2, this.width + 4, this.height + 4, MessageType.GREY.getNumericalColour());
     }
-
-    @Override
-    protected void extractListBackground(@NonNull GuiGraphicsExtractor graphics)
-    {
-        super.extractListBackground(graphics);
-    }
-
-
-    public static class Subtitle
-    {
-        private final Component displayable;
-        private final MessageType messageType;
-
-        public Subtitle(Component component, MessageType messageType)
-        {
-            this.displayable = Component.literal( messageType.toString() + "§o" + component.getString());
-            this.messageType = messageType;
-        }
-
-        public Component getDisplayableComponent()
-        {
-            return displayable;
-        }
-
-        public MessageType getMessageType()
-        {
-            return messageType;
-        }
-    }
-
 }

@@ -53,6 +53,7 @@
   "sharing.jmws.unknown_player": "Unknown Soldier",
   "sharing.jmws.stopped_sharing": "Stopped sharing",
   "sharing.jmws.already_sharing": "You are already sharing %s with %s",
+  "sharing.jmws.invalid_type": "Unrecognised type. This is likely because you are missing the required JMWS extension.",
 
   "__comment__": "Global object language strings",
   "global.jmws.cannot_edit_global": "You cannot edit global waypoints / groups",
@@ -141,7 +142,7 @@
   "error.jmws.jmws_not_installed": "Server does not have JMWS installed. JMWS will be disabled.",
   "error.jmws.screen.needing_got": "Need: %s or newer. Got: %s",
   "error.jmws.invalid_name": "Invalid name!",
-
+  "error.jmws.player_offline": "Player is offline!",
   "fatal.jmws.server_mismatch": "You must update to the latest version of JMWS!",
 
   "warning.jmws.server.disabled_jmws": "Server has JMWS, but has been disabled on server.",
@@ -172,10 +173,16 @@
   "jmws.ui.sharing.not_shared": "not shared",
   "jmws.ui.sharing.pending": "pending",
   "jmws.ui.sharing.already_shared": "shared",
-  "jmws.ui.sharing.selected": "selected",
   "jmws.ui.sharing.share_object": "Share %s \"%s\"",
   "jmws.ui.sharing.no_players": "No players with JMWS!",
   "jmws.ui.sharing.no_selected_players": "No players selected!",
   "jmws.ui.sharing.send_requests": "Send Requests",
-  "jmws.ui.sharing.reload": "Reload"
+  "jmws.ui.sharing.reload": "Reload",
+
+  "jmws.ui.requests.expired": "expired",
+  "jmws.ui.requests.accepted": "accepted",
+  "jmws.ui.requests.no_requests": "No incoming requests.",
+
+  "jmws.ui.generic.selected": "selected",
+  "jmws.ui.generic.empty": "Empty!"
 }

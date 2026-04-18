@@ -3,7 +3,8 @@ package me.brynview.navidrohim.jmws.client.ui;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
-import me.brynview.navidrohim.jmws.client.ui.generic.entry.TitleLabelEntry;
+import me.brynview.navidrohim.jmws.client.ui.generic.Subtitle;
+import me.brynview.navidrohim.jmws.client.ui.generic.entry.PlayerHeadEntryWithTitle;
 import me.brynview.navidrohim.jmws.client.ui.share_panel.ObjectSharePanel;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -18,26 +19,31 @@ import java.util.UUID;
 
 import static me.brynview.navidrohim.jmws.client.ui.UIConstants.PLAYER_HEAD_SIZE_HALVED;
 
-public class PlayerEntry extends TitleLabelEntry {
-    private final static @NotNull ObjectSharePanel.Subtitle EMPTY = new ObjectSharePanel.Subtitle(Component.translatable("jmws.ui.sharing.not_shared"), MessageType.GREY);
-    private final static @NotNull ObjectSharePanel.Subtitle ALREADY_SHARED = new ObjectSharePanel.Subtitle(Component.translatable("jmws.ui.sharing.already_shared"), MessageType.SUCCESS);
-    private final static @NotNull ObjectSharePanel.Subtitle PENDING_SHARE = new ObjectSharePanel.Subtitle(Component.translatable("jmws.ui.sharing.pending"), MessageType.PENDING);
+public class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerHeadEntryWithTitle {
+
+    private final static @NotNull Subtitle EMPTY = new Subtitle(Component.translatable("jmws.ui.sharing.not_shared"), MessageType.GREY);
+    private final static @NotNull Subtitle ALREADY_SHARED = new Subtitle(Component.translatable("jmws.ui.sharing.already_shared"), MessageType.SUCCESS);
+    private final static @NotNull Subtitle PENDING_SHARE = new Subtitle(Component.translatable("jmws.ui.sharing.pending"), MessageType.PENDING);
+
     public final @NonNull PlayerInfo user;
     private final @NotNull UUID userUuid;
+    private final @NotNull ClientObjectWrapper<?> sharedObject;
 
-    public PlayerEntry(@NotNull PlayerInfo user, @NonNull ObjectSharePanel<? extends ClientObjectWrapper<?>> owner) {
-        super(owner, Component.literal(user.getProfile().name()), EMPTY, true);
+    public PlayerEntry(@NotNull PlayerInfo user, @NonNull ObjectSharePanel<T> owner, ClientObjectWrapper<?> sharedObject) {
+        super(owner, user);
+
+        this.sharedObject = sharedObject;
         this.user = user;
         this.userUuid = user.getProfile().id();
 
         setSubtitle(getSubtitleText());
     }
 
-    public ObjectSharePanel.Subtitle getSubtitleText() {
-        ObjectSharePanel.Subtitle display;
+    public Subtitle getSubtitleText() {
+        Subtitle display;
         if (JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(userUuid)) {
             display = PENDING_SHARE;
-        } else if (this.listOwner.sharedObject.getSharedTo().contains(userUuid)) {
+        } else if (sharedObject.getSharedTo().contains(userUuid)) {
             display = ALREADY_SHARED;
         } else {
             display = EMPTY;
@@ -62,7 +68,7 @@ public class PlayerEntry extends TitleLabelEntry {
 
     @Override
     public boolean canSelect() {
-        return !JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(userUuid) && !this.listOwner.sharedObject.getSharedTo().contains(userUuid);
+        return !JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(userUuid) && !sharedObject.getSharedTo().contains(userUuid);
     }
 
     @Override
@@ -70,7 +76,8 @@ public class PlayerEntry extends TitleLabelEntry {
         boolean c = super.mouseClicked(event, doubleClick);
 
         if (doubleClick) {
-            OutgoingShareRequest.sendShareRequest(this.listOwner.sharedObject, this.user.getProfile());
+            this.setSelected(false);
+            OutgoingShareRequest.sendShareRequest(sharedObject, this.user.getProfile());
         }
         return c;
     }
@@ -95,5 +102,9 @@ public class PlayerEntry extends TitleLabelEntry {
         super.extractContent(guiGraphicsExtractor, i, i1, b, v);
         this.extractSharingStatusBar(guiGraphicsExtractor, i, i1, b, v);
         this.extractThumbnailImage(guiGraphicsExtractor, i, i1, b, v);
+
+        if (this.selectedEntry) {
+            this.setSubtitle(new Subtitle(Component.translatable("jmws.ui.generic.selected"), MessageType.of(null, sharedObject.getColour())));
+        }
     }
 }

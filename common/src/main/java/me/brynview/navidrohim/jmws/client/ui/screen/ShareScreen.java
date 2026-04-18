@@ -23,7 +23,7 @@ import java.util.Set;
 
 import static me.brynview.navidrohim.jmws.common.JMWSCommon.minecraftClientInstance;
 
-public class ShareScreen<T extends ClientObjectWrapper<?>> extends NotificationAlertScreen {
+public class ShareScreen extends NotificationAlertScreen {
 
     private final ClientObjectWrapper<?> object;
     private ObjectSharePanel<ClientObjectWrapper<?>> sharePanel;
@@ -59,13 +59,13 @@ public class ShareScreen<T extends ClientObjectWrapper<?>> extends NotificationA
 
     private void sendRequests()
     {
-        Set<SelectableLabelEntry> players = this.sharePanel.getSelectedEntries();
+        Set<SelectableLabelEntry<ObjectSharePanel<ClientObjectWrapper<?>>>> players = this.sharePanel.getSelectedEntries();
         if (players.isEmpty())
         {
             PlayerUtils.sendUserAlert(Component.translatable("jmws.ui.sharing.no_selected_players"), true, true, MessageType.PENDING);
         } else {
-            for (SelectableLabelEntry selectedPlayer : players) {
-                if (selectedPlayer instanceof PlayerEntry playerEntry)
+            for (SelectableLabelEntry<?> selectedPlayer : players) {
+                if (selectedPlayer instanceof PlayerEntry<?> playerEntry)
                 {
                     OutgoingShareRequest.sendShareRequest(this.object, playerEntry.user.getProfile());
                 }
@@ -93,6 +93,6 @@ public class ShareScreen<T extends ClientObjectWrapper<?>> extends NotificationA
 
     public static void openShare(ClientBaseObjectWrapper<?> object)
     {
-       JMWSClientCommon.setCurrentUIScreen(new ShareScreen<ClientBaseObjectWrapper<?>>(minecraftClientInstance.screen, object));
+       JMWSClientCommon.setCurrentUIScreen(new ShareScreen(minecraftClientInstance.screen, object));
     }
 }

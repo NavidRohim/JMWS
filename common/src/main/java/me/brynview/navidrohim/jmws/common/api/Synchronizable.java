@@ -8,7 +8,6 @@ public interface Synchronizable
 {
     void stopSharingWith(UUID user);
     void stopSharingWithAll();
-    void shareWith(UUID toUser);
 
     void makeGlobal();
     void removeGlobal();

@@ -1,7 +1,7 @@
 # todo - 2.0-26.1
 
 ## -- Internals --
-- Fix sharing system. Was built for server-side command dispatching but that will now move to the client.
+- Fix sharing system. Was built for server-side command dispatching, but that will now move to the client.
 
 ## -- Sharing UI --
 - ~~Add UI colour indicator for object status (shared (green), awaiting share (orange), not shared (grey), cannot share (red))~~
@@ -27,9 +27,10 @@
 ## -- Todo tomorrow --
 
 - Fix the timeout bug
-- Fix share request not being added
+- ~~Fix share request not being added~~
 - Add select / deselect all buttons
   - Position these buttons in the top right corner of the scroll list. Make a part of the CheckableSelectionList class. Though, buttons cannot be natively added to ObjectSelectionList or children of it, so maybe make a generic abstract screen class for this behaviour (CheckableSelectionList will need to be passed to this generic screen class for button placement)
+
 *Already finished*
 
 ## -- Done --

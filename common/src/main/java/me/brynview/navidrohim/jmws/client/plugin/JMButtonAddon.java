@@ -4,6 +4,7 @@ import journeymap.api.v2.client.event.FullscreenDisplayEvent;
 import journeymap.api.v2.client.fullscreen.IThemeButton;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
+import me.brynview.navidrohim.jmws.client.ui.screen.ShareRequestScreen;
 import me.brynview.navidrohim.jmws.client.ui.screen.ViewAllObjectScreen;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
@@ -40,7 +41,7 @@ public class JMButtonAddon {
                     "button.jmws.view_objects_for_sharing_button",
                     JMWSTextures.enableButtonAsset,
                     ConfigInterface.getEnabledStatus(),
-                    (IThemeButton iThemeButton) -> ViewAllObjectScreen.open()
+                    (IThemeButton iThemeButton) -> ShareRequestScreen.open()
             );
 
             buttonSync.setEnabled(ConfigInterface.getEnabledStatus()); // Sync button will only be functional if JMWS is enabled.

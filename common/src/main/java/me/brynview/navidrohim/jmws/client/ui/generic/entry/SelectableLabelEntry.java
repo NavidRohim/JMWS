@@ -1,18 +1,17 @@
 package me.brynview.navidrohim.jmws.client.ui.generic.entry;
 
-import me.brynview.navidrohim.jmws.client.ui.share_panel.ObjectSharePanel;
+import me.brynview.navidrohim.jmws.client.ui.generic.selection_list.CheckableSelectionList;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
-public abstract class SelectableLabelEntry extends ObjectSelectionList.Entry<SelectableLabelEntry> {
+public abstract class SelectableLabelEntry<L extends CheckableSelectionList> extends ObjectSelectionList.Entry<SelectableLabelEntry<?>> {
 
-    protected final @NotNull ObjectSharePanel<?> listOwner;
+    protected final @NotNull L listOwner;
     public boolean selectedEntry = false;
 
-    public SelectableLabelEntry(@NotNull ObjectSharePanel<?> listOwner, @NotNull Component title, @NotNull ObjectSharePanel.Subtitle subtitle) {
+    public SelectableLabelEntry(@NotNull L listOwner) {
         super();
         this.listOwner = listOwner;
     }
@@ -34,19 +33,13 @@ public abstract class SelectableLabelEntry extends ObjectSelectionList.Entry<Sel
     }
 
     @Override
-    public @NonNull Component getNarration() {
-        return Component.empty();
-    }
-
-    @Override
     public boolean mouseClicked(@NonNull MouseButtonEvent event, boolean doubleClick) {
-        boolean clicked = super.mouseClicked(event, doubleClick);
+        super.mouseClicked(event, doubleClick);
 
-        if (doubleClick) {
-            this.setSelected(false);
-        } else {
+        if (!doubleClick) {
             this.setSelected(!selectedEntry);
         }
-        return clicked;
+
+        return selectedEntry;
     }
 }
