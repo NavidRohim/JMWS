@@ -2,7 +2,7 @@ package me.brynview.navidrohim.jmws.common.utils;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
+import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
@@ -96,14 +96,14 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.TRANSITION_NEW_DATA, objectIdentifier, owner, isGlobal, transitionType);
     }
 
-    public static String makeUnshareRequestForAllOnServer(UUID from, String objectIdentifier, SyncObjectType syncObjectType)
+    public static String makeUnshareRequestForAllOnServer(UUID from, String objectIdentifier, SyncRegistry syncRegistryType)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_WITH_ALL, from, objectIdentifier, syncObjectType.getId());
+        return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_WITH_ALL, from, objectIdentifier, syncRegistryType.getId());
     }
 
-    public static String makeGlobalRequestForServer(UUID from, String objectIdentifier, SyncObjectType syncObjectType, boolean global)
+    public static String makeGlobalRequestForServer(UUID from, String objectIdentifier, SyncRegistry syncRegistryType, boolean global)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.MAKE_GLOBAL, from, objectIdentifier, syncObjectType.getId(), global);
+        return CommandFactory.makeBaseJsonRequest(Commands.MAKE_GLOBAL, from, objectIdentifier, syncRegistryType.getId(), global);
     }
 
     public static class PeerToPeer
@@ -118,19 +118,26 @@ public class CommandFactory {
             return makeBaseRequestForUser(to, PeerToPeerCommand.CLIENT_SHARE_REQUEST, shareableObject.getSerialization(), shareableObject.getType().getId());
         }
 
+        public static String removeShareWith(UUID with, String identifier, SyncRegistry type)
+        {
+            return makeBaseRequestForUser(with, PeerToPeerCommand.CLIENT_REMOVE_SHARE_WITH, identifier, type.getId());
+        }
+
+        public static String removeShareWithAll(String identifier, SyncRegistry type)
+        {
+            return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_WITH_ALL, PlayerUtils.ourUUID(), identifier, type.getId());
+        }
+
+        /* Share responses*/
+
         public static String declineWithReason(UUID to, String translationKeyReason)
         {
             return makeBaseRequestForUser(to, PeerToPeerCommand.CLIENT_REJECTED_SHARE_WITH_REASON, translationKeyReason);
         }
 
-        public static String removeShareWith(UUID with, String identifier, SyncObjectType type)
+        public static String acceptShare(ShareRequest shareRequest)
         {
-            return makeBaseRequestForUser(with, PeerToPeerCommand.CLIENT_REMOVE_SHARE_WITH, identifier, type.getId());
-        }
-
-        public static String removeShareWithAll(String identifier, SyncObjectType type)
-        {
-            return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_WITH_ALL, PlayerUtils.ourUUID(), identifier, type.getId());
+            return makeBaseRequestForUser(PlayerUtils.ourUUID(), PeerToPeerCommand.SERVER_ACCEPTED_SHARE, shareRequest.currentSharedObject.getSerialization(), shareRequest.sharedObjectType.getId());
         }
     }
     /*
@@ -149,16 +156,11 @@ public class CommandFactory {
 
         // Utility
         SYNC,
-        REQUEST_CLIENT_SYNC,
         CLIENT_ALERT,
-        COMMON_DISPLAY_INTERVAL,
-        COMMON_DISPLAY_NEXT_UPDATE,
         UPDATE,
 
         // Object sharing (server)
-        OBJECT_SHARE, // Share waypoint / group
         AFFIRM_SHARE, // Confirm user wants shared object
-        REJECT_SHARE, // User doesnt want shared object.
         REMOVE_SHARE_WITH_ALL,
 
         // Global
@@ -177,6 +179,7 @@ public class CommandFactory {
         CLIENT_SHARE_REQUEST,
         CLIENT_REJECTED_SHARE_WITH_REASON,
         CLIENT_ACCEPTED_SHARE,
-        CLIENT_REMOVE_SHARE_WITH
+        CLIENT_REMOVE_SHARE_WITH,
+        SERVER_ACCEPTED_SHARE
     }
 }

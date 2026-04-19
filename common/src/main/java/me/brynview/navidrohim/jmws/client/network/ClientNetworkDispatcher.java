@@ -56,21 +56,6 @@ public class ClientNetworkDispatcher {
         sendString(CommandFactory.makeGroupCreationRequestJson(waypointGroup, silent));
     }
 
-    public static void acceptShare(ShareRequest shareRequest)
-    {
-        sendString(CommandFactory.makeObjectShareRequestAccept(shareRequest));
-    }
-
-    public static void updateWaypoint(ClientWaypointWrapper waypoint)
-    {
-        sendString(CommandFactory.makeUpdateWaypointRequest(waypoint));
-    }
-
-    public static void updateGroup(ClientGroupWrapper group)
-    {
-        sendString(CommandFactory.makeUpdateGroupRequest(group));
-    }
-
     public static void updateObject(ClientBaseObjectWrapper<?> object)
     {
         sendString(CommandFactory.makeUpdateObjectRequest(object));
@@ -88,7 +73,7 @@ public class ClientNetworkDispatcher {
 
     public static void removeShareFromAll(ClientBaseObjectWrapper<?> shareableObject)
     {
-        sendString(CommandFactory.makeUnshareRequestForAllOnServer(PlayerUtils.ourUUID(), shareableObject.getIdentifier(), shareableObject.getType())); // TODO
+        sendString(CommandFactory.makeUnshareRequestForAllOnServer(PlayerUtils.ourUUID(), shareableObject.getInfo())); // TODO
     }
 
     public static void makeGlobal(ClientBaseObjectWrapper<?> globalObject, boolean global)
@@ -103,14 +88,19 @@ public class ClientNetworkDispatcher {
             sendString(CommandFactory.PeerToPeer.shareToUser(to, shareableObject)); // PLACEHOLDER
         }
 
-        public static void declineShare(UUID originalSender, String messageKey)
+        public static void acceptShare(ShareRequest shareRequest)
         {
-            sendString(CommandFactory.PeerToPeer.declineWithReason(originalSender, messageKey));
+            sendString(CommandFactory.PeerToPeer.acceptShare(shareRequest));
         }
 
-        public static void declineShare(UUID originalSender)
+        public static void declineShare(ShareRequest shareRequest, String messageKey)
         {
-            sendString(CommandFactory.PeerToPeer.declineWithReason(originalSender, "sharing.jmws.declined_by_server"));
+            sendString(CommandFactory.PeerToPeer.declineWithReason(shareRequest.originalSender, messageKey));
+        }
+
+        public static void declineShare(ShareRequest shareRequest)
+        {
+            sendString(CommandFactory.PeerToPeer.declineWithReason(shareRequest.originalSender, "sharing.jmws.declined_by_server"));
         }
 
         public static void removeShare(UUID with, ClientBaseObjectWrapper<?> shareableObject)

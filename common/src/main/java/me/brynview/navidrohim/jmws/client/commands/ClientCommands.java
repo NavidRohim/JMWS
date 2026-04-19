@@ -112,41 +112,4 @@ public class ClientCommands {
         }
         return 1;
     }
-
-    public static int accept(@Nullable ShareRequest specifiedShare)
-    {
-        if (specifiedShare != null)
-        {
-            specifiedShare.accept();
-            PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.sharing_child"), true, false, MessageType.NEUTRAL);
-        } else {
-            PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.no_requests"), true, false, MessageType.NEUTRAL);
-        }
-        return 1;
-    }
-
-    public static int accept(@Nullable String name)
-    {
-        @Nullable ShareRequest request = JMWSClientCommon.incomingShareRequests.getAllUserKey().get(name);
-        return accept(request);
-    }
-
-    public static int decline(@Nullable ShareRequest request)
-    {
-        if (request != null)
-        {
-            request.decline();
-            PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.decline"), true, false, MessageType.NEUTRAL);
-        } else {
-            PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.no_requests"), true, false, MessageType.NEUTRAL);
-        }
-        return 1;
-    }
-
-    public static int decline(@Nullable String from)
-    {
-
-        @Nullable ShareRequest request = JMWSClientCommon.incomingShareRequests.getAllUserKey().get(from);
-        return decline(request);
-    }
 }

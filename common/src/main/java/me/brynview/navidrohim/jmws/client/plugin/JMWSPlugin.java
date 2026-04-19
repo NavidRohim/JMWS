@@ -19,7 +19,8 @@ import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
-import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
+import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import me.brynview.navidrohim.jmws.client.syncing.objects.factory.ClientObjectFactory;
@@ -541,7 +542,7 @@ public class JMWSPlugin implements IClientPlugin {
 
             // Add server groups to the client
             for (WaypointGroup savedGroup : savedGroups) {
-                SyncInformation gpSync = SyncInformation.syncInformationFromString(savedGroup.getCustomData(Constants.MODID));
+                ClientSyncInformation gpSync = ClientSyncInformation.syncInformationFromString(savedGroup.getCustomData(Constants.MODID));
 
                 if (gpSync == null) {
                     portLegacyDataField(savedGroup.toString(), ObjectType.GROUP);
@@ -613,7 +614,7 @@ public class JMWSPlugin implements IClientPlugin {
 
             // Add server waypoints to the client
             for (Waypoint savedWaypoint : savedWaypoints) {
-                @Nullable SyncInformation wpSync = SyncInformation.syncInformationFromString(savedWaypoint.getCustomData(Constants.MODID));
+                @Nullable ClientSyncInformation wpSync = ClientSyncInformation.syncInformationFromString(savedWaypoint.getCustomData(Constants.MODID));
 
                 if (wpSync == null) {
                     //portLegacyDataField(savedWaypoint.toString(), ObjectType.WAYPOINT);
@@ -726,7 +727,7 @@ public class JMWSPlugin implements IClientPlugin {
 
     public void addObjectFromRequest(ShareRequest request)
     {
-        if (request.sharedObjectType.equals(SyncObjectType.WAYPOINT))
+        if (request.sharedObjectType.equals(SyncRegistry.WAYPOINT))
         {
             addWaypoint((Waypoint) request.currentSharedObject.getNativeObject());
         } else {

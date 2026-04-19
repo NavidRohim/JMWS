@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
-import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
+import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
@@ -24,7 +24,7 @@ public class ShareRequest {
     public UUID meantFor;
 
     public ClientObjectWrapper<?> currentSharedObject;
-    public SyncObjectType sharedObjectType;
+    public SyncRegistry sharedObjectType;
     public String requestIdentifier;
     public String objectDisplayName;
 
@@ -75,7 +75,7 @@ public class ShareRequest {
     public void accept()
     {
         JMWSClientCommon.isBusy = true;
-        ClientNetworkDispatcher.acceptShare(this);
+        ClientNetworkDispatcher.PeerToPeer.acceptShare(this);
         JMWSPlugin.getInstance().addObjectFromRequest(this);
 
         this.finishRequest();

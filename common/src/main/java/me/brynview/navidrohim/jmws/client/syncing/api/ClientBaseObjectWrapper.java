@@ -4,9 +4,9 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.exceptions.NoInfoException;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
-import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper<T> {
 
-    @Nullable protected SyncInformation info;
+    @Nullable protected ClientSyncInformation info;
     private Context context;
 
     private boolean isValid;
@@ -50,7 +50,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
             this.setContext(Context.INBUILT);
         }
 
-        SyncInformation info1;
+        ClientSyncInformation info1;
         Constants.LoggerHolder.debug(syncData, "SYNC DATA");
         this.isValid = syncData != null && SyncUtils.isValidSyncField(syncData);
         this.isLegacy = !this.isValid && SyncUtils.isLegacySyncField(syncData);
@@ -62,7 +62,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         this.pluginId = plugin;
 
         if (this.getContext() == Context.SYNCHRONISE) {
-            info1 = SyncInformation.syncInformationFromString(syncData);
+            info1 = ClientSyncInformation.syncInformationFromString(syncData);
         } else {
             info1 = null;
         }
@@ -74,7 +74,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     public void createRemotely(boolean silent)
     {
         if (getContext() == Context.NATIVE) {
-            this.setInfo(SyncInformation.syncInformationFromString(SyncUtils.getEmptySyncingInfoString(makeWaypointHash(objectGuid, objectName), PlayerUtils.ourUUID(), false)));
+            this.setInfo(ClientSyncInformation.syncInformationFromString(SyncUtils.getEmptySyncingInfoString(makeWaypointHash(objectGuid, objectName), PlayerUtils.ourUUID(), false)));
         }
     }
 
@@ -89,7 +89,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     }
 
     @Override
-    public void setInfo(@Nullable SyncInformation info)
+    public void setInfo(@Nullable ClientSyncInformation info)
     {
         if (getContext() != Context.INBUILT) {
             this.info = info;
@@ -158,7 +158,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     }
 
     @Nullable
-    public final SyncInformation getInfo()
+    public final ClientSyncInformation getInfo()
     {
         return info;
     }

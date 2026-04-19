@@ -4,7 +4,7 @@ import journeymap.api.v2.common.waypoint.Waypoint;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
-import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
+import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.JMObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 
@@ -38,9 +38,9 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     }
 
     @Override
-    public SyncObjectType getType()
+    public SyncRegistry getType()
     {
-        return SyncObjectType.WAYPOINT;
+        return SyncRegistry.WAYPOINT;
     }
 
     @Override

@@ -4,12 +4,11 @@ import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
-import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
-import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
+import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
-import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +17,7 @@ public class ClientObjectFactory {
     public static ClientWaypointWrapper fromWaypoint(Waypoint waypoint)
     {
 
-        @Nullable SyncInformation syncInfo = SyncInformation.syncInformationFromString(waypoint.getCustomData(Constants.MODID));
+        @Nullable ClientSyncInformation syncInfo = ClientSyncInformation.syncInformationFromString(waypoint.getCustomData(Constants.MODID));
 
         if (syncInfo == null)
         {
@@ -37,7 +36,7 @@ public class ClientObjectFactory {
     public static ClientGroupWrapper fromGroup(@NotNull WaypointGroup group)
     {
 
-        @Nullable SyncInformation syncInfo = SyncInformation.syncInformationFromString(group.getCustomData(Constants.MODID));
+        @Nullable ClientSyncInformation syncInfo = ClientSyncInformation.syncInformationFromString(group.getCustomData(Constants.MODID));
 
         if (syncInfo == null)
         {
@@ -53,7 +52,7 @@ public class ClientObjectFactory {
     }
 
     @Nullable
-    public static ClientObjectWrapper<?> fromType(SyncObjectType type, String data)
+    public static ClientObjectWrapper<?> fromType(SyncRegistry type, String data)
     {
         return type.getDecoder().decodeStringToWrapper(data);
     }

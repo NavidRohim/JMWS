@@ -3,9 +3,9 @@ package me.brynview.navidrohim.jmws.common.utils;
 import com.google.gson.JsonSyntaxException;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,9 +43,9 @@ public class SyncUtils {
     }
 
     @Nullable
-    public static SyncInformation getIdentifier(Waypoint waypoint)
+    public static ClientSyncInformation getIdentifier(Waypoint waypoint)
     {
-        return SyncInformation.syncInformationFromString(waypoint.getCustomData(Constants.MODID));
+        return ClientSyncInformation.syncInformationFromString(waypoint.getCustomData(Constants.MODID));
     }
 
     public static ServerSyncingHandler getSyncingInfo(String customDataField, boolean returnNullIfError) {

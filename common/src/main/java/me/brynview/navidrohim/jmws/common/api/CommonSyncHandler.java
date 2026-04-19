@@ -13,7 +13,7 @@ public class CommonSyncHandler
     public String objectIdentifier;
 
     @Expose
-    public Set<String> sharedTo;
+    public Set<UUID> sharedTo;
 
     @Expose
     protected UUID owner;
@@ -21,7 +21,7 @@ public class CommonSyncHandler
     @Expose
     protected boolean isGlobal;
 
-    public CommonSyncHandler(Set<String> sharedTo, String identifier, UUID owner, boolean isGlobal) {
+    public CommonSyncHandler(Set<UUID> sharedTo, String identifier, UUID owner, boolean isGlobal) {
         this.objectIdentifier = identifier;
         this.sharedTo = sharedTo;
         this.owner = owner;
@@ -30,12 +30,12 @@ public class CommonSyncHandler
 
     public void addUserToShare(UUID userUUID)
     {
-        this.sharedTo.add(userUUID.toString());
+        this.sharedTo.add(userUUID);
     }
 
     public void removeUserFromShare(UUID userUUID)
     {
-        this.sharedTo.remove(userUUID.toString());
+        this.sharedTo.remove(userUUID);
     }
 
     public void removeAllFromShare()

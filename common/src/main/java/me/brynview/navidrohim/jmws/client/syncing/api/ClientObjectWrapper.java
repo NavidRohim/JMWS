@@ -1,12 +1,10 @@
 package me.brynview.navidrohim.jmws.client.syncing.api;
 
-import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
+import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
-import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
-import net.minecraft.util.ARGB;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -41,7 +39,7 @@ public interface ClientObjectWrapper<T> {
     void createLocally();
     void removeLocally();
 
-    void setInfo(SyncInformation info);
+    void setInfo(ClientSyncInformation info);
     void update();
 
     boolean isValid();
@@ -53,6 +51,6 @@ public interface ClientObjectWrapper<T> {
     void setNativeObject(@NotNull T nativeObject);
     void setContext(Context context);
     Context getContext();
-    SyncObjectType getType();
+    SyncRegistry getType();
 
 }

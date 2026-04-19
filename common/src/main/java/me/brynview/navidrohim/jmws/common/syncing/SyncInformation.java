@@ -1,29 +1,30 @@
 package me.brynview.navidrohim.jmws.common.syncing;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Set;
 import java.util.UUID;
 
-public class SyncInformation {
+public abstract class SyncInformation {
 
     public String objectIdentifier;
     public UUID owner;
     public Set<UUID> sharedTo;
     public boolean isGlobal;
 
-    public boolean isOwner(UUID user)
+    public SyncInformation(String objectIdentifier, UUID owner, Set<UUID> sharedTo, boolean isGlobal)
     {
-        return owner.equals(user);
+        this.objectIdentifier = objectIdentifier;
+        this.owner = owner;
+        this.sharedTo = sharedTo;
+        this.isGlobal = isGlobal;
     }
 
-    @Nullable
-    public String getSyncInformationAsString()
-    {
+    public @NonNull String getSyncInformationAsString() {
         return JMWSCommon.gson.toJson(this);
     }
 
@@ -37,6 +38,11 @@ public class SyncInformation {
         {
             return null;
         }
+    }
+
+    public boolean isOwner(UUID user)
+    {
+        return owner.equals(user);
     }
 
     @Nullable

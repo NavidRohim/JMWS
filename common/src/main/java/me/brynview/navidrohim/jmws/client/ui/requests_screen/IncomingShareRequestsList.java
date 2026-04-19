@@ -81,10 +81,7 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
 
         public IncomingRequestFromPlayerEntry(@NotNull IncomingShareRequestsList listOwner, PlayerInfo player, ShareRequest request) {
             super(listOwner, player);
-            String raw = request.objectDisplayName;
-            String displayString = raw.length() >= 12 ? raw.substring(0, 12) + "..." : raw;
-            this.title = Component.literal(player.getProfile().name()).append(Component.literal(" §o(%s, \"%s\")".formatted(request.sharedObjectType.getReadableName(), displayString)));
-
+            this.title = Component.literal(player.getProfile().name()).append(Component.literal(" §o(%s, \"%s\")".formatted(request.sharedObjectType.getReadableName(), RenderUtils.shortenObjectName(request.objectDisplayName, 13))));
             this.request = request;
         }
 

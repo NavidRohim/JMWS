@@ -3,10 +3,9 @@ package me.brynview.navidrohim.jmws.client.network;
 import com.google.gson.JsonElement;
 import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
-import me.brynview.navidrohim.jmws.client.syncing.SyncCounter;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
-import me.brynview.navidrohim.jmws.client.syncing.SyncObjectType;
+import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.factory.ClientObjectFactory;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
@@ -59,14 +58,6 @@ public class ClientPacketHandler {
                 // Sends no outbound data
                 case SYNC -> JMWSPlugin.syncHandler(waypointPayload);
 
-                // was "update"
-                // Sends "request" packet | New = "SYNC"
-                case REQUEST_CLIENT_SYNC -> JMWSPlugin.sync(true);
-
-                // was display_interval
-                // No outbound data
-                case COMMON_DISPLAY_INTERVAL -> sendUserAlert(Component.translatable("message.jmws.sync_frequency", SyncCounter.getSyncFrequency()), true, false, MessageType.NEUTRAL);
-
                 // was "alert"
                 // No outbound data
                 // This might be useless. Found out recently there is a way to do this with vanilla code without defining a custom packet.
@@ -106,10 +97,6 @@ public class ClientPacketHandler {
                     );
                 }
 
-                // was "display_next_update"
-                // No outbound data
-                case COMMON_DISPLAY_NEXT_UPDATE -> sendUserAlert(Component.translatable("message.jmws.next_sync", (SyncCounter.timeUntilNextSync())), true, false, MessageType.NEUTRAL);
-
                 case SPECIAL_FORWARD_TO_CLIENT ->
                 {
 
@@ -136,11 +123,11 @@ public class ClientPacketHandler {
             case CommandFactory.PeerToPeerCommand.CLIENT_SHARE_REQUEST ->
             {
                 String data = argumentsForClient.getFirst().getAsString();
-                Optional<SyncObjectType> possibleType = SyncObjectType.of(argumentsForClient.get(1).getAsString());
+                Optional<SyncRegistry> possibleType = SyncRegistry.of(argumentsForClient.get(1).getAsString());
 
                 if (possibleType.isPresent())
                 {
-                    SyncObjectType type = possibleType.get();
+                    SyncRegistry type = possibleType.get();
                     ClientObjectWrapper<?> objectWrapper = ClientObjectFactory.fromType(type, data);
 
                     if (!JMWSClientCommon.config.enableSharing.get())

@@ -5,6 +5,7 @@ import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.ui.PlayerEntry;
+import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.NotificationAlertScreen;
 import me.brynview.navidrohim.jmws.client.ui.share_panel.ObjectSharePanel;
@@ -28,6 +29,7 @@ import static me.brynview.navidrohim.jmws.common.JMWSCommon.minecraftClientInsta
 
 public class ShareScreen extends NotificationAlertScreen {
 
+    private final String displayName;
     private final ClientObjectWrapper<?> object;
     private ObjectSharePanel<ClientObjectWrapper<?>> sharePanel;
 
@@ -37,6 +39,7 @@ public class ShareScreen extends NotificationAlertScreen {
     public ShareScreen(Screen parent, ClientBaseObjectWrapper<?> object) {
         super(parent);
         this.object = object;
+        this.displayName = RenderUtils.shortenObjectName(object.getName(), 20);
     }
 
     @Override
@@ -100,7 +103,7 @@ public class ShareScreen extends NotificationAlertScreen {
         super.extractRenderState(graphics, mouseX, mouseY, a);
         if (!this.sharePanel.isEmpty())
         {
-            graphics.text(this.font, Component.translatable("jmws.ui.sharing.share_object", this.object.getType().getReadableName(), this.object.getName()), sharePanel.getX(), sharePanel.getY() - 15, -1);
+            graphics.text(this.font, Component.translatable("jmws.ui.sharing.share_object", this.object.getType().getReadableName(), this.displayName), sharePanel.getX(), sharePanel.getY() - 15, -1);
         }
     }
 

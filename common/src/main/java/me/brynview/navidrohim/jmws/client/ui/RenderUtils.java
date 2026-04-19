@@ -11,4 +11,9 @@ public class RenderUtils
     {
         graphics.outline(list.getX() - 2, list.getY() - 2, list.getWidth() + 4, list.getHeight() + 4, MessageType.GREY.getNumericalColour());
     }
+
+    public static String shortenObjectName(String name, int maxLength)
+    {
+        return name.length() > maxLength ? name.substring(0, maxLength) + "..." : name;
+    }
 }

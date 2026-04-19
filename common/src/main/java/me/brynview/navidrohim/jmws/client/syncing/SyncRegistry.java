@@ -8,18 +8,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class SyncObjectType {
+public class SyncRegistry {
 
-    private static final Map<String, SyncObjectType> REGISTRY = new HashMap<>();
+    private static final Map<String, SyncRegistry> REGISTRY = new HashMap<>();
 
-    public static final SyncObjectType WAYPOINT = register("WAYPOINT", new WaypointDecoder());
-    public static final SyncObjectType GROUP = register("GROUP", new GroupDecoder());
+    public static final SyncRegistry WAYPOINT = register("WAYPOINT", new WaypointDecoder());
+    public static final SyncRegistry GROUP = register("GROUP", new GroupDecoder());
+    public static final SyncRegistry UNKNOWN = register("UNKNOWN", null);
 
     private final String id;
     private final String displayName;
     private final BaseDecoder<?, ?> stringDecoder;
 
-    private SyncObjectType(String id, BaseDecoder<?, ?> stringDecoder)
+    private SyncRegistry(String id, BaseDecoder<?, ?> stringDecoder)
     {
         this.id = id;
         this.displayName = id.toLowerCase();
@@ -46,18 +47,18 @@ public class SyncObjectType {
         return this.stringDecoder;
     }
 
-    public static SyncObjectType register(String id, BaseDecoder<?, ?> stringDecoder)
+    public static SyncRegistry register(String id, BaseDecoder<?, ?> stringDecoder)
     {
         if (REGISTRY.containsKey(id))
         {
             return REGISTRY.get(id);
         }
-        SyncObjectType type = new SyncObjectType(id, stringDecoder);
+        SyncRegistry type = new SyncRegistry(id, stringDecoder);
         REGISTRY.put(id, type);
         return type;
     }
 
-    public static Optional<SyncObjectType> of(String id)
+    public static Optional<SyncRegistry> of(String id)
     {
         return Optional.ofNullable(REGISTRY.get(id));
     }
