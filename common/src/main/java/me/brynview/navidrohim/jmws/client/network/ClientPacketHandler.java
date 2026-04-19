@@ -62,14 +62,27 @@ public class ClientPacketHandler {
                 // No outbound data
                 // This might be useless. Found out recently there is a way to do this with vanilla code without defining a custom packet.
                 case CLIENT_ALERT -> {
-                    String firstArgument = waypointPayload.arguments().getFirst().getAsString();
-                    MessageType messageType = MessageType.valueOf(waypointPayload.arguments().getLast().getAsString());
+                    String key = arguments.get(0).getAsString();
+                    boolean overlay = arguments.get(1).getAsBoolean();
+                    MessageType messageType = MessageType.valueOf(arguments.get(2).getAsString());
+
+                    Component message;
+                    if (arguments.size() > 3) {
+                        int size = arguments.get(3).getAsJsonArray().size();
+                        String[] transArgs = new String[size];
+                        for (int i = 0; i < size; i++) {
+                            transArgs[i] = arguments.get(3).getAsJsonArray().get(i).getAsString();
+                        }
+                        message = Component.translatable(key, (Object[]) transArgs);
+                    } else {
+                        message = Component.translatable(key);
+                    }
 
                     if (messageType.equals(MessageType.FAILURE)) {
                         PlayerUtils.sendUserSoundAlert(JMWSSounds.ACTION_FAILURE);
                     }
 
-                    sendUserAlert(Component.translatable(firstArgument), waypointPayload.arguments().get(1).getAsBoolean(), false, messageType);
+                    sendUserAlert(message, overlay, false, messageType);
                 }
 
                 // was "deleteWaypoint"

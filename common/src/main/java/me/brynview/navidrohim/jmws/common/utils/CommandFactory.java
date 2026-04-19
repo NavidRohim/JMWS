@@ -66,6 +66,10 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.CLIENT_ALERT, message, overlay, messageType.toString());
     }
 
+    public static String makeClientAlertRequestJson(String message, boolean overlay, MessageType messageType, String... translationArgs) { // SERVER ONLY
+        return CommandFactory.makeBaseJsonRequest(Commands.CLIENT_ALERT, message, overlay, messageType.toString(), translationArgs);
+    }
+
     public static String makeObjectShareRequestAccept(ShareRequest shareRequest)
     {
         return CommandFactory.makeBaseJsonRequest(Commands.AFFIRM_SHARE, shareRequest.originalSender, shareRequest.requestIdentifier, shareRequest.sharedObjectType, shareRequest.meantFor);
