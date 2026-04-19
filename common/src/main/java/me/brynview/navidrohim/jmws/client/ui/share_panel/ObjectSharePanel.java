@@ -4,13 +4,11 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.ui.PlayerEntry;
+import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.generic.selection_list.CheckableSelectionList;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
-import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
@@ -41,11 +39,6 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
         onlinePlayers.removeIf(player -> player.getProfile().equals(minecraft.player.getGameProfile()));
 
         return onlinePlayers;
-    }
-
-    public boolean isEmpty()
-    {
-        return this.children().isEmpty();
     }
 
     private void refreshPlayers()
@@ -88,8 +81,8 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
     }
 
     @Override
-    protected void extractListSeparators(GuiGraphicsExtractor graphics)
+    protected void extractListSeparators(@NonNull GuiGraphicsExtractor graphics)
     {
-        graphics.outline(this.getX() - 2, this.getY() - 2, this.width + 4, this.height + 4, MessageType.GREY.getNumericalColour());
+        RenderUtils.renderBorderForList(graphics, this);
     }
 }

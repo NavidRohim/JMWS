@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.client.ui.requests_screen;
 
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
+import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.generic.Subtitle;
 import me.brynview.navidrohim.jmws.client.ui.generic.entry.PlayerHeadEntryWithTitle;
 import me.brynview.navidrohim.jmws.client.ui.generic.entry.TitleLabelEntry;
@@ -23,6 +24,7 @@ import java.awt.*;
 import java.util.concurrent.TimeUnit;
 
 public class IncomingShareRequestsList extends CheckableSelectionList<IncomingShareRequestsList> {
+
 
     private static final Component NO_PLAYERS_TEXT = Component.translatable("jmws.ui.requests.no_requests");
 
@@ -54,18 +56,35 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
         return NO_PLAYERS_TEXT;
     }
 
+    @Override
+    protected void extractListSeparators(@NotNull GuiGraphicsExtractor graphics)
+    {
+        RenderUtils.renderBorderForList(graphics, this);
+    }
+
+    private static void sendShareAlert()
+    {
+        PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.sharing_child"), true, false, MessageType.NEUTRAL);
+    }
+
     public static class IncomingRequestFromPlayerEntry extends PlayerHeadEntryWithTitle
     {
         private final ShareRequest request;
+
         private boolean isExpired = false;
         private boolean didAccept = false;
+        private boolean didDecline = false;
 
-        private static final Subtitle EXPIRED = new Subtitle(Component.translatable("jmws.ui.requests.expired"), MessageType.FAILURE);
+        private static final Subtitle EXPIRED = new Subtitle(Component.translatable("jmws.ui.requests.expired"), MessageType.PENDING);
         private static final Subtitle ACCEPTED = new Subtitle(Component.translatable("jmws.ui.requests.accepted"), MessageType.SUCCESS);
+        private static final Subtitle DECLINED = new Subtitle(Component.translatable("jmws.ui.requests.declined"), MessageType.FAILURE);
 
         public IncomingRequestFromPlayerEntry(@NotNull IncomingShareRequestsList listOwner, PlayerInfo player, ShareRequest request) {
             super(listOwner, player);
-            this.title = Component.literal(player.getProfile().name()).append(Component.literal(" §o(%s, \"%s\")".formatted(request.sharedObjectType.getReadableName(), request.objectDisplayName)));
+            String raw = request.objectDisplayName;
+            String displayString = raw.length() >= 12 ? raw.substring(0, 12) + "..." : raw;
+            this.title = Component.literal(player.getProfile().name()).append(Component.literal(" §o(%s, \"%s\")".formatted(request.sharedObjectType.getReadableName(), displayString)));
+
             this.request = request;
         }
 
@@ -75,16 +94,17 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
             long time = request.timeout.getDelay(TimeUnit.SECONDS);
             MutableComponent timeLeft = Component.literal(time + " ");
 
-            if (time > 0)
+            if (didAccept)
             {
-                if (!didAccept)
-                {
-                    Component toDisplay = !this.selectedEntry ? timeLeft : timeLeft.append(Component.translatable("jmws.ui.generic.selected"));
-                    setSubtitle(new Subtitle(toDisplay, MessageType.GREY));
-                } else {
-                    setSubtitle(ACCEPTED);
-                }
-            } else if (!didAccept){
+                setSubtitle(ACCEPTED);
+            } else if (didDecline)
+            {
+                setSubtitle(DECLINED);
+            } else if (time > 0)
+            {
+                Component toDisplay = !this.selectedEntry ? timeLeft : timeLeft.append(Component.translatable("jmws.ui.generic.selected"));
+                setSubtitle(new Subtitle(toDisplay, MessageType.GREY));
+            } else {
                 isExpired = true;
                 setSubtitle(EXPIRED);
             }
@@ -93,7 +113,7 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
 
         @Override
         public boolean canSelect() {
-            return !isExpired && !didAccept;
+            return !isExpired && !didAccept && !didDecline;
         }
 
         @Override
@@ -102,14 +122,25 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
             boolean isEnabled = super.mouseClicked(event, doubleClick);
             if (doubleClick && canSelect())
             {
-                didAccept = true;
-                this.request.accept();
-                this.setSelected(false);
-
-                PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.sharing_child"), true, false, MessageType.NEUTRAL);
+                this.accept();
+                IncomingShareRequestsList.sendShareAlert();
             }
 
             return isEnabled;
+        }
+
+        public void accept()
+        {
+            didAccept = true;
+            this.setSelected(false);
+            this.request.accept();
+        }
+
+        public void decline()
+        {
+            didDecline = true;
+            this.setSelected(false);
+            this.request.decline();
         }
     }
 }

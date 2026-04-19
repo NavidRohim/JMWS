@@ -54,6 +54,16 @@ public abstract class CheckableSelectionList<L extends CheckableSelectionList<L>
         return this.highlightedEntries;
     }
 
+    public boolean isEmpty()
+    {
+        return this.children().isEmpty();
+    }
+
+    public int getAmount()
+    {
+        return this.children().size();
+    }
+
     public Component getEmptyStateText()
     {
         return UIConstants.EMPTY_TEXT;

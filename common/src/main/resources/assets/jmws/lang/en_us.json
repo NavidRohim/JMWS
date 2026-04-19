@@ -171,6 +171,7 @@
   "subtitle.jmws.generic_error": "JMWS error",
 
   "__comment__": "Sharing UI strings",
+
   "jmws.ui.sharing.not_shared": "not shared",
   "jmws.ui.sharing.pending": "pending",
   "jmws.ui.sharing.already_shared": "shared",
@@ -179,13 +180,17 @@
   "jmws.ui.sharing.no_selected_players": "No players selected!",
   "jmws.ui.sharing.send_requests": "Send",
   "jmws.ui.sharing.reload": "Reload",
-
   "jmws.ui.sharing.send_request.tooltip": "Sends a share request to selected players.",
   "jmws.ui.sharing.toggle_select_all.tooltip": "Toggles selection of all players.",
 
+  "jmws.ui.requests.accept": "Accept",
+  "jmws.ui.requests.decline": "Decline",
   "jmws.ui.requests.expired": "expired",
   "jmws.ui.requests.accepted": "accepted",
+  "jmws.ui.requests.declined": "declined",
   "jmws.ui.requests.no_requests": "No incoming requests.",
+  "jmws.ui.requests.no_selected_requests": "No requests selected!",
+  "jmws.ui.requests.requests_amount": "%s incoming request(s)",
 
   "jmws.ui.generic.selected": "selected",
   "jmws.ui.generic.empty": "Empty!"

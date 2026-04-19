@@ -29,7 +29,7 @@ public class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerHeadEnt
     private final @NotNull UUID userUuid;
     private final @NotNull ClientObjectWrapper<?> sharedObject;
 
-    public PlayerEntry(@NotNull PlayerInfo user, @NonNull ObjectSharePanel<T> owner, ClientObjectWrapper<?> sharedObject) {
+    public PlayerEntry(@NotNull PlayerInfo user, @NonNull ObjectSharePanel<T> owner, @NonNull ClientObjectWrapper<?> sharedObject) {
         super(owner, user);
 
         this.sharedObject = sharedObject;

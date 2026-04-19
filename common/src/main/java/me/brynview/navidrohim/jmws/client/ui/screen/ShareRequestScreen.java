@@ -2,15 +2,24 @@ package me.brynview.navidrohim.jmws.client.ui.screen;
 
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
+import me.brynview.navidrohim.jmws.client.ui.generic.entry.SelectableLabelEntry;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.NotificationAlertScreen;
 import me.brynview.navidrohim.jmws.client.ui.requests_screen.IncomingShareRequestsList;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
+import me.brynview.navidrohim.jmws.common.enums.MessageType;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.joml.Vector2i;
+import org.jspecify.annotations.NonNull;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ShareRequestScreen extends NotificationAlertScreen {
 
@@ -35,10 +44,10 @@ public class ShareRequestScreen extends NotificationAlertScreen {
 
         incomingShareRequestsList = new IncomingShareRequestsList(JMWSCommon.minecraftClientInstance, panelWidth, panelHeight, panelX, panelY, 50);
 
-        verticalButtonColumnSpacer.addChild(Button.builder(Component.literal("Accept"), (button) -> incomingShareRequestsList.toggleSelectAll()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
-        verticalButtonColumnSpacer.addChild(Button.builder(Component.literal("Decline"), (button) -> incomingShareRequestsList.toggleSelectAll()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
+        verticalButtonColumnSpacer.addChild(Button.builder(Component.translatable("jmws.ui.requests.accept"), (button) -> this.acceptAll()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
+        verticalButtonColumnSpacer.addChild(Button.builder(Component.translatable("jmws.ui.requests.decline"), (button) -> this.declineAll()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
 
-        verticalButtonColumnSpacerForSaDa.addChild(Button.builder(Component.literal("SAT"), (button) -> incomingShareRequestsList.toggleSelectAll()).width(UIConstants.ICON_BUTTON_WIDTH_HEIGHT).build());
+        verticalButtonColumnSpacerForSaDa.addChild(Button.builder(Component.literal("S"), (button) -> incomingShareRequestsList.toggleSelectAll()).width(UIConstants.ICON_BUTTON_WIDTH_HEIGHT).build());
 
         horizontalButtonColumnSpacer.addChild(verticalButtonColumnSpacerForSaDa, settings -> settings.paddingRight(4).paddingLeft(6));
         horizontalButtonColumnSpacer.addChild(incomingShareRequestsList, settings -> settings.paddingRight(20));
@@ -51,10 +60,51 @@ public class ShareRequestScreen extends NotificationAlertScreen {
         incomingShareRequestsList.addWidgets();
     }
 
+    private Set<IncomingShareRequestsList.IncomingRequestFromPlayerEntry> getEntries()
+    {
+        return this.incomingShareRequestsList.getSelectedEntries().stream()
+                .filter(entry -> entry instanceof IncomingShareRequestsList.IncomingRequestFromPlayerEntry)
+                .map(entry -> (IncomingShareRequestsList.IncomingRequestFromPlayerEntry) entry)
+                .collect(Collectors.toSet());
+    }
+
+    private void acceptAll()
+    {
+        Set<IncomingShareRequestsList.IncomingRequestFromPlayerEntry> entries = getEntries();
+        if (entries.isEmpty())
+        {
+            PlayerUtils.sendUserAlert(Component.translatable("jmws.ui.requests.no_selected_requests"), true, true, MessageType.PENDING);
+        }
+        for (IncomingShareRequestsList.IncomingRequestFromPlayerEntry entry : entries) {
+            entry.accept();
+        }
+    }
+
+    private void declineAll()
+    {
+        Set<IncomingShareRequestsList.IncomingRequestFromPlayerEntry> entries = getEntries();
+        if (entries.isEmpty())
+        {
+            PlayerUtils.sendUserAlert(Component.translatable("jmws.ui.requests.no_selected_requests"), true, true, MessageType.PENDING);
+        }
+        for (IncomingShareRequestsList.IncomingRequestFromPlayerEntry entry : entries) {
+            entry.decline();
+        }
+    }
+
     @Override
     protected Vector2i getDrawLocationForAlert() {
         int y = incomingShareRequestsList.getY() + incomingShareRequestsList.getHeight() + 15;
         return new Vector2i(incomingShareRequestsList.getX(), y);
+    }
+
+    @Override
+    public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        super.extractRenderState(graphics, mouseX, mouseY, a);
+        if (!this.incomingShareRequestsList.isEmpty())
+        {
+            graphics.text(this.font, Component.translatable("jmws.ui.requests.requests_amount", this.incomingShareRequestsList.getAmount()), incomingShareRequestsList.getX(), incomingShareRequestsList.getY() - 15, -1);
+        }
     }
 
     public static void open()
