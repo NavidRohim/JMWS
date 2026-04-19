@@ -65,6 +65,7 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
 
         public IncomingRequestFromPlayerEntry(@NotNull IncomingShareRequestsList listOwner, PlayerInfo player, ShareRequest request) {
             super(listOwner, player);
+            this.title = Component.literal(player.getProfile().name()).append(Component.literal(" §o(%s, %s)".formatted(request.sharedObjectType.getReadableName(), request.objectDisplayName)));
             this.request = request;
         }
 
@@ -74,7 +75,7 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
             long time = request.timeout.getDelay(TimeUnit.SECONDS);
             MutableComponent timeLeft = Component.literal(time + " ");
 
-            if (time >= 0)
+            if (time > 0)
             {
                 if (!didAccept)
                 {
