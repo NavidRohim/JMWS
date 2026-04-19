@@ -22,7 +22,6 @@ public class MessageType {
 
     public static final MessageType ONE_TIME_WARNING = register(WARNING.text, WARNING.numericalColour, true);
     public static final MessageType NEUTRAL = register("", 0xFFFFFFFF);
-    public static final MessageType INVISIBLE = register("", 0x00000000);
 
     private final String text;
     private final int numericalColour;

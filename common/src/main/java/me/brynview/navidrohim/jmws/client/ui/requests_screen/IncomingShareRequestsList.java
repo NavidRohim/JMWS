@@ -28,7 +28,10 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
 
     public IncomingShareRequestsList(Minecraft minecraft, int width, int height, int x, int y, int itemHeight) {
         super(minecraft, width, height, x, y, itemHeight);
+    }
 
+    public void addWidgets()
+    {
         for (ShareRequest request : JMWSClientCommon.incomingShareRequests.values())
         {
             @Nullable PlayerInfo sender = PlayerUtils.getPlayerInfoFromUUID(request.originalSender);
@@ -38,6 +41,12 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
             }
         }
     }
+
+    @Override
+    public int getRowWidth() {
+        return width;
+    }
+
 
     @Override
     public Component getEmptyStateText()
@@ -51,8 +60,8 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
         private boolean isExpired = false;
         private boolean didAccept = false;
 
-        private static final Subtitle EXPIRED = new Subtitle(Component.translatable("jmws.ui.requests.expired"), MessageType.GREY);
-        private static final Subtitle ACCEPTED = new Subtitle(Component.translatable("jmws.ui.requests.accepted"), MessageType.GREY);
+        private static final Subtitle EXPIRED = new Subtitle(Component.translatable("jmws.ui.requests.expired"), MessageType.FAILURE);
+        private static final Subtitle ACCEPTED = new Subtitle(Component.translatable("jmws.ui.requests.accepted"), MessageType.SUCCESS);
 
         public IncomingRequestFromPlayerEntry(@NotNull IncomingShareRequestsList listOwner, PlayerInfo player, ShareRequest request) {
             super(listOwner, player);

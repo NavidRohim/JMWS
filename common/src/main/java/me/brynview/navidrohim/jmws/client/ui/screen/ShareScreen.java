@@ -13,6 +13,9 @@ import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.layouts.FrameLayout;
+import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -28,33 +31,44 @@ public class ShareScreen extends NotificationAlertScreen {
     private final ClientObjectWrapper<?> object;
     private ObjectSharePanel<ClientObjectWrapper<?>> sharePanel;
 
+    private static final Tooltip SELECT_ALL_TOGGLE = Tooltip.create(Component.translatable("jmws.ui.sharing.toggle_select_all.tooltip"));
+    private static final Tooltip SEND_TO_SELECTED = Tooltip.create(Component.translatable("jmws.ui.sharing.send_request.tooltip"));
+
     public ShareScreen(Screen parent, ClientBaseObjectWrapper<?> object) {
         super(parent);
         this.object = object;
     }
 
-    private int getCornerXWithSpacing(int width, int spacing)
-    {
-        return this.width - (width + spacing);
-    }
-
-    private int getCornerYWithSpacing(int height, int spacing, int row)
-    {
-        return this.height - (height + spacing) * row;
-    }
-
     @Override
     protected void init()
     {
-        // Define the sharing panel and add all shared objects on this client to panel
-        this.sharePanel = new ObjectSharePanel<>(minecraftClientInstance,  UIConstants.PLAYER_LIST_WIDTH, UIConstants.PLAYER_LIST_HEIGHT,this.width / 10, (height / 2) - (UIConstants.PLAYER_LIST_HEIGHT / 2), 50, object);
-        this.sharePanel.addWidgets();
-        // Add close button and share panel
-        this.addRenderableWidget(this.sharePanel);
+        int panelWidth = (int) (this.width * 0.75);
+        int panelHeight = (int) (this.height * 0.65);
+        int panelX = this.width / 10;
+        int panelY = (this.height - panelHeight) / 2;
 
-        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (bnt) -> this.onClose()).bounds(getCornerXWithSpacing(UIConstants.DONE_BUTTON_WIDTH, UIConstants.ELEMENT_SPACING), getCornerYWithSpacing(UIConstants.DONE_BUTTON_HEIGHT, UIConstants.ELEMENT_SPACING, 1), UIConstants.DONE_BUTTON_WIDTH, UIConstants.DONE_BUTTON_HEIGHT).build());
-        this.addRenderableWidget(Button.builder(Component.translatable("jmws.ui.sharing.reload"), (bnt) -> this.sharePanel.refresh()).bounds(getCornerXWithSpacing(UIConstants.DONE_BUTTON_WIDTH, UIConstants.ELEMENT_SPACING), getCornerYWithSpacing(UIConstants.DONE_BUTTON_HEIGHT, UIConstants.ELEMENT_SPACING, 2), UIConstants.DONE_BUTTON_WIDTH, UIConstants.DONE_BUTTON_HEIGHT).build());
-        this.addRenderableWidget(Button.builder(Component.translatable("jmws.ui.sharing.send_requests"), (bnt) -> this.sendRequests()).bounds(getCornerXWithSpacing(UIConstants.DONE_BUTTON_WIDTH, UIConstants.ELEMENT_SPACING), getCornerYWithSpacing(UIConstants.DONE_BUTTON_HEIGHT, UIConstants.ELEMENT_SPACING, 3), UIConstants.DONE_BUTTON_WIDTH, UIConstants.DONE_BUTTON_HEIGHT).build());
+        // Define the sharing panel and add all shared objects on this client to panel
+        this.sharePanel = new ObjectSharePanel<>(minecraftClientInstance,  panelWidth, panelHeight, panelX, panelY, 50, object);
+
+        LinearLayout buttonIcnColumb = LinearLayout.vertical().spacing(4);
+        LinearLayout buttonColumn = LinearLayout.vertical().spacing(4);
+        LinearLayout mainRow = LinearLayout.horizontal();
+
+        buttonColumn.addChild(Button.builder(CommonComponents.GUI_DONE, (bnt) -> this.onClose()).width(UIConstants.DONE_BUTTON_WIDTH).build());
+        buttonColumn.addChild(Button.builder(Component.translatable("jmws.ui.sharing.reload"), (bnt) -> this.sharePanel.refresh()).width(UIConstants.DONE_BUTTON_WIDTH).build());
+        buttonColumn.addChild(Button.builder(Component.translatable("jmws.ui.sharing.send_requests"), (bnt) -> this.sendRequests()).width(UIConstants.DONE_BUTTON_WIDTH).tooltip(SEND_TO_SELECTED).build());
+
+        buttonIcnColumb.addChild(Button.builder(Component.literal("S"), (bnt) -> this.sharePanel.toggleSelectAll()).width(UIConstants.DONE_BUTTON_WIDTH / 2).tooltip(SELECT_ALL_TOGGLE).build());
+
+        mainRow.addChild(buttonIcnColumb, layoutSettings -> layoutSettings.paddingRight(6));
+        mainRow.addChild(this.sharePanel, layoutSettings -> layoutSettings.paddingRight(20));
+        mainRow.addChild(buttonColumn, layoutSettings -> layoutSettings.paddingRight(20));
+
+        mainRow.arrangeElements();
+        FrameLayout.centerInRectangle(mainRow, 0, 0, this.width, this.height);
+        mainRow.visitWidgets(this::addRenderableWidget);
+
+        sharePanel.addWidgets();
     }
 
     private void sendRequests()
@@ -76,19 +90,18 @@ public class ShareScreen extends NotificationAlertScreen {
     }
 
     @Override
-    protected Vector2i getDrawLocation() {
-        int alertX = this.sharePanel.getX();
-        int sharePanelBottom = this.sharePanel.getY() + UIConstants.PLAYER_LIST_HEIGHT;
-        int alertY = sharePanelBottom + ((this.height - sharePanelBottom) / 2) - (this.font.lineHeight / 2);
-        return new Vector2i(alertX, alertY);
+    protected Vector2i getDrawLocationForAlert() {
+        int y = this.sharePanel.getY() + this.sharePanel.getHeight() + 15;
+        return new Vector2i(this.sharePanel.getX(), y);
     }
 
     @Override
     public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         super.extractRenderState(graphics, mouseX, mouseY, a);
-
-        int x = (this.width / 10) + UIConstants.PLAYER_LIST_WIDTH + 20;
-        graphics.text(this.font, Component.translatable("jmws.ui.sharing.share_object", this.object.getType().getReadableName(), this.object.getName()), x, (height / 2) - (UIConstants.PLAYER_LIST_HEIGHT / 2), -1);
+        if (!this.sharePanel.isEmpty())
+        {
+            graphics.text(this.font, Component.translatable("jmws.ui.sharing.share_object", this.object.getType().getReadableName(), this.object.getName()), sharePanel.getX(), sharePanel.getY() - 15, -1);
+        }
     }
 
     public static void openShare(ClientBaseObjectWrapper<?> object)

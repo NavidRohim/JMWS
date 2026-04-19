@@ -176,8 +176,11 @@
   "jmws.ui.sharing.share_object": "Share %s \"%s\"",
   "jmws.ui.sharing.no_players": "No players with JMWS!",
   "jmws.ui.sharing.no_selected_players": "No players selected!",
-  "jmws.ui.sharing.send_requests": "Send Requests",
+  "jmws.ui.sharing.send_requests": "Send",
   "jmws.ui.sharing.reload": "Reload",
+
+  "jmws.ui.sharing.send_request.tooltip": "Sends a share request to selected players.",
+  "jmws.ui.sharing.toggle_select_all.tooltip": "Toggles selection of all players.",
 
   "jmws.ui.requests.expired": "expired",
   "jmws.ui.requests.accepted": "accepted",

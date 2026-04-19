@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.client.ui.generic.selection_list;
 
 import com.mojang.datafixers.types.templates.Check;
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.generic.entry.SelectableLabelEntry;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
@@ -15,6 +16,7 @@ import java.util.Set;
 public abstract class CheckableSelectionList<L extends CheckableSelectionList<L>> extends ObjectSelectionList<SelectableLabelEntry<?>> {
 
     protected final Set<SelectableLabelEntry<L>> highlightedEntries = new HashSet<>();
+    private boolean isSelectingAll = false;
 
     public CheckableSelectionList(Minecraft minecraft, int width, int height, int x, int y, int itemHeight) {
         super(minecraft, width, height, y, itemHeight);
@@ -25,8 +27,28 @@ public abstract class CheckableSelectionList<L extends CheckableSelectionList<L>
     {
         this.highlightedEntries.forEach(entry -> entry.selectedEntry = false);
         this.highlightedEntries.clear();
+        this.isSelectingAll = false;
     }
 
+    public void selectAll()
+    {
+        this.children().forEach(entry -> entry.setSelected(true));
+        this.isSelectingAll = true;
+    }
+
+    public void toggleSelectAll()
+    {
+        if (this.isSelectingAll)
+        {
+            this.unselectAll();
+            this.isSelectingAll = false;
+        }
+        else
+        {
+            this.selectAll();
+            this.isSelectingAll = true;
+        }
+    }
     public Set<SelectableLabelEntry<L>> getSelectedEntries()
     {
         return this.highlightedEntries;
@@ -42,7 +64,7 @@ public abstract class CheckableSelectionList<L extends CheckableSelectionList<L>
         super.extractWidgetRenderState(graphics, mouseX, mouseY, a);
         if (this.children().isEmpty())
         {
-            graphics.text(JMWSCommon.minecraftClientInstance.font, getEmptyStateText(), this.getX(), this.getY() / 2, -1);
+            graphics.text(JMWSCommon.minecraftClientInstance.font, getEmptyStateText(), this.getX(), this.getY() - 15, -1);
         }
 
     }

@@ -37,7 +37,7 @@ public class NotificationAlertScreen extends Screen {
         this.alertStartTime = Util.getMillis();
     }
 
-    protected Vector2i getDrawLocation()
+    protected Vector2i getDrawLocationForAlert()
     {
         assert this.alertText != null;
         int alertX = this.width / 2 - this.font.width(this.alertText) / 2;
@@ -77,7 +77,7 @@ public class NotificationAlertScreen extends Screen {
 
                 Vector4f baseColor = ARGB.vector4fFromARGB32(MessageType.NEUTRAL.getNumericalColour());
                 int argbColor = ARGB.colorFromFloat(alpha, baseColor.x, baseColor.y, baseColor.z);
-                Vector2i drawLocation = getDrawLocation();
+                Vector2i drawLocation = getDrawLocationForAlert();
 
                 graphics.text(this.font, this.alertText, drawLocation.x, drawLocation.y, argbColor);
             } else {

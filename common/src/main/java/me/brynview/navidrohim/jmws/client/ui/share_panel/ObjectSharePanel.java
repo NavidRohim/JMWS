@@ -31,7 +31,6 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
     public ObjectSharePanel(Minecraft minecraft, int width, int height, int x, int y, int itemHeight, T clientObjectWrapper) {
         super(minecraft, width, height, x, y, itemHeight);
 
-
         this.players.addAll(getPlayers());
         this.sharedObject = clientObjectWrapper;
     }
@@ -44,6 +43,11 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
         return onlinePlayers;
     }
 
+    public boolean isEmpty()
+    {
+        return this.children().isEmpty();
+    }
+
     private void refreshPlayers()
     {
         this.players.clear();
@@ -53,10 +57,10 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
     public void refresh()
     {
         JMWSPlugin.sync(false);
+        this.unselectAll();
         this.clearEntries();
         this.refreshPlayers();
         this.addWidgets();
-        this.unselectAll();
         this.addSelfDebug(5);
     }
 
@@ -68,7 +72,7 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
         }
     }
 
-    public void addSelfDebug(int times)
+    private void addSelfDebug(int times)
     {
         for (int i = 0; i < times; i++)
         {
