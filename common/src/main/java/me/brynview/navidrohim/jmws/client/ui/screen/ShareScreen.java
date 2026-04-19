@@ -42,7 +42,7 @@ public class ShareScreen extends NotificationAlertScreen {
     @Override
     protected void init()
     {
-        int panelWidth = (int) (this.width * 0.75);
+        int panelWidth = (int) (this.width * 0.70);
         int panelHeight = (int) (this.height * 0.65);
         int panelX = this.width / 10;
         int panelY = (this.height - panelHeight) / 2;
@@ -54,13 +54,13 @@ public class ShareScreen extends NotificationAlertScreen {
         LinearLayout buttonColumn = LinearLayout.vertical().spacing(4);
         LinearLayout mainRow = LinearLayout.horizontal();
 
-        buttonColumn.addChild(Button.builder(CommonComponents.GUI_DONE, (bnt) -> this.onClose()).width(UIConstants.DONE_BUTTON_WIDTH).build());
-        buttonColumn.addChild(Button.builder(Component.translatable("jmws.ui.sharing.reload"), (bnt) -> this.sharePanel.refresh()).width(UIConstants.DONE_BUTTON_WIDTH).build());
-        buttonColumn.addChild(Button.builder(Component.translatable("jmws.ui.sharing.send_requests"), (bnt) -> this.sendRequests()).width(UIConstants.DONE_BUTTON_WIDTH).tooltip(SEND_TO_SELECTED).build());
+        buttonColumn.addChild(Button.builder(CommonComponents.GUI_DONE, (bnt) -> this.onClose()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
+        buttonColumn.addChild(Button.builder(Component.translatable("jmws.ui.sharing.reload"), (bnt) -> this.sharePanel.refresh()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
+        buttonColumn.addChild(Button.builder(Component.translatable("jmws.ui.sharing.send_requests"), (bnt) -> this.sendRequests()).width(UIConstants.NAMED_BUTTON_WIDTH).tooltip(SEND_TO_SELECTED).build());
 
-        buttonIcnColumb.addChild(Button.builder(Component.literal("S"), (bnt) -> this.sharePanel.toggleSelectAll()).width(UIConstants.DONE_BUTTON_WIDTH / 2).tooltip(SELECT_ALL_TOGGLE).build());
+        buttonIcnColumb.addChild(Button.builder(Component.literal("S"), (bnt) -> this.sharePanel.toggleSelectAll()).width(UIConstants.ICON_BUTTON_WIDTH_HEIGHT).tooltip(SELECT_ALL_TOGGLE).build());
 
-        mainRow.addChild(buttonIcnColumb, layoutSettings -> layoutSettings.paddingRight(6));
+        mainRow.addChild(buttonIcnColumb, layoutSettings -> layoutSettings.paddingRight(4).paddingLeft(6));
         mainRow.addChild(this.sharePanel, layoutSettings -> layoutSettings.paddingRight(20));
         mainRow.addChild(buttonColumn, layoutSettings -> layoutSettings.paddingRight(20));
 

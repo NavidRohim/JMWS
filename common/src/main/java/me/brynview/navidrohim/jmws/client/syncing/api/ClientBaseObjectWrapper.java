@@ -29,7 +29,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     private final String objectGuid;
 
     /**
-     * Creates a universal identifier from the players UUID, the waypoints GUID and name of the object.
+     * Creates a universal identifier from the players UUID, the waypoint's GUID, and name of the object.
      * @param waypointGUID -- GUID of the object being created.
      * @param objectName -- The name of the waypoint or group.
      * @return String -- The universal identifier.

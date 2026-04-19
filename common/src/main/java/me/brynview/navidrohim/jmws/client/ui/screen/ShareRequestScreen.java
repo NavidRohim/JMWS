@@ -1,7 +1,6 @@
 package me.brynview.navidrohim.jmws.client.ui.screen;
 
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
-import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.NotificationAlertScreen;
 import me.brynview.navidrohim.jmws.client.ui.requests_screen.IncomingShareRequestsList;
@@ -11,7 +10,6 @@ import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2i;
 
 public class ShareRequestScreen extends NotificationAlertScreen {
@@ -26,21 +24,25 @@ public class ShareRequestScreen extends NotificationAlertScreen {
     protected void init() {
         //super.init();
 
-        int panelWidth = (int) (this.width * 0.75);
+        int panelWidth = (int) (this.width * 0.70);
         int panelHeight = (int) (this.height * 0.65);
         int panelX = this.width / 10;
         int panelY = (this.height - panelHeight) / 2;
 
         LinearLayout verticalButtonColumnSpacer = LinearLayout.vertical().spacing(4);
-        LinearLayout horizontalButtonColumnSpacer = LinearLayout.horizontal().spacing(20);
+        LinearLayout verticalButtonColumnSpacerForSaDa = LinearLayout.vertical().spacing(4);
+        LinearLayout horizontalButtonColumnSpacer = LinearLayout.horizontal();
 
         incomingShareRequestsList = new IncomingShareRequestsList(JMWSCommon.minecraftClientInstance, panelWidth, panelHeight, panelX, panelY, 50);
 
-        verticalButtonColumnSpacer.addChild(Button.builder(Component.literal("Decline all"), (button) -> JMWSClientCommon.incomingShareRequests.values().forEach(ShareRequest::decline)).width(UIConstants.DONE_BUTTON_WIDTH).build());
-        verticalButtonColumnSpacer.addChild(Button.builder(Component.literal("Accept all"), (button) -> JMWSClientCommon.incomingShareRequests.values().forEach(ShareRequest::accept)).width(UIConstants.DONE_BUTTON_WIDTH).build());
+        verticalButtonColumnSpacer.addChild(Button.builder(Component.literal("Accept"), (button) -> incomingShareRequestsList.toggleSelectAll()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
+        verticalButtonColumnSpacer.addChild(Button.builder(Component.literal("Decline"), (button) -> incomingShareRequestsList.toggleSelectAll()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
 
-        horizontalButtonColumnSpacer.addChild(incomingShareRequestsList);
-        horizontalButtonColumnSpacer.addChild(verticalButtonColumnSpacer);
+        verticalButtonColumnSpacerForSaDa.addChild(Button.builder(Component.literal("SAT"), (button) -> incomingShareRequestsList.toggleSelectAll()).width(UIConstants.ICON_BUTTON_WIDTH_HEIGHT).build());
+
+        horizontalButtonColumnSpacer.addChild(verticalButtonColumnSpacerForSaDa, settings -> settings.paddingRight(4).paddingLeft(6));
+        horizontalButtonColumnSpacer.addChild(incomingShareRequestsList, settings -> settings.paddingRight(20));
+        horizontalButtonColumnSpacer.addChild(verticalButtonColumnSpacer, settings -> settings.paddingRight(10) );
 
         horizontalButtonColumnSpacer.arrangeElements();
         FrameLayout.centerInRectangle(horizontalButtonColumnSpacer, 0, 0, this.width, this.height);
