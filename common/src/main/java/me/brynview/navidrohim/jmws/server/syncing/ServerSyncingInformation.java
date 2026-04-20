@@ -19,7 +19,7 @@ import java.util.UUID;
 public class ServerSyncingInformation extends ServerSyncInformationImpl {
 
     @Nullable
-    protected ServerObject parentObject = null;
+    protected transient ServerObject parentObject = null;
 
     public ServerSyncingInformation(String identifier, UUID owner, Set<UUID> sharedTo, boolean isGlobal, ObjectType syncRegistryType) {
         super(identifier, owner, sharedTo, isGlobal, syncRegistryType);
@@ -78,7 +78,7 @@ public class ServerSyncingInformation extends ServerSyncInformationImpl {
 
     private void update() {
         if (this.parentObject != null) {
-            String jsonString = JMWSCommon.gsonExcludeNoExpose.toJson(this, ServerSyncingInformation.class);
+            String jsonString = JMWSCommon.gson.toJson(this, ServerSyncingInformation.class);
 
             this.parentObject.getRawJson().get("customDataMap").getAsJsonObject().add(Constants.MODID, new JsonPrimitive(jsonString));
             this.parentObject.update(this.parentObject.getRawJson().getAsJsonObject().toString(), true); // TODO: bug test more. This seems very janky and not done right. Will test more

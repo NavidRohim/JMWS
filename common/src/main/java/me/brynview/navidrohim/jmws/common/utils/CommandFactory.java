@@ -123,7 +123,7 @@ public class CommandFactory {
 
         public static String acceptShare(ShareRequest shareRequest)
         {
-            return CommandFactory.makeBaseJsonRequest(Commands.AFFIRM_SHARE, shareRequest.currentSharedObject.getInfo().serialize());
+            return CommandFactory.makeBaseJsonRequest(Commands.AFFIRM_SHARE, shareRequest.currentSharedObject.getInfo().serialize(), PlayerUtils.ourUUID());
         }
     }
     /*

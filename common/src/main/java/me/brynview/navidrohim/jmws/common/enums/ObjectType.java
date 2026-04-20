@@ -7,20 +7,26 @@ import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
 import org.jetbrains.annotations.Nullable;
 
 public enum ObjectType {
-    WAYPOINT(ServerWaypoint.class, "./jmws/"),
-    GROUP(ServerGroup.class, "./jmws/groups/"),
-    SHARED(null, "./jmws/users/"),
+    WAYPOINT(ServerWaypoint.class),
+    GROUP(ServerGroup.class),
+    SHARED(null),
     GENERIC(null, null);
 
     private final Class<? extends ServerObject> savedClass;
-    private final String objectPathPrefix;
+    private final @Nullable String objectPathPrefix;
 
-    ObjectType(final Class<? extends ServerObject> savedClass, String objectPathPrefix) {
+    ObjectType(final Class<? extends ServerObject> savedClass, @Nullable String objectPathPrefix) {
         this.savedClass = savedClass;
         this.objectPathPrefix = objectPathPrefix;
     }
 
-    public static String getPathLocationPrefix(ObjectType objectType)
+    ObjectType(final Class<? extends ServerObject> savedClass)
+    {
+        this.savedClass = savedClass;
+        this.objectPathPrefix = "./jmws/%s/".formatted(this.name());
+    }
+
+    public static @Nullable String getPathLocationPrefix(ObjectType objectType)
     {
         return objectType.getObjectPathPrefix();
     }
@@ -29,7 +35,7 @@ public enum ObjectType {
         return savedClass;
     }
 
-    public String getObjectPathPrefix()
+    public @Nullable String getObjectPathPrefix()
     {
         return this.objectPathPrefix;
     }

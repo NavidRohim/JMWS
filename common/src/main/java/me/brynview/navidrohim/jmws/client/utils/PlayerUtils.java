@@ -7,6 +7,7 @@ import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import org.jetbrains.annotations.NotNull;
@@ -103,15 +104,16 @@ public class PlayerUtils {
         return profile.isPresent() ? profile.get().name() : "S";
     }
 
-    public static UUID ourUUID()
+    public static @NotNull UUID ourUUID()
     {
-        return JMWSCommon.minecraftClientInstance.player.getUUID();
+        LocalPlayer playerUUID = Objects.requireNonNull(JMWSCommon.minecraftClientInstance.player, "Player is null! This should never happen and was likely because this method was called too early.");
+        return playerUUID.getUUID();
     }
 
     public static @Nullable PlayerInfo getPlayerInfoFromUUID(UUID player)
     {
         try {
-            return JMWSCommon.minecraftClientInstance.getConnection().getPlayerInfo(player);
+            return Objects.requireNonNull(JMWSCommon.minecraftClientInstance.getConnection()).getPlayerInfo(player);
         } catch (Exception e)
         {
             return null;

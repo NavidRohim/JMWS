@@ -7,6 +7,7 @@ import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -65,7 +66,13 @@ public class CommonShareIO implements AutoCloseable {
         try (FileWriter permissionsListFileWriter = new FileWriter(this.objectPath.toFile()))
         {
             permissionsListFileWriter.write(permissionsJson);
-        } catch (IOException reason)
+
+        } catch (FileNotFoundException noShareFile)
+        {
+            JMWSCommon.createServerResources();
+            writeSharedList();
+        }
+        catch (IOException reason)
         {
             Constants.getLogger().error("Failed to write permissions file. Reason: ", reason);
         }

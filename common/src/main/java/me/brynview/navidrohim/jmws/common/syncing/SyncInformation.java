@@ -1,8 +1,6 @@
 package me.brynview.navidrohim.jmws.common.syncing;
 
-import com.google.gson.*;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Set;
@@ -30,17 +28,6 @@ public class SyncInformation {
     public boolean isOwner(UUID user)
     {
         return owner.equals(user);
-    }
-
-    @Nullable
-    public static String getOnlyIdentifier(@Nullable String syncInformation)
-    {
-        if (syncInformation != null)
-        {
-            JsonObject obj = JsonParser.parseString(syncInformation).getAsJsonObject();
-            return obj.get("objectIdentifier").getAsString();
-        }
-        return null;
     }
 }
 

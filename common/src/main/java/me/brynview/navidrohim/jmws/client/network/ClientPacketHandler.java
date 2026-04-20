@@ -126,12 +126,14 @@ public class ClientPacketHandler {
 
                 case AFFIRM_SHARE ->
                 {
+                    Constants.LoggerHolder.debug(arguments, "AFFIRM SHARE ARGS");
                     ClientSyncInformation syncInfo = ClientSyncUtils.syncInformationFromString(arguments.getFirst().getAsString());
+                    UUID senderUUID = UUID.fromString(arguments.get(1).getAsString());
 
-                    if (syncInfo != null && JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(syncInfo.owner))
+                    if (syncInfo != null && JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(senderUUID))
                     {
-                        OutgoingShareRequest request = JMWSClientCommon.outgoingShareRequests.getRequest(syncInfo.owner).resolve();
-                        request.currentSharedObject.addSharedTo(syncInfo.owner);
+                        OutgoingShareRequest request = JMWSClientCommon.outgoingShareRequests.getRequest(senderUUID).resolve();
+                        request.currentSharedObject.addSharedTo(senderUUID);
 
                         sendUserAlert(Component.translatable("sharing.jmws.sharing_host", request.objectDisplayName, request.getRecipientName()), true, false, MessageType.SUCCESS);
                     } else {

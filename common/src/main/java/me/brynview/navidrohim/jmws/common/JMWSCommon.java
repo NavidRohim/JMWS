@@ -8,6 +8,8 @@ import commonnetwork.networking.data.PacketContext;
 import commonnetwork.networking.data.Side;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.platform.Services;
@@ -55,7 +57,7 @@ public class JMWSCommon {
         if (
                 isInternalServer() &&
                 Constants.forgeModLoaders.contains(Services.PLATFORM.getPlatformName()) &&
-                (ctx.sender() == null || ctx.sender().getUUID() == JMWSCommon.minecraftClientInstance.player.getUUID()))
+                (ctx.sender() == null || ctx.sender().getUUID() == PlayerUtils.ourUUID()))
         {
             return;
         }
@@ -84,9 +86,24 @@ public class JMWSCommon {
     }
 
     public static void createServerResources() {
+        for (ObjectType type : ObjectType.values())
+        {
+            if (type.getObjectPathPrefix() != null)
+            {
+                boolean didCreate = new File("./jmws/" + type.name().toLowerCase()).mkdir();
+                if (didCreate)
+                {
+                    Constants.getLogger().info("Created directory for object type -> {}", type.name());
+                } else {
+                    Constants.getLogger().warn("Registry type directory {} already exists. Will ignore.", type.name());
+                }
+            }
+        }
+        /*
         new File("./jmws").mkdir();
         new File("./jmws/groups").mkdir();
         new File("./jmws/users").mkdir();
+        */
     }
 
 

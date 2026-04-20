@@ -34,7 +34,6 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.assets.JMWSSounds;
-import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
@@ -359,7 +358,7 @@ public class JMWSPlugin implements IClientPlugin {
     private void waypointDragHandler(WaypointGroupTransferEvent waypointGroupTransferEvent) {
         // Do not do on LAN, since there is no physical server.
         Waypoint subjectedChangeWp = waypointGroupTransferEvent.getWaypoint();
-        @Nullable String identifier = SyncInformation.getOnlyIdentifier(subjectedChangeWp.getCustomData(Constants.MODID));
+        @Nullable String identifier = ClientSyncUtils.getOnlyIdentifier(subjectedChangeWp.getCustomData(Constants.MODID));
         @Nullable ClientWaypointWrapper waypoint = ObjectIdentifierMap.getObjectFromMap(identifier, ClientWaypointWrapper.class);
 
         if (!isInternalServer() && waypoint != null)

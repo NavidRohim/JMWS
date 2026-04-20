@@ -19,7 +19,6 @@ import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
-import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingInformation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -133,7 +132,7 @@ public class ServerPacketHandler {
                     Dispatcher.sendToClient(waypointPayloadOutbound, player);
                 }
             } catch (IOException ioe) {
-                Constants.getLogger().error("Error on server when trying to process sync from %s ERROR: %s".formatted(player.getUUID(), ioe.toString()));
+                Constants.getLogger().error("Error on server when trying to process sync from {} ERROR: {}", player.getUUID(), ioe.toString());
             }
         }
     }
@@ -347,6 +346,7 @@ public class ServerPacketHandler {
                             usf.addToShared(syncInfo.objectIdentifier, syncInfo.syncRegistryType);
                         }
                         sharedWp.serverSyncingHandler.addUserToShare(playerUUID);
+
                         Dispatcher.sendToClient(waypointActionPayload, JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(syncInfo.owner));
                     } else {
                         sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
