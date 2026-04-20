@@ -12,10 +12,10 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.UUID;
 
 public class PlayerNetworkingHelper {
-    public static void sendUserMessage(ServerPlayer player, String messageKey, Boolean overlay, boolean isError, boolean silent) {
+    public static void sendUserMessage(ServerPlayer player, String messageKey, Boolean overlay, boolean isError, boolean silent, String... translationArgs) {
         if (!silent) // is this dumb
         {
-            JMWSActionPayload messagePayload = new JMWSActionPayload(CommandFactory.makeClientAlertRequestJson(messageKey, overlay, isError ? MessageType.FAILURE : MessageType.NEUTRAL));
+            JMWSActionPayload messagePayload = new JMWSActionPayload(CommandFactory.makeClientAlertRequestJson(messageKey, overlay, isError ? MessageType.FAILURE : MessageType.NEUTRAL, translationArgs));
             Dispatcher.sendToClient(messagePayload, player);
         }
     }

@@ -1,7 +1,6 @@
 package me.brynview.navidrohim.jmws.common.syncing;
 
 import com.google.gson.*;
-import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
@@ -9,7 +8,7 @@ import org.jspecify.annotations.NonNull;
 import java.util.Set;
 import java.util.UUID;
 
-public abstract class SyncInformation {
+public class SyncInformation {
 
     public String objectIdentifier;
     public UUID owner;
@@ -24,20 +23,8 @@ public abstract class SyncInformation {
         this.isGlobal = isGlobal;
     }
 
-    public @NonNull String getSyncInformationAsString() {
+    public @NonNull String serialize() {
         return JMWSCommon.gson.toJson(this);
-    }
-
-    @Nullable
-    public static SyncInformation syncInformationFromString(String info)
-    {
-        try
-        {
-            return JMWSCommon.gson.fromJson(info, SyncInformation.class);
-        } catch (JsonSyntaxException e)
-        {
-            return null;
-        }
     }
 
     public boolean isOwner(UUID user)

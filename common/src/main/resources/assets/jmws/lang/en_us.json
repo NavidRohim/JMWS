@@ -143,6 +143,7 @@
   "error.jmws.screen.needing_got": "Need: %s or newer. Got: %s",
   "error.jmws.invalid_name": "Invalid name!",
   "error.jmws.player_offline": "Player is offline!",
+  "error.jmws.invalid_object_type": "Invalid object type: {} the server may not have the required JMWS extension.",
   "fatal.jmws.server_mismatch": "You must update to the latest version of JMWS!",
 
   "warning.jmws.server.disabled_jmws": "Server has JMWS, but has been disabled on server.",

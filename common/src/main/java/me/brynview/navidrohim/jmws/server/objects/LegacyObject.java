@@ -68,7 +68,7 @@ public class LegacyObject
                 LegacyObject oldObj = new LegacyObject(payload);
                 if (me.brynview.navidrohim.jmws.common.utils.SyncUtils.isLegacySyncField(oldObj.getOldCustomData()))
                 {
-                    oldObj.setSyncedCustomData(SyncUtils.getEmptySyncingInfoString(oldObj.getOldCustomData(), owner, false));
+                    oldObj.setSyncedCustomData(SyncUtils.getEmptySyncingInfoString(oldObj.getOldCustomData(), owner, false, newType));
                     Constructor<? extends ServerObject> constructor = newType.getObjectClass().getConstructor(JsonObject.class, UUID.class);
                     T newObj = (T) constructor.newInstance(payload, owner);
                     newObj.create();

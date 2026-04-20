@@ -27,7 +27,7 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     {
         super.update();
         if (this.info != null) {
-            getNativeObject().setCustomData(Constants.MODID, this.getInfo().getSyncInformationAsString());
+            getNativeObject().setCustomData(Constants.MODID, this.getInfo().serialize());
         }
     }
 

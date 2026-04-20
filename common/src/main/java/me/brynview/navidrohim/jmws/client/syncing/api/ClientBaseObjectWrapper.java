@@ -5,6 +5,7 @@ import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.exceptions.NoInfoException;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncUtils;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
@@ -62,7 +63,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         this.pluginId = plugin;
 
         if (this.getContext() == Context.SYNCHRONISE) {
-            info1 = ClientSyncInformation.syncInformationFromString(syncData);
+            info1 = ClientSyncUtils.syncInformationFromString(syncData, getType());
         } else {
             info1 = null;
         }
@@ -74,14 +75,14 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     public void createRemotely(boolean silent)
     {
         if (getContext() == Context.NATIVE) {
-            this.setInfo(ClientSyncInformation.syncInformationFromString(SyncUtils.getEmptySyncingInfoString(makeWaypointHash(objectGuid, objectName), PlayerUtils.ourUUID(), false)));
+            this.setInfo(ClientSyncUtils.getEmptySyncInformation(makeWaypointHash(objectGuid, objectName), false, getType()));
         }
     }
 
     @Override
     public void update()
     {
-        @Nullable String syncData = this.info != null ? this.info.getSyncInformationAsString() : null;
+        @Nullable String syncData = this.info != null ? this.info.serialize() : null;
         this.isValid = syncData != null && SyncUtils.isValidSyncField(syncData);
         this.isLegacy = !this.isValid && SyncUtils.isLegacySyncField(syncData);
 
@@ -95,12 +96,6 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
             this.info = info;
             this.update();
         }
-    }
-
-    @Override
-    public boolean isValid()
-    {
-        return isValid;
     }
 
     @Override
@@ -211,7 +206,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         if (this.info != null)
         {
             this.getInfo().sharedTo.remove(sharedTo);
-            ClientNetworkDispatcher.PeerToPeer.removeShare(sharedTo, this);
+            ClientNetworkDispatcher.PeerToPeer.removeShare(sharedTo, this.info);
         } else {
             throw new NoInfoException();
         }
@@ -224,7 +219,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         if (this.info != null)
         {
             this.getInfo().sharedTo.clear();
-            ClientNetworkDispatcher.removeShareFromAll( this);
+            //ClientNetworkDispatcher.removeShareFromAll( this); TODO
         } else {
             throw new NoInfoException();
         }

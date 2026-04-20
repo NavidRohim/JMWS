@@ -5,6 +5,7 @@ import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncUtils;
 import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
@@ -17,7 +18,7 @@ public class ClientObjectFactory {
     public static ClientWaypointWrapper fromWaypoint(Waypoint waypoint)
     {
 
-        @Nullable ClientSyncInformation syncInfo = ClientSyncInformation.syncInformationFromString(waypoint.getCustomData(Constants.MODID));
+        @Nullable ClientSyncInformation syncInfo = ClientSyncUtils.syncInformationFromString(waypoint.getCustomData(Constants.MODID), SyncRegistry.WAYPOINT);
 
         if (syncInfo == null)
         {
@@ -36,7 +37,7 @@ public class ClientObjectFactory {
     public static ClientGroupWrapper fromGroup(@NotNull WaypointGroup group)
     {
 
-        @Nullable ClientSyncInformation syncInfo = ClientSyncInformation.syncInformationFromString(group.getCustomData(Constants.MODID));
+        @Nullable ClientSyncInformation syncInfo = ClientSyncUtils.syncInformationFromString(group.getCustomData(Constants.MODID), SyncRegistry.GROUP);
 
         if (syncInfo == null)
         {

@@ -4,6 +4,7 @@ import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
+import org.jetbrains.annotations.Nullable;
 
 public enum ObjectType {
     WAYPOINT(ServerWaypoint.class, "./jmws/"),
@@ -33,8 +34,16 @@ public enum ObjectType {
         return this.objectPathPrefix;
     }
 
-    public boolean equalsNew(SyncRegistry obj)
+    @Nullable
+    public static ObjectType get(String registry)
     {
-        return this.toString().equals(obj.getId());
+        for (ObjectType type : ObjectType.values())
+        {
+            if (type.toString().equals(registry))
+            {
+                return type;
+            }
+        }
+        return null;
     }
 }

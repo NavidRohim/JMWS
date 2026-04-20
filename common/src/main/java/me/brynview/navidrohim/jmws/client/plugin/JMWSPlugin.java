@@ -20,6 +20,7 @@ import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncUtils;
 import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
@@ -542,7 +543,7 @@ public class JMWSPlugin implements IClientPlugin {
 
             // Add server groups to the client
             for (WaypointGroup savedGroup : savedGroups) {
-                ClientSyncInformation gpSync = ClientSyncInformation.syncInformationFromString(savedGroup.getCustomData(Constants.MODID));
+                ClientSyncInformation gpSync = ClientSyncUtils.syncInformationFromString(savedGroup.getCustomData(Constants.MODID), SyncRegistry.GROUP);
 
                 if (gpSync == null) {
                     portLegacyDataField(savedGroup.toString(), ObjectType.GROUP);
@@ -614,13 +615,13 @@ public class JMWSPlugin implements IClientPlugin {
 
             // Add server waypoints to the client
             for (Waypoint savedWaypoint : savedWaypoints) {
-                @Nullable ClientSyncInformation wpSync = ClientSyncInformation.syncInformationFromString(savedWaypoint.getCustomData(Constants.MODID));
+                @Nullable ClientSyncInformation wpSync = ClientSyncUtils.syncInformationFromString(savedWaypoint.getCustomData(Constants.MODID), SyncRegistry.WAYPOINT);
 
                 if (wpSync == null) {
                     //portLegacyDataField(savedWaypoint.toString(), ObjectType.WAYPOINT);
                     continue;
                 }
-
+                Constants.LoggerHolder.debug(savedWaypoint.getCustomData(Constants.MODID), "SYNC INFORMATION");
                 if (!wpSync.isOwner(PlayerUtils.ourUUID()))
                 {
                     if (wpSync.isGlobal && showGlobalLabels) // Global

@@ -39,10 +39,10 @@ public interface ClientObjectWrapper<T> {
     void createLocally();
     void removeLocally();
 
+    ClientSyncInformation getInfo();
     void setInfo(ClientSyncInformation info);
     void update();
 
-    boolean isValid();
     boolean isLegacy();
     boolean isUsable();
     boolean isNative();

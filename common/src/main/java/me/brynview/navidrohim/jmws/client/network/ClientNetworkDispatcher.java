@@ -4,13 +4,17 @@ import com.mojang.brigadier.Command;
 import commonnetwork.api.Network;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
+import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 
 import java.util.UUID;
@@ -18,7 +22,7 @@ import java.util.UUID;
 public class ClientNetworkDispatcher {
     private static void sendString(String data)
     {
-        // ignoreCheck is true because forge broke packet validation I think.
+        // ignoreCheck is true because forge broke packet validation, I think.
         sendPacket(new JMWSActionPayload(data));
     }
 
@@ -71,11 +75,6 @@ public class ClientNetworkDispatcher {
         sendString(CommandFactory.makeTransitionObjectRequest(filename, objectIdentifier, transitionType));
     }
 
-    public static void removeShareFromAll(ClientBaseObjectWrapper<?> shareableObject)
-    {
-        sendString(CommandFactory.makeUnshareRequestForAllOnServer(PlayerUtils.ourUUID(), shareableObject.getInfo())); // TODO
-    }
-
     public static void makeGlobal(ClientBaseObjectWrapper<?> globalObject, boolean global)
     {
         sendString(CommandFactory.makeGlobalRequestForServer(PlayerUtils.ourUUID(), globalObject.getIdentifier(), globalObject.getType(), global)); // TODO
@@ -93,19 +92,19 @@ public class ClientNetworkDispatcher {
             sendString(CommandFactory.PeerToPeer.acceptShare(shareRequest));
         }
 
-        public static void declineShare(ShareRequest shareRequest, String messageKey)
+        public static void declineShare(UUID shareRequest, String messageKey, String... translationArgs)
         {
-            sendString(CommandFactory.PeerToPeer.declineWithReason(shareRequest.originalSender, messageKey));
+            sendString(CommandFactory.PeerToPeer.declineWithReason(shareRequest, messageKey, translationArgs));
         }
 
-        public static void declineShare(ShareRequest shareRequest)
+        public static void declineShare(UUID shareRequest)
         {
-            sendString(CommandFactory.PeerToPeer.declineWithReason(shareRequest.originalSender, "sharing.jmws.declined_by_server"));
+            sendString(CommandFactory.PeerToPeer.declineWithReason(shareRequest, "sharing.jmws.share_rejected", JMWSCommon.minecraftClientInstance.player.getPlainTextName()));
         }
 
-        public static void removeShare(UUID with, ClientBaseObjectWrapper<?> shareableObject)
+        public static void removeShare(UUID with, ClientSyncInformation syncInformation)
         {
-            sendString(CommandFactory.PeerToPeer.removeShareWith(with, shareableObject.getIdentifier(), shareableObject.getType()));
+            sendString(CommandFactory.PeerToPeer.removeShareWith(with, syncInformation));
         }
     }
 }

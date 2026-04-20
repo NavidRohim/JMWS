@@ -1,12 +1,13 @@
 package me.brynview.navidrohim.jmws.common.utils;
 
-import com.google.gson.JsonSyntaxException;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
-import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncUtils;
+import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingInformation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -45,26 +46,10 @@ public class SyncUtils {
     @Nullable
     public static ClientSyncInformation getIdentifier(Waypoint waypoint)
     {
-        return ClientSyncInformation.syncInformationFromString(waypoint.getCustomData(Constants.MODID));
+        return ClientSyncUtils.syncInformationFromString(waypoint.getCustomData(Constants.MODID), SyncRegistry.WAYPOINT);
     }
 
-    public static ServerSyncingHandler getSyncingInfo(String customDataField, boolean returnNullIfError) {
-        try {
-            return JMWSCommon.gson.fromJson(customDataField, ServerSyncingHandler.class);
-        } catch (JsonSyntaxException syntaxException) // will throw if object hasn't been ported.
-        {
-            if (!returnNullIfError) {
-                return getSyncingInfo(getEmptySyncingInfoString(customDataField, PlayerUtils.ourUUID(), false));
-            }
-            return null;
-        }
-    }
-
-    public static ServerSyncingHandler getSyncingInfo(String customDataField) {
-        return getSyncingInfo(customDataField, false);
-    }
-
-    public static String getEmptySyncingInfoString(String objectIdentifier, UUID owner, boolean isGlobal) {
-        return JMWSCommon.gson.toJson(new ServerSyncingHandler(Set.of(), objectIdentifier, owner, isGlobal));
+    public static String getEmptySyncingInfoString(String objectIdentifier, UUID owner, boolean isGlobal, ObjectType registryType) {
+        return JMWSCommon.gson.toJson(new ServerSyncingInformation(objectIdentifier, owner, Set.of(), isGlobal, registryType));
     }
 }

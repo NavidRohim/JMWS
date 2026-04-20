@@ -23,11 +23,12 @@
 - ~~Timeout alert is not sent after the first timeout.~~
 - ~~When accepting a share request, the recieving client cannot display the object. A casting error is thrown.~~
 - ~~If a client or server does not have a packet registered, the game will crash.~~
+- When accepting a share request with a user, the server wipes the objects syncInfo field.
 
 ## -- Todo tomorrow --
 
 - Fix the timeout bug
-- With the new sharing system, a packet needs to be sent to the server to notify that the object has been shared and to update the client.
+- ~~With the new sharing system, a packet needs to be sent to the server to notify that the object has been shared and to update the client.~~
 - Make a custom asset for the incoming share request button.
 
 *Already finished*

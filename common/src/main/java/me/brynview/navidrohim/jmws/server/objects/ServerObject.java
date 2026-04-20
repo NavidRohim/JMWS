@@ -8,7 +8,7 @@ import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
-import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingHandler;
+import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingInformation;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
@@ -31,7 +31,7 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
     String groupIdentifier; // TODO: remove?
 
     public UserSharingFile accessorSharing;
-    public ServerSyncingHandler serverSyncingHandler;
+    public ServerSyncingInformation serverSyncingHandler;
 
     public boolean dataclass;
     public static ObjectType objectType = ObjectType.GENERIC;
@@ -56,7 +56,7 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
         this.dataclass = dataclass;
 
         this.ownerUUID = playerUUID; // Note; if you set ownerUUID before this.syncing is defined, it enables some sort of compatibility for legacy clients. But I've left it as-is to avoid chaos.
-        this.serverSyncingHandler = ServerSyncingHandler.getSyncingHandlerFromServerObject(this);
+        this.serverSyncingHandler = ServerSyncingInformation.getSyncingHandlerFromServerObject(this);
 
         this.name = payload.get("name").getAsString();
         this.accessorSharing = !dataclass ? new UserSharingFile(playerUUID) : null;
@@ -117,8 +117,8 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
 
     @Override
     public void stopSharingWithAll() {
-        for (String userUUID : this.serverSyncingHandler.sharedTo) {
-            JMWSServerIO.removeObjectFromUser(this, UUID.fromString(userUUID), this.serverSyncingHandler.objectIdentifier, this.getObjectType());
+        for (UUID userUUID : this.serverSyncingHandler.sharedTo) {
+            JMWSServerIO.removeObjectFromUser(this, userUUID, this.serverSyncingHandler.objectIdentifier, this.getObjectType());
         }
         this.serverSyncingHandler.removeAllFromShare();
     }

@@ -3,9 +3,10 @@ package me.brynview.navidrohim.jmws.server.syncing;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.api.CommonSyncHandler;
+import me.brynview.navidrohim.jmws.common.api.ServerSyncInformationImpl;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -15,25 +16,25 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 import java.util.UUID;
 
-public class ServerSyncingHandler extends CommonSyncHandler {
+public class ServerSyncingInformation extends ServerSyncInformationImpl {
 
     @Nullable
     protected ServerObject parentObject = null;
 
-    public ServerSyncingHandler(Set<String> sharedTo, String identifier, UUID owner, boolean isGlobal) {
-        super(sharedTo, identifier, owner, isGlobal);
+    public ServerSyncingInformation(String identifier, UUID owner, Set<UUID> sharedTo, boolean isGlobal, ObjectType syncRegistryType) {
+        super(identifier, owner, sharedTo, isGlobal, syncRegistryType);
     }
 
-    public static ServerSyncingHandler getSyncingHandlerFromServerObject(ServerObject object) {
+    public static ServerSyncingInformation getSyncingHandlerFromServerObject(ServerObject object) {
         try {
-            ServerSyncingHandler serverSyncingHandler = JMWSCommon.gson.fromJson(object.getSyncedCustomData(), ServerSyncingHandler.class);
+            Constants.getLogger().info("Syncing handler: " + object.getSyncedCustomData());
+            ServerSyncingInformation serverSyncingHandler = JMWSCommon.gson.fromJson(object.getSyncedCustomData(), ServerSyncingInformation.class);
             serverSyncingHandler.parentObject = object;
 
             return serverSyncingHandler;
         } catch (IllegalStateException | JsonSyntaxException reader) {
             PlayerNetworkingHelper.sendUserMessage(object.getOwnerUUID(), "FATAL: You are on the wrong JMWS version! Update to JMWS v%s as soon as possible or you may suffer data loss!".formatted(Constants.SERVER_VERSION), false, MessageType.FAILURE);
             object.dataclass = true;
-
             return null;
         }
     }
@@ -67,11 +68,17 @@ public class ServerSyncingHandler extends CommonSyncHandler {
         this.update();
     }
 
+    @Override
+    public void setRegistry(@Nullable ObjectType registry) {
+        super.setRegistry(registry);
+        this.update();
+    }
+
     // IO (SERVER ONLY)
 
     private void update() {
         if (this.parentObject != null) {
-            String jsonString = JMWSCommon.gsonExcludeNoExpose.toJson(this, ServerSyncingHandler.class);
+            String jsonString = JMWSCommon.gsonExcludeNoExpose.toJson(this, ServerSyncingInformation.class);
 
             this.parentObject.getRawJson().get("customDataMap").getAsJsonObject().add(Constants.MODID, new JsonPrimitive(jsonString));
             this.parentObject.update(this.parentObject.getRawJson().getAsJsonObject().toString(), true); // TODO: bug test more. This seems very janky and not done right. Will test more
@@ -83,8 +90,8 @@ public class ServerSyncingHandler extends CommonSyncHandler {
     // Syncing
 
     public void syncToUsers() {
-        for (String playerUUID : this.sharedTo) {
-            ServerPlayer sharedUser = JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(UUID.fromString(playerUUID));
+        for (UUID playerUUID : this.sharedTo) {
+            ServerPlayer sharedUser = JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
 
             if (sharedUser != null) {
                 ServerPacketHandler.sendUserSync(sharedUser, false, false, true);

@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
+import me.brynview.navidrohim.jmws.common.api.ServerSyncInformationImpl;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
@@ -286,6 +287,17 @@ public class JMWSServerIO {
         if (objectPath != null)
         {
             return getObjectFromFile(objectPath, playerUUID, objectType, false);
+        }
+        return null;
+    }
+
+    @Nullable
+    public static <T extends ServerObject> T getObjectFromSyncInformation(ServerSyncInformationImpl syncInfo)
+    {
+        @Nullable Path objPath = JMWSServerIO.PathUtils.getObjectFilename(syncInfo.owner, syncInfo.objectIdentifier, syncInfo.syncRegistryType, syncInfo.isGlobal);
+        if (objPath != null)
+        {
+            return getObjectFromFile(objPath, null, syncInfo.syncRegistryType);
         }
         return null;
     }

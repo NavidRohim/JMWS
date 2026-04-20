@@ -3,15 +3,14 @@ package me.brynview.navidrohim.jmws.server.network;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.common.api.ServerSyncInformationImpl;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
-import me.brynview.navidrohim.jmws.server.commands.ServerCommands;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -20,6 +19,7 @@ import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
+import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingInformation;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -295,7 +295,7 @@ public class ServerPacketHandler {
                     }
                 }
 
-                case UPDATE -> // Bug here, after updating, the user shareWith list is cleared
+                case UPDATE -> // Bug here; after updating, the user shareWith list is cleared
                 {
                     String objectIdentifier = arguments.getFirst().getAsString();
                     ObjectType modifyingType = ObjectType.valueOf(arguments.get(1).getAsString());
@@ -333,19 +333,21 @@ public class ServerPacketHandler {
 
                 case CommandFactory.Commands.AFFIRM_SHARE ->
                 {
-                    UUID ownerUUID = UUID.fromString(arguments.getFirst().getAsString());
-                    String objectIdentifier = arguments.get(1).getAsString();
-                    ObjectType objType = ObjectType.valueOf(arguments.get(2).getAsString());
-                    ServerObject sharedWp = JMWSServerIO.getObjectFromDisk(objectIdentifier, ownerUUID, objType);
+                    String rawSyncInfo = arguments.getFirst().getAsString();
+                    ServerSyncInformationImpl syncInfo = ServerSyncInformationImpl.getFromString(rawSyncInfo);
+
+                    Constants.LoggerHolder.debug(syncInfo.toString(), "SYNC INFO");
+                    Constants.LoggerHolder.debug(rawSyncInfo, "RAW SYNC INFO");
+                    ServerObject sharedWp = JMWSServerIO.getObjectFromSyncInformation(syncInfo);
 
                     if (sharedWp != null)
                     {
                         try (UserSharingFile usf = new UserSharingFile(playerUUID))
                         {
-                            usf.addToShared(objectIdentifier, objType);
+                            usf.addToShared(syncInfo.objectIdentifier, syncInfo.syncRegistryType);
                         }
                         sharedWp.serverSyncingHandler.addUserToShare(playerUUID);
-                        Dispatcher.sendToClient(waypointActionPayload, JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(ownerUUID));
+                        Dispatcher.sendToClient(waypointActionPayload, JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(syncInfo.owner));
                     } else {
                         sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
                     }
@@ -362,8 +364,6 @@ public class ServerPacketHandler {
                 }
                 case MAKE_GLOBAL ->
                 {
-                    Constants.getLogger().info(arguments.toString());
-
                     UUID from = UUID.fromString(arguments.getFirst().getAsString());
                     String objectIdentifier = arguments.get(1).getAsString();
                     ObjectType objectType = ObjectType.valueOf(arguments.get(2).getAsString());

@@ -5,6 +5,8 @@ import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncUtils;
 import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.factory.ClientObjectFactory;
@@ -121,7 +123,21 @@ public class ClientPacketHandler {
                     Constants.LoggerHolder.debug(argumentsForClient, "ARGS FOR CLIENT");
                     ClientPacketHandler.handlePeerToPeerPacket(sentCommand, senderUUID, argumentsForClient.getFirst().getAsJsonArray().asList());
                 }
-                
+
+                case AFFIRM_SHARE ->
+                {
+                    ClientSyncInformation syncInfo = ClientSyncUtils.syncInformationFromString(arguments.getFirst().getAsString());
+
+                    if (syncInfo != null && JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(syncInfo.owner))
+                    {
+                        OutgoingShareRequest request = JMWSClientCommon.outgoingShareRequests.getRequest(syncInfo.owner).resolve();
+                        request.currentSharedObject.addSharedTo(syncInfo.owner);
+
+                        sendUserAlert(Component.translatable("sharing.jmws.sharing_host", request.objectDisplayName, request.getRecipientName()), true, false, MessageType.SUCCESS);
+                    } else {
+                        sendUserAlert(Component.translatable("sharing.jmws.no_longer_valid"), true, true, MessageType.SUCCESS);
+                    }
+                }
                 default -> Constants.getLogger().warn("Unknown packet command -> {} ", waypointPayload.command);
              }
         }
@@ -173,17 +189,6 @@ public class ClientPacketHandler {
                 }
             }
 
-            case CLIENT_ACCEPTED_SHARE -> {
-                if (JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(senderUUID))
-                {
-                    OutgoingShareRequest request = JMWSClientCommon.outgoingShareRequests.getRequest(senderUUID).resolve();
-                    request.currentSharedObject.addSharedTo(senderUUID);
-
-                    sendUserAlert(Component.translatable("sharing.jmws.sharing_host", request.objectDisplayName, request.getRecipientName()), true, false, MessageType.SUCCESS);
-                } else {
-                    sendUserAlert(Component.translatable("sharing.jmws.no_longer_valid"), true, true, MessageType.SUCCESS);
-                }
-            }
             default -> Constants.getLogger().warn("Unknown peer to peer command -> {} ", sentCommand);
         }
     }

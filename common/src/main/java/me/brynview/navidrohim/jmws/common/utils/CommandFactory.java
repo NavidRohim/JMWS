@@ -2,6 +2,8 @@ package me.brynview.navidrohim.jmws.common.utils;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
 import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
@@ -11,12 +13,14 @@ import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class CommandFactory {
+
     public static class PacketCommand {
         Commands command;
         Object[] arguments;
@@ -51,6 +55,7 @@ public class CommandFactory {
     }
 
     public static String makeCreationRequestJson(Waypoint waypoint, boolean silent) {
+        Constants.getLogger().info("Creating waypoint: " + waypoint.toString());
         return CommandFactory.makeBaseJsonRequest(Commands.SERVER_CREATE, waypoint.toString(), silent);
     }
 
@@ -70,24 +75,9 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.CLIENT_ALERT, message, overlay, messageType.toString(), translationArgs);
     }
 
-    public static String makeObjectShareRequestAccept(ShareRequest shareRequest)
-    {
-        return CommandFactory.makeBaseJsonRequest(Commands.AFFIRM_SHARE, shareRequest.originalSender, shareRequest.requestIdentifier, shareRequest.sharedObjectType, shareRequest.meantFor);
-    }
-
-    public static String makeUpdateWaypointRequest(ClientWaypointWrapper waypoint)
-    {
-        return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, waypoint.getIdentifier(), ObjectType.WAYPOINT, waypoint.getGlobal(), waypoint.getSerialization());
-    }
-
     public static String makeUpdateObjectRequest(ClientBaseObjectWrapper<?> objectWrapper)
     {
         return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectWrapper.getIdentifier(), objectWrapper.getType().toString(), objectWrapper.getGlobal(), objectWrapper.getSerialization());
-    }
-
-    public static String makeUpdateGroupRequest(ClientGroupWrapper group)
-    {
-        return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, group.getIdentifier(), ObjectType.GROUP, group.getGlobal(), group.getSerialization());
     }
 
     public static String makeTransitionObjectRequest(String objectIdentifier, String filename, ObjectType transitionType)
@@ -98,11 +88,6 @@ public class CommandFactory {
     public static String makeTransitionObjectRequestForLegacyCustomData(String objectIdentifier, UUID owner, boolean isGlobal, ObjectType transitionType)
     {
         return CommandFactory.makeBaseJsonRequest(Commands.TRANSITION_NEW_DATA, objectIdentifier, owner, isGlobal, transitionType);
-    }
-
-    public static String makeUnshareRequestForAllOnServer(UUID from, String objectIdentifier, SyncRegistry syncRegistryType)
-    {
-        return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_WITH_ALL, from, objectIdentifier, syncRegistryType.getId());
     }
 
     public static String makeGlobalRequestForServer(UUID from, String objectIdentifier, SyncRegistry syncRegistryType, boolean global)
@@ -119,29 +104,26 @@ public class CommandFactory {
 
         public static String shareToUser(UUID to, ClientBaseObjectWrapper<?> shareableObject)
         {
+            // As we are sharing an object directly with another user, we must serialize and send the full object and the second argument which indicates
+            // how to encode the raw data into a usable object.
             return makeBaseRequestForUser(to, PeerToPeerCommand.CLIENT_SHARE_REQUEST, shareableObject.getSerialization(), shareableObject.getType().getId());
         }
 
-        public static String removeShareWith(UUID with, String identifier, SyncRegistry type)
+        public static String removeShareWith(UUID with, ClientSyncInformation syncInformation)
         {
-            return makeBaseRequestForUser(with, PeerToPeerCommand.CLIENT_REMOVE_SHARE_WITH, identifier, type.getId());
-        }
-
-        public static String removeShareWithAll(String identifier, SyncRegistry type)
-        {
-            return CommandFactory.makeBaseJsonRequest(Commands.REMOVE_SHARE_WITH_ALL, PlayerUtils.ourUUID(), identifier, type.getId());
+            return makeBaseRequestForUser(with, PeerToPeerCommand.CLIENT_REMOVE_SHARE_WITH, syncInformation.serialize());
         }
 
         /* Share responses*/
 
-        public static String declineWithReason(UUID to, String translationKeyReason)
+        public static String declineWithReason(UUID to, String translationKeyReason, String... translationArgs)
         {
-            return makeBaseRequestForUser(to, PeerToPeerCommand.CLIENT_REJECTED_SHARE_WITH_REASON, translationKeyReason);
+            return makeBaseRequestForUser(to, PeerToPeerCommand.CLIENT_REJECTED_SHARE_WITH_REASON, translationKeyReason, translationArgs);
         }
 
         public static String acceptShare(ShareRequest shareRequest)
         {
-            return makeBaseRequestForUser(PlayerUtils.ourUUID(), PeerToPeerCommand.SERVER_ACCEPTED_SHARE, shareRequest.currentSharedObject.getSerialization(), shareRequest.sharedObjectType.getId());
+            return CommandFactory.makeBaseJsonRequest(Commands.AFFIRM_SHARE, shareRequest.currentSharedObject.getInfo().serialize());
         }
     }
     /*
@@ -182,7 +164,6 @@ public class CommandFactory {
     public enum PeerToPeerCommand {
         CLIENT_SHARE_REQUEST,
         CLIENT_REJECTED_SHARE_WITH_REASON,
-        CLIENT_ACCEPTED_SHARE,
         CLIENT_REMOVE_SHARE_WITH,
         SERVER_ACCEPTED_SHARE
     }

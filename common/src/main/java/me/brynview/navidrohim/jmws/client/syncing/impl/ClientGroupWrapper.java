@@ -34,7 +34,7 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
         {
             Constants.LoggerHolder.debug("GUID %s".formatted(getNativeObject().getGuid()), "GUID CHECK");
             Constants.LoggerHolder.debug("CONTEXT %s".formatted(this.getContext()), "CONTEXT CHECK");
-            getNativeObject().setCustomData(Constants.MODID, this.getInfo().getSyncInformationAsString());
+            getNativeObject().setCustomData(Constants.MODID, this.getInfo().serialize());
         }
     }
 
