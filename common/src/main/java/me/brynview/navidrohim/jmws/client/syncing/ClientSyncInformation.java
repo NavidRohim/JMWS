@@ -14,18 +14,18 @@ import java.util.UUID;
 public final class ClientSyncInformation extends SyncInformation
 {
     static final Gson SYNC_DECODER = new GsonBuilder().registerTypeAdapter(ClientSyncInformation.class, new ClientSyncInfoSerializer()).create();
-    static SyncRegistry REGISTRY;
+    static ClientSyncRegistry REGISTRY;
 
-    public SyncRegistry syncRegistryType;
+    public ClientSyncRegistry clientSyncRegistryType;
 
-    public ClientSyncInformation(SyncInformation syncInformation, SyncRegistry syncRegistryType) {
+    public ClientSyncInformation(SyncInformation syncInformation, ClientSyncRegistry clientSyncRegistryType) {
         super(syncInformation.objectIdentifier, syncInformation.owner, syncInformation.sharedTo, syncInformation.isGlobal);
-        this.syncRegistryType = syncRegistryType;
+        this.clientSyncRegistryType = clientSyncRegistryType;
     }
 
-    public ClientSyncInformation(String objectIdentifier, UUID owner, Set<UUID> sharedTo, boolean isGlobal, SyncRegistry syncRegistryType) {
+    public ClientSyncInformation(String objectIdentifier, UUID owner, Set<UUID> sharedTo, boolean isGlobal, ClientSyncRegistry clientSyncRegistryType) {
         super(objectIdentifier, owner, sharedTo, isGlobal);
-        this.syncRegistryType = syncRegistryType;
+        this.clientSyncRegistryType = clientSyncRegistryType;
     }
 
     /* Serializes to JSON */
@@ -61,22 +61,22 @@ public final class ClientSyncInformation extends SyncInformation
             String rawJsonObjectString = json.getAsJsonObject().toString();
             SyncInformation info = syncInformationFromString(rawJsonObjectString);
 
-            @Nullable SyncRegistry syncRegistryType = REGISTRY;
+            @Nullable ClientSyncRegistry clientSyncRegistryType = REGISTRY;
             try
             {
                 String rawObjType = rawJsonObject.get("syncRegistryType").getAsString();
-                syncRegistryType = SyncRegistry.of(rawObjType).orElse(SyncRegistry.UNKNOWN);
+                clientSyncRegistryType = ClientSyncRegistry.of(rawObjType).orElse(ClientSyncRegistry.UNKNOWN);
             } catch (NullPointerException e) {
                 Constants.getLogger().error("Missing syncRegistryType field in sync information: {} will use REGISTRY default. If none is given, null will be returned. Registry default: {} This is very likely a legacy object and cannot be updated.", rawJsonObjectString, REGISTRY);
             }
 
-            if (syncRegistryType == SyncRegistry.UNKNOWN || info == null || syncRegistryType == null)
+            if (clientSyncRegistryType == ClientSyncRegistry.UNKNOWN || info == null || clientSyncRegistryType == null)
             {
-                Constants.getLogger().error("Unknown sync object type: {}", syncRegistryType);
+                Constants.getLogger().error("Unknown sync object type: {}", clientSyncRegistryType);
                 return null;
             }
 
-            return new ClientSyncInformation(info, syncRegistryType);
+            return new ClientSyncInformation(info, clientSyncRegistryType);
         }
 
         @Override
@@ -85,7 +85,7 @@ public final class ClientSyncInformation extends SyncInformation
             // Only syncRegistryType needs custom serialization
             JsonObject jsonObject = JMWSCommon.gson.toJsonTree(src).getAsJsonObject();
             jsonObject.remove("syncRegistryType");
-            jsonObject.add("syncRegistryType", new JsonPrimitive(src.syncRegistryType.getId()));
+            jsonObject.add("syncRegistryType", new JsonPrimitive(src.clientSyncRegistryType.getId()));
 
             return jsonObject;
         }

@@ -3,12 +3,11 @@ package me.brynview.navidrohim.jmws.client.share.request;
 import com.mojang.authlib.GameProfile;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
-import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,7 +15,7 @@ import java.util.UUID;
 
 public class OutgoingShareRequest extends ShareRequest {
 
-    public OutgoingShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, ClientObjectWrapper<?> sharedObject, ObjectType sharedObjectType, String requestIdentifier, String objectDisplayName) {
+    public OutgoingShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, ClientObjectWrapper<?> sharedObject, ServerSyncRegistry sharedServerSyncRegistry, String requestIdentifier, String objectDisplayName) {
         super(uuid, meantForPlayerUUID, sharedObject);
     }
 

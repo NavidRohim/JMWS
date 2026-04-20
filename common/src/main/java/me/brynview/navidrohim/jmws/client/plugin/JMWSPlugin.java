@@ -20,8 +20,8 @@ import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncUtils;
-import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import me.brynview.navidrohim.jmws.client.syncing.objects.factory.ClientObjectFactory;
@@ -36,7 +36,7 @@ import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.assets.JMWSSounds;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.minecraft.client.player.LocalPlayer;
@@ -424,7 +424,7 @@ public class JMWSPlugin implements IClientPlugin {
         sync(sendAlert, false);
     }
 
-    private static void portLegacyDataField(@Nullable String objectAsString, ObjectType transitionType)
+    private static void portLegacyDataField(@Nullable String objectAsString, ServerSyncRegistry transitionType)
     {
         JsonObject legacy = CommonUtils.parseStringToJsonObject(objectAsString);
 
@@ -542,10 +542,10 @@ public class JMWSPlugin implements IClientPlugin {
 
             // Add server groups to the client
             for (WaypointGroup savedGroup : savedGroups) {
-                ClientSyncInformation gpSync = ClientSyncUtils.syncInformationFromString(savedGroup.getCustomData(Constants.MODID), SyncRegistry.GROUP);
+                ClientSyncInformation gpSync = ClientSyncUtils.syncInformationFromString(savedGroup.getCustomData(Constants.MODID), ClientSyncRegistry.GROUP);
 
                 if (gpSync == null) {
-                    portLegacyDataField(savedGroup.toString(), ObjectType.GROUP);
+                    portLegacyDataField(savedGroup.toString(), ServerSyncRegistry.GROUP);
                     continue;
                 }
 
@@ -614,7 +614,7 @@ public class JMWSPlugin implements IClientPlugin {
 
             // Add server waypoints to the client
             for (Waypoint savedWaypoint : savedWaypoints) {
-                @Nullable ClientSyncInformation wpSync = ClientSyncUtils.syncInformationFromString(savedWaypoint.getCustomData(Constants.MODID), SyncRegistry.WAYPOINT);
+                @Nullable ClientSyncInformation wpSync = ClientSyncUtils.syncInformationFromString(savedWaypoint.getCustomData(Constants.MODID), ClientSyncRegistry.WAYPOINT);
 
                 if (wpSync == null) {
                     //portLegacyDataField(savedWaypoint.toString(), ObjectType.WAYPOINT);
@@ -727,7 +727,7 @@ public class JMWSPlugin implements IClientPlugin {
 
     public void addObjectFromRequest(ShareRequest request)
     {
-        if (request.sharedObjectType.equals(SyncRegistry.WAYPOINT))
+        if (request.sharedObjectType.equals(ClientSyncRegistry.WAYPOINT))
         {
             addWaypoint((Waypoint) request.currentSharedObject.getNativeObject());
         } else {

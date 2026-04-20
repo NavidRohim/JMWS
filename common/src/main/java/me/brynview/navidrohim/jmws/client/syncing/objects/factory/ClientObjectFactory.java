@@ -6,7 +6,7 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncUtils;
-import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
@@ -18,7 +18,7 @@ public class ClientObjectFactory {
     public static ClientWaypointWrapper fromWaypoint(Waypoint waypoint)
     {
 
-        @Nullable ClientSyncInformation syncInfo = ClientSyncUtils.syncInformationFromString(waypoint.getCustomData(Constants.MODID), SyncRegistry.WAYPOINT);
+        @Nullable ClientSyncInformation syncInfo = ClientSyncUtils.syncInformationFromString(waypoint.getCustomData(Constants.MODID), ClientSyncRegistry.WAYPOINT);
 
         if (syncInfo == null)
         {
@@ -37,7 +37,7 @@ public class ClientObjectFactory {
     public static ClientGroupWrapper fromGroup(@NotNull WaypointGroup group)
     {
 
-        @Nullable ClientSyncInformation syncInfo = ClientSyncUtils.syncInformationFromString(group.getCustomData(Constants.MODID), SyncRegistry.GROUP);
+        @Nullable ClientSyncInformation syncInfo = ClientSyncUtils.syncInformationFromString(group.getCustomData(Constants.MODID), ClientSyncRegistry.GROUP);
 
         if (syncInfo == null)
         {
@@ -53,7 +53,7 @@ public class ClientObjectFactory {
     }
 
     @Nullable
-    public static ClientObjectWrapper<?> fromType(SyncRegistry type, String data)
+    public static ClientObjectWrapper<?> fromType(ClientSyncRegistry type, String data)
     {
         return type.getDecoder().decodeStringToWrapper(data);
     }

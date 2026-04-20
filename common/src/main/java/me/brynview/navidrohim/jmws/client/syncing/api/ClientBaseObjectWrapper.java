@@ -99,6 +99,12 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     }
 
     @Override
+    public String getRegistryTypeName()
+    {
+        return this.getType().getId();
+    }
+
+    @Override
     public boolean isLegacy()
     {
         return isLegacy;

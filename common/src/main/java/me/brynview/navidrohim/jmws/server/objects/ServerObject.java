@@ -6,7 +6,8 @@ import me.brynview.navidrohim.jmws.common.api.PossessesIdentifier;
 import me.brynview.navidrohim.jmws.common.api.Synchronizable;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingInformation;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
@@ -34,7 +35,7 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
     public ServerSyncingInformation serverSyncingHandler;
 
     public boolean dataclass;
-    public static ObjectType objectType = ObjectType.GENERIC;
+    public static ServerSyncRegistry serverSyncRegistry = ServerSyncRegistry.GENERIC;
 
     @Nullable
     private Path currentObjectPath;
@@ -56,12 +57,12 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
         this.dataclass = dataclass;
 
         this.ownerUUID = playerUUID; // Note; if you set ownerUUID before this.syncing is defined, it enables some sort of compatibility for legacy clients. But I've left it as-is to avoid chaos.
-        this.serverSyncingHandler = ServerSyncingInformation.getSyncingHandlerFromServerObject(this);
+        this.serverSyncingHandler = ServerSyncingInformation.getSyncingHandlerFromServerObject(this, this.customData);
 
         this.name = payload.get("name").getAsString();
         this.accessorSharing = !dataclass ? new UserSharingFile(playerUUID) : null;
 
-        this.globalObjectPath = !dataclass ? Path.of(ObjectType.getPathLocationPrefix(this.getObjectType()) + JMWSServerIO.PathUtils.makeFilename(this.serverSyncingHandler.objectIdentifier, this.ownerUUID, true)) : null;
+        this.globalObjectPath = !dataclass ? Path.of(this.getObjectType().getRegistryPath() + JMWSServerIO.PathUtils.makeFilename(this.serverSyncingHandler.objectIdentifier, this.ownerUUID, true)) : null;
         this.normalObjectPath = !dataclass ? JMWSServerIO.PathUtils.getObjectFilename(this.serverSyncingHandler.getOwner(), this.serverSyncingHandler.objectIdentifier, getObjectType(), false) : null;
         this.groupIdentifier = payload.get("guid").getAsString();
 
@@ -134,7 +135,7 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
         return false;
     }
 
-    public static boolean deleteAll(UUID user, ObjectType deletionType) {
+    public static boolean deleteAll(UUID user, ServerSyncRegistry deletionType) {
         List<Boolean> deletionStatusList = new ArrayList<>();
 
         for (Path waypointPath : JMWSServerIO.getObjectPathsForUser(user, deletionType)) {
@@ -211,22 +212,27 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
         return this.name;
     }
 
-    // From PossessesIdentifier
     @Override
-    public String getSyncedCustomData() {
-        return this.customData;
+    public SyncInformation getInfo()
+    {
+        return this.serverSyncingHandler;
     }
 
     // From PossessesIdentifier
     @Override
-    public String getGroupIdentifier() {
+    public String getGuid() {
         return this.groupIdentifier;
     } // No usages but may be used elsewhere like with generics not sure
 
     // From PossessesIdentifier
+    public ServerSyncRegistry getObjectType() {
+        return serverSyncRegistry;
+    }
+
     @Override
-    public ObjectType getObjectType() {
-        return objectType;
+    public String getRegistryTypeName()
+    {
+        return this.getObjectType().toString();
     }
 
     public String getRawString() {

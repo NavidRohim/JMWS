@@ -2,7 +2,7 @@ package me.brynview.navidrohim.jmws.server.objects;
 
 import com.google.gson.JsonObject;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +21,7 @@ public class ServerWaypoint extends ServerObject {
     public int z;
     public String primaryDimension;
 
-    public static ObjectType objectType = ObjectType.WAYPOINT;
+    public static ServerSyncRegistry serverSyncRegistry = ServerSyncRegistry.WAYPOINT;
 
     public ServerWaypoint(JsonObject payload, UUID playerUUID) {
         super(payload, playerUUID);
@@ -62,7 +62,7 @@ public class ServerWaypoint extends ServerObject {
     @Nullable
     public static ServerWaypoint getWaypointFromUniqueIdentifier(String waypointIdentifier, UUID user)
     {
-        Path objPath = JMWSServerIO.getObjectPathFromUniqueIdentifier(waypointIdentifier, ObjectType.WAYPOINT);
+        Path objPath = JMWSServerIO.getObjectPathFromUniqueIdentifier(waypointIdentifier, ServerSyncRegistry.WAYPOINT);
         return getWaypointFromFile(objPath, user);
     }
 
@@ -71,9 +71,9 @@ public class ServerWaypoint extends ServerObject {
     public String getDifferentiator() { return "X=%s Y=%s Z=%s %s".formatted(x, y, z, this.primaryDimension); }
 
     @Override
-    public ObjectType getObjectType()
+    public ServerSyncRegistry getObjectType()
     {
-        return objectType;
+        return serverSyncRegistry;
     }
 
 }

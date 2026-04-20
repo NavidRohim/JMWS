@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
-import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
@@ -24,7 +24,7 @@ public class ShareRequest {
     public UUID meantFor;
 
     public ClientObjectWrapper<?> currentSharedObject;
-    public SyncRegistry sharedObjectType;
+    public ClientSyncRegistry sharedObjectType;
     public String requestIdentifier;
     public String objectDisplayName;
 

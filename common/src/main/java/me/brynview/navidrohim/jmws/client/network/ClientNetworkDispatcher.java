@@ -1,20 +1,15 @@
 package me.brynview.navidrohim.jmws.client.network;
 
-import com.mojang.brigadier.Command;
 import commonnetwork.api.Network;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
-import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
-import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
-import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 
 import java.util.UUID;
@@ -65,12 +60,12 @@ public class ClientNetworkDispatcher {
         sendString(CommandFactory.makeUpdateObjectRequest(object));
     }
 
-    public static void transitionToNewCustomData(String objectIdentifier, UUID owner, boolean isGlobal, ObjectType transitionType)
+    public static void transitionToNewCustomData(String objectIdentifier, UUID owner, boolean isGlobal, ServerSyncRegistry transitionType)
     {
         sendString(CommandFactory.makeTransitionObjectRequestForLegacyCustomData(objectIdentifier, owner, isGlobal, transitionType));
     }
 
-    public static void transitionOldObject(String objectIdentifier, String filename, ObjectType transitionType)
+    public static void transitionOldObject(String objectIdentifier, String filename, ServerSyncRegistry transitionType)
     {
         sendString(CommandFactory.makeTransitionObjectRequest(filename, objectIdentifier, transitionType));
     }

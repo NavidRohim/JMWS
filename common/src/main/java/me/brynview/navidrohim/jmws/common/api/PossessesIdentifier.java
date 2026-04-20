@@ -1,10 +1,11 @@
 package me.brynview.navidrohim.jmws.common.api;
 
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 
 public interface PossessesIdentifier {
     String getName();
-    String getSyncedCustomData();
-    String getGroupIdentifier();
-    ObjectType getObjectType();
+    String getGuid();
+    String getRegistryTypeName();
+    SyncInformation getInfo();
+
 }

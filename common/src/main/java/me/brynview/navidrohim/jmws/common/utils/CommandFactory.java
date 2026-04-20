@@ -4,16 +4,13 @@ import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
-import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
-import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
-import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
+import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -80,19 +77,19 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectWrapper.getIdentifier(), objectWrapper.getType().toString(), objectWrapper.getGlobal(), objectWrapper.getSerialization());
     }
 
-    public static String makeTransitionObjectRequest(String objectIdentifier, String filename, ObjectType transitionType)
+    public static String makeTransitionObjectRequest(String objectIdentifier, String filename, ServerSyncRegistry transitionType)
     {
         return CommandFactory.makeBaseJsonRequest(Commands.TRANSITION, objectIdentifier, filename, transitionType);
     }
 
-    public static String makeTransitionObjectRequestForLegacyCustomData(String objectIdentifier, UUID owner, boolean isGlobal, ObjectType transitionType)
+    public static String makeTransitionObjectRequestForLegacyCustomData(String objectIdentifier, UUID owner, boolean isGlobal, ServerSyncRegistry transitionType)
     {
         return CommandFactory.makeBaseJsonRequest(Commands.TRANSITION_NEW_DATA, objectIdentifier, owner, isGlobal, transitionType);
     }
 
-    public static String makeGlobalRequestForServer(UUID from, String objectIdentifier, SyncRegistry syncRegistryType, boolean global)
+    public static String makeGlobalRequestForServer(UUID from, String objectIdentifier, ClientSyncRegistry clientSyncRegistryType, boolean global)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.MAKE_GLOBAL, from, objectIdentifier, syncRegistryType.getId(), global);
+        return CommandFactory.makeBaseJsonRequest(Commands.MAKE_GLOBAL, from, objectIdentifier, clientSyncRegistryType.getId(), global);
     }
 
     public static class PeerToPeer

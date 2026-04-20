@@ -1,7 +1,7 @@
 package me.brynview.navidrohim.jmws.server.objects;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,7 +16,7 @@ import java.util.UUID;
  */
 public class ServerGroup extends ServerObject {
 
-    public static ObjectType objectType = ObjectType.GROUP;
+    public static ServerSyncRegistry serverSyncRegistry = ServerSyncRegistry.GROUP;
 
     public ServerGroup(JsonObject payload, UUID playerUUID) {
         super(payload, playerUUID);
@@ -57,7 +57,7 @@ public class ServerGroup extends ServerObject {
 
     public String getDifferentiator()
     {
-        return getGroupIdentifier().substring(0, 5);
+        return getGuid().substring(0, 5);
     }
 
     @Override
@@ -75,13 +75,13 @@ public class ServerGroup extends ServerObject {
     }
 
     @Override
-    public ObjectType getObjectType()
+    public ServerSyncRegistry getObjectType()
     {
-        return objectType;
+        return serverSyncRegistry;
     }
 
     private static List<Path> getLocalWaypointsFromGroup(UUID playerUUID, String groupID) { // note; should switch to database for this shit
-        List<Path> userWaypointFilepaths = JMWSServerIO.getObjectPathsForUser(playerUUID, ObjectType.WAYPOINT);
+        List<Path> userWaypointFilepaths = JMWSServerIO.getObjectPathsForUser(playerUUID, ServerSyncRegistry.WAYPOINT);
         List<Path> groupWaypoints = new ArrayList<>();
 
         for (Path waypointPath : userWaypointFilepaths) {
@@ -117,6 +117,6 @@ public class ServerGroup extends ServerObject {
     @Nullable
     public static ServerGroup getGroupFromUniqueIdentifier(String groupIdentifier, UUID user)
     {
-        return getGroupFromFile(JMWSServerIO.getObjectPathFromUniqueIdentifier(groupIdentifier, ObjectType.GROUP), user, true);
+        return getGroupFromFile(JMWSServerIO.getObjectPathFromUniqueIdentifier(groupIdentifier, ServerSyncRegistry.GROUP), user, true);
     }
 }

@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 
 import java.io.FileNotFoundException;
@@ -78,28 +78,28 @@ public class CommonShareIO implements AutoCloseable {
         }
     }
 
-    public boolean addToShared(String sharedValue, ObjectType sharedObjectType)
+    public boolean addToShared(String sharedValue, ServerSyncRegistry sharedServerSyncRegistry)
     {
-        if (!isInShared(sharedValue, sharedObjectType))
+        if (!isInShared(sharedValue, sharedServerSyncRegistry))
         {
-            return sharedObjectType == ObjectType.WAYPOINT ? WpData.add(sharedValue) : GpData.add(sharedValue);
+            return sharedServerSyncRegistry == ServerSyncRegistry.WAYPOINT ? WpData.add(sharedValue) : GpData.add(sharedValue);
         }
         return false;
     }
 
-    public boolean removeFromShared(String sharedValue, ObjectType sharedObjectType)
+    public boolean removeFromShared(String sharedValue, ServerSyncRegistry sharedServerSyncRegistry)
     {
-        return sharedObjectType == ObjectType.WAYPOINT ? WpData.remove(sharedValue) : GpData.remove(sharedValue);
+        return sharedServerSyncRegistry == ServerSyncRegistry.WAYPOINT ? WpData.remove(sharedValue) : GpData.remove(sharedValue);
     }
 
-    public boolean isInShared(String sharedValue, ObjectType sharedObjectType)
+    public boolean isInShared(String sharedValue, ServerSyncRegistry sharedServerSyncRegistry)
     {
-        return sharedObjectType == ObjectType.WAYPOINT ? WpData.contains(sharedValue) : GpData.contains(sharedValue);
+        return sharedServerSyncRegistry == ServerSyncRegistry.WAYPOINT ? WpData.contains(sharedValue) : GpData.contains(sharedValue);
     }
 
-    public List<String> getSharedList(ObjectType sharedObjectType)
+    public List<String> getSharedList(ServerSyncRegistry sharedServerSyncRegistry)
     {
-        return sharedObjectType == ObjectType.WAYPOINT ? WpData : GpData;
+        return sharedServerSyncRegistry == ServerSyncRegistry.WAYPOINT ? WpData : GpData;
     }
 
     @Override

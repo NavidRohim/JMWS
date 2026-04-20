@@ -1,8 +1,7 @@
 package me.brynview.navidrohim.jmws.common.api;
 
-import com.google.gson.annotations.Expose;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,9 +12,9 @@ public class ServerSyncInformationImpl extends SyncInformation
 {
     // TODO: Extend from SyncInformation? And no need for expose I don't believe.
 
-    public ObjectType syncRegistryType;
+    public ServerSyncRegistry syncRegistryType;
 
-    public ServerSyncInformationImpl(String identifier, UUID owner, Set<UUID> sharedTo, boolean isGlobal, ObjectType syncRegistryType) {
+    public ServerSyncInformationImpl(String identifier, UUID owner, Set<UUID> sharedTo, boolean isGlobal, ServerSyncRegistry syncRegistryType) {
         super(identifier, owner, sharedTo, isGlobal);
         this.syncRegistryType = syncRegistryType;
     }
@@ -50,7 +49,7 @@ public class ServerSyncInformationImpl extends SyncInformation
         return this.owner;
     }
 
-    public void setRegistry(@Nullable ObjectType registry)
+    public void setRegistry(@Nullable ServerSyncRegistry registry)
     {
         this.syncRegistryType = registry;
     }

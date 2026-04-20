@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
 
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
@@ -59,7 +59,7 @@ public class LegacyObject
         this.customDataJmwsFieldObject.add(Constants.MODID, new JsonPrimitive(data));
     }
 
-    public static <T extends ServerObject> void transitionIfNeed(Path path, UUID owner, ObjectType newType)
+    public static <T extends ServerObject> void transitionIfNeed(Path path, UUID owner, ServerSyncRegistry newType)
     {
         try {
             JsonObject payload = JMWSServerIO.getObjectDataFromDisk(path, true);
@@ -69,7 +69,7 @@ public class LegacyObject
                 if (me.brynview.navidrohim.jmws.common.utils.SyncUtils.isLegacySyncField(oldObj.getOldCustomData()))
                 {
                     oldObj.setSyncedCustomData(SyncUtils.getEmptySyncingInfoString(oldObj.getOldCustomData(), owner, false, newType));
-                    Constructor<? extends ServerObject> constructor = newType.getObjectClass().getConstructor(JsonObject.class, UUID.class);
+                    Constructor<? extends ServerObject> constructor = newType.getRegistryClass().getConstructor(JsonObject.class, UUID.class);
                     T newObj = (T) constructor.newInstance(payload, owner);
                     newObj.create();
 
@@ -88,6 +88,6 @@ public class LegacyObject
 
     public String getDifferentiator()
     {
-        return ObjectType.GENERIC.toString();
+        return ServerSyncRegistry.GENERIC.toString();
     }
 }

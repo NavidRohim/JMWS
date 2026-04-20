@@ -9,7 +9,7 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.api.ServerSyncInformationImpl;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper.sendUserMessage;
@@ -51,8 +52,8 @@ public class ServerPacketHandler {
                 int lastIterWp = 0;
                 int lastIterGp = 0;
 
-                List<Path> playerWaypoints = JMWSServerIO.getObjectPathsForUser(playerUUID, ObjectType.WAYPOINT);
-                List<Path> playerGroups = JMWSServerIO.getObjectPathsForUser(playerUUID, ObjectType.GROUP);
+                List<Path> playerWaypoints = JMWSServerIO.getObjectPathsForUser(playerUUID, ServerSyncRegistry.WAYPOINT);
+                List<Path> playerGroups = JMWSServerIO.getObjectPathsForUser(playerUUID, ServerSyncRegistry.GROUP);
 
                 HashMap<String, String> jsonWaypointPayloadArray = new HashMap<>();
                 HashMap<String, String> jsonGroupPayloadArray = new HashMap<>();
@@ -75,13 +76,13 @@ public class ServerPacketHandler {
                     }
                 }
 
-                for (Path globalWpPath : JMWSServerIO.getGlobalObjects(ObjectType.WAYPOINT))
+                for (Path globalWpPath : JMWSServerIO.getGlobalObjects(ServerSyncRegistry.WAYPOINT))
                 {
                     lastIterWp++;
                     jsonWaypointPayloadArray.put(String.valueOf(lastIterWp), Files.readString(globalWpPath));
                 }
 
-                for (Path globalGpPath : JMWSServerIO.getGlobalObjects(ObjectType.GROUP))
+                for (Path globalGpPath : JMWSServerIO.getGlobalObjects(ServerSyncRegistry.GROUP))
                 {
                     lastIterGp++;
                     jsonGroupPayloadArray.put(String.valueOf(lastIterGp), Files.readString(globalGpPath));
@@ -92,7 +93,7 @@ public class ServerPacketHandler {
                 {
                     try (UserSharingFile userSharingFile = new UserSharingFile(playerUUID))
                     {
-                        for (String shared : userSharingFile.getSharedList(ObjectType.WAYPOINT))
+                        for (String shared : userSharingFile.getSharedList(ServerSyncRegistry.WAYPOINT))
                         {
                             lastIterWp++;
                             ServerWaypoint wp = ServerWaypoint.getWaypointFromUniqueIdentifier(shared, playerUUID);
@@ -104,10 +105,10 @@ public class ServerPacketHandler {
                                 }
                             }
                             else {
-                                userSharingFile.removeFromShared(shared, ObjectType.WAYPOINT);
+                                userSharingFile.removeFromShared(shared, ServerSyncRegistry.WAYPOINT);
                             }
                         }
-                        for (String sharedGpString : userSharingFile.getSharedList(ObjectType.GROUP))
+                        for (String sharedGpString : userSharingFile.getSharedList(ServerSyncRegistry.GROUP))
                         {
                             lastIterGp++;
                             ServerGroup gp = ServerGroup.getGroupFromUniqueIdentifier(sharedGpString, playerUUID);
@@ -118,7 +119,7 @@ public class ServerPacketHandler {
                                     jsonGroupPayloadArray.put(String.valueOf(lastIterGp), gp.getRawString());
                                 }
                             } else {
-                                userSharingFile.removeFromShared(sharedGpString, ObjectType.GROUP);
+                                userSharingFile.removeFromShared(sharedGpString, ServerSyncRegistry.GROUP);
                             }
                         }
                     }
@@ -204,7 +205,7 @@ public class ServerPacketHandler {
                         sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false);
                     } else if (deleteAllObjects)
                     {
-                        if (ServerObject.deleteAll(playerUUID, ObjectType.GROUP)) {
+                        if (ServerObject.deleteAll(playerUUID, ServerSyncRegistry.GROUP)) {
                             sendUserMessage(player, "message.jmws.deletion_group_success", true, false, silent);
                         } else {
                             sendUserMessage(player, "message.jmws.deletion_group_failure", true, true, silent);
@@ -241,7 +242,7 @@ public class ServerPacketHandler {
                         }
                     } else if (deleteAll)
                     {
-                        if (ServerObject.deleteAll(playerUUID, ObjectType.WAYPOINT))
+                        if (ServerObject.deleteAll(playerUUID, ServerSyncRegistry.WAYPOINT))
                         {
                             sendUserMessage(player, "message.jmws.deletion_success", true, false);
                         } else {
@@ -297,8 +298,8 @@ public class ServerPacketHandler {
                 case UPDATE -> // Bug here; after updating, the user shareWith list is cleared
                 {
                     String objectIdentifier = arguments.getFirst().getAsString();
-                    ObjectType modifyingType = ObjectType.valueOf(arguments.get(1).getAsString());
-                    boolean isGlobal = arguments.get(2).getAsBoolean();
+                    ServerSyncRegistry modifyingType = ServerSyncRegistry.getStrict(arguments.get(1).getAsString());
+                    // boolean isGlobal = arguments.get(2).getAsBoolean();
                     String objectData = arguments.getLast().getAsString();
 
                     ServerObject obj = JMWSServerIO.getObjectFromUniqueIdentifier(objectIdentifier, playerUUID, modifyingType);
@@ -310,7 +311,7 @@ public class ServerPacketHandler {
                             obj.update(objectData, false);
                             obj.serverSyncingHandler.syncToUsers();
 
-                            if (modifyingType == ObjectType.WAYPOINT)
+                            if (modifyingType == ServerSyncRegistry.WAYPOINT)
                             {
 
                                 PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_waypoint_success", true, MessageType.NEUTRAL);
@@ -357,19 +358,20 @@ public class ServerPacketHandler {
                 {
                     String objectID = arguments.getFirst().getAsString();
                     Path legacyObjPath = Path.of(arguments.get(1).getAsString());
-                    ObjectType objectType = ObjectType.valueOf(arguments.getLast().getAsString());
+                    ServerSyncRegistry serverSyncRegistry = ServerSyncRegistry.getStrict(arguments.getLast().getAsString());
 
-                    LegacyObject.transitionIfNeed(legacyObjPath, playerUUID, objectType);
+                    LegacyObject.transitionIfNeed(legacyObjPath, playerUUID, serverSyncRegistry);
 
                 }
+
                 case MAKE_GLOBAL ->
                 {
                     UUID from = UUID.fromString(arguments.getFirst().getAsString());
                     String objectIdentifier = arguments.get(1).getAsString();
-                    ObjectType objectType = ObjectType.valueOf(arguments.get(2).getAsString());
+                    ServerSyncRegistry serverSyncRegistry = ServerSyncRegistry.getStrict(arguments.get(2).getAsString());
                     boolean global = arguments.getLast().getAsBoolean();
 
-                    ServerWaypoint globalObject = JMWSServerIO.getObjectFromUniqueIdentifier(objectIdentifier, from, objectType);
+                    ServerWaypoint globalObject = JMWSServerIO.getObjectFromUniqueIdentifier(objectIdentifier, from, serverSyncRegistry);
                     Constants.getLogger().info("Making global " + global);
                     if (globalObject != null)
                     {
@@ -399,9 +401,9 @@ public class ServerPacketHandler {
                     String legacyObjectIdentifier = arguments.getFirst().getAsString();
                     UUID legacyOwnerUUID =  UUID.fromString(arguments.get(1).getAsString());
                     boolean isGlobal = arguments.get(2).getAsBoolean();
-                    ObjectType legacyObjectType = ObjectType.valueOf(arguments.getLast().getAsString());
+                    ServerSyncRegistry legacyServerSyncRegistry = ServerSyncRegistry.getStrict(arguments.getLast().getAsString());
 
-                    JMWSServerIO.getObjectFromDisk(legacyObjectIdentifier, legacyOwnerUUID, legacyObjectType, false, isGlobal);
+                    JMWSServerIO.getObjectFromDisk(legacyObjectIdentifier, legacyOwnerUUID, legacyServerSyncRegistry, false, isGlobal);
                 }
 
                 case SPECIAL_FORWARD_TO_CLIENT ->

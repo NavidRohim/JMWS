@@ -1,13 +1,11 @@
 package me.brynview.navidrohim.jmws.client.share;
 
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
-import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -54,7 +52,7 @@ public class OutgoingShareRequests extends HashMap<UUID, OutgoingShareRequest> {
 
     public void sendRequest(UUID sharedTo, ClientBaseObjectWrapper<?> sharedObject)
     {
-        this.addRequest(sharedTo, new OutgoingShareRequest(PlayerUtils.ourUUID(), sharedTo, sharedObject, ObjectType.valueOf(sharedObject.getType().getId()), sharedObject.getIdentifier(), sharedObject.getName()));
+        this.addRequest(sharedTo, new OutgoingShareRequest(PlayerUtils.ourUUID(), sharedTo, sharedObject, ServerSyncRegistry.getStrict(sharedObject.getType().getId()), sharedObject.getIdentifier(), sharedObject.getName()));
         ClientNetworkDispatcher.PeerToPeer.shareWith(sharedTo, sharedObject);
     }
 }

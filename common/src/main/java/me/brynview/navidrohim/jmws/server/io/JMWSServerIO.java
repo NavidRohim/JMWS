@@ -12,7 +12,7 @@ import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.server.exceptions.ObjectError;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,24 +30,24 @@ public class JMWSServerIO {
 
     public static final String globalObjPrefix = "GLOBAL_";
 
-    public static <T extends ServerObject> List<T> getAllInitialisedGlobalObjects(ObjectType globalObjectType)
+    public static <T extends ServerObject> List<T> getAllInitialisedGlobalObjects(ServerSyncRegistry globalServerSyncRegistry)
     {
         List<T> wp = new ArrayList<>();
-        for (Path path : getAllObjects(globalObjectType).toList())
+        for (Path path : getAllObjects(globalServerSyncRegistry).toList())
         {
             if (path.toString().contains(globalObjPrefix))
             {
-                UUID playerUUID = PathUtils.getUUIDFromPath(path, globalObjectType);
-                wp.add(getObjectFromFile(path, playerUUID, globalObjectType));
+                UUID playerUUID = PathUtils.getUUIDFromPath(path, globalServerSyncRegistry);
+                wp.add(getObjectFromFile(path, playerUUID, globalServerSyncRegistry));
             }
         }
         return wp;
     }
 
-    public static List<Path> getGlobalObjects(ObjectType globalObjectType)
+    public static List<Path> getGlobalObjects(ServerSyncRegistry globalServerSyncRegistry)
     {
         List<Path> wp = new ArrayList<>();
-        for (Path path : getAllObjects(globalObjectType).toList())
+        for (Path path : getAllObjects(globalServerSyncRegistry).toList())
         {
             if (path.toString().contains(globalObjPrefix))
             {
@@ -57,11 +57,11 @@ public class JMWSServerIO {
         return wp;
     }
 
-    public static void removeObjectFromUser(ServerObject serverObject, UUID playerUUID, String objectIdentifier, ObjectType objectType) {
+    public static void removeObjectFromUser(ServerObject serverObject, UUID playerUUID, String objectIdentifier, ServerSyncRegistry serverSyncRegistry) {
         UserSharingFile.removeObjectFromUser(playerUUID, objectIdentifier, serverObject.getObjectType());
         ServerPlayer sharedPlayer = JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
         if (sharedPlayer != null) {
-            if (objectType == ObjectType.WAYPOINT) {
+            if (serverSyncRegistry == ServerSyncRegistry.WAYPOINT) {
                 Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.deleteWaypoint(objectIdentifier, true, false)), sharedPlayer); // TODO: SERVER
             } else {
                 Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.deleteGroup(objectIdentifier, null, true, true, true, false, false)), sharedPlayer);
@@ -77,17 +77,17 @@ public class JMWSServerIO {
         }
 
         @Nullable
-        public static Path getObjectFilename(@Nullable UUID playerOwner, String objectID, ObjectType objectType, boolean isGlobal) {
+        public static Path getObjectFilename(@Nullable UUID playerOwner, String objectID, ServerSyncRegistry serverSyncRegistry, boolean isGlobal) {
             try
             {
-                return Path.of(ObjectType.getPathLocationPrefix(objectType) + makeFilename(objectID, playerOwner, isGlobal));
+                return Path.of(serverSyncRegistry.getRegistryPath() + makeFilename(objectID, playerOwner, isGlobal));
             } catch (InvalidPathException oldVersion)
             {
                 return null;
             }
         }
 
-        public static UUID getUUIDFromPath(Path path, ObjectType transitionType)
+        public static UUID getUUIDFromPath(Path path, ServerSyncRegistry transitionType)
         {
             String pathString = path.toString();
             String uuidString = pathString.substring(pathString.indexOf("#") + 1, pathString.length() - 5);
@@ -112,11 +112,11 @@ public class JMWSServerIO {
         }
     }
 
-    public static Stream<Path> getAllObjects(ObjectType objectType)
+    public static Stream<Path> getAllObjects(ServerSyncRegistry serverSyncRegistry)
     {
-        String pathSearch = ObjectType.getPathLocationPrefix(objectType);
+        Path pathSearch = serverSyncRegistry.getRegistryPath();
         try {
-            return Files.list(Path.of(pathSearch));
+            return Files.list(pathSearch);
         } catch (SecurityException e)
         {
             Constants.getLogger().error("FATAL: Missing permissions! cannot read from {}", pathSearch);
@@ -124,13 +124,13 @@ public class JMWSServerIO {
         return Stream.of();
     }
 
-    private static List<Path> getObjectPathsForUser(UUID uuid, ObjectType objectType, boolean global) {
+    private static List<Path> getObjectPathsForUser(UUID uuid, ServerSyncRegistry serverSyncRegistry, boolean global) {
 
         List<Path> waypointFileList = new ArrayList<>();
-        String pathSearch = ObjectType.getPathLocationPrefix(objectType);
+        Path pathSearch = serverSyncRegistry.getRegistryPath();
         String globalPrefix = global ? globalObjPrefix : "";
 
-        try (Stream<Path> files = Files.list(Path.of(pathSearch))) {
+        try (Stream<Path> files = Files.list(pathSearch)) {
             files.filter(Files::isRegularFile).forEach(path -> {
                 if (path.toString().contains(uuid.toString()) && path.toString().contains(globalPrefix)) {
                     waypointFileList.add(path);
@@ -138,7 +138,7 @@ public class JMWSServerIO {
             });
         } catch (NoSuchFileException exc) {
             JMWSCommon.createServerResources();
-            return getObjectPathsForUser(uuid, objectType, global);
+            return getObjectPathsForUser(uuid, serverSyncRegistry, global);
         } catch (IOException err) {
             Constants.getLogger().error("Got error trying to of user objects: {}", err.getMessage());
             return List.of();
@@ -148,15 +148,15 @@ public class JMWSServerIO {
 
     public static void validateUserObjects(UUID userUUID)
     {
-        try (Stream<Path> wpFiles = Files.list(Path.of(ObjectType.WAYPOINT.getObjectPathPrefix())) ; Stream<Path> gpFiles = Files.list(Path.of(ObjectType.GROUP.getObjectPathPrefix()))) {
+        try (Stream<Path> wpFiles = Files.list(ServerSyncRegistry.WAYPOINT.getRegistryPath()); Stream<Path> gpFiles = Files.list(ServerSyncRegistry.GROUP.getRegistryPath())) {
             wpFiles.filter(Files::isRegularFile).forEach(path -> {
                 if (path.toString().contains(userUUID.toString())) {
-                    getObjectFromFile(path, userUUID, ObjectType.WAYPOINT);
+                    getObjectFromFile(path, userUUID, ServerSyncRegistry.WAYPOINT);
                 }
             });
             gpFiles.filter(Files::isRegularFile).forEach(path -> {
                 if (path.toString().contains(userUUID.toString())) {
-                    getObjectFromFile(path, userUUID, ObjectType.GROUP);
+                    getObjectFromFile(path, userUUID, ServerSyncRegistry.GROUP);
                 }
             });
 
@@ -164,17 +164,17 @@ public class JMWSServerIO {
             throw new RuntimeException(e);
         }
     }
-    public static List<Path> getObjectPathsForUser(UUID uuid, ObjectType objectType) {
-        return getObjectPathsForUser(uuid, objectType, false);
+    public static List<Path> getObjectPathsForUser(UUID uuid, ServerSyncRegistry serverSyncRegistry) {
+        return getObjectPathsForUser(uuid, serverSyncRegistry, false);
     }
 
-    public static <T extends ServerObject> List<T> getObjectsForUser(UUID user, ObjectType objectType, boolean global)
+    public static <T extends ServerObject> List<T> getObjectsForUser(UUID user, ServerSyncRegistry serverSyncRegistry, boolean global)
     {
         List<T> list = new ArrayList<>();
 
-        for (Path objPath : getObjectPathsForUser(user, objectType, global))
+        for (Path objPath : getObjectPathsForUser(user, serverSyncRegistry, global))
         {
-            list.add((T) getObjectFromFile(objPath, user, objectType));
+            list.add((T) getObjectFromFile(objPath, user, serverSyncRegistry));
         }
 
         return list;
@@ -197,14 +197,14 @@ public class JMWSServerIO {
         }
     }*/
 
-    public static <T extends ServerObject> T getObjectFromFile(Path objPath, UUID user, ObjectType objectType, boolean silentFail)
+    public static <T extends ServerObject> T getObjectFromFile(Path objPath, UUID user, ServerSyncRegistry serverSyncRegistry, boolean silentFail)
     {
         try {
             @Nullable JsonObject data = getObjectDataFromDisk(objPath, silentFail);
             if (data != null && objPath != null)
             {
-                Constructor<? extends ServerObject> constructor = objectType.getObjectClass().getConstructor(JsonObject.class, UUID.class);
-                return (T) constructor.newInstance(data, PathUtils.getUUIDFromPath(objPath, objectType));
+                Constructor<? extends ServerObject> constructor = serverSyncRegistry.getRegistryClass().getConstructor(JsonObject.class, UUID.class);
+                return (T) constructor.newInstance(data, PathUtils.getUUIDFromPath(objPath, serverSyncRegistry));
             } else {
                 return null;
             }
@@ -215,15 +215,15 @@ public class JMWSServerIO {
         }
     }
 
-    public static <T extends ServerObject> T getObjectFromFile(Path objPath, UUID user, ObjectType objectType)
+    public static <T extends ServerObject> T getObjectFromFile(Path objPath, UUID user, ServerSyncRegistry serverSyncRegistry)
     {
-        return getObjectFromFile(objPath, user, objectType, false);
+        return getObjectFromFile(objPath, user, serverSyncRegistry, false);
     }
 
-    public static HashMap<String, Path> getNameHashmapLookup(UUID user, ObjectType objectType)
+    public static HashMap<String, Path> getNameHashmapLookup(UUID user, ServerSyncRegistry serverSyncRegistry)
     {
         HashMap<String, Path> map = new HashMap<>();
-        for (ServerObject obj : getObjectsForUser(user, objectType, false))
+        for (ServerObject obj : getObjectsForUser(user, serverSyncRegistry, false))
         {
             map.put(obj.getObjectNonDuplicateIdentifier(), obj.getCurrentObjectPath());
         }
@@ -253,24 +253,24 @@ public class JMWSServerIO {
     }
 
     @Nullable
-    public static <T extends ServerObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, ObjectType objectType, boolean silentFail, boolean global) {
-        Path objPath = PathUtils.getObjectFilename(ownerUUID, objectIdentifier, objectType, global);
+    public static <T extends ServerObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, ServerSyncRegistry serverSyncRegistry, boolean silentFail, boolean global) {
+        Path objPath = PathUtils.getObjectFilename(ownerUUID, objectIdentifier, serverSyncRegistry, global);
         if (objPath != null)
         {
-            return getObjectFromFile(objPath, ownerUUID, objectType, silentFail);
+            return getObjectFromFile(objPath, ownerUUID, serverSyncRegistry, silentFail);
         }
         return null;
     }
 
     @Nullable
-    public static <T extends ServerObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, ObjectType objectType) {
-        return getObjectFromDisk(objectIdentifier, ownerUUID, objectType, false, false);
+    public static <T extends ServerObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, ServerSyncRegistry serverSyncRegistry) {
+        return getObjectFromDisk(objectIdentifier, ownerUUID, serverSyncRegistry, false, false);
     }
 
     @Nullable
-    public static Path getObjectPathFromUniqueIdentifier(String identifier, ObjectType objectType)
+    public static Path getObjectPathFromUniqueIdentifier(String identifier, ServerSyncRegistry serverSyncRegistry)
     {
-        for (Path objectPath : getAllObjects(objectType).toList())
+        for (Path objectPath : getAllObjects(serverSyncRegistry).toList())
         {
             if (objectPath.toString().contains(identifier))
             {
@@ -281,12 +281,12 @@ public class JMWSServerIO {
     }
 
     @Nullable
-    public static <T extends ServerObject> T getObjectFromUniqueIdentifier(String identifier, UUID playerUUID, ObjectType objectType)
+    public static <T extends ServerObject> T getObjectFromUniqueIdentifier(String identifier, UUID playerUUID, ServerSyncRegistry serverSyncRegistry)
     {
-        Path objectPath = getObjectPathFromUniqueIdentifier(identifier, objectType);
+        Path objectPath = getObjectPathFromUniqueIdentifier(identifier, serverSyncRegistry);
         if (objectPath != null)
         {
-            return getObjectFromFile(objectPath, playerUUID, objectType, false);
+            return getObjectFromFile(objectPath, playerUUID, serverSyncRegistry, false);
         }
         return null;
     }

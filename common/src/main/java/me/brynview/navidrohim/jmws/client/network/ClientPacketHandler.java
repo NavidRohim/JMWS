@@ -6,8 +6,8 @@ import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
+import me.brynview.navidrohim.jmws.client.syncing.ClientSyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncUtils;
-import me.brynview.navidrohim.jmws.client.syncing.SyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.factory.ClientObjectFactory;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
@@ -154,11 +154,11 @@ public class ClientPacketHandler {
             case CommandFactory.PeerToPeerCommand.CLIENT_SHARE_REQUEST ->
             {
                 String data = argumentsForClient.getFirst().getAsString();
-                Optional<SyncRegistry> possibleType = SyncRegistry.of(argumentsForClient.get(1).getAsString());
+                Optional<ClientSyncRegistry> possibleType = ClientSyncRegistry.of(argumentsForClient.get(1).getAsString());
 
                 if (possibleType.isPresent())
                 {
-                    SyncRegistry type = possibleType.get();
+                    ClientSyncRegistry type = possibleType.get();
                     ClientObjectWrapper<?> objectWrapper = ClientObjectFactory.fromType(type, data);
 
                     if (!JMWSClientCommon.config.enableSharing.get())

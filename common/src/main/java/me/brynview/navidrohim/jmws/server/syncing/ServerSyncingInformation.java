@@ -6,7 +6,7 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.api.ServerSyncInformationImpl;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -21,14 +21,13 @@ public class ServerSyncingInformation extends ServerSyncInformationImpl {
     @Nullable
     protected transient ServerObject parentObject = null;
 
-    public ServerSyncingInformation(String identifier, UUID owner, Set<UUID> sharedTo, boolean isGlobal, ObjectType syncRegistryType) {
+    public ServerSyncingInformation(String identifier, UUID owner, Set<UUID> sharedTo, boolean isGlobal, ServerSyncRegistry syncRegistryType) {
         super(identifier, owner, sharedTo, isGlobal, syncRegistryType);
     }
 
-    public static ServerSyncingInformation getSyncingHandlerFromServerObject(ServerObject object) {
+    public static ServerSyncingInformation getSyncingHandlerFromServerObject(ServerObject object, String syncData) {
         try {
-            Constants.getLogger().info("Syncing handler: " + object.getSyncedCustomData());
-            ServerSyncingInformation serverSyncingHandler = JMWSCommon.gson.fromJson(object.getSyncedCustomData(), ServerSyncingInformation.class);
+            ServerSyncingInformation serverSyncingHandler = JMWSCommon.gson.fromJson(syncData, ServerSyncingInformation.class);
             serverSyncingHandler.parentObject = object;
 
             return serverSyncingHandler;
@@ -69,7 +68,7 @@ public class ServerSyncingInformation extends ServerSyncInformationImpl {
     }
 
     @Override
-    public void setRegistry(@Nullable ObjectType registry) {
+    public void setRegistry(@Nullable ServerSyncRegistry registry) {
         super.setRegistry(registry);
         this.update();
     }

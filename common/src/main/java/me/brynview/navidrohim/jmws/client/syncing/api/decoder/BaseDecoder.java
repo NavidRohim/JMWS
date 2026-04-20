@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.client.syncing.api.decoder;
 
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
+import me.brynview.navidrohim.jmws.common.api.PossessesIdentifier;
 
 public interface BaseDecoder<W extends ClientObjectWrapper<?>, N extends Object>
 {

@@ -9,7 +9,7 @@ import commonnetwork.networking.data.Side;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.platform.Services;
@@ -86,17 +86,14 @@ public class JMWSCommon {
     }
 
     public static void createServerResources() {
-        for (ObjectType type : ObjectType.values())
+        for (ServerSyncRegistry type : ServerSyncRegistry.getRegistryValues())
         {
-            if (type.getObjectPathPrefix() != null)
+            boolean didCreate = new File("./jmws/" + type.getDisplayName()).mkdir();
+            if (didCreate)
             {
-                boolean didCreate = new File("./jmws/" + type.name().toLowerCase()).mkdir();
-                if (didCreate)
-                {
-                    Constants.getLogger().info("Created directory for object type -> {}", type.name());
-                } else {
-                    Constants.getLogger().warn("Registry type directory {} already exists. Will ignore.", type.name());
-                }
+                Constants.getLogger().info("Created directory for object type -> {}", type.getId());
+            } else {
+                Constants.getLogger().warn("Registry type directory {} already exists. Will ignore.", type.getId());
             }
         }
         /*
