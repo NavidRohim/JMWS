@@ -29,6 +29,9 @@ import net.minecraft.server.MinecraftServer;
 
 import java.io.File;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -88,23 +91,19 @@ public class JMWSCommon {
     }
 
     public static void createServerResources() {
-        for (ServerSyncRegistryEntry type : JMWSServerCommon.REGISTRY.getRegistryValues())
-        {
-            if (!type.isInternal()) {
-                boolean didCreate = new File("./jmws/" + type.getDisplayName()).mkdir();
-                if (didCreate) {
+        for (ServerSyncRegistryEntry type : JMWSServerCommon.REGISTRY.getRegistryValues()) {
+            try {
+                if (!type.isInternal()) {
+                    Files.createDirectories(Path.of(type.getRegistryPath()));
                     Constants.getLogger().info("Created directory for object type -> {}", type.getId());
-                } else {
-                    Constants.getLogger().warn("Registry type directory {} already exists. Will ignore.", type.getId());
+
                 }
+            } catch (IOException e) {
+                Constants.getLogger().error("Failed to create server resources for registry type {}. Reason: {}", type.getId(), e);
             }
         }
-        /*
-        new File("./jmws").mkdir();
-        new File("./jmws/groups").mkdir();
-        new File("./jmws/users").mkdir();
-        */
     }
+
 
 
     public static boolean isInternalServer() {
