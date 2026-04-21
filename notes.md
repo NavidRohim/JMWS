@@ -28,11 +28,11 @@
 
 ## -- Todo tomorrow --
 
-- ~~Fix the timeout bug~~
+- ~~Fix the timeout bug~
 - ~~With the new sharing system, a packet needs to be sent to the server to notify that the object has been shared and to update the client.~~
 - ~~Make a custom asset for the incoming share request button.~~
 - Remake JMWS on-off toggle button and sync button icons.
-- Disable the share request list button when JMWS is off. Straightforward to do, but I am exhausted.
+- ~~Disable the share request list button when JMWS is off. Straightforward to do, but I am exhausted.~~
 - Ensure on the server side that any given user has permissions to make a global object.
 - Test on Windows. Been coding all this on macOS.
 

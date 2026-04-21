@@ -161,9 +161,9 @@
   "button.jmws.update_button": "Sync",
   "button.jmws.tooltip.update_button": "Synchronizes from the server",
   "button.jmws.enable_button": "On / Off JMWS",
-  "button.jmws.tooltip.enable_button": "Turn on / off waypoint syncing",
+  "button.jmws.tooltip.enable_button": "Turn on / off JMWS",
   "button.jmws.incoming_share_requests": "Incoming Share Requests",
-  "button.jmws.incoming_share_requests.tooltip": "View all incoming share requests",
+  "button.jmws.incoming_share_requests.tooltip": "View all incoming share requests.",
   "button.jmws.enable_button.enabled": "Enabled",
   "button.jmws.enable_button.disabled": "Disabled",
 
