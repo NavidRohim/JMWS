@@ -15,7 +15,7 @@ public class ClientSyncUtils
     {
         try
         {
-            ClientSyncInformation.REGISTRY = registryDefault;
+            ClientSyncInformation.DEFAULT_REGISTRY = registryDefault;
             return ClientSyncInformation.SYNC_DECODER.fromJson(info, ClientSyncInformation.class);
         } catch (JsonSyntaxException e)
         {

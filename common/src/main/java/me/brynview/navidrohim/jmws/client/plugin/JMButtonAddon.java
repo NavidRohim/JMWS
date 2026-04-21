@@ -39,7 +39,7 @@ public class JMButtonAddon {
 
             IThemeButton buttonViewObjectsForSharing = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
                     "button.jmws.incoming_share_requests",
-                    JMWSTextures.enableButtonAsset,
+                    JMWSTextures.sharedObjectAsset,
                     ConfigInterface.getEnabledStatus(),
                     (IThemeButton iThemeButton) -> ShareRequestScreen.open()
             );

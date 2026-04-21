@@ -1,12 +1,14 @@
 package me.brynview.navidrohim.jmws.common.syncing;
 
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
+import me.brynview.navidrohim.jmws.common.api.registry.HasRegistry;
+import me.brynview.navidrohim.jmws.common.api.registry.RegistryEntry;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Set;
 import java.util.UUID;
 
-public class SyncInformation {
+public class SyncInformation implements HasRegistry {
 
     public String objectIdentifier;
     public UUID owner;
@@ -28,6 +30,12 @@ public class SyncInformation {
     public boolean isOwner(UUID user)
     {
         return owner.equals(user);
+    }
+
+    @Override
+    public RegistryEntry syncRegistryType()
+    {
+        return null;
     }
 }
 

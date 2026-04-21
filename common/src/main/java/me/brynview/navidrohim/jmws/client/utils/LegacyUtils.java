@@ -4,7 +4,7 @@ import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
-import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
 import org.joml.Vector3d;
 
 import java.util.UUID;
@@ -22,11 +22,11 @@ public class LegacyUtils
         return "./jmws/groups/" + universalID + "_" + playerUUID + "-group" + ".json";
     }
 
-    public static void transitionObject(Waypoint waypoint, UUID playerOwner, ServerSyncRegistry serverSyncRegistry)
+    public static void transitionObject(Waypoint waypoint, UUID playerOwner, ServerSyncRegistryEntry serverSyncRegistry)
     {
         ClientNetworkDispatcher.transitionOldObject(waypoint.getCustomData(Constants.MODID), getLegacyWaypointFilename(waypoint, playerOwner), serverSyncRegistry);
     }
-    public static void transitionObject(WaypointGroup waypointGroup, UUID playerOwner, ServerSyncRegistry serverSyncRegistry)
+    public static void transitionObject(WaypointGroup waypointGroup, UUID playerOwner, ServerSyncRegistryEntry serverSyncRegistry)
     {
         ClientNetworkDispatcher.transitionOldObject(waypointGroup.getCustomData(Constants.MODID), getLegacyGroupFilename(playerOwner, waypointGroup.getCustomData(Constants.MODID)), serverSyncRegistry);
     }

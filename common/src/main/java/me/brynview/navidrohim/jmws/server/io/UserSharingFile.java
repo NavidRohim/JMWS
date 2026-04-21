@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.server.io;
 
-import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.common.syncing.share.io.CommonShareIO;
 
 import java.util.UUID;
@@ -11,7 +12,7 @@ public class UserSharingFile extends CommonShareIO {
     }
 
     @Override
-    public boolean addToShared(String sharedValue, ServerSyncRegistry sharedServerSyncRegistry)
+    public boolean addToShared(String sharedValue, ServerSyncRegistryEntry sharedServerSyncRegistry)
     {
         boolean b = super.addToShared(sharedValue, sharedServerSyncRegistry);
         writeSharedList();
@@ -19,14 +20,14 @@ public class UserSharingFile extends CommonShareIO {
     }
 
     @Override
-    public boolean removeFromShared(String sharedValue, ServerSyncRegistry sharedServerSyncRegistry)
+    public boolean removeFromShared(String sharedValue, ServerSyncRegistryEntry sharedServerSyncRegistry)
     {
         boolean b = super.removeFromShared(sharedValue, sharedServerSyncRegistry);
         writeSharedList();
         return b;
     }
 
-    public static void removeObjectFromUser(UUID playerUUID, String objectIdentifier, ServerSyncRegistry sharedServerSyncRegistry)
+    public static void removeObjectFromUser(UUID playerUUID, String objectIdentifier, ServerSyncRegistryEntry sharedServerSyncRegistry)
     {
         try (UserSharingFile usf = new UserSharingFile(playerUUID))
         {

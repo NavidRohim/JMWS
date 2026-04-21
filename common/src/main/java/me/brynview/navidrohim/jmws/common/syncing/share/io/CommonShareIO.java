@@ -4,7 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 
 import java.io.FileNotFoundException;
@@ -78,7 +79,7 @@ public class CommonShareIO implements AutoCloseable {
         }
     }
 
-    public boolean addToShared(String sharedValue, ServerSyncRegistry sharedServerSyncRegistry)
+    public boolean addToShared(String sharedValue, ServerSyncRegistryEntry sharedServerSyncRegistry)
     {
         if (!isInShared(sharedValue, sharedServerSyncRegistry))
         {
@@ -87,17 +88,17 @@ public class CommonShareIO implements AutoCloseable {
         return false;
     }
 
-    public boolean removeFromShared(String sharedValue, ServerSyncRegistry sharedServerSyncRegistry)
+    public boolean removeFromShared(String sharedValue, ServerSyncRegistryEntry sharedServerSyncRegistry)
     {
         return sharedServerSyncRegistry == ServerSyncRegistry.WAYPOINT ? WpData.remove(sharedValue) : GpData.remove(sharedValue);
     }
 
-    public boolean isInShared(String sharedValue, ServerSyncRegistry sharedServerSyncRegistry)
+    public boolean isInShared(String sharedValue, ServerSyncRegistryEntry sharedServerSyncRegistry)
     {
         return sharedServerSyncRegistry == ServerSyncRegistry.WAYPOINT ? WpData.contains(sharedValue) : GpData.contains(sharedValue);
     }
 
-    public List<String> getSharedList(ServerSyncRegistry sharedServerSyncRegistry)
+    public List<String> getSharedList(ServerSyncRegistryEntry sharedServerSyncRegistry)
     {
         return sharedServerSyncRegistry == ServerSyncRegistry.WAYPOINT ? WpData : GpData;
     }

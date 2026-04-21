@@ -1,7 +1,7 @@
 package me.brynview.navidrohim.jmws.server.commands;
 
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 public class ServerCommands {
 
-    public static int removeShare(ServerPlayer sender, String waypointID, ServerSyncRegistry serverSyncRegistry) {
+    public static int removeShare(ServerPlayer sender, String waypointID, ServerSyncRegistryEntry serverSyncRegistry) {
         HashMap<String, Path> userObjPaths = JMWSServerIO.getNameHashmapLookup(sender.getUUID(), serverSyncRegistry);
         Path specifiedObj = userObjPaths.get(waypointID);
 

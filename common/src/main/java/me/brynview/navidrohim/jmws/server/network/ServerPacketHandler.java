@@ -6,10 +6,12 @@ import com.google.gson.JsonParser;
 import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.api.ServerSyncInformationImpl;
+import me.brynview.navidrohim.jmws.common.api.ServerSyncInformation;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.JMWSServerCommon;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
@@ -27,7 +29,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper.sendUserMessage;
@@ -51,7 +52,7 @@ public class ServerPacketHandler {
             try {
                 int lastIterWp = 0;
                 int lastIterGp = 0;
-
+                Constants.getLogger().info(ServerSyncRegistry.WAYPOINT.toString());
                 List<Path> playerWaypoints = JMWSServerIO.getObjectPathsForUser(playerUUID, ServerSyncRegistry.WAYPOINT);
                 List<Path> playerGroups = JMWSServerIO.getObjectPathsForUser(playerUUID, ServerSyncRegistry.GROUP);
 
@@ -298,7 +299,7 @@ public class ServerPacketHandler {
                 case UPDATE -> // Bug here; after updating, the user shareWith list is cleared
                 {
                     String objectIdentifier = arguments.getFirst().getAsString();
-                    ServerSyncRegistry modifyingType = ServerSyncRegistry.getStrict(arguments.get(1).getAsString());
+                    ServerSyncRegistryEntry modifyingType = JMWSServerCommon.REGISTRY.getStrict(arguments.get(1).getAsString());
                     // boolean isGlobal = arguments.get(2).getAsBoolean();
                     String objectData = arguments.getLast().getAsString();
 
@@ -334,7 +335,7 @@ public class ServerPacketHandler {
                 case CommandFactory.Commands.AFFIRM_SHARE ->
                 {
                     String rawSyncInfo = arguments.getFirst().getAsString();
-                    ServerSyncInformationImpl syncInfo = ServerSyncInformationImpl.getFromString(rawSyncInfo);
+                    ServerSyncInformation syncInfo = ServerSyncInformation.getFromString(rawSyncInfo);
 
                     Constants.LoggerHolder.debug(syncInfo.toString(), "SYNC INFO");
                     Constants.LoggerHolder.debug(rawSyncInfo, "RAW SYNC INFO");
@@ -358,7 +359,7 @@ public class ServerPacketHandler {
                 {
                     String objectID = arguments.getFirst().getAsString();
                     Path legacyObjPath = Path.of(arguments.get(1).getAsString());
-                    ServerSyncRegistry serverSyncRegistry = ServerSyncRegistry.getStrict(arguments.getLast().getAsString());
+                    ServerSyncRegistryEntry serverSyncRegistry = JMWSServerCommon.REGISTRY.getStrict(arguments.getLast().getAsString());
 
                     LegacyObject.transitionIfNeed(legacyObjPath, playerUUID, serverSyncRegistry);
 
@@ -368,11 +369,12 @@ public class ServerPacketHandler {
                 {
                     UUID from = UUID.fromString(arguments.getFirst().getAsString());
                     String objectIdentifier = arguments.get(1).getAsString();
-                    ServerSyncRegistry serverSyncRegistry = ServerSyncRegistry.getStrict(arguments.get(2).getAsString());
+                    ServerSyncRegistryEntry serverSyncRegistry = JMWSServerCommon.REGISTRY.getStrict(arguments.get(2).getAsString());
                     boolean global = arguments.getLast().getAsBoolean();
 
                     ServerWaypoint globalObject = JMWSServerIO.getObjectFromUniqueIdentifier(objectIdentifier, from, serverSyncRegistry);
                     Constants.getLogger().info("Making global " + global);
+                    Constants.getLogger().info("global " + globalObject);
                     if (globalObject != null)
                     {
                         if (global)
@@ -401,7 +403,7 @@ public class ServerPacketHandler {
                     String legacyObjectIdentifier = arguments.getFirst().getAsString();
                     UUID legacyOwnerUUID =  UUID.fromString(arguments.get(1).getAsString());
                     boolean isGlobal = arguments.get(2).getAsBoolean();
-                    ServerSyncRegistry legacyServerSyncRegistry = ServerSyncRegistry.getStrict(arguments.getLast().getAsString());
+                    ServerSyncRegistryEntry legacyServerSyncRegistry = JMWSServerCommon.REGISTRY.getStrict(arguments.getLast().getAsString());
 
                     JMWSServerIO.getObjectFromDisk(legacyObjectIdentifier, legacyOwnerUUID, legacyServerSyncRegistry, false, isGlobal);
                 }

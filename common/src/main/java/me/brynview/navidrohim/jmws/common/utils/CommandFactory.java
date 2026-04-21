@@ -10,7 +10,7 @@ import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -77,19 +77,19 @@ public class CommandFactory {
         return CommandFactory.makeBaseJsonRequest(Commands.UPDATE, objectWrapper.getIdentifier(), objectWrapper.getType().toString(), objectWrapper.getGlobal(), objectWrapper.getSerialization());
     }
 
-    public static String makeTransitionObjectRequest(String objectIdentifier, String filename, ServerSyncRegistry transitionType)
+    public static String makeTransitionObjectRequest(String objectIdentifier, String filename, ServerSyncRegistryEntry transitionType)
     {
         return CommandFactory.makeBaseJsonRequest(Commands.TRANSITION, objectIdentifier, filename, transitionType);
     }
 
-    public static String makeTransitionObjectRequestForLegacyCustomData(String objectIdentifier, UUID owner, boolean isGlobal, ServerSyncRegistry transitionType)
+    public static String makeTransitionObjectRequestForLegacyCustomData(String objectIdentifier, UUID owner, boolean isGlobal, ServerSyncRegistryEntry transitionType)
     {
         return CommandFactory.makeBaseJsonRequest(Commands.TRANSITION_NEW_DATA, objectIdentifier, owner, isGlobal, transitionType);
     }
 
-    public static String makeGlobalRequestForServer(UUID from, String objectIdentifier, ClientSyncRegistry clientSyncRegistryType, boolean global)
+    public static String makeGlobalRequestForServer(UUID from, String objectIdentifier, ClientSyncRegistry syncRegistryType, boolean global)
     {
-        return CommandFactory.makeBaseJsonRequest(Commands.MAKE_GLOBAL, from, objectIdentifier, clientSyncRegistryType.getId(), global);
+        return CommandFactory.makeBaseJsonRequest(Commands.MAKE_GLOBAL, from, objectIdentifier, syncRegistryType.getId(), global);
     }
 
     public static class PeerToPeer

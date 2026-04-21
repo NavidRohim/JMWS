@@ -9,7 +9,9 @@ import commonnetwork.networking.data.Side;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
-import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.JMWSServerCommon;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.platform.Services;
@@ -86,14 +88,15 @@ public class JMWSCommon {
     }
 
     public static void createServerResources() {
-        for (ServerSyncRegistry type : ServerSyncRegistry.getRegistryValues())
+        for (ServerSyncRegistryEntry type : JMWSServerCommon.REGISTRY.getRegistryValues())
         {
-            boolean didCreate = new File("./jmws/" + type.getDisplayName()).mkdir();
-            if (didCreate)
-            {
-                Constants.getLogger().info("Created directory for object type -> {}", type.getId());
-            } else {
-                Constants.getLogger().warn("Registry type directory {} already exists. Will ignore.", type.getId());
+            if (!type.isInternal()) {
+                boolean didCreate = new File("./jmws/" + type.getDisplayName()).mkdir();
+                if (didCreate) {
+                    Constants.getLogger().info("Created directory for object type -> {}", type.getId());
+                } else {
+                    Constants.getLogger().warn("Registry type directory {} already exists. Will ignore.", type.getId());
+                }
             }
         }
         /*
@@ -124,7 +127,6 @@ public class JMWSCommon {
         Constants.getLogger().info("Creating server resources..");
         ServerConfig.ensureExistence();
         createServerResources();
-
         // It is common for all supported loaders to provide a similar feature that can not be used directly in the
         // common code. A popular way to of around this is using Java's built-in service loader feature to create
         // your own abstraction layer. You can learn more about this in our provided services class. In this example

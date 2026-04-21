@@ -8,7 +8,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import net.minecraft.commands.CommandSourceStack;
@@ -47,13 +48,13 @@ public class ServerDispatcher {
         return ServerCommands.removeShare(context1.getSource().getPlayer(), groupID, ServerSyncRegistry.GROUP);
     }
 
-    public static HashMap<String, ServerObject> getUserObjectsAsNameHashmap(UUID playerUUID, ServerSyncRegistry serverSyncRegistry, boolean global, boolean onlyShared)
+    public static HashMap<String, ServerObject> getUserObjectsAsNameHashmap(UUID playerUUID, ServerSyncRegistryEntry serverSyncRegistry, boolean global, boolean onlyShared)
     {
         HashMap<String, ServerObject> stringServerObjectHashMap = new HashMap<>();
         for (ServerObject object : JMWSServerIO.getObjectsForUser(playerUUID, serverSyncRegistry, global))
         {
             String nonDupeIdentifier = object.getObjectNonDuplicateIdentifier();
-            if ((!object.serverSyncingHandler.isGlobal() && !onlyShared) || global || (onlyShared && !object.serverSyncingHandler.sharedTo.isEmpty()))
+            if ((!object.serverSyncingHandler.isGlobal() && !onlyShared) || global || (onlyShared && !object.serverSyncingHandler.info.sharedTo.isEmpty()))
             {
                 stringServerObjectHashMap.put(nonDupeIdentifier, object);
             }
@@ -62,24 +63,7 @@ public class ServerDispatcher {
         return stringServerObjectHashMap;
     }
 
-    public static HashMap<String, ServerObject> getInactiveOpUserGlobalObjects(ServerSyncRegistry serverSyncRegistry)
-    {
-        List<ServerObject> objs = getAllInitialisedGlobalObjects(serverSyncRegistry);
-        HashMap<String, ServerObject> stringServerObjectHashMap = new HashMap<>();
-
-        objs.forEach(obj -> {
-            Optional<GameProfile> oldOpPlayerProfile = JMWSCommon.minecraftServerInstance.services().profileResolver().fetchById(obj.getOwnerUUID());
-            boolean isOp = oldOpPlayerProfile.isPresent() && JMWSCommon.minecraftServerInstance.getPlayerList().isOp(new NameAndId(oldOpPlayerProfile.get()));
-
-            if (!isOp)
-            {
-                stringServerObjectHashMap.put(obj.getObjectNonDuplicateIdentifier(), obj);
-            }
-        });
-        return stringServerObjectHashMap;
-    }
-
-    private static CompletableFuture<Suggestions> suggestSharedObject(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder, ServerSyncRegistry serverSyncRegistry)
+    private static CompletableFuture<Suggestions> suggestSharedObject(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder, ServerSyncRegistryEntry serverSyncRegistry)
     {
         Set<String> names = getUserObjectsAsNameHashmap(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), serverSyncRegistry, false, true).keySet();
         return SharedSuggestionProvider.suggest(names, suggestionsBuilder);

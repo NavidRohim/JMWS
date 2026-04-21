@@ -8,7 +8,7 @@ import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 
@@ -60,12 +60,12 @@ public class ClientNetworkDispatcher {
         sendString(CommandFactory.makeUpdateObjectRequest(object));
     }
 
-    public static void transitionToNewCustomData(String objectIdentifier, UUID owner, boolean isGlobal, ServerSyncRegistry transitionType)
+    public static void transitionToNewCustomData(String objectIdentifier, UUID owner, boolean isGlobal, ServerSyncRegistryEntry transitionType)
     {
         sendString(CommandFactory.makeTransitionObjectRequestForLegacyCustomData(objectIdentifier, owner, isGlobal, transitionType));
     }
 
-    public static void transitionOldObject(String objectIdentifier, String filename, ServerSyncRegistry transitionType)
+    public static void transitionOldObject(String objectIdentifier, String filename, ServerSyncRegistryEntry transitionType)
     {
         sendString(CommandFactory.makeTransitionObjectRequest(filename, objectIdentifier, transitionType));
     }

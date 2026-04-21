@@ -4,7 +4,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
 
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
@@ -59,7 +60,7 @@ public class LegacyObject
         this.customDataJmwsFieldObject.add(Constants.MODID, new JsonPrimitive(data));
     }
 
-    public static <T extends ServerObject> void transitionIfNeed(Path path, UUID owner, ServerSyncRegistry newType)
+    public static <T extends ServerObject> void transitionIfNeed(Path path, UUID owner, ServerSyncRegistryEntry newType)
     {
         try {
             JsonObject payload = JMWSServerIO.getObjectDataFromDisk(path, true);

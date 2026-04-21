@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.server.network;
 
 import commonnetwork.api.Dispatcher;
+import commonnetwork.api.Network;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
@@ -36,7 +37,8 @@ public class PlayerNetworkingHelper {
 
     public static void sendHandshakeAndValidate(ServerPlayer joinedUser)
     {
-        JMWSServerIO.validateUserObjects(joinedUser.getUUID());
-        Dispatcher.sendToClient(new JMWSHandshakePayload(), joinedUser);
+        //JMWSServerIO.validateUserObjects(joinedUser.getUUID());
+        Network.getNetworkHandler().sendToClient(new JMWSHandshakePayload(), joinedUser, true);
+        //Dispatcher.sendToClient(new JMWSHandshakePayload(), joinedUser, false);
     }
 }

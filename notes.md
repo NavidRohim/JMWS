@@ -1,7 +1,8 @@
 # todo - 2.0-26.1
 
 ## -- Internals --
-- Fix sharing system. Was built for server-side command dispatching, but that will now move to the client.
+- ~~Fix sharing system. Was built for server-side command dispatching, but that will now move to the client.~~
+- Convert waypoint / group creation to a more generic creation system.
 
 ## -- Sharing UI --
 - ~~Add UI colour indicator for object status (shared (green), awaiting share (orange), not shared (grey), cannot share (red))~~
@@ -19,17 +20,21 @@
 ## -- General bugs --
 - ~~Sharing status label does not update when an object is successfully shared~~
 - ~~Waypoint context menu breaks after updating an already existing object~~
-- Timeout is not cancelled when an object is successfully shared.
+- ~~Timeout is not cancelled when an object is successfully shared.~~
 - ~~Timeout alert is not sent after the first timeout.~~
 - ~~When accepting a share request, the recieving client cannot display the object. A casting error is thrown.~~
 - ~~If a client or server does not have a packet registered, the game will crash.~~
-- When accepting a share request with a user, the server wipes the objects syncInfo field.
+- ~~When accepting a share request with a user, the server wipes the objects syncInfo field.~~
 
 ## -- Todo tomorrow --
 
-- Fix the timeout bug
+- ~~Fix the timeout bug~~
 - ~~With the new sharing system, a packet needs to be sent to the server to notify that the object has been shared and to update the client.~~
-- Make a custom asset for the incoming share request button.
+- ~~Make a custom asset for the incoming share request button.~~
+- Remake JMWS on-off toggle button and sync button icons.
+- Disable the share request list button when JMWS is off. Straightforward to do, but I am exhausted.
+- Ensure on the server side that any given user has permissions to make a global object.
+- Test on Windows. Been coding all this on macOS.
 
 *Already finished*
 

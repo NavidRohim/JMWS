@@ -36,12 +36,15 @@ import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.assets.JMWSSounds;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
-import me.brynview.navidrohim.jmws.common.enums.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.Permissions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -107,14 +110,23 @@ public class JMWSPlugin implements IClientPlugin {
             ClientWaypointWrapper waypoint = ObjectIdentifierMap.getWaypointFromContextMenu(waypointPopupMenuEvent.getWaypoint());
             if (waypoint.getOwner().equals(PlayerUtils.ourUUID()))
             {
-                if (!waypoint.getGlobal())
+                if (minecraftClientInstance.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                 {
-                    waypointPopupMenuEvent.getPopupMenu().addMenuItem("Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.GLOBAL);});
-                } else {
+                    if (!waypoint.getGlobal())
+                    {
+                        waypointPopupMenuEvent.getPopupMenu().addMenuItem("Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.GLOBAL);});
+                    }
+                }
+
+                if (waypoint.getGlobal())
+                {
                     waypointPopupMenuEvent.getPopupMenu().addMenuItem("Remove Global", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.UNGLOBAL);});
                 }
 
-                waypointPopupMenuEvent.getPopupMenu().addMenuItem("Share", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.SHARE);});
+                if (JMWSClientCommon.serverConfig.sharingEnabled && !waypoint.getGlobal())
+                {
+                    waypointPopupMenuEvent.getPopupMenu().addMenuItem("Share", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.SHARE);});
+                }
             }
         }
     }
@@ -424,7 +436,7 @@ public class JMWSPlugin implements IClientPlugin {
         sync(sendAlert, false);
     }
 
-    private static void portLegacyDataField(@Nullable String objectAsString, ServerSyncRegistry transitionType)
+    private static void portLegacyDataField(@Nullable String objectAsString, ServerSyncRegistryEntry transitionType)
     {
         JsonObject legacy = CommonUtils.parseStringToJsonObject(objectAsString);
 
@@ -623,6 +635,7 @@ public class JMWSPlugin implements IClientPlugin {
                 Constants.LoggerHolder.debug(savedWaypoint.getCustomData(Constants.MODID), "SYNC INFORMATION");
                 if (!wpSync.isOwner(PlayerUtils.ourUUID()))
                 {
+                    Constants.getLogger().info(wpSync.serialize());
                     if (wpSync.isGlobal && showGlobalLabels) // Global
                     {
                         savedWaypoint.setIconResourceLoctaion(JMWSTextures.globalObjectAsset);
