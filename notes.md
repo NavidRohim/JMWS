@@ -21,6 +21,11 @@
 - ~~Test on Windows. Been coding all this on macOS.~~
 - ~~Remake JMWS on-off toggle button and sync button icons.~~
 - Generally build up the UI API.
+- Make an unshare screen.
+- Make a screen for admins / owner so they can manage global objects. (maybe also make a CLI tool?) 
+- Make the sync manager screen.
+  - This will be quite complex. Any registered sync type in ClientSyncRegistry will have to have its own interface which will be used to fetch all objects from that extension.
+  - I am yet to even think of the design of the screen, but I may add a sidebar with all registered types, you click that, and it will show another screen with all objects.
 
 ## -- General bugs --
 - ~~Sharing status label does not update when an object is successfully shared~~

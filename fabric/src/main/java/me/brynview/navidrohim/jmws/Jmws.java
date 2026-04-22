@@ -3,7 +3,6 @@ package me.brynview.navidrohim.jmws;
 
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.server.commands.ServerDispatcher;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -79,9 +78,5 @@ public class Jmws implements ModInitializer {
         } catch (NoSuchElementException | VersionParsingException | IllegalStateException ignored) {
 
         }
-
-        CommandRegistrationCallback.EVENT.register((dispatcher, context, commandSelection) -> {
-            ServerDispatcher.addCommandsToDispatcher(dispatcher);
-        });
     };
 }

@@ -3,7 +3,6 @@ package me.brynview.navidrohim.jmws;
 import com.mojang.brigadier.CommandDispatcher;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.events.CommonEvents;
-import me.brynview.navidrohim.jmws.server.commands.ServerDispatcher;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,12 +30,5 @@ public class NeoforgeServerEventHandler {
         {
             CommonEvents.handleJoin((ServerPlayer) event.getEntity(), false, false);
         }
-    }
-
-    @SubscribeEvent
-    public static void registerServerCommandsEvent(RegisterCommandsEvent event)
-    {
-        CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
-        ServerDispatcher.addCommandsToDispatcher(dispatcher);
     }
 }
