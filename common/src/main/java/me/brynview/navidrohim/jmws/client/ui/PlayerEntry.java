@@ -19,7 +19,7 @@ import java.util.UUID;
 
 import static me.brynview.navidrohim.jmws.client.ui.UIConstants.PLAYER_HEAD_SIZE_HALVED;
 
-public class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerHeadEntryWithTitle {
+public final class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerHeadEntryWithTitle<PlayerEntry<T>> {
 
     private final static @NotNull Subtitle EMPTY = new Subtitle(Component.translatable("jmws.ui.sharing.not_shared"), MessageType.GREY);
     private final static @NotNull Subtitle ALREADY_SHARED = new Subtitle(Component.translatable("jmws.ui.sharing.already_shared"), MessageType.SUCCESS);
@@ -27,9 +27,9 @@ public class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerHeadEnt
 
     public final @NonNull PlayerInfo user;
     private final @NotNull UUID userUuid;
-    private final @NotNull ClientObjectWrapper<?> sharedObject;
+    private final @NotNull T sharedObject;
 
-    public PlayerEntry(@NotNull PlayerInfo user, @NonNull ObjectSharePanel<T> owner, @NonNull ClientObjectWrapper<?> sharedObject) {
+    public PlayerEntry(@NotNull PlayerInfo user, @NonNull ObjectSharePanel<T> owner, @NonNull T sharedObject) {
         super(owner, user);
 
         this.sharedObject = sharedObject;
@@ -82,12 +82,6 @@ public class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerHeadEnt
         return c;
     }
 
-    protected void extractThumbnailImage(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
-        int headPlacementX = this.getContentX() + PLAYER_HEAD_SIZE_HALVED + 4;
-        int headPlacementY = this.getContentYMiddle() - PLAYER_HEAD_SIZE_HALVED;
-        PlayerFaceExtractor.extractRenderState(guiGraphicsExtractor, user.getSkin(), headPlacementX, headPlacementY, UIConstants.PLAYER_HEAD_SIZE);
-    }
-
     @Override
     public void extractSubtitleText(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
         super.extractSubtitleText(guiGraphicsExtractor, i, i1, b, v);
@@ -101,7 +95,6 @@ public class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerHeadEnt
     public void extractContent(@NonNull GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
         super.extractContent(guiGraphicsExtractor, i, i1, b, v);
         this.extractSharingStatusBar(guiGraphicsExtractor, i, i1, b, v);
-        this.extractThumbnailImage(guiGraphicsExtractor, i, i1, b, v);
 
         if (this.selectedEntry) {
             this.setSubtitle(new Subtitle(Component.translatable("jmws.ui.generic.selected"), MessageType.of(null, sharedObject.getColour())));

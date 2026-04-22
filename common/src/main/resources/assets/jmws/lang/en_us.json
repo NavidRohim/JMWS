@@ -193,6 +193,8 @@
   "jmws.ui.requests.no_selected_requests": "No requests selected!",
   "jmws.ui.requests.requests_amount": "%s incoming request(s)",
 
+  "jmws.ui.stop_sharing.empty": "Not sharing with anyone!",
+
   "jmws.ui.generic.selected": "selected",
   "jmws.ui.generic.empty": "Empty!"
 }

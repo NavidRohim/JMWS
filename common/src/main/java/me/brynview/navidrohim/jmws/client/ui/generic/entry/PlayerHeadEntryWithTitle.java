@@ -15,11 +15,11 @@ import org.jspecify.annotations.NonNull;
 
 import static me.brynview.navidrohim.jmws.client.ui.UIConstants.PLAYER_HEAD_SIZE_HALVED;
 
-public class PlayerHeadEntryWithTitle extends TitleLabelEntry {
+public class PlayerHeadEntryWithTitle<E extends PlayerHeadEntryWithTitle<E>> extends TitleLabelEntry<E> {
 
     private final @NonNull PlayerInfo user;
 
-    public PlayerHeadEntryWithTitle(@NotNull CheckableSelectionList listOwner, PlayerInfo player) {
+    public PlayerHeadEntryWithTitle(@NotNull CheckableSelectionList<E> listOwner, PlayerInfo player) {
         super(listOwner, Component.literal(player.getProfile().name()), new Subtitle(Component.empty(), MessageType.PENDING), true);
         this.user = player;
     }
@@ -41,6 +41,4 @@ public class PlayerHeadEntryWithTitle extends TitleLabelEntry {
     protected void extractThumbnailImage(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
         PlayerFaceExtractor.extractRenderState(guiGraphicsExtractor, user.getSkin(), getThumbnailImageX(), getThumbnailImageY(), UIConstants.PLAYER_HEAD_SIZE);
     }
-
-
 }

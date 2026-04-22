@@ -31,6 +31,7 @@ public interface ClientObjectWrapper<T> extends PossessesIdentifier {
 
     void clearSharedTo();
     Set<UUID> getSharedTo();
+    boolean isSharing();
 
     void createRemotely(boolean silent);
     void removeRemotely(boolean silent);

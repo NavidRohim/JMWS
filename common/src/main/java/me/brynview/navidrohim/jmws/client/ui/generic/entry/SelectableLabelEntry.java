@@ -6,25 +6,26 @@ import net.minecraft.client.input.MouseButtonEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
-public abstract class SelectableLabelEntry<L extends CheckableSelectionList> extends ObjectSelectionList.Entry<SelectableLabelEntry<?>> {
+public abstract class SelectableLabelEntry<E extends SelectableLabelEntry<E>> extends ObjectSelectionList.Entry<E> {
 
-    protected final @NotNull L listOwner;
+    protected final @NotNull CheckableSelectionList<E> listOwner;
     public boolean selectedEntry = false;
 
-    public SelectableLabelEntry(@NotNull L listOwner) {
+    public SelectableLabelEntry(@NotNull CheckableSelectionList<E> listOwner) {
         super();
         this.listOwner = listOwner;
     }
 
+    @SuppressWarnings("unchecked")
     public void setSelected(boolean selected) {
         if (selected) {
             if (canSelect()) {
                 this.selectedEntry = true;
-                this.listOwner.getSelectedEntries().add(this);
+                this.listOwner.getSelectedEntries().add((E) this);
             }
         } else {
             this.selectedEntry = false;
-            this.listOwner.getSelectedEntries().remove(this);
+            this.listOwner.getSelectedEntries().remove((E) this);
         }
     }
 

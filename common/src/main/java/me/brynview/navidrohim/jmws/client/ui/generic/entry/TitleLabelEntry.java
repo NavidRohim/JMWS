@@ -3,22 +3,19 @@ package me.brynview.navidrohim.jmws.client.ui.generic.entry;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.generic.Subtitle;
 import me.brynview.navidrohim.jmws.client.ui.generic.selection_list.CheckableSelectionList;
-import me.brynview.navidrohim.jmws.client.ui.share_panel.ObjectSharePanel;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
-public class TitleLabelEntry <L extends CheckableSelectionList<L>> extends SelectableLabelEntry<L> {
+public class TitleLabelEntry<E extends TitleLabelEntry<E>> extends SelectableLabelEntry<E> {
 
     private final boolean canSelect;
     protected @NotNull Component title;
     public @NotNull Subtitle subtitle;
 
-    public TitleLabelEntry(@NotNull L listOwner, @NotNull Component title, @NotNull Subtitle subtitle, boolean canSelect) {
+    public TitleLabelEntry(@NotNull CheckableSelectionList<E> listOwner, @NotNull Component title, @NotNull Subtitle subtitle, boolean canSelect) {
         super(listOwner);
         this.title = title;
         this.subtitle = subtitle;

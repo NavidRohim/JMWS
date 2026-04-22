@@ -9,7 +9,6 @@ import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.NotificationAlertScreen;
 import me.brynview.navidrohim.jmws.client.ui.share_panel.ObjectSharePanel;
-import me.brynview.navidrohim.jmws.client.ui.generic.entry.SelectableLabelEntry;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -45,13 +44,9 @@ public class ShareScreen extends NotificationAlertScreen {
     @Override
     protected void init()
     {
-        int panelWidth = (int) (this.width * 0.70);
-        int panelHeight = (int) (this.height * 0.65);
-        int panelX = this.width / 10;
-        int panelY = (this.height - panelHeight) / 2;
-
         // Define the sharing panel and add all shared objects on this client to panel
-        this.sharePanel = new ObjectSharePanel<>(minecraftClientInstance,  panelWidth, panelHeight, panelX, panelY, 50, object);
+        this.sharePanel = new ObjectSharePanel<>(minecraftClientInstance,  0, 0, 0, 0, 50, object);
+        RenderUtils.setDimensionsForList(this.sharePanel, this.width, this.height);
 
         LinearLayout buttonIcnColumb = LinearLayout.vertical().spacing(4);
         LinearLayout buttonColumn = LinearLayout.vertical().spacing(4);
@@ -76,16 +71,13 @@ public class ShareScreen extends NotificationAlertScreen {
 
     private void sendRequests()
     {
-        Set<SelectableLabelEntry<ObjectSharePanel<ClientObjectWrapper<?>>>> players = this.sharePanel.getSelectedEntries();
+        Set<? extends PlayerEntry<?>> players = this.sharePanel.getSelectedEntries();
         if (players.isEmpty())
         {
             PlayerUtils.sendUserAlert(Component.translatable("jmws.ui.sharing.no_selected_players"), true, true, MessageType.PENDING);
         } else {
-            for (SelectableLabelEntry<?> selectedPlayer : players) {
-                if (selectedPlayer instanceof PlayerEntry<?> playerEntry)
-                {
-                    OutgoingShareRequest.sendShareRequest(this.object, playerEntry.user.getProfile());
-                }
+            for (PlayerEntry<?> selectedPlayer : players) {
+                OutgoingShareRequest.sendShareRequest(this.object, selectedPlayer.user.getProfile());
             }
             this.sharePanel.unselectAll();
         }
@@ -94,8 +86,7 @@ public class ShareScreen extends NotificationAlertScreen {
 
     @Override
     protected Vector2i getDrawLocationForAlert() {
-        int y = this.sharePanel.getY() + this.sharePanel.getHeight() + 15;
-        return new Vector2i(this.sharePanel.getX(), y);
+        return RenderUtils.getPositionRelativeToList(this.sharePanel);
     }
 
     @Override
@@ -107,7 +98,7 @@ public class ShareScreen extends NotificationAlertScreen {
         }
     }
 
-    public static void openShare(ClientBaseObjectWrapper<?> object)
+    public static void open(ClientBaseObjectWrapper<?> object)
     {
        JMWSClientCommon.setCurrentUIScreen(new ShareScreen(minecraftClientInstance.screen, object));
     }

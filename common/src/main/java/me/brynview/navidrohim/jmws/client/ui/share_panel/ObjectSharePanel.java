@@ -5,17 +5,19 @@ import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.ui.PlayerEntry;
 import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
+import me.brynview.navidrohim.jmws.client.ui.generic.entry.SelectableLabelEntry;
 import me.brynview.navidrohim.jmws.client.ui.generic.selection_list.CheckableSelectionList;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
-public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends CheckableSelectionList<ObjectSharePanel<T>> {
+public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends CheckableSelectionList<PlayerEntry<T>> {
 
     private static final Component NO_PLAYERS_TEXT = Component.translatable("jmws.ui.sharing.no_players");
     private final List<PlayerInfo> players = new ArrayList<>();
@@ -54,7 +56,6 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
         this.clearEntries();
         this.refreshPlayers();
         this.addWidgets();
-        this.addSelfDebug(5);
     }
 
     public void addWidgets()
@@ -62,15 +63,6 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
         if (!this.players.isEmpty())
         {
             players.forEach(p -> this.addEntryToTop(new PlayerEntry<>(p, this, this.sharedObject)));
-        }
-    }
-
-    private void addSelfDebug(int times)
-    {
-        for (int i = 0; i < times; i++)
-        {
-            Constants.getLogger().info("Adding self to list");
-            this.addEntryToTop(new PlayerEntry<>(PlayerUtils.getOurPlayerInfo(), this, this.sharedObject));
         }
     }
 

@@ -23,7 +23,7 @@ import org.jspecify.annotations.NonNull;
 import java.awt.*;
 import java.util.concurrent.TimeUnit;
 
-public class IncomingShareRequestsList extends CheckableSelectionList<IncomingShareRequestsList> {
+public class IncomingShareRequestsList extends CheckableSelectionList<IncomingShareRequestsList.IncomingRequestFromPlayerEntry> {
 
 
     private static final Component NO_PLAYERS_TEXT = Component.translatable("jmws.ui.requests.no_requests");
@@ -67,7 +67,7 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
         PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.sharing_child"), true, false, MessageType.NEUTRAL);
     }
 
-    public static class IncomingRequestFromPlayerEntry extends PlayerHeadEntryWithTitle
+    public static class IncomingRequestFromPlayerEntry extends PlayerHeadEntryWithTitle<IncomingRequestFromPlayerEntry>
     {
         private final ShareRequest request;
 
@@ -106,7 +106,6 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
                 setSubtitle(EXPIRED);
             }
         }
-
 
         @Override
         public boolean canSelect() {

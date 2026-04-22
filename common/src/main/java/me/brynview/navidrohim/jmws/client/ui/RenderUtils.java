@@ -3,7 +3,9 @@ package me.brynview.navidrohim.jmws.client.ui;
 import me.brynview.navidrohim.jmws.client.ui.generic.selection_list.CheckableSelectionList;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.ObjectSelectionList;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector2i;
 
 public class RenderUtils
 {
@@ -16,4 +18,24 @@ public class RenderUtils
     {
         return name.length() > maxLength ? name.substring(0, maxLength) + "..." : name;
     }
+
+    public static void setDimensionsForList(ObjectSelectionList<?> list, int screenWidth, int screenHeight)
+    {
+        int panelWidth = (int) (screenWidth * 0.70);
+        int panelHeight = (int) (screenHeight * 0.65);
+        int panelX = screenWidth / 10;
+        int panelY = (screenHeight - panelHeight) / 2;
+
+        list.setX(panelX);
+        list.setY(panelY);
+        list.setWidth(panelWidth);
+        list.setHeight(panelHeight);
+    }
+
+    public static Vector2i getPositionRelativeToList(ObjectSelectionList<?> list)
+    {
+        int y = list.getY() + list.getHeight() + 15;
+        return new Vector2i(list.getX(), y);
+    }
+
 }

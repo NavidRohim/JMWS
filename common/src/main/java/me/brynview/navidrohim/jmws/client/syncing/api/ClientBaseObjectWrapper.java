@@ -35,6 +35,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
      * @param objectName -- The name of the waypoint or group.
      * @return String -- The universal identifier.
      */
+
     private static String makeWaypointHash(String waypointGUID, String objectName)
     {
         return DigestUtils.sha256Hex(PlayerUtils.ourUUID() + waypointGUID + objectName);
@@ -232,7 +233,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     }
 
     @Override
-    public String getIdentifier() {
+    public final String getIdentifier() {
         if (this.info != null) {
             return this.getInfo().objectIdentifier;
         }
@@ -240,7 +241,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     }
 
     @Override
-    public Set<UUID> getSharedTo() {
+    public final Set<UUID> getSharedTo() {
         if (this.info != null) {
             return this.getInfo().sharedTo;
         }
@@ -248,7 +249,15 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     }
 
     @Override
-    public UUID getOwner()
+    public final boolean isSharing() {
+        if (this.info != null) {
+            return !this.getInfo().sharedTo.isEmpty();
+        }
+        throw new NoInfoException();
+    }
+
+    @Override
+    public final UUID getOwner()
     {
         if (this.info != null) {
             return this.getInfo().owner;
@@ -257,7 +266,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     }
 
     @Override
-    public boolean getGlobal()
+    public final boolean getGlobal()
     {
         if (this.info != null) {
             return this.getInfo().isGlobal;
@@ -268,5 +277,6 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     @Override
     public String getSerialization() {
         return getNativeObject().toString();
+
     }
 }

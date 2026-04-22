@@ -1,7 +1,5 @@
 package me.brynview.navidrohim.jmws.client.ui.generic.selection_list;
 
-import com.mojang.datafixers.types.templates.Check;
-import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.generic.entry.SelectableLabelEntry;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
@@ -9,14 +7,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.network.chat.Component;
+import org.jspecify.annotations.NonNull;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class CheckableSelectionList<L extends CheckableSelectionList<L>> extends ObjectSelectionList<SelectableLabelEntry<?>> {
+public abstract class CheckableSelectionList<E extends SelectableLabelEntry<E>> extends ObjectSelectionList<E> {
 
-    protected final Set<SelectableLabelEntry<L>> highlightedEntries = new HashSet<>();
-    private boolean isSelectingAll = false;
+    protected final Set<E> highlightedEntries = new HashSet<>();
+    protected boolean isSelectingAll = false;
 
     public CheckableSelectionList(Minecraft minecraft, int width, int height, int x, int y, int itemHeight) {
         super(minecraft, width, height, y, itemHeight);
@@ -49,7 +48,8 @@ public abstract class CheckableSelectionList<L extends CheckableSelectionList<L>
             this.isSelectingAll = true;
         }
     }
-    public Set<SelectableLabelEntry<L>> getSelectedEntries()
+
+    public Set<E> getSelectedEntries()
     {
         return this.highlightedEntries;
     }
@@ -70,7 +70,7 @@ public abstract class CheckableSelectionList<L extends CheckableSelectionList<L>
     }
 
     @Override
-    public void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+    public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         super.extractWidgetRenderState(graphics, mouseX, mouseY, a);
         if (this.children().isEmpty())
         {
