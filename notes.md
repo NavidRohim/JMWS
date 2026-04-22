@@ -2,6 +2,7 @@
 
 ## -- Internals --
 - ~~Fix sharing system. Was built for server-side command dispatching, but that will now move to the client.~~
+- - ~~With the new sharing system, a packet needs to be sent to the server to notify that the object has been shared and to update the client.~~
 - Convert waypoint / group creation to a more generic creation system.
 
 ## -- Sharing UI --
@@ -10,11 +11,15 @@
 - ~~Add select all / deselect all buttons.~~
   ~~- Position these buttons in the top right corner of the scroll list. Make a part of the CheckableSelectionList class. Though, buttons cannot be natively added to ObjectSelectionList or children of it, so maybe make a generic abstract screen class for this behaviour (CheckableSelectionList will need to be passed to this generic screen class for button placement)~~
 
-## -- General / Other UI -- 
+## -- General / Other UI --
+- ~~Disable the share request list button when JMWS is off. Straightforward to do, but I am exhausted.~~
 - ~~Add a screen for waiting share requests.~~
 - ~~Compartmentalise UI classes so they are more dynamic and can be used in more places.~~
 - ~~Fix UI internals to how things are positioned (Use layouts and grids, much more dynamic I have heard.)~~
 - ~~Refactor the ObjectSharePanel class (split it) so it can be used in more places. For example, the checkbox behaviour in Entries will need to rely on a subclass of it and I plan to use this Entry class in more areas.~~
+- ~~Make a custom asset for the incoming share request button.~~
+- ~~Test on Windows. Been coding all this on macOS.~~
+- ~~Remake JMWS on-off toggle button and sync button icons.~~
 - Generally build up the UI API.
 
 ## -- General bugs --
@@ -22,19 +27,14 @@
 - ~~Waypoint context menu breaks after updating an already existing object~~
 - ~~Timeout is not cancelled when an object is successfully shared.~~
 - ~~Timeout alert is not sent after the first timeout.~~
-- ~~When accepting a share request, the recieving client cannot display the object. A casting error is thrown.~~
+- ~~When accepting a share request, the receiving client cannot display the object. A casting error is thrown.~~
 - ~~If a client or server does not have a packet registered, the game will crash.~~
 - ~~When accepting a share request with a user, the server wipes the objects syncInfo field.~~
+- ~~Fix the timeout bug~~
 
 ## -- Todo tomorrow --
 
-- ~~Fix the timeout bug~
-- ~~With the new sharing system, a packet needs to be sent to the server to notify that the object has been shared and to update the client.~~
-- ~~Make a custom asset for the incoming share request button.~~
-- Remake JMWS on-off toggle button and sync button icons.
-- ~~Disable the share request list button when JMWS is off. Straightforward to do, but I am exhausted.~~
 - Ensure on the server side that any given user has permissions to make a global object.
-- Test on Windows. Been coding all this on macOS.
 
 *Already finished*
 
