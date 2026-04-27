@@ -17,7 +17,6 @@ import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
-import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncRegistry;
@@ -648,13 +647,13 @@ public class JMWSPlugin implements IClientPlugin {
                     Constants.getLogger().info(wpSync.serialize());
                     if (wpSync.isGlobal && showGlobalLabels) // Global
                     {
-                        savedWaypoint.setIconResourceLoctaion(JMWSTextures.globalObjectAsset);
+                        savedWaypoint.setIconResourceLoctaion(JMButtonAddon.globalObjectAsset);
                         savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(CommonUtils.globalStringTag));
                     } else if (showSharingLabels) // Shared
                     {
                         String ownerUser = PlayerUtils.getUsernameFromUUIDForShare(wpSync.owner);
                         savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(ownerUser));
-                        savedWaypoint.setIconResourceLoctaion(JMWSTextures.sharedObjectAsset);
+                        savedWaypoint.setIconResourceLoctaion(JMButtonAddon.sharedObjectAsset);
                     }
 
                 }

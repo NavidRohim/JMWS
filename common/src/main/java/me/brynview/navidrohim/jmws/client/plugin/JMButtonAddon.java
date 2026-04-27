@@ -7,8 +7,8 @@ import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.ui.screen.ShareRequestScreen;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +18,10 @@ import java.util.List;
  */
 public class JMButtonAddon {
 
+    public static final Identifier onOffButtonAsset = Identifier.fromNamespaceAndPath(Constants.MODID, "textures/gui/toggle.png");
+    public static final Identifier enableButtonAsset = Identifier.fromNamespaceAndPath(Constants.MODID, "textures/gui/sync.png");
+    public static final Identifier globalObjectAsset = Identifier.fromNamespaceAndPath(Constants.MODID, "textures/gui/global.png");
+    public static final Identifier sharedObjectAsset = Identifier.fromNamespaceAndPath(Constants.MODID, "textures/gui/share.png");
     private static final List<IThemeButton> buttons = new ArrayList<>();
     private static IThemeButton toggleButton;
 
@@ -64,20 +68,20 @@ public class JMButtonAddon {
             // Button for enabling and disabling JMWS
             toggleButton = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
                     "button.jmws.enable_button",
-                    JMWSTextures.onOffButtonAsset,
+                        onOffButtonAsset,
                     ConfigInterface.getEnabledStatus(),
                     JMButtonAddon::enableMod);
 
             // Manual sync button
             IThemeButton buttonSync = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
                     "button.jmws.update_button",
-                    JMWSTextures.enableButtonAsset,
+                    enableButtonAsset,
                     true,
                     JMButtonAddon::updateFromButton);
 
             IThemeButton buttonViewObjectsForSharing = addonButtonDisplayEvent.getThemeButtonDisplay().addThemeToggleButton(
                     "button.jmws.incoming_share_requests",
-                    JMWSTextures.sharedObjectAsset,
+                    sharedObjectAsset,
                     ConfigInterface.getEnabledStatus(),
                     (IThemeButton iThemeButton) -> ShareRequestScreen.open()
             );

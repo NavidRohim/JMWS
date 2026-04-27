@@ -1,9 +1,12 @@
 package me.brynview.navidrohim.jmws.client.ui.screen;
 
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
+import me.brynview.navidrohim.jmws.client.plugin.JMButtonAddon;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
+import me.brynview.navidrohim.jmws.client.ui.elements.IconButton;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.HasScrollableList;
 import me.brynview.navidrohim.jmws.client.ui.list.entry.PlayerEntry;
 import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
@@ -19,8 +22,8 @@ import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import org.joml.Vector2i;
 import org.jspecify.annotations.NonNull;
 
@@ -39,6 +42,8 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
     public static final Tooltip SELECT_ALL_TOGGLE = Tooltip.create(Component.translatable("jmws.ui.sharing.toggle_select_all.tooltip"));
     private static final Tooltip SEND_TO_SELECTED = Tooltip.create(Component.translatable("jmws.ui.sharing.send_request.tooltip"));
 
+    private static final Identifier TEST_STAR = Identifier.fromNamespaceAndPath(Constants.MODID, "test");
+
     public ShareScreen(Screen parent, ClientBaseObjectWrapper<?> object) {
         super(parent);
         this.object = object;
@@ -56,7 +61,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         LinearLayout buttonColumn = LinearLayout.vertical().spacing(4);
         LinearLayout mainRow = LinearLayout.horizontal();
 
-        buttonColumn.addChild(Button.builder(CommonComponents.GUI_DONE, (bnt) -> this.onClose()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
+        buttonColumn.addChild(IconButton.buildButton(TEST_STAR, button -> this.onClose(), 16, 16));
         buttonColumn.addChild(Button.builder(Component.translatable("jmws.ui.sharing.reload"), (bnt) -> this.refresh()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
         buttonColumn.addChild(Button.builder(Component.translatable("jmws.ui.sharing.send_requests"), (bnt) -> this.sendRequests()).width(UIConstants.NAMED_BUTTON_WIDTH).tooltip(SEND_TO_SELECTED).build());
 
