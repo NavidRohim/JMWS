@@ -8,7 +8,6 @@ import net.minecraft.network.chat.Component;
 public class UIConstants
 {
     public static final int NAMED_BUTTON_WIDTH = 50;
-    public static final int ICON_BUTTON_WIDTH_HEIGHT = 15;
 
     public static final int ALERT_DURATION_MS = 4000;
     public static final int ALERT_FADE_DURATION_MS = 800;

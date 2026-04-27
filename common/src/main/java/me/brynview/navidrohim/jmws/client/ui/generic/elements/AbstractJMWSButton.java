@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.NonNull;
 
-public abstract class  AbstractJMWSButton extends Button implements AbstractJMWSElement
+public abstract class AbstractJMWSButton extends Button implements AbstractJMWSElement
 {
 
     private static final Identifier BUTTON_BG = Identifier.fromNamespaceAndPath(Constants.MODID, "button_bg");

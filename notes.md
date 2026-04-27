@@ -4,6 +4,8 @@
 - ~~Fix sharing system. Was built for server-side command dispatching, but that will now move to the client.~~
 - - ~~With the new sharing system, a packet needs to be sent to the server to notify that the object has been shared and to update the client.~~
 - Convert waypoint / group creation to a more generic creation system.
+- Make sharing rules. Users can enable/disable certain rules for sharing. Like
+  - Receiving users can only get shared objects while the owner of the object is online.
 
 ## -- Sharing UI --
 - ~~Add UI colour indicator for object status (shared (green), awaiting share (orange), not shared (grey), cannot share (red))~~
