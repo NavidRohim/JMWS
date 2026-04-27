@@ -194,6 +194,8 @@
   "jmws.ui.requests.requests_amount": "%s incoming request(s)",
 
   "jmws.ui.stop_sharing.empty": "Not sharing with anyone!",
+  "jmws.ui.stop_sharing.not_sharing": "stopped sharing",
+  "jmws.ui.stop_sharing.sharing": "sharing",
 
   "jmws.ui.generic.selected": "selected",
   "jmws.ui.generic.empty": "Empty!"

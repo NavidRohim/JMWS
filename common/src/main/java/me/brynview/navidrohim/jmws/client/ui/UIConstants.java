@@ -14,6 +14,7 @@ public class UIConstants
     public static final int PLAYER_HEAD_SIZE = 32;
     public static final int PLAYER_HEAD_SIZE_HALVED = PLAYER_HEAD_SIZE / 2;
 
+
     public static final Subtitle GENERIC_SELECTED = new Subtitle(Component.translatable("jmws.ui.generic.selected"), MessageType.GREY);
     public static final Component EMPTY_TEXT = Component.translatable("jmws.ui.generic.empty");
 }

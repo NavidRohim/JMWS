@@ -108,7 +108,7 @@ public class CommandFactory {
 
         public static String removeShareWith(UUID with, ClientSyncInformation syncInformation)
         {
-            return makeBaseRequestForUser(with, PeerToPeerCommand.CLIENT_REMOVE_SHARE_WITH, syncInformation.serialize());
+            return CommandFactory.makeBaseJsonRequest(Commands.SERVER_REMOVE_SHARE_WITH, with, syncInformation.serialize());
         }
 
         /* Share responses*/
@@ -144,7 +144,7 @@ public class CommandFactory {
 
         // Object sharing (server)
         AFFIRM_SHARE, // Confirm user wants shared object
-        REMOVE_SHARE_WITH_ALL,
+        SERVER_REMOVE_SHARE_WITH,
 
         // Global
         MAKE_GLOBAL,
@@ -161,7 +161,7 @@ public class CommandFactory {
     public enum PeerToPeerCommand {
         CLIENT_SHARE_REQUEST,
         CLIENT_REJECTED_SHARE_WITH_REASON,
-        CLIENT_REMOVE_SHARE_WITH,
-        SERVER_ACCEPTED_SHARE
+
+        SERVER_ADD_SHARE
     }
 }

@@ -18,7 +18,7 @@ import static me.brynview.navidrohim.jmws.client.ui.UIConstants.ALERT_DURATION_M
 import static me.brynview.navidrohim.jmws.client.ui.UIConstants.ALERT_FADE_DURATION_MS;
 import static me.brynview.navidrohim.jmws.common.JMWSCommon.minecraftClientInstance;
 
-public class NotificationAlertScreen extends Screen {
+public abstract class NotificationAlertScreen extends Screen {
 
     private long alertStartTime = 0;
 

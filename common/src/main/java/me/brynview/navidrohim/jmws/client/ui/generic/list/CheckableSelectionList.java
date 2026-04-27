@@ -1,12 +1,14 @@
-package me.brynview.navidrohim.jmws.client.ui.generic.selection_list;
+package me.brynview.navidrohim.jmws.client.ui.generic.list;
 
+import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
-import me.brynview.navidrohim.jmws.client.ui.generic.entry.SelectableLabelEntry;
+import me.brynview.navidrohim.jmws.client.ui.generic.list.entry.SelectableLabelEntry;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
 import java.util.HashSet;
@@ -14,8 +16,8 @@ import java.util.Set;
 
 public abstract class CheckableSelectionList<E extends SelectableLabelEntry<E>> extends ObjectSelectionList<E> {
 
-    protected final Set<E> highlightedEntries = new HashSet<>();
-    protected boolean isSelectingAll = false;
+    protected final Set<E> selectedEntries = new HashSet<>();
+    public boolean isSelectingAll = false;
 
     public CheckableSelectionList(Minecraft minecraft, int width, int height, int x, int y, int itemHeight) {
         super(minecraft, width, height, y, itemHeight);
@@ -24,8 +26,8 @@ public abstract class CheckableSelectionList<E extends SelectableLabelEntry<E>> 
 
     public void unselectAll()
     {
-        this.highlightedEntries.forEach(entry -> entry.selectedEntry = false);
-        this.highlightedEntries.clear();
+        this.selectedEntries.forEach(entry -> entry.isSelected = false);
+        this.selectedEntries.clear();
         this.isSelectingAll = false;
     }
 
@@ -51,7 +53,12 @@ public abstract class CheckableSelectionList<E extends SelectableLabelEntry<E>> 
 
     public Set<E> getSelectedEntries()
     {
-        return this.highlightedEntries;
+        return this.selectedEntries;
+    }
+
+    public void entryChanged(E entry)
+    {
+
     }
 
     public boolean isEmpty()
@@ -77,5 +84,22 @@ public abstract class CheckableSelectionList<E extends SelectableLabelEntry<E>> 
             graphics.text(JMWSCommon.minecraftClientInstance.font, getEmptyStateText(), this.getX(), this.getY() - 15, -1);
         }
 
+    }
+
+    @Override
+    protected void extractListSeparators(@NotNull GuiGraphicsExtractor graphics) {
+        RenderUtils.renderBorderForList(graphics, this);
+    }
+
+    @Override
+    protected void extractSelection(@NonNull GuiGraphicsExtractor graphics, @NonNull E entry, int outlineColor) {
+        outlineColor = this.isFocused() ? 0xFFCCCCCC : -8355712;
+
+        int outlineX0 = entry.getX();
+        int outlineY0 = entry.getY();
+        //int outlineX1 = outlineX0 + entry.getWidth();
+        //int outlineY1 = outlineY0 + entry.getHeight();
+        graphics.outline(outlineX0, outlineY0, entry.getWidth(), entry.getHeight(), outlineColor);
+        //graphics.fill(outlineX0 + 1, outlineY0 + 1, outlineX1 - 1, outlineY1 - 1, 0xF0000000);
     }
 }

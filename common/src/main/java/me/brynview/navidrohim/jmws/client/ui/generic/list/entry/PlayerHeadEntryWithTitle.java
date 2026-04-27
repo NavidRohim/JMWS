@@ -1,10 +1,8 @@
-package me.brynview.navidrohim.jmws.client.ui.generic.entry;
+package me.brynview.navidrohim.jmws.client.ui.generic.list.entry;
 
-import com.mojang.authlib.GameProfile;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.generic.Subtitle;
-import me.brynview.navidrohim.jmws.client.ui.generic.selection_list.CheckableSelectionList;
-import me.brynview.navidrohim.jmws.client.ui.share_panel.ObjectSharePanel;
+import me.brynview.navidrohim.jmws.client.ui.generic.list.CheckableSelectionList;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.PlayerFaceExtractor;
@@ -15,9 +13,9 @@ import org.jspecify.annotations.NonNull;
 
 import static me.brynview.navidrohim.jmws.client.ui.UIConstants.PLAYER_HEAD_SIZE_HALVED;
 
-public class PlayerHeadEntryWithTitle<E extends PlayerHeadEntryWithTitle<E>> extends TitleLabelEntry<E> {
+public abstract class PlayerHeadEntryWithTitle<E extends PlayerHeadEntryWithTitle<E>> extends TitleLabelEntry<E> {
 
-    private final @NonNull PlayerInfo user;
+    protected final @NonNull PlayerInfo user;
 
     public PlayerHeadEntryWithTitle(@NotNull CheckableSelectionList<E> listOwner, PlayerInfo player) {
         super(listOwner, Component.literal(player.getProfile().name()), new Subtitle(Component.empty(), MessageType.PENDING), true);

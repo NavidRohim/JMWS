@@ -1,14 +1,15 @@
-package me.brynview.navidrohim.jmws.client.ui;
+package me.brynview.navidrohim.jmws.client.ui.list.entry;
 
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
+import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.generic.Subtitle;
-import me.brynview.navidrohim.jmws.client.ui.generic.entry.PlayerHeadEntryWithTitle;
-import me.brynview.navidrohim.jmws.client.ui.share_panel.ObjectSharePanel;
+import me.brynview.navidrohim.jmws.client.ui.generic.list.entry.PlayerHeadEntryWithTitle;
+import me.brynview.navidrohim.jmws.client.ui.list.ObjectSharePanel;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.PlayerFaceExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
@@ -17,13 +18,12 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.UUID;
 
-import static me.brynview.navidrohim.jmws.client.ui.UIConstants.PLAYER_HEAD_SIZE_HALVED;
-
 public final class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerHeadEntryWithTitle<PlayerEntry<T>> {
 
     private final static @NotNull Subtitle EMPTY = new Subtitle(Component.translatable("jmws.ui.sharing.not_shared"), MessageType.GREY);
     private final static @NotNull Subtitle ALREADY_SHARED = new Subtitle(Component.translatable("jmws.ui.sharing.already_shared"), MessageType.SUCCESS);
     private final static @NotNull Subtitle PENDING_SHARE = new Subtitle(Component.translatable("jmws.ui.sharing.pending"), MessageType.PENDING);
+    private final static @NotNull Subtitle SELECTED = new Subtitle(Component.translatable("jmws.ui.generic.selected"), MessageType.SUCCESS);
 
     public final @NonNull PlayerInfo user;
     private final @NotNull UUID userUuid;
@@ -52,20 +52,6 @@ public final class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerH
         return display;
     }
 
-    public void extractSharingStatusBar(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
-        // minus half-width
-        int barWidth = 6;
-        int middle = (this.getContentX() + ((4 + PLAYER_HEAD_SIZE_HALVED) / 2));
-
-        int startX = middle - (barWidth / 2);
-        int endX = middle + (barWidth / 2);
-
-        int startY = this.getContentYMiddle() - PLAYER_HEAD_SIZE_HALVED;
-        int endY = this.getContentYMiddle() + PLAYER_HEAD_SIZE_HALVED;
-
-        guiGraphicsExtractor.fill(startX, startY, endX, endY, this.subtitle.getMessageType().getNumericalColour());
-    }
-
     @Override
     public boolean canSelect() {
         return !JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(userUuid) && !sharedObject.getSharedTo().contains(userUuid);
@@ -83,21 +69,21 @@ public final class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerH
     }
 
     @Override
-    public void extractSubtitleText(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
-        super.extractSubtitleText(guiGraphicsExtractor, i, i1, b, v);
-        if (!selectedEntry) {
+    public void extractSelectedState(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v)
+    {
+        setSubtitle(SELECTED);
+    }
+
+    @Override
+    public void extractUnselectedState(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
+        if (!isSelected) {
             setSubtitle(getSubtitleText());
-            super.extractSubtitleText(guiGraphicsExtractor, i, i1, b, v);
         }
     }
 
     @Override
     public void extractContent(@NonNull GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
         super.extractContent(guiGraphicsExtractor, i, i1, b, v);
-        this.extractSharingStatusBar(guiGraphicsExtractor, i, i1, b, v);
-
-        if (this.selectedEntry) {
-            this.setSubtitle(new Subtitle(Component.translatable("jmws.ui.generic.selected"), MessageType.of(null, sharedObject.getColour())));
-        }
+        RenderUtils.renderStatusBarInEntry(guiGraphicsExtractor, this, this.subtitle.getMessageType().getNumericalColour());
     }
 }

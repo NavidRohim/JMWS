@@ -1,13 +1,11 @@
-package me.brynview.navidrohim.jmws.client.ui.requests_screen;
+package me.brynview.navidrohim.jmws.client.ui.list;
 
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.generic.Subtitle;
-import me.brynview.navidrohim.jmws.client.ui.generic.entry.PlayerHeadEntryWithTitle;
-import me.brynview.navidrohim.jmws.client.ui.generic.entry.TitleLabelEntry;
-import me.brynview.navidrohim.jmws.client.ui.generic.selection_list.CheckableSelectionList;
-import me.brynview.navidrohim.jmws.client.ui.share_panel.ObjectSharePanel;
+import me.brynview.navidrohim.jmws.client.ui.generic.list.entry.PlayerHeadEntryWithTitle;
+import me.brynview.navidrohim.jmws.client.ui.generic.list.CheckableSelectionList;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.Minecraft;
@@ -20,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 
-import java.awt.*;
 import java.util.concurrent.TimeUnit;
 
 public class IncomingShareRequestsList extends CheckableSelectionList<IncomingShareRequestsList.IncomingRequestFromPlayerEntry> {
@@ -49,17 +46,10 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
         return width;
     }
 
-
     @Override
     public Component getEmptyStateText()
     {
         return NO_PLAYERS_TEXT;
-    }
-
-    @Override
-    protected void extractListSeparators(@NotNull GuiGraphicsExtractor graphics)
-    {
-        RenderUtils.renderBorderForList(graphics, this);
     }
 
     private static void sendShareAlert()
@@ -99,7 +89,7 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
                 setSubtitle(DECLINED);
             } else if (time > 0)
             {
-                Component toDisplay = !this.selectedEntry ? timeLeft : timeLeft.append(Component.translatable("jmws.ui.generic.selected"));
+                Component toDisplay = !this.isSelected ? timeLeft : timeLeft.append(Component.translatable("jmws.ui.generic.selected"));
                 setSubtitle(new Subtitle(toDisplay, MessageType.GREY));
             } else {
                 isExpired = true;

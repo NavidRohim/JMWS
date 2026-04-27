@@ -3,9 +3,8 @@ package me.brynview.navidrohim.jmws.client.ui.screen;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
-import me.brynview.navidrohim.jmws.client.ui.generic.entry.SelectableLabelEntry;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.NotificationAlertScreen;
-import me.brynview.navidrohim.jmws.client.ui.requests_screen.IncomingShareRequestsList;
+import me.brynview.navidrohim.jmws.client.ui.list.IncomingShareRequestsList;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
@@ -14,13 +13,11 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.joml.Vector2i;
 import org.jspecify.annotations.NonNull;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ShareRequestScreen extends NotificationAlertScreen {
 

@@ -3,7 +3,7 @@ package me.brynview.navidrohim.jmws.client.ui.generic;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.network.chat.Component;
 
-public class Subtitle {
+public final class Subtitle {
     private final Component displayable;
     private final MessageType messageType;
 
