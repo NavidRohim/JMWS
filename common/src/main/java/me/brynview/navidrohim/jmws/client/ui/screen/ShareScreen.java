@@ -6,6 +6,7 @@ import me.brynview.navidrohim.jmws.client.plugin.JMButtonAddon;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
+import me.brynview.navidrohim.jmws.client.ui.elements.CloseButton;
 import me.brynview.navidrohim.jmws.client.ui.elements.IconButton;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.HasScrollableList;
 import me.brynview.navidrohim.jmws.client.ui.list.entry.PlayerEntry;
@@ -61,7 +62,6 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         LinearLayout buttonColumn = LinearLayout.vertical().spacing(4);
         LinearLayout mainRow = LinearLayout.horizontal();
 
-        buttonColumn.addChild(IconButton.buildButton(TEST_STAR, button -> this.onClose(), 16, 16));
         buttonColumn.addChild(Button.builder(Component.translatable("jmws.ui.sharing.reload"), (bnt) -> this.refresh()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
         buttonColumn.addChild(Button.builder(Component.translatable("jmws.ui.sharing.send_requests"), (bnt) -> this.sendRequests()).width(UIConstants.NAMED_BUTTON_WIDTH).tooltip(SEND_TO_SELECTED).build());
 
@@ -73,6 +73,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
             }
         });
 
+        buttonIcnColumn.addChild(CloseButton.buildButton(11, 11, this));
         buttonIcnColumn.addChild(this.sACheckbox);
 
         mainRow.addChild(buttonIcnColumn, layoutSettings -> layoutSettings.paddingRight(6).paddingLeft(6));
