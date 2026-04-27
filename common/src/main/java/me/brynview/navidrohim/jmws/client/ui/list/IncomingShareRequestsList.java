@@ -6,6 +6,7 @@ import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.generic.Subtitle;
 import me.brynview.navidrohim.jmws.client.ui.generic.list.entry.PlayerHeadEntryWithTitle;
 import me.brynview.navidrohim.jmws.client.ui.generic.list.CheckableSelectionList;
+import me.brynview.navidrohim.jmws.client.ui.generic.screen.HasScrollableList;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.Minecraft;
@@ -24,9 +25,11 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
 
 
     private static final Component NO_PLAYERS_TEXT = Component.translatable("jmws.ui.requests.no_requests");
+    private final HasScrollableList parentScreen;
 
-    public IncomingShareRequestsList(Minecraft minecraft, int width, int height, int x, int y, int itemHeight) {
+    public IncomingShareRequestsList(Minecraft minecraft, int width, int height, int x, int y, int itemHeight, HasScrollableList parentScreen) {
         super(minecraft, width, height, x, y, itemHeight);
+        this.parentScreen = parentScreen;
     }
 
     public void addWidgets()
@@ -55,6 +58,12 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
     private static void sendShareAlert()
     {
         PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.sharing_child"), true, false, MessageType.NEUTRAL);
+    }
+
+    @Override
+    public void entryChanged(IncomingRequestFromPlayerEntry entry)
+    {
+        this.parentScreen.entryPressed();
     }
 
     public static class IncomingRequestFromPlayerEntry extends PlayerHeadEntryWithTitle<IncomingRequestFromPlayerEntry>

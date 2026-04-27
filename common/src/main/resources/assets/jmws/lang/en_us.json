@@ -198,5 +198,7 @@
   "jmws.ui.stop_sharing.sharing": "sharing",
 
   "jmws.ui.generic.selected": "selected",
-  "jmws.ui.generic.empty": "Empty!"
+  "jmws.ui.generic.empty": "Empty!",
+  "jmws.ui.generic.select_all": "Select all",
+  "jmws.ui.generic.deselect_all": "Deselect all"
 }

@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.client.ui;
 
 import me.brynview.navidrohim.jmws.client.ui.generic.Subtitle;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 
 public class UIConstants
@@ -15,6 +16,7 @@ public class UIConstants
     public static final int PLAYER_HEAD_SIZE_HALVED = PLAYER_HEAD_SIZE / 2;
 
 
-    public static final Subtitle GENERIC_SELECTED = new Subtitle(Component.translatable("jmws.ui.generic.selected"), MessageType.GREY);
+    public static final Tooltip SELECT_ALL = Tooltip.create(Component.translatable("jmws.ui.generic.select_all"));
+    public static final Tooltip DESELECT_ALL = Tooltip.create(Component.translatable("jmws.ui.generic.deselect_all"));
     public static final Component EMPTY_TEXT = Component.translatable("jmws.ui.generic.empty");
 }

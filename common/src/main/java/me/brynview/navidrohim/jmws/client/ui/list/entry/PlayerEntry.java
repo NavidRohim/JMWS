@@ -61,7 +61,7 @@ public final class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerH
     public boolean mouseClicked(@NonNull MouseButtonEvent event, boolean doubleClick) {
         boolean c = super.mouseClicked(event, doubleClick);
 
-        if (doubleClick) {
+        if (doubleClick && canSelect()) {
             this.setSelected(false);
             OutgoingShareRequest.sendShareRequest(sharedObject, this.user.getProfile());
         }

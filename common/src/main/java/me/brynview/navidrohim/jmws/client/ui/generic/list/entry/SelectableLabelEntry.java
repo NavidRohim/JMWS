@@ -33,13 +33,13 @@ public abstract class SelectableLabelEntry<E extends SelectableLabelEntry<E>> ex
             if (canSelect()) {
                 this.isSelected = true;
                 this.listOwner.getSelectedEntries().add((E) this);
+                this.listOwner.entryChanged((E) this);
             }
-        } else {
+        } else if (canSelect()){
             this.isSelected = false;
             this.listOwner.getSelectedEntries().remove((E) this);
+            this.listOwner.entryChanged((E) this);
         }
-
-        this.listOwner.entryChanged((E) this);
     }
 
     public boolean canSelect() {
@@ -59,7 +59,6 @@ public abstract class SelectableLabelEntry<E extends SelectableLabelEntry<E>> ex
 
     @Override
     public void extractContent(@NonNull GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
-        //Constants.LoggerHolder.debug("EXTRACTING CONTENT", "SELECTABLE LABEL ENTRY SUPER");
         if (this.isSelected)
         {
             this.extractSelectedState(guiGraphicsExtractor, i, i1, b, v);

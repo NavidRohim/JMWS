@@ -5,6 +5,7 @@ import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.generic.Subtitle;
 import me.brynview.navidrohim.jmws.client.ui.generic.list.entry.PlayerHeadEntryWithTitle;
 import me.brynview.navidrohim.jmws.client.ui.generic.list.CheckableSelectionList;
+import me.brynview.navidrohim.jmws.client.ui.generic.screen.HasScrollableList;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -23,12 +24,14 @@ public class PlayerSelectionList extends CheckableSelectionList<PlayerSelectionL
 
     private final List<PlayerInfo> players = new ArrayList<>();
     private final ClientObjectWrapper<?> object;
+    private final HasScrollableList parentScreen;
 
-    public PlayerSelectionList(Minecraft minecraft, int itemHeight, ClientObjectWrapper<?> object) {
+    public PlayerSelectionList(Minecraft minecraft, int itemHeight, ClientObjectWrapper<?> object, HasScrollableList parentScreen) {
         super(minecraft, 0, 0, 0, 0, itemHeight);
 
         this.object = object;
         this.players.addAll(RenderUtils.getPlayers(minecraft));
+        this.parentScreen = parentScreen;
     }
 
     @Override
@@ -50,7 +53,13 @@ public class PlayerSelectionList extends CheckableSelectionList<PlayerSelectionL
     @Override
     public int getRowWidth()
     {
-        return width;
+        return width - 2;
+    }
+
+    @Override
+    public void entryChanged(PlayerEntry entry)
+    {
+        this.parentScreen.entryPressed();
     }
 
     public static class PlayerEntry extends PlayerHeadEntryWithTitle<PlayerEntry> {
@@ -73,6 +82,7 @@ public class PlayerSelectionList extends CheckableSelectionList<PlayerSelectionL
             boolean isSelected = super.mouseClicked(event, doubleClick);
             if (doubleClick && canSelect())
             {
+                this.setSelected(false);
                 this.object.removeSharedTo(this.user.getProfile().id());
                 this.didStopSharing = true;
             }

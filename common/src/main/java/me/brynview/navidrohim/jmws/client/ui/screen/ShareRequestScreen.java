@@ -3,6 +3,8 @@ package me.brynview.navidrohim.jmws.client.ui.screen;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
+import me.brynview.navidrohim.jmws.client.ui.elements.Checkbox;
+import me.brynview.navidrohim.jmws.client.ui.generic.screen.HasScrollableList;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.NotificationAlertScreen;
 import me.brynview.navidrohim.jmws.client.ui.list.IncomingShareRequestsList;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
@@ -19,9 +21,10 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.Set;
 
-public class ShareRequestScreen extends NotificationAlertScreen {
+public class ShareRequestScreen extends NotificationAlertScreen implements HasScrollableList {
 
     private IncomingShareRequestsList incomingShareRequestsList;
+    private Checkbox SDAllCheckbox;
 
     public ShareRequestScreen(Screen parent) {
         super(parent);
@@ -33,13 +36,21 @@ public class ShareRequestScreen extends NotificationAlertScreen {
         LinearLayout verticalButtonColumnSpacerForSaDa = LinearLayout.vertical().spacing(4);
         LinearLayout horizontalButtonColumnSpacer = LinearLayout.horizontal();
 
-        incomingShareRequestsList = new IncomingShareRequestsList(JMWSCommon.minecraftClientInstance, 0, 0, 0, 0, 50);
+        incomingShareRequestsList = new IncomingShareRequestsList(JMWSCommon.minecraftClientInstance, 0, 0, 0, 0, 50, this);
         RenderUtils.setDimensionsForList(incomingShareRequestsList, this.width, this.height);
 
         verticalButtonColumnSpacer.addChild(Button.builder(Component.translatable("jmws.ui.requests.accept"), (button) -> this.acceptAll()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
         verticalButtonColumnSpacer.addChild(Button.builder(Component.translatable("jmws.ui.requests.decline"), (button) -> this.declineAll()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
 
-        verticalButtonColumnSpacerForSaDa.addChild(Button.builder(Component.literal("S"), (button) -> incomingShareRequestsList.toggleSelectAll()).width(UIConstants.ICON_BUTTON_WIDTH_HEIGHT).build());
+        this.SDAllCheckbox = Checkbox.buildCheckbox(button -> {
+            if (button.isChecked) {
+                this.incomingShareRequestsList.selectAll();
+            } else {
+                this.incomingShareRequestsList.unselectAll();
+            }
+        });
+
+        verticalButtonColumnSpacerForSaDa.addChild(this.SDAllCheckbox);
 
         horizontalButtonColumnSpacer.addChild(verticalButtonColumnSpacerForSaDa, settings -> settings.paddingRight(4).paddingLeft(6));
         horizontalButtonColumnSpacer.addChild(incomingShareRequestsList, settings -> settings.paddingRight(20));
@@ -92,6 +103,20 @@ public class ShareRequestScreen extends NotificationAlertScreen {
         if (!this.incomingShareRequestsList.isEmpty())
         {
             graphics.text(this.font, Component.translatable("jmws.ui.requests.requests_amount", this.incomingShareRequestsList.getAmount()), incomingShareRequestsList.getX(), incomingShareRequestsList.getY() - 15, -1);
+        }
+    }
+
+    @Override
+    public void entryPressed()
+    {
+        if (incomingShareRequestsList.getSelectedEntries().isEmpty())
+        {
+            SDAllCheckbox.isChecked = false;
+            incomingShareRequestsList.isSelectingAll = false;
+        } else if (incomingShareRequestsList.getSelectedEntries().size() == incomingShareRequestsList.children().size())
+        {
+            SDAllCheckbox.isChecked = true;
+            incomingShareRequestsList.isSelectingAll = true;
         }
     }
 

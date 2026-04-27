@@ -37,6 +37,7 @@ public abstract class PlayerHeadEntryWithTitle<E extends PlayerHeadEntryWithTitl
     }
 
     protected void extractThumbnailImage(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
+
         PlayerFaceExtractor.extractRenderState(guiGraphicsExtractor, user.getSkin(), getThumbnailImageX(), getThumbnailImageY(), UIConstants.PLAYER_HEAD_SIZE);
     }
 }

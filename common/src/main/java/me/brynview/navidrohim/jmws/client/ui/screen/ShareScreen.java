@@ -1,6 +1,5 @@
 package me.brynview.navidrohim.jmws.client.ui.screen;
 
-import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
@@ -37,7 +36,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
     private Checkbox sACheckbox;
     private ObjectSharePanel<ClientObjectWrapper<?>> sharePanel;
 
-    private static final Tooltip SELECT_ALL_TOGGLE = Tooltip.create(Component.translatable("jmws.ui.sharing.toggle_select_all.tooltip"));
+    public static final Tooltip SELECT_ALL_TOGGLE = Tooltip.create(Component.translatable("jmws.ui.sharing.toggle_select_all.tooltip"));
     private static final Tooltip SEND_TO_SELECTED = Tooltip.create(Component.translatable("jmws.ui.sharing.send_request.tooltip"));
 
     public ShareScreen(Screen parent, ClientBaseObjectWrapper<?> object) {
@@ -53,7 +52,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         this.sharePanel = new ObjectSharePanel<>(minecraftClientInstance,  0, 0, 0, 0, 50, object, this);
         RenderUtils.setDimensionsForList(this.sharePanel, this.width, this.height);
 
-        LinearLayout buttonIcnColumb = LinearLayout.vertical().spacing(4);
+        LinearLayout buttonIcnColumn = LinearLayout.vertical().spacing(4);
         LinearLayout buttonColumn = LinearLayout.vertical().spacing(4);
         LinearLayout mainRow = LinearLayout.horizontal();
 
@@ -61,18 +60,17 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         buttonColumn.addChild(Button.builder(Component.translatable("jmws.ui.sharing.reload"), (bnt) -> this.refresh()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
         buttonColumn.addChild(Button.builder(Component.translatable("jmws.ui.sharing.send_requests"), (bnt) -> this.sendRequests()).width(UIConstants.NAMED_BUTTON_WIDTH).tooltip(SEND_TO_SELECTED).build());
 
-        this.sACheckbox = Checkbox.buildCheckbox(Component.empty(), button -> {
+        this.sACheckbox = Checkbox.buildCheckbox(button -> {
             if (button.isChecked) {
                 this.sharePanel.selectAll();
             } else {
                 this.sharePanel.unselectAll();
             }
         });
-        this.sACheckbox.setTooltip(SELECT_ALL_TOGGLE);
 
-        buttonIcnColumb.addChild(this.sACheckbox);
+        buttonIcnColumn.addChild(this.sACheckbox);
 
-        mainRow.addChild(buttonIcnColumb, layoutSettings -> layoutSettings.paddingRight(6).paddingLeft(6));
+        mainRow.addChild(buttonIcnColumn, layoutSettings -> layoutSettings.paddingRight(6).paddingLeft(6));
         mainRow.addChild(this.sharePanel, layoutSettings -> layoutSettings.paddingRight(20));
         mainRow.addChild(buttonColumn, layoutSettings -> layoutSettings.paddingRight(20));
 
