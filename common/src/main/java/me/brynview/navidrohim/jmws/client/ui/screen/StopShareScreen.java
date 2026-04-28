@@ -8,17 +8,14 @@ import me.brynview.navidrohim.jmws.client.ui.generic.screen.HasScrollableList;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.NotificationAlertScreen;
 import me.brynview.navidrohim.jmws.client.ui.list.PlayerSelectionList;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.joml.Vector2i;
 
 public class StopShareScreen extends NotificationAlertScreen implements HasScrollableList
 {
-    private Checkbox sDCheckbox;
+    private Checkbox checkbox;
     private PlayerSelectionList playerSelectionList;
 
     private final ClientObjectWrapper<?> object;
@@ -34,13 +31,13 @@ public class StopShareScreen extends NotificationAlertScreen implements HasScrol
     {
         super.init();
 
-        LinearLayout rightButtonColumn = LinearLayout.vertical().spacing(4);
-        LinearLayout horizontalElementRow = LinearLayout.horizontal().spacing(6);
+        LinearLayout rightButtonColumn = LinearLayout.vertical();
+        LinearLayout horizontalElementRow = LinearLayout.horizontal().spacing(4);
 
         this.playerSelectionList = new PlayerSelectionList(JMWSCommon.minecraftClientInstance, 50, this.object, this);
         RenderUtils.setDimensionsForList(this.playerSelectionList, this.width, this.height);
 
-        this.sDCheckbox = Checkbox.buildCheckbox(button -> {
+        this.checkbox = Checkbox.buildSelectAllCheckbox(button -> {
             if (button.isChecked) {
                 this.playerSelectionList.selectAll();
             } else {
@@ -48,9 +45,10 @@ public class StopShareScreen extends NotificationAlertScreen implements HasScrol
             }
         });
 
-        horizontalElementRow.addChild(sDCheckbox);
-        horizontalElementRow.addChild(this.playerSelectionList);
+        //        rightButtonColumn.addChild()
         horizontalElementRow.addChild(rightButtonColumn);
+        horizontalElementRow.addChild(this.playerSelectionList);
+        horizontalElementRow.addChild(checkbox);
 
         horizontalElementRow.arrangeElements();
         FrameLayout.centerInRectangle(horizontalElementRow, 0, 0, this.width, this.height);
@@ -69,11 +67,11 @@ public class StopShareScreen extends NotificationAlertScreen implements HasScrol
     {
         if (playerSelectionList.getSelectedEntries().isEmpty())
         {
-            this.sDCheckbox.isChecked = false;
+            this.checkbox.isChecked = false;
             this.playerSelectionList.isSelectingAll = false;
         } else if (playerSelectionList.getSelectedEntries().size() == playerSelectionList.children().size())
         {
-            this.sDCheckbox.isChecked = true;
+            this.checkbox.isChecked = true;
             this.playerSelectionList.isSelectingAll = true;
         }
     }

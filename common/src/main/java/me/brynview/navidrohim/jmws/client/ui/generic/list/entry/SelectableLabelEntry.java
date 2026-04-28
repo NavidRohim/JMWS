@@ -35,7 +35,7 @@ public abstract class SelectableLabelEntry<E extends SelectableLabelEntry<E>> ex
                 this.listOwner.getSelectedEntries().add((E) this);
                 this.listOwner.entryChanged((E) this);
             }
-        } else if (canSelect()){
+        } else {
             this.isSelected = false;
             this.listOwner.getSelectedEntries().remove((E) this);
             this.listOwner.entryChanged((E) this);

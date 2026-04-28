@@ -44,6 +44,12 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
         }
     }
 
+    public void refresh()
+    {
+        this.clearEntries();
+        this.addWidgets();
+    }
+
     @Override
     public int getRowWidth() {
         return width;

@@ -66,7 +66,7 @@ public class RenderUtils
 
     public static Vector2i getPositionRelativeToList(ObjectSelectionList<?> list)
     {
-        int y = list.getY() + list.getHeight() + 15;
+        int y = list.getY() + list.getHeight() + 10;
         return new Vector2i(list.getX(), y);
     }
 

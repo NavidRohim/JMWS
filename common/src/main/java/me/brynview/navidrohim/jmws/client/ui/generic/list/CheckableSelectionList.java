@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.client.ui.generic.list;
 
+import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.generic.list.entry.SelectableLabelEntry;
@@ -81,7 +82,7 @@ public abstract class CheckableSelectionList<E extends SelectableLabelEntry<E>> 
         super.extractWidgetRenderState(graphics, mouseX, mouseY, a);
         if (this.children().isEmpty())
         {
-            graphics.text(JMWSCommon.minecraftClientInstance.font, getEmptyStateText(), this.getX(), this.getY() - 15, -1);
+            graphics.text(JMWSCommon.minecraftClientInstance.font, getEmptyStateText(), this.getX() + this.getWidth() / 2 - (JMWSCommon.minecraftClientInstance.font.width(getEmptyStateText()) / 2), this.getY() - 15, -1);
         }
 
     }

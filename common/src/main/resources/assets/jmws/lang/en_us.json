@@ -184,6 +184,8 @@
   "jmws.ui.sharing.send_request.tooltip": "Sends a share request to selected players.",
   "jmws.ui.sharing.toggle_select_all.tooltip": "Toggles selection of all players.",
   "jmws.ui.sharing.send.tooltip": "Send to all selected players",
+  "jmws.ui.sharing.stop_share.tooltip": "Stop sharing with all selected players",
+  "jmws.ui.sharing.offline_sharing": "Offline players your sharing with",
 
   "jmws.ui.requests.accept": "Accept",
   "jmws.ui.requests.decline": "Decline",
@@ -193,6 +195,8 @@
   "jmws.ui.requests.no_requests": "No incoming requests.",
   "jmws.ui.requests.no_selected_requests": "No requests selected!",
   "jmws.ui.requests.requests_amount": "%s incoming request(s)",
+  "jmws.ui.requests.accept_selected": "Accept selected",
+  "jmws.ui.requests.decline_selected": "Decline selected",
 
   "jmws.ui.stop_sharing.empty": "Not sharing with anyone!",
   "jmws.ui.stop_sharing.not_sharing": "stopped sharing",

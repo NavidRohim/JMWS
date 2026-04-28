@@ -2,11 +2,9 @@ package me.brynview.navidrohim.jmws.client.ui.screen;
 
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
-import me.brynview.navidrohim.jmws.client.plugin.JMButtonAddon;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
-import me.brynview.navidrohim.jmws.client.ui.elements.CloseButton;
 import me.brynview.navidrohim.jmws.client.ui.elements.IconButton;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.HasScrollableList;
 import me.brynview.navidrohim.jmws.client.ui.list.entry.PlayerEntry;
@@ -18,28 +16,26 @@ import me.brynview.navidrohim.jmws.client.ui.list.ObjectSharePanel;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import org.joml.Vector2i;
 import org.jspecify.annotations.NonNull;
 
-import java.time.Duration;
 import java.util.Set;
 
 import static me.brynview.navidrohim.jmws.common.JMWSCommon.minecraftClientInstance;
 
 public class ShareScreen extends NotificationAlertScreen implements HasScrollableList {
 
-    private static final Identifier REFRESH = Identifier.fromNamespaceAndPath(Constants.MODID, "refresh");
     private static final Identifier SEND = Identifier.fromNamespaceAndPath(Constants.MODID, "send");
-
-    private static final Tooltip REFRESH_TOOLTIP = Tooltip.create(Component.translatable("selectServer.refresh"));
+    private static final Identifier STOP_SHARE = Identifier.fromNamespaceAndPath(Constants.MODID, "stop_share");
     private static final Tooltip SEND_TOOLTIP = Tooltip.create(Component.translatable("jmws.ui.sharing.send.tooltip"));
+    private static final Tooltip STOP_SHARE_TOOLTIP = Tooltip.create(Component.translatable("jmws.ui.sharing.stop_share.tooltip"));
 
     private final String displayName;
     private final ClientObjectWrapper<?> object;
@@ -61,7 +57,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         this.sharePanel = new ObjectSharePanel<>(minecraftClientInstance,  0, 0, 0, 0, 50, object, this);
         RenderUtils.setDimensionsForList(this.sharePanel, this.width, this.height);
 
-        this.sACheckbox = Checkbox.buildCheckbox(button -> {
+        this.sACheckbox = Checkbox.buildSelectAllCheckbox(button -> {
             if (button.isChecked) {
                 this.sharePanel.selectAll();
             } else {
@@ -73,8 +69,9 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         LinearLayout mainRow = LinearLayout.horizontal();
         LinearLayout systemColumn = LinearLayout.vertical().spacing(4);
 
-        buttonIcnColumn.addChild(IconButton.buildGenericButton(REFRESH, (btn) -> this.refresh(), REFRESH_TOOLTIP));
-        buttonIcnColumn.addChild(IconButton.buildGenericButton(SEND, (btn) -> this.sendRequests(), SEND_TOOLTIP));
+        buttonIcnColumn.addChild(IconButton.buildGenericButton(SEND, (btn) -> this.sendRequests(), MessageType.SUCCESS.getNumericalColour(), SEND_TOOLTIP));
+        buttonIcnColumn.addChild(IconButton.buildGenericButton(STOP_SHARE, (bnt) -> this.stopSharing(), MessageType.FAILURE.getNumericalColour(), STOP_SHARE_TOOLTIP));
+        buttonIcnColumn.addChild(IconButton.buildGenericButton(UIConstants.REFRESH, (btn) -> this.refresh(true), MessageType.PENDING.getNumericalColour(), UIConstants.REFRESH_TOOLTIP));
 
         systemColumn.addChild(this.sACheckbox);
 
@@ -89,9 +86,12 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         sharePanel.addWidgets();
     }
 
-    private void refresh()
+    private void refresh(boolean sendAlert)
     {
-        PlayerUtils.sendUserAlert(UIConstants.REFRESHING, true, true, MessageType.NEUTRAL);
+        if (sendAlert)
+        {
+            PlayerUtils.sendUserAlert(UIConstants.REFRESHING, true, true, MessageType.NEUTRAL);
+        }
         this.sharePanel.refresh();
         this.sACheckbox.isChecked = false;
     }
@@ -104,11 +104,33 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
             PlayerUtils.sendUserAlert(Component.translatable("jmws.ui.sharing.no_selected_players"), true, true, MessageType.PENDING);
         } else {
             for (PlayerEntry<?> selectedPlayer : players) {
-                OutgoingShareRequest.sendShareRequest(this.object, selectedPlayer.user.getProfile());
+                if (selectedPlayer.isOnline)
+                {
+                    OutgoingShareRequest.sendShareRequest(this.object, selectedPlayer.user.getProfile());
+                }
             }
             this.sharePanel.unselectAll();
         }
+    }
 
+    private void stopSharing()
+    {
+        Set<? extends PlayerEntry<?>> players = this.sharePanel.getSelectedEntries();
+        if (players.isEmpty())
+        {
+            PlayerUtils.sendUserAlert(Component.translatable("jmws.ui.sharing.no_selected_players"), true, true, MessageType.PENDING);
+        } else {
+            for (PlayerEntry<?> selectedPlayer : players) {
+                String playerDisplayName = selectedPlayer.isOnline ? selectedPlayer.user.getProfile().name() : selectedPlayer.userUuid.toString();
+                if (object.getSharedTo().contains(selectedPlayer.userUuid))
+                {
+                    selectedPlayer.setStoppedSharing();
+                } else {
+                    PlayerUtils.sendUserAlert(Component.literal("Not sharing with %s!".formatted(playerDisplayName)), true, true, MessageType.WARNING);
+                }
+            }
+            //this.refresh(false);
+        }
     }
 
     @Override
@@ -121,7 +143,8 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         super.extractRenderState(graphics, mouseX, mouseY, a);
         if (!this.sharePanel.isEmpty())
         {
-            graphics.text(this.font, Component.translatable("jmws.ui.sharing.share_object", this.object.getType().getReadableName(), this.displayName), sharePanel.getX(), sharePanel.getY() - 15, -1);
+            MutableComponent sharingText = Component.translatable("jmws.ui.sharing.share_object", this.object.getType().getReadableName(), this.displayName);
+            graphics.text(this.font, sharingText, sharePanel.getX() + sharePanel.getWidth() / 2 - (this.font.width(sharingText) / 2), sharePanel.getY() - 15, -1);
         }
     }
 
@@ -130,11 +153,11 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
     {
         if (sharePanel.getSelectedEntries().isEmpty())
         {
-            this.sACheckbox.isChecked = false;
+            this.sACheckbox.uncheck();
             this.sharePanel.isSelectingAll = false;
         } else if (sharePanel.getSelectedEntries().size() == this.sharePanel.children().size())
         {
-            this.sACheckbox.isChecked = true;
+            this.sACheckbox.check();
             this.sharePanel.isSelectingAll = true;
         }
     }

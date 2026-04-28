@@ -1,9 +1,11 @@
 package me.brynview.navidrohim.jmws.client.ui;
 
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.ui.generic.Subtitle;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 public class UIConstants
 {
@@ -22,4 +24,6 @@ public class UIConstants
     public static final Tooltip REFRESHING_TOOLTIP = Tooltip.create(REFRESHING);
 
 
+    public static final Identifier REFRESH = Identifier.fromNamespaceAndPath(Constants.MODID, "refresh");
+    public static final Tooltip REFRESH_TOOLTIP = Tooltip.create(Component.translatable("selectServer.refresh"));
 }
