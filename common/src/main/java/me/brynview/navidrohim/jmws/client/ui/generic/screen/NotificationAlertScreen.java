@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.client.ui.generic.screen;
 
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
+import me.brynview.navidrohim.jmws.client.ui.elements.CloseButton;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -22,13 +23,16 @@ public abstract class NotificationAlertScreen extends Screen {
 
     private long alertStartTime = 0;
 
+    private final boolean renderCloseButton;
     private final Screen parent;
     private @Nullable Component alertText = Component.empty();
 
-    public NotificationAlertScreen(Screen parent)
+    public NotificationAlertScreen(Screen parent, boolean renderCloseButton)
     {
         super(Component.empty());
         this.parent = parent;
+        this.renderCloseButton = renderCloseButton;
+
     }
 
     public void sendAlert(Component text)
@@ -44,6 +48,15 @@ public abstract class NotificationAlertScreen extends Screen {
         int alertY = this.height / 2;
 
         return new Vector2i(alertX, alertY);
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+
+        if (this.renderCloseButton) {
+            this.addRenderableWidget(CloseButton.buildAsSystemButton(this));
+        }
     }
 
     @Override

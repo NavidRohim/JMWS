@@ -31,10 +31,30 @@ public class RenderUtils
         return name.length() > maxLength ? name.substring(0, maxLength / 2) + " ... " +  name.substring(name.length() - 5): name;
     }
 
+    public static void renderStatusBarInEntry(GuiGraphicsExtractor renderer, ObjectSelectionList.Entry<?> entry, int colour)
+    {
+        // minus half-width
+        int barWidth = 6;
+        int middle = (entry.getContentX() + ((4 + PLAYER_HEAD_SIZE_HALVED) / 2));
+
+        int startX = middle - (barWidth / 2);
+        int endX = middle + (barWidth / 2);
+
+        int startY = entry.getContentYMiddle() - PLAYER_HEAD_SIZE_HALVED;
+        int endY = entry.getContentYMiddle() + PLAYER_HEAD_SIZE_HALVED;
+
+        renderer.fill(startX, startY, endX, endY, colour);
+    }
+
+    public static void renderFillForElement(GuiGraphicsExtractor renderer, LayoutElement element, int colour)
+    {
+        renderer.fill(element.getX(), element.getY(), element.getX() + element.getWidth(), element.getY() + element.getHeight(), colour);
+    }
+
     public static void setDimensionsForList(ObjectSelectionList<?> list, int screenWidth, int screenHeight)
     {
-        int panelWidth = (int) (screenWidth * 0.70);
-        int panelHeight = (int) (screenHeight * 0.65);
+        int panelWidth = (int) (screenWidth * 0.80);
+        int panelHeight = (int) (screenHeight * 0.75);
         int panelX = screenWidth / 10;
         int panelY = (screenHeight - panelHeight) / 2;
 
@@ -57,20 +77,4 @@ public class RenderUtils
 
         return onlinePlayers;
     }
-
-    public static void renderStatusBarInEntry(GuiGraphicsExtractor renderer, ObjectSelectionList.Entry<?> entry, int colour)
-    {
-        // minus half-width
-        int barWidth = 6;
-        int middle = (entry.getContentX() + ((4 + PLAYER_HEAD_SIZE_HALVED) / 2));
-
-        int startX = middle - (barWidth / 2);
-        int endX = middle + (barWidth / 2);
-
-        int startY = entry.getContentYMiddle() - PLAYER_HEAD_SIZE_HALVED;
-        int endY = entry.getContentYMiddle() + PLAYER_HEAD_SIZE_HALVED;
-
-        renderer.fill(startX, startY, endX, endY, colour);
-    }
-
 }

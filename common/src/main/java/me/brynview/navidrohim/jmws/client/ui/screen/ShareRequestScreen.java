@@ -27,11 +27,13 @@ public class ShareRequestScreen extends NotificationAlertScreen implements HasSc
     private Checkbox SDAllCheckbox;
 
     public ShareRequestScreen(Screen parent) {
-        super(parent);
+        super(parent, true);
     }
 
     @Override
     protected void init() {
+        super.init();
+
         LinearLayout verticalButtonColumnSpacer = LinearLayout.vertical().spacing(4);
         LinearLayout verticalButtonColumnSpacerForSaDa = LinearLayout.vertical().spacing(4);
         LinearLayout horizontalButtonColumnSpacer = LinearLayout.horizontal();

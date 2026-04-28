@@ -25,13 +25,14 @@ public class StopShareScreen extends NotificationAlertScreen implements HasScrol
 
     public StopShareScreen(Screen parent, ClientObjectWrapper<?> object)
     {
-        super(parent);
+        super(parent, true);
         this.object = object;
     }
 
     @Override
     protected void init()
     {
+        super.init();
 
         LinearLayout rightButtonColumn = LinearLayout.vertical().spacing(4);
         LinearLayout horizontalElementRow = LinearLayout.horizontal().spacing(6);

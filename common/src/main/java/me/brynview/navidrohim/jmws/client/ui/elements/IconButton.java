@@ -1,12 +1,18 @@
 package me.brynview.navidrohim.jmws.client.ui.elements;
 
+import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.generic.elements.AbstractJMWSButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
+
+import javax.tools.Tool;
 
 public class IconButton extends AbstractJMWSButton {
 
@@ -24,11 +30,24 @@ public class IconButton extends AbstractJMWSButton {
     @Override
     protected void extractContents(@NonNull GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, float v) {
         super.extractContents(guiGraphicsExtractor, i, i1, v);
-        //guiGraphicsExtractor.outline();
-        guiGraphicsExtractor.blitSprite(RenderPipelines.GUI_TEXTURED, image, this.getX() + (width / 2) - buttonIconWHHalfed, this.getY() + (height / 2) - buttonIconWHHalfed, width, height);
+        guiGraphicsExtractor.blitSprite(RenderPipelines.GUI_TEXTURED, image, this.getX() + (width / 2) - buttonIconWHHalfed, this.getY() + (height / 2) - buttonIconWHHalfed, buttonIconWH, buttonIconWH);
     }
 
-    public static IconButton buildButton(Identifier image, OnPress onPress, int width, int height) {
-        return new IconButton(0, 0, width, height, image, 16, onPress, Button.DEFAULT_NARRATION);
+    public static IconButton buildButton(Identifier image, OnPress onPress, int width, int height, int iconWH, @Nullable Tooltip tooltip) {
+        if (width < iconWH || height < iconWH)
+        {
+            throw new IllegalArgumentException("Icon button size must be bigger than the icon itself!");
+        }
+        IconButton icnButton = new IconButton(0, 0, width, height, image, iconWH, onPress, Button.DEFAULT_NARRATION);
+        if (tooltip != null)
+        {
+            icnButton.setTooltip(tooltip);
+        }
+        return icnButton;
+    }
+
+    public static IconButton buildGenericButton(Identifier image, OnPress onPress, Tooltip tooltip)
+    {
+        return buildButton(image, onPress, 20, 20, 20, tooltip);
     }
 }

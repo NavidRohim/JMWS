@@ -28,11 +28,18 @@ import net.minecraft.resources.Identifier;
 import org.joml.Vector2i;
 import org.jspecify.annotations.NonNull;
 
+import java.time.Duration;
 import java.util.Set;
 
 import static me.brynview.navidrohim.jmws.common.JMWSCommon.minecraftClientInstance;
 
 public class ShareScreen extends NotificationAlertScreen implements HasScrollableList {
+
+    private static final Identifier REFRESH = Identifier.fromNamespaceAndPath(Constants.MODID, "refresh");
+    private static final Identifier SEND = Identifier.fromNamespaceAndPath(Constants.MODID, "send");
+
+    private static final Tooltip REFRESH_TOOLTIP = Tooltip.create(Component.translatable("selectServer.refresh"));
+    private static final Tooltip SEND_TOOLTIP = Tooltip.create(Component.translatable("jmws.ui.sharing.send.tooltip"));
 
     private final String displayName;
     private final ClientObjectWrapper<?> object;
@@ -40,13 +47,8 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
     private Checkbox sACheckbox;
     private ObjectSharePanel<ClientObjectWrapper<?>> sharePanel;
 
-    public static final Tooltip SELECT_ALL_TOGGLE = Tooltip.create(Component.translatable("jmws.ui.sharing.toggle_select_all.tooltip"));
-    private static final Tooltip SEND_TO_SELECTED = Tooltip.create(Component.translatable("jmws.ui.sharing.send_request.tooltip"));
-
-    private static final Identifier TEST_STAR = Identifier.fromNamespaceAndPath(Constants.MODID, "test");
-
     public ShareScreen(Screen parent, ClientBaseObjectWrapper<?> object) {
-        super(parent);
+        super(parent, true);
         this.object = object;
         this.displayName = RenderUtils.shortenObjectName(object.getName(), 20);
     }
@@ -54,16 +56,10 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
     @Override
     protected void init()
     {
+        super.init();
         // Define the sharing panel and add all shared objects on this client to panel
         this.sharePanel = new ObjectSharePanel<>(minecraftClientInstance,  0, 0, 0, 0, 50, object, this);
         RenderUtils.setDimensionsForList(this.sharePanel, this.width, this.height);
-
-        LinearLayout buttonIcnColumn = LinearLayout.vertical().spacing(4);
-        LinearLayout buttonColumn = LinearLayout.vertical().spacing(4);
-        LinearLayout mainRow = LinearLayout.horizontal();
-
-        buttonColumn.addChild(Button.builder(Component.translatable("jmws.ui.sharing.reload"), (bnt) -> this.refresh()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
-        buttonColumn.addChild(Button.builder(Component.translatable("jmws.ui.sharing.send_requests"), (bnt) -> this.sendRequests()).width(UIConstants.NAMED_BUTTON_WIDTH).tooltip(SEND_TO_SELECTED).build());
 
         this.sACheckbox = Checkbox.buildCheckbox(button -> {
             if (button.isChecked) {
@@ -73,12 +69,18 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
             }
         });
 
-        buttonIcnColumn.addChild(CloseButton.buildButton(11, 11, this));
-        buttonIcnColumn.addChild(this.sACheckbox);
+        LinearLayout buttonIcnColumn = LinearLayout.vertical().spacing(4);
+        LinearLayout mainRow = LinearLayout.horizontal();
+        LinearLayout systemColumn = LinearLayout.vertical().spacing(4);
+
+        buttonIcnColumn.addChild(IconButton.buildGenericButton(REFRESH, (btn) -> this.refresh(), REFRESH_TOOLTIP));
+        buttonIcnColumn.addChild(IconButton.buildGenericButton(SEND, (btn) -> this.sendRequests(), SEND_TOOLTIP));
+
+        systemColumn.addChild(this.sACheckbox);
 
         mainRow.addChild(buttonIcnColumn, layoutSettings -> layoutSettings.paddingRight(6).paddingLeft(6));
-        mainRow.addChild(this.sharePanel, layoutSettings -> layoutSettings.paddingRight(20));
-        mainRow.addChild(buttonColumn, layoutSettings -> layoutSettings.paddingRight(20));
+        mainRow.addChild(this.sharePanel, layoutSettings -> layoutSettings.paddingRight(6));
+        mainRow.addChild(systemColumn, layoutSettings -> layoutSettings.paddingRight(6));
 
         mainRow.arrangeElements();
         FrameLayout.centerInRectangle(mainRow, 0, 0, this.width, this.height);
@@ -89,6 +91,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
 
     private void refresh()
     {
+        PlayerUtils.sendUserAlert(UIConstants.REFRESHING, true, true, MessageType.NEUTRAL);
         this.sharePanel.refresh();
         this.sACheckbox.isChecked = false;
     }

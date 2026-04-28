@@ -183,6 +183,7 @@
   "jmws.ui.sharing.reload": "Reload",
   "jmws.ui.sharing.send_request.tooltip": "Sends a share request to selected players.",
   "jmws.ui.sharing.toggle_select_all.tooltip": "Toggles selection of all players.",
+  "jmws.ui.sharing.send.tooltip": "Send to all selected players",
 
   "jmws.ui.requests.accept": "Accept",
   "jmws.ui.requests.decline": "Decline",
@@ -200,5 +201,6 @@
   "jmws.ui.generic.selected": "selected",
   "jmws.ui.generic.empty": "Empty!",
   "jmws.ui.generic.select_all": "Select all",
-  "jmws.ui.generic.deselect_all": "Deselect all"
+  "jmws.ui.generic.deselect_all": "Deselect all",
+  "jmws.ui.generic.refreshing": "Refreshing"
 }

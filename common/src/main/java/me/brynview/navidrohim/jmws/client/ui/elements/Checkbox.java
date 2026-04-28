@@ -33,7 +33,7 @@ public class Checkbox extends AbstractJMWSButton {
 
     @Override
     public void onPress(@NonNull InputWithModifiers input) {
-        Constants.LoggerHolder.debug(isChecked, "BEFORE PRESS");
+        super.onPress(input);
         isChecked = !isChecked;
 
         if (isChecked)
@@ -42,13 +42,11 @@ public class Checkbox extends AbstractJMWSButton {
         } else {
             this.setTooltip(UIConstants.SELECT_ALL);
         }
-
-        Constants.LoggerHolder.debug(isChecked, "CHECKED");
         this.onPress.onPress(this);
     }
 
     public static Checkbox buildCheckbox(OnCheckboxPress onPress) {
-        Checkbox box = new Checkbox(0, 0, 11, 11, Component.empty(), onPress, Button.DEFAULT_NARRATION);
+        Checkbox box = new Checkbox(0, 0, 12, 12, Component.empty(), onPress, Button.DEFAULT_NARRATION);
         box.setTooltip(UIConstants.SELECT_ALL);
 
         return box;
