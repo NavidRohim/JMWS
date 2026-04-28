@@ -54,15 +54,10 @@ repositories {
     }
 }
 
-sourcesJar {
-    from(rootProject.file('LICENSE')) {
-        rename { "${it}_${mod_name}" }
-    }
-}
-
 jar {
-    from(rootProject.file('LICENSE')) {
-        rename { "${it}_${mod_name}" }
+    into('META-INF/licenses')
+    {
+        from fileTree(rootProject.file("licenses"))
     }
 
     manifest {
