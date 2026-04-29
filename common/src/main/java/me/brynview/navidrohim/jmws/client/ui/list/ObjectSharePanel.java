@@ -1,7 +1,9 @@
 package me.brynview.navidrohim.jmws.client.ui.list;
 
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
+import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.HasScrollableList;
 import me.brynview.navidrohim.jmws.client.ui.list.entry.PlayerEntry;
 import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
@@ -19,10 +21,16 @@ import java.util.*;
 public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends CheckableSelectionList<PlayerEntry<T>> {
 
     private static final Component NO_PLAYERS_TEXT = Component.translatable("jmws.ui.sharing.no_players");
-    private final static Component PLAYERS_OFFLINE_SHARING_WITH = Component.translatable("jmws.ui.sharing.offline_sharing");
-    private final List<PlayerInfo> players = new ArrayList<>();
-    public final List<UUID> offlinePlayers = new ArrayList<>();
+    private static final Component PLAYERS_OFFLINE_SHARING_WITH = Component.translatable("jmws.ui.sharing.offline_sharing");
+    private final int playersOfflineSharingWithWidth;
 
+    private final List<PlayerInfo> players = new ArrayList<>();
+    private final List<UUID> offlinePlayers = new ArrayList<>();
+
+    private final List<PlayerEntry<T>> onlineEntries = new ArrayList<>();
+    private final List<PlayerEntry<T>> offlineEntries = new ArrayList<>();
+
+    private static final int OFFLINE_LABEL_Y_SPACING = 20;
     private final HasScrollableList parentScreen;
 
     public final T sharedObject;
@@ -34,30 +42,33 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
         this.sharedObject = clientObjectWrapper;
         this.parentScreen = parentScreen;
         this.offlinePlayers.add(UUID.randomUUID());
+        this.offlinePlayers.add(UUID.randomUUID());
+
+        this.playersOfflineSharingWithWidth = minecraft.font.width(PLAYERS_OFFLINE_SHARING_WITH);
     }
 
     @Override
     public void setScrollAmount(double scrollAmount) {
         super.setScrollAmount(scrollAmount);
+
+        for (PlayerEntry<T> entry : this.children())
+        {
+            if (offlineEntries.contains(entry) && !this.onlineEntries.isEmpty())
+            {
+                entry.setY(getEntryOfflineEntryYPos(entry));
+            }
+        }
     }
 
-    protected void addEntryUnderText(@NonNull PlayerEntry<T> entry) {
-        entry.setX(this.getRowLeft());
-        entry.setWidth(this.getRowWidth());
-        entry.setY(this.getNextY() + 20);
-        entry.setHeight(this.defaultEntryHeight);
-        this.addEntry(entry);
+    private int getEntryOfflineEntryYPos(PlayerEntry<T> entry)
+    {
+        return (OFFLINE_LABEL_Y_SPACING * 2) + entry.getY();
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double scrollX, double scrollY) {
-        return super.mouseScrolled(mx, my, scrollX, scrollY);
-    }
-
-    @Override
-    public boolean updateScrolling(@NonNull MouseButtonEvent event) {
-        //return super.updateScrolling(event);
-        return true;
+    protected int contentHeight() {
+        int normalHeight = super.contentHeight();
+        return (normalHeight) + (OFFLINE_LABEL_Y_SPACING * 2);
     }
 
     private void refreshPlayers()
@@ -66,47 +77,59 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
         this.players.addAll(RenderUtils.getPlayers(this.minecraft));
     }
 
-
-
     public void refresh()
     {
+        this.offlineEntries.clear();
+        this.onlineEntries.clear();
+
         JMWSPlugin.sync(false);
         this.unselectAll();
         this.clearEntries();
         this.refreshPlayers();
         this.addWidgets();
-        this.addSelf(5);
     }
 
     private void addSelf(int i)
     {
         for (int j = 0; j < i; ++j)
         {
-            this.addEntry(new PlayerEntry<>(PlayerUtils.getOurPlayerInfo(), this, this.sharedObject));
+            this.players.add(PlayerUtils.getOurPlayerInfo());
         }
     }
 
     public void addWidgets()
     {
-        players.forEach(p -> this.addEntryToTop(new PlayerEntry<>(p, this, this.sharedObject)));
-        if (!this.offlinePlayers.isEmpty())
-        {
-            for (UUID player : offlinePlayers) {
-                PlayerEntry<T> offlinePlayer = new PlayerEntry<>(player, this, this.sharedObject, false);
-                this.addEntryUnderText(offlinePlayer);
-            }
+
+        for (UUID player : offlinePlayers) {
+            PlayerEntry<T> offlinePlayer = new PlayerEntry<>(player, this, this.sharedObject, false);
+            this.addEntry(offlinePlayer);
+            this.offlineEntries.add(offlinePlayer);
         }
 
+        for (PlayerInfo player : players) {
+            PlayerEntry<T> onlinePlayer = new PlayerEntry<>(player, this, this.sharedObject);
+            this.addEntryToTop(onlinePlayer);
+            this.onlineEntries.add(onlinePlayer);
+        }
     }
-
-    private void extractOfflinePlayersTextLabel(@NonNull GuiGraphicsExtractor guiGraphicsExtractor, PlayerEntry<?> lastPlayer)
+    private void extractOfflinePlayersTextLabel(@NonNull GuiGraphicsExtractor guiGraphicsExtractor)
     {
-        int x = lastPlayer.getContentX() + lastPlayer.getContentWidth() / 2;
-        int y = lastPlayer.getContentY() + lastPlayer.getContentHeight();
+        PlayerEntry<T> firstEntry = this.onlineEntries.getFirst();
 
-        if (y < this.getY() + this.getHeight())
+        int bottomBoundary = this.getY() + this.getHeight();
+        int offlineLabelY = (firstEntry.getContentY() + firstEntry.getContentHeight() + (OFFLINE_LABEL_Y_SPACING / 2));
+        int offlineLabelBottom = offlineLabelY + minecraft.font.lineHeight;
+        int offlineLabelYLine = offlineLabelBottom + 4;
+
+        int x = this.getX() + this.getWidth() / 2;
+
+        if (offlineLabelYLine < bottomBoundary)
         {
-            guiGraphicsExtractor.centeredText(this.minecraft.font, PLAYERS_OFFLINE_SHARING_WITH, x, y, 0xFFFFFFFF);
+            guiGraphicsExtractor.horizontalLine(x - this.playersOfflineSharingWithWidth / 2, x + this.playersOfflineSharingWithWidth / 2, offlineLabelYLine, 0xFFFFFFFF);
+        }
+        if (offlineLabelY + minecraft.font.lineHeight < bottomBoundary)
+        {
+            guiGraphicsExtractor.centeredText(this.minecraft.font, PLAYERS_OFFLINE_SHARING_WITH, x, offlineLabelY, 0xFFFFFFFF);
         }
     }
 
@@ -131,9 +154,10 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
     @Override
     public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         super.extractWidgetRenderState(graphics, mouseX, mouseY, a);
-        if (!this.offlinePlayers.isEmpty() && !this.children().isEmpty())
+
+        if (!this.offlineEntries.isEmpty() && !this.onlineEntries.isEmpty())
         {
-            this.extractOfflinePlayersTextLabel(graphics, this.children().getLast());
+            this.extractOfflinePlayersTextLabel(graphics);
         }
     }
 }

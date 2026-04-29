@@ -67,17 +67,17 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
 
         LinearLayout buttonIcnColumn = LinearLayout.vertical().spacing(4);
         LinearLayout mainRow = LinearLayout.horizontal();
-        LinearLayout systemColumn = LinearLayout.vertical().spacing(4);
+        //LinearLayout systemColumn = LinearLayout.vertical().spacing(6);
 
         buttonIcnColumn.addChild(IconButton.buildGenericButton(SEND, (btn) -> this.sendRequests(), MessageType.SUCCESS.getNumericalColour(), SEND_TOOLTIP));
         buttonIcnColumn.addChild(IconButton.buildGenericButton(STOP_SHARE, (bnt) -> this.stopSharing(), MessageType.FAILURE.getNumericalColour(), STOP_SHARE_TOOLTIP));
         buttonIcnColumn.addChild(IconButton.buildGenericButton(UIConstants.REFRESH, (btn) -> this.refresh(true), MessageType.PENDING.getNumericalColour(), UIConstants.REFRESH_TOOLTIP));
 
-        systemColumn.addChild(this.sACheckbox);
+        buttonIcnColumn.addChild(this.sACheckbox, settings -> settings.paddingRight(4).paddingLeft(4));
 
         mainRow.addChild(buttonIcnColumn, layoutSettings -> layoutSettings.paddingRight(6).paddingLeft(6));
-        mainRow.addChild(this.sharePanel, layoutSettings -> layoutSettings.paddingRight(6));
-        mainRow.addChild(systemColumn, layoutSettings -> layoutSettings.paddingRight(6));
+        mainRow.addChild(this.sharePanel, layoutSettings -> layoutSettings.paddingRight(14));
+        //mainRow.addChild(systemColumn, layoutSettings -> layoutSettings.paddingRight(6));
 
         mainRow.arrangeElements();
         FrameLayout.centerInRectangle(mainRow, 0, 0, this.width, this.height);

@@ -23,7 +23,7 @@ public class RenderUtils
 
     public static void renderBorderForList(@NotNull GuiGraphicsExtractor graphics, LayoutElement layout, int padding)
     {
-        graphics.outline(layout.getX() - padding, layout.getY() - padding, layout.getWidth() + padding * 2, layout.getHeight() + padding * 2, 0xFF202020);
+        graphics.outline(layout.getX() - padding, layout.getY() - padding, layout.getWidth() + padding * 2, layout.getHeight() + padding * 2, UIConstants.BORDER_COLOUR);
     }
 
     public static String shortenObjectName(String name, int maxLength)
