@@ -64,6 +64,7 @@ public final class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerH
         this.userUuid = user.getProfile().id();
         this.isOnline = true;
 
+        setSelected(false);
         setSubtitle(getSubtitleText());
     }
 
@@ -98,7 +99,7 @@ public final class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerH
 
         super.setSelected(selected);
 
-        setSubtitle(STOPPED_SHARING);
+        //setSubtitle(STOPPED_SHARING);
     }
 
     public EntryState getState()
