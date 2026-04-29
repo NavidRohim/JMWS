@@ -13,6 +13,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -243,7 +244,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     @Override
     public final Set<UUID> getSharedTo() {
         if (this.info != null) {
-            return this.getInfo().sharedTo;
+            return new HashSet<>(this.getInfo().sharedTo);
         }
         throw new NoInfoException();
     }

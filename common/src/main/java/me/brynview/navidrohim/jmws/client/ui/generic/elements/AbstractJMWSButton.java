@@ -15,6 +15,7 @@ public abstract class AbstractJMWSButton extends Button implements AbstractJMWSE
 
     private static final Identifier BUTTON_BG = Identifier.fromNamespaceAndPath(Constants.MODID, "button_bg");
     protected boolean isHeld = false;
+    public boolean isEnabled = true;
 
     protected AbstractJMWSButton(int x, int y, int width, int height, Component message, OnPress onPress, CreateNarration createNarration) {
         super(x, y, width, height, message, onPress, createNarration);
@@ -22,8 +23,11 @@ public abstract class AbstractJMWSButton extends Button implements AbstractJMWSE
 
     @Override
     public void onClick(@NonNull MouseButtonEvent event, boolean doubleClick) {
-        isHeld = true;
-        super.onClick(event, doubleClick);
+        if (isEnabled)
+        {
+            isHeld = true;
+            super.onClick(event, doubleClick);
+        }
     }
 
     @Override
@@ -44,6 +48,11 @@ public abstract class AbstractJMWSButton extends Button implements AbstractJMWSE
         } else if (this.isHovered())
         {
             RenderUtils.renderFillForElement(guiGraphicsExtractor, this, 0x40909090);
+        }
+
+        if (!isEnabled)
+        {
+            RenderUtils.renderFillForElement(guiGraphicsExtractor, this, 0x40929292);
         }
     }
 

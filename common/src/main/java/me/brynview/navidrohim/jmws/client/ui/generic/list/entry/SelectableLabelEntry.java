@@ -28,7 +28,10 @@ public abstract class SelectableLabelEntry<E extends SelectableLabelEntry<E>> ex
     }
 
     @SuppressWarnings("unchecked")
-    public void setSelected(boolean selected) {
+    public void setSelected(boolean selected)
+    {
+
+
         if (selected) {
             if (canSelect()) {
                 this.isSelected = true;

@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.client.ui;
 
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -9,8 +10,7 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static me.brynview.navidrohim.jmws.client.ui.UIConstants.PLAYER_HEAD_SIZE_HALVED;
 
@@ -76,5 +76,13 @@ public class RenderUtils
         onlinePlayers.removeIf(player -> player.getProfile().equals(minecraft.player.getGameProfile()));
 
         return onlinePlayers;
+    }
+
+    public static Set<UUID> getOfflinePlayers(Set<UUID> players)
+    {
+        Set<UUID> playersCopy = new HashSet<>(players);
+        Collection<UUID> onlinePlayers = JMWSCommon.minecraftClientInstance.getConnection().getOnlinePlayerIds();
+        onlinePlayers.forEach(playersCopy::remove);
+        return playersCopy;
     }
 }

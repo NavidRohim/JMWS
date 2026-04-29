@@ -130,6 +130,7 @@ public class JMWSPlugin implements IClientPlugin {
 
                 if (waypoint.isSharing())
                 {
+                    Constants.LoggerHolder.debug(waypoint.getSharedTo(), "SHARED TO SIZE");
                     waypointPopupMenuEvent.getPopupMenu().addMenuItem("Stop Sharing (%s)".formatted(waypoint.getSharedTo().size()), (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.UNSHARE);});
                 }
             }

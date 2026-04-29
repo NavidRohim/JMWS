@@ -40,7 +40,10 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
     private final String displayName;
     private final ClientObjectWrapper<?> object;
 
-    private Checkbox sACheckbox;
+    private Checkbox checkbox;
+    private IconButton sendButton;
+    private IconButton stopShareButton;
+
     private ObjectSharePanel<ClientObjectWrapper<?>> sharePanel;
 
     public ShareScreen(Screen parent, ClientBaseObjectWrapper<?> object) {
@@ -57,7 +60,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         this.sharePanel = new ObjectSharePanel<>(minecraftClientInstance,  0, 0, 0, 0, 50, object, this);
         RenderUtils.setDimensionsForList(this.sharePanel, this.width, this.height);
 
-        this.sACheckbox = Checkbox.buildSelectAllCheckbox(button -> {
+        this.checkbox = Checkbox.buildSelectAllCheckbox(button -> {
             if (button.isChecked) {
                 this.sharePanel.selectAll();
             } else {
@@ -65,19 +68,20 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
             }
         });
 
+        this.sendButton = IconButton.buildGenericButton(SEND, (btn) -> this.sendRequests(), MessageType.SUCCESS.getNumericalColour(), SEND_TOOLTIP);
+        this.stopShareButton = IconButton.buildGenericButton(STOP_SHARE, (btn) -> this.stopSharing(), MessageType.FAILURE.getNumericalColour(), STOP_SHARE_TOOLTIP);
+
         LinearLayout buttonIcnColumn = LinearLayout.vertical().spacing(4);
         LinearLayout mainRow = LinearLayout.horizontal();
-        //LinearLayout systemColumn = LinearLayout.vertical().spacing(6);
 
-        buttonIcnColumn.addChild(IconButton.buildGenericButton(SEND, (btn) -> this.sendRequests(), MessageType.SUCCESS.getNumericalColour(), SEND_TOOLTIP));
-        buttonIcnColumn.addChild(IconButton.buildGenericButton(STOP_SHARE, (bnt) -> this.stopSharing(), MessageType.FAILURE.getNumericalColour(), STOP_SHARE_TOOLTIP));
-        buttonIcnColumn.addChild(IconButton.buildGenericButton(UIConstants.REFRESH, (btn) -> this.refresh(true), MessageType.PENDING.getNumericalColour(), UIConstants.REFRESH_TOOLTIP));
+        buttonIcnColumn.addChild(this.sendButton);
+        buttonIcnColumn.addChild(this.stopShareButton);
+        buttonIcnColumn.addChild(IconButton.buildGenericButton(UIConstants.REFRESH, (btn) -> this.refresh(), MessageType.PENDING.getNumericalColour(), UIConstants.REFRESH_TOOLTIP));
 
-        buttonIcnColumn.addChild(this.sACheckbox, settings -> settings.paddingRight(4).paddingLeft(4));
+        buttonIcnColumn.addChild(this.checkbox, settings -> settings.paddingRight(4).paddingLeft(4));
 
         mainRow.addChild(buttonIcnColumn, layoutSettings -> layoutSettings.paddingRight(6).paddingLeft(6));
         mainRow.addChild(this.sharePanel, layoutSettings -> layoutSettings.paddingRight(14));
-        //mainRow.addChild(systemColumn, layoutSettings -> layoutSettings.paddingRight(6));
 
         mainRow.arrangeElements();
         FrameLayout.centerInRectangle(mainRow, 0, 0, this.width, this.height);
@@ -86,14 +90,14 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         sharePanel.addWidgets();
     }
 
-    private void refresh(boolean sendAlert)
+    private void refresh()
     {
-        if (sendAlert)
-        {
-            PlayerUtils.sendUserAlert(UIConstants.REFRESHING, true, true, MessageType.NEUTRAL);
-        }
+        PlayerUtils.sendUserAlert(UIConstants.REFRESHING, true, true, MessageType.NEUTRAL);
         this.sharePanel.refresh();
-        this.sACheckbox.isChecked = false;
+        this.checkbox.isChecked = false;
+
+        this.sendButton.isEnabled = true;
+        this.stopShareButton.isEnabled = true;
     }
 
     private void sendRequests()
@@ -109,7 +113,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
                     OutgoingShareRequest.sendShareRequest(this.object, selectedPlayer.user.getProfile());
                 }
             }
-            this.sharePanel.unselectAll();
+            this.refresh();
         }
     }
 
@@ -129,7 +133,6 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
                     PlayerUtils.sendUserAlert(Component.literal("Not sharing with %s!".formatted(playerDisplayName)), true, true, MessageType.WARNING);
                 }
             }
-            //this.refresh(false);
         }
     }
 
@@ -153,12 +156,41 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
     {
         if (sharePanel.getSelectedEntries().isEmpty())
         {
-            this.sACheckbox.uncheck();
+            this.checkbox.uncheck();
             this.sharePanel.isSelectingAll = false;
         } else if (sharePanel.getSelectedEntries().size() == this.sharePanel.children().size())
         {
-            this.sACheckbox.check();
+            this.checkbox.check();
             this.sharePanel.isSelectingAll = true;
+        }
+
+        for (PlayerEntry<ClientObjectWrapper<?>> offlineEntry : this.sharePanel.offlineEntries) {
+            if (offlineEntry.isSelected)
+            {
+                this.sendButton.isEnabled = false;
+                break;
+            }
+            this.sendButton.isEnabled = true;
+        }
+
+        for (PlayerEntry<ClientObjectWrapper<?>> onlineEntry : this.sharePanel.onlineEntries) {
+            if (onlineEntry.isSelected && onlineEntry.getState() == PlayerEntry.EntryState.NOT_SHARED)
+            {
+                this.stopShareButton.isEnabled = false;
+                break;
+            }
+            this.stopShareButton.isEnabled = true;
+        }
+
+        for (PlayerEntry<ClientObjectWrapper<?>> child : this.sharePanel.children())
+        {
+            if (child.isSelected && child.getState() == PlayerEntry.EntryState.SHARED)
+            {
+                this.sendButton.isEnabled = false;
+                break;
+            }
+
+            this.sendButton.isEnabled = true;
         }
     }
 

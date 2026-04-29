@@ -34,7 +34,9 @@ public class IconButton extends AbstractJMWSButton {
     @Override
     protected void extractContents(@NonNull GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, float v) {
         super.extractContents(guiGraphicsExtractor, i, i1, v);
-        guiGraphicsExtractor.blitSprite(RenderPipelines.GUI_TEXTURED, image, this.getX() + (width / 2) - buttonIconWHHalfed, this.getY() + (height / 2) - buttonIconWHHalfed, buttonIconWH, buttonIconWH, tintColor);
+
+        int colour = !this.isEnabled ? 0x80B0B0B0 : tintColor;
+        guiGraphicsExtractor.blitSprite(RenderPipelines.GUI_TEXTURED, image, this.getX() + (width / 2) - buttonIconWHHalfed, this.getY() + (height / 2) - buttonIconWHHalfed, buttonIconWH, buttonIconWH, colour);
     }
 
     public static IconButton buildButton(Identifier image, OnPress onPress, int width, int height, int iconWH, int tintColor, @Nullable Tooltip tooltip) {

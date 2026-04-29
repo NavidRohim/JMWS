@@ -24,38 +24,37 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
     private static final Component PLAYERS_OFFLINE_SHARING_WITH = Component.translatable("jmws.ui.sharing.offline_sharing");
     private final int playersOfflineSharingWithWidth;
 
-    private final List<PlayerInfo> players = new ArrayList<>();
-    private final List<UUID> offlinePlayers = new ArrayList<>();
+    public final List<PlayerInfo> players = new ArrayList<>();
+    public final List<UUID> offlinePlayers = new ArrayList<>();
 
-    private final List<PlayerEntry<T>> onlineEntries = new ArrayList<>();
-    private final List<PlayerEntry<T>> offlineEntries = new ArrayList<>();
+    public final List<PlayerEntry<T>> onlineEntries = new ArrayList<>();
+    public final List<PlayerEntry<T>> offlineEntries = new ArrayList<>();
 
     private static final int OFFLINE_LABEL_Y_SPACING = 20;
     private final HasScrollableList parentScreen;
+    private boolean shouldRenderOfflinePlayers = false;
 
     public final T sharedObject;
 
     public ObjectSharePanel(Minecraft minecraft, int width, int height, int x, int y, int itemHeight, T clientObjectWrapper, HasScrollableList parentScreen) {
         super(minecraft, width, height, x, y, itemHeight);
 
-        this.players.addAll(RenderUtils.getPlayers(minecraft));
         this.sharedObject = clientObjectWrapper;
         this.parentScreen = parentScreen;
-        this.offlinePlayers.add(UUID.randomUUID());
-        this.offlinePlayers.add(UUID.randomUUID());
 
         this.playersOfflineSharingWithWidth = minecraft.font.width(PLAYERS_OFFLINE_SHARING_WITH);
+        this.refreshPlayers();
+        this.addSelf(2);
     }
 
     @Override
     public void setScrollAmount(double scrollAmount) {
         super.setScrollAmount(scrollAmount);
 
-        for (PlayerEntry<T> entry : this.children())
+        if (shouldRenderOfflinePlayers)
         {
-            if (offlineEntries.contains(entry) && !this.onlineEntries.isEmpty())
-            {
-                entry.setY(getEntryOfflineEntryYPos(entry));
+            for (PlayerEntry<T> offlineEntry : offlineEntries) {
+                offlineEntry.setY(getEntryOfflineEntryYPos(offlineEntry));
             }
         }
     }
@@ -68,12 +67,29 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
     @Override
     protected int contentHeight() {
         int normalHeight = super.contentHeight();
-        return (normalHeight) + (OFFLINE_LABEL_Y_SPACING * 2);
+        if (shouldRenderOfflinePlayers)
+        {
+            return (normalHeight) + (OFFLINE_LABEL_Y_SPACING * 2);
+        }
+        return normalHeight;
+    }
+
+    private void addOfflineEntry(PlayerEntry<T> entry)
+    {
+        this.addEntry(entry);
+        if (shouldRenderOfflinePlayers)
+        {
+            entry.setY(getEntryOfflineEntryYPos(entry));
+        }
     }
 
     private void refreshPlayers()
     {
+
         this.players.clear();
+        this.offlinePlayers.clear();
+
+        this.offlinePlayers.addAll(RenderUtils.getOfflinePlayers(this.sharedObject.getSharedTo()));
         this.players.addAll(RenderUtils.getPlayers(this.minecraft));
     }
 
@@ -86,6 +102,7 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
         this.unselectAll();
         this.clearEntries();
         this.refreshPlayers();
+        //this.addSelf(5);
         this.addWidgets();
     }
 
@@ -99,7 +116,6 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
 
     public void addWidgets()
     {
-
         for (UUID player : offlinePlayers) {
             PlayerEntry<T> offlinePlayer = new PlayerEntry<>(player, this, this.sharedObject, false);
             this.addEntry(offlinePlayer);
@@ -111,25 +127,31 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
             this.addEntryToTop(onlinePlayer);
             this.onlineEntries.add(onlinePlayer);
         }
+        shouldRenderOfflinePlayers = !this.offlineEntries.isEmpty() && !this.onlineEntries.isEmpty();
+        this.setScrollAmount(0);
     }
+
     private void extractOfflinePlayersTextLabel(@NonNull GuiGraphicsExtractor guiGraphicsExtractor)
     {
-        PlayerEntry<T> firstEntry = this.onlineEntries.getFirst();
-
-        int bottomBoundary = this.getY() + this.getHeight();
-        int offlineLabelY = (firstEntry.getContentY() + firstEntry.getContentHeight() + (OFFLINE_LABEL_Y_SPACING / 2));
-        int offlineLabelBottom = offlineLabelY + minecraft.font.lineHeight;
-        int offlineLabelYLine = offlineLabelBottom + 4;
-
-        int x = this.getX() + this.getWidth() / 2;
-
-        if (offlineLabelYLine < bottomBoundary)
+        if (shouldRenderOfflinePlayers)
         {
-            guiGraphicsExtractor.horizontalLine(x - this.playersOfflineSharingWithWidth / 2, x + this.playersOfflineSharingWithWidth / 2, offlineLabelYLine, 0xFFFFFFFF);
-        }
-        if (offlineLabelY + minecraft.font.lineHeight < bottomBoundary)
-        {
-            guiGraphicsExtractor.centeredText(this.minecraft.font, PLAYERS_OFFLINE_SHARING_WITH, x, offlineLabelY, 0xFFFFFFFF);
+            PlayerEntry<T> firstEntry = this.onlineEntries.getFirst();
+
+            int bottomBoundary = this.getY() + this.getHeight();
+            int offlineLabelY = (firstEntry.getContentY() + firstEntry.getContentHeight() + (OFFLINE_LABEL_Y_SPACING / 2));
+            int offlineLabelBottom = offlineLabelY + minecraft.font.lineHeight;
+            int offlineLabelYLine = offlineLabelBottom + 4;
+
+            int x = this.getX() + this.getWidth() / 2;
+
+            if (offlineLabelYLine < bottomBoundary)
+            {
+                guiGraphicsExtractor.horizontalLine(x - this.playersOfflineSharingWithWidth / 2, x + this.playersOfflineSharingWithWidth / 2, offlineLabelYLine, 0xFFFFFFFF);
+            }
+            if (offlineLabelBottom < bottomBoundary)
+            {
+                guiGraphicsExtractor.centeredText(this.minecraft.font, PLAYERS_OFFLINE_SHARING_WITH, x, offlineLabelY, 0xFFFFFFFF);
+            }
         }
     }
 
@@ -154,10 +176,6 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
     @Override
     public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
         super.extractWidgetRenderState(graphics, mouseX, mouseY, a);
-
-        if (!this.offlineEntries.isEmpty() && !this.onlineEntries.isEmpty())
-        {
-            this.extractOfflinePlayersTextLabel(graphics);
-        }
+        this.extractOfflinePlayersTextLabel(graphics);
     }
 }
