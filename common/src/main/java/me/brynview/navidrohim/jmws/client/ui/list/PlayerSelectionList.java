@@ -62,6 +62,21 @@ public class PlayerSelectionList extends CheckableSelectionList<PlayerSelectionL
         this.parentScreen.entryPressed();
     }
 
+    @Override
+    public void renderBorder(@NotNull GuiGraphicsExtractor graphics) {
+        RenderUtils.renderBorderForList(graphics, this);
+    }
+
+    @Override
+    public void renderBackground(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+
+    }
+
+    @Override
+    public void refresh() {
+
+    }
+
     public static class PlayerEntry extends PlayerHeadEntryWithTitle<PlayerEntry> {
 
         private static final Subtitle SHARING = new Subtitle(Component.translatable("jmws.ui.stop_sharing.sharing"), MessageType.GREY);

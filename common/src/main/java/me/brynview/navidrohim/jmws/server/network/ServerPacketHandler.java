@@ -9,6 +9,7 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.api.ServerSyncInformation;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
+import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.server.JMWSServerCommon;
 import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
 import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
@@ -419,6 +420,21 @@ public class ServerPacketHandler {
                         Dispatcher.sendToClient(new JMWSActionPayload(CommandFactory.makeBaseJsonRequest(CommandFactory.Commands.SPECIAL_FORWARD_TO_CLIENT, playerUUID, commandForClient, arguments)), toPlayerObject);
                     } else {
                         PlayerNetworkingHelper.sendUserMessage(player, "error.jmws.player_offline", true, MessageType.WARNING);
+                    }
+                }
+
+                case SERVER_REMOVE_SHARE_WITH -> {
+                    UUID with = UUID.fromString(arguments.getFirst().getAsString());
+                    ServerSyncInformation syncInformation = ServerSyncInformation.getFromString(arguments.getLast().getAsString());
+
+                    @Nullable ServerPlayer withPlayer = JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(with);
+
+                    if (syncInformation.object != null) {
+                        syncInformation.object.serverSyncingHandler.removeUserFromShare(with);
+                        if (withPlayer != null)
+                        {
+                            sendUserSync(withPlayer, false, false, false);
+                        }
                     }
                 }
 

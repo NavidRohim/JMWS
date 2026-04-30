@@ -1,8 +1,7 @@
 package me.brynview.navidrohim.jmws.client.ui.generic.list;
 
-import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
-import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
+import me.brynview.navidrohim.jmws.client.ui.generic.elements.AbstractJMWSElement;
 import me.brynview.navidrohim.jmws.client.ui.generic.list.entry.SelectableLabelEntry;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import net.minecraft.client.Minecraft;
@@ -15,7 +14,7 @@ import org.jspecify.annotations.NonNull;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class CheckableSelectionList<E extends SelectableLabelEntry<E>> extends ObjectSelectionList<E> {
+public abstract class CheckableSelectionList<E extends SelectableLabelEntry<E>> extends ObjectSelectionList<E> implements AbstractJMWSElement {
 
     protected final Set<E> selectedEntries = new HashSet<>();
     public boolean isSelectingAll = false;
@@ -88,8 +87,9 @@ public abstract class CheckableSelectionList<E extends SelectableLabelEntry<E>> 
     }
 
     @Override
-    protected void extractListSeparators(@NotNull GuiGraphicsExtractor graphics) {
-        RenderUtils.renderBorderForList(graphics, this);
+    protected void extractListSeparators(@NotNull GuiGraphicsExtractor graphics)
+    {
+        this.renderBorder(graphics);
     }
 
     @Override

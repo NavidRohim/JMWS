@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 public interface AbstractJMWSElement extends Renderable, LayoutElement
 {
-    void renderBorder(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks);
+    void renderBorder(@NotNull GuiGraphicsExtractor graphics);
     void renderBackground(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks);
+    void refresh();
 }

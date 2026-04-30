@@ -1,7 +1,9 @@
 package me.brynview.navidrohim.jmws.client.ui.generic.screen;
 
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
+import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.elements.CloseButton;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -19,7 +21,7 @@ import static me.brynview.navidrohim.jmws.client.ui.UIConstants.ALERT_DURATION_M
 import static me.brynview.navidrohim.jmws.client.ui.UIConstants.ALERT_FADE_DURATION_MS;
 import static me.brynview.navidrohim.jmws.common.JMWSCommon.minecraftClientInstance;
 
-public abstract class NotificationAlertScreen extends Screen {
+public abstract class NotificationAlertScreen extends AbstractJMWSScreen {
 
     private long alertStartTime = 0;
 
@@ -69,7 +71,15 @@ public abstract class NotificationAlertScreen extends Screen {
     public void onClose()
     {
         minecraftClientInstance.setScreen(parent);
+
         JMWSClientCommon.currentShareScreen = null;
+        JMWSClientCommon.currentNotificationScreen = null;
+    }
+
+    @Override
+    public void refresh() {
+        PlayerUtils.sendUserAlert(UIConstants.REFRESHING, true, true, MessageType.NEUTRAL);
+        super.refresh();
     }
 
     public void extractAlertText(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks)

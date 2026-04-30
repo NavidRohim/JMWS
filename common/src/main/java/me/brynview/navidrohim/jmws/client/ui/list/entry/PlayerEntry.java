@@ -65,7 +65,7 @@ public final class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerH
         this.isOnline = true;
 
         setSelected(false);
-        setSubtitle(getSubtitleText());
+        setSubtitle(entryState.getAssociated());
     }
 
     public PlayerEntry(@NotNull UUID user, @NonNull ObjectSharePanel<T> owner, @NonNull T sharedObject, boolean didStopSharing) {
@@ -77,12 +77,7 @@ public final class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerH
         this.didStopSharing = didStopSharing;
         this.isOnline = false;
 
-        setSubtitle(getSubtitleText());
-    }
-
-    public Subtitle getSubtitleText()
-    {
-        return entryState.getAssociated();
+        setSubtitle(entryState.getAssociated());
     }
 
     @Override
@@ -98,8 +93,6 @@ public final class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerH
         }
 
         super.setSelected(selected);
-
-        //setSubtitle(STOPPED_SHARING);
     }
 
     public EntryState getState()
@@ -143,7 +136,7 @@ public final class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerH
     @Override
     public void extractUnselectedState(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
         if (!isSelected) {
-            setSubtitle(getSubtitleText());
+            setSubtitle(entryState.getAssociated());
         }
     }
 

@@ -13,7 +13,6 @@ import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
@@ -53,9 +52,9 @@ public class ShareRequestScreen extends NotificationAlertScreen implements HasSc
 
         //verticalButtonColumnSpacer.addChild(Button.builder(Component.translatable("jmws.ui.requests.accept"), (button) -> this.acceptAll()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
         //verticalButtonColumnSpacer.addChild(Button.builder(Component.translatable("jmws.ui.requests.decline"), (button) -> this.declineAll()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
-        iconButtonColumn.addChild(IconButton.buildGenericButton(ACCEPT, (button -> this.acceptAll()), ACCEPT_TOOLTIP));
-        iconButtonColumn.addChild(IconButton.buildGenericButton(DECLINE, (button -> this.declineAll()), DECLINE_TOOLTIP));
-        iconButtonColumn.addChild(IconButton.buildGenericButton(UIConstants.REFRESH, (button -> this.incomingShareRequestsList.refresh()), UIConstants.REFRESH_TOOLTIP));
+        iconButtonColumn.addChild(IconButton.buildGenericButton(ACCEPT, (button -> this.acceptAll()), ACCEPT_TOOLTIP, null));
+        iconButtonColumn.addChild(IconButton.buildGenericButton(DECLINE, (button -> this.declineAll()), DECLINE_TOOLTIP, null));
+        iconButtonColumn.addChild(IconButton.buildGenericButton(UIConstants.REFRESH, (button -> this.incomingShareRequestsList.refresh()), UIConstants.REFRESH_TOOLTIP, null));
         this.checkbox = Checkbox.buildSelectAllCheckbox(button -> {
             if (button.isChecked) {
                 this.incomingShareRequestsList.selectAll();
@@ -136,6 +135,6 @@ public class ShareRequestScreen extends NotificationAlertScreen implements HasSc
 
     public static void open()
     {
-        JMWSClientCommon.setCurrentUIScreen(new ShareRequestScreen(JMWSClientCommon.currentShareScreen));
+        JMWSClientCommon.setCurrentUIScreen(new ShareRequestScreen(JMWSClientCommon.currentNotificationScreen));
     }
 }

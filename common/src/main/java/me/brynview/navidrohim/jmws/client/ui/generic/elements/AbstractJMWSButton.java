@@ -15,10 +15,27 @@ public abstract class AbstractJMWSButton extends Button implements AbstractJMWSE
 
     private static final Identifier BUTTON_BG = Identifier.fromNamespaceAndPath(Constants.MODID, "button_bg");
     protected boolean isHeld = false;
-    public boolean isEnabled = true;
+    private boolean isEnabled = true;
 
     protected AbstractJMWSButton(int x, int y, int width, int height, Component message, OnPress onPress, CreateNarration createNarration) {
         super(x, y, width, height, message, onPress, createNarration);
+    }
+
+    public boolean isEnabled()
+    {
+        return isEnabled;
+    }
+
+    public void setEnabled(boolean enabled)
+    {
+        isEnabled = enabled;
+    }
+
+    @Override
+    public void refresh()
+    {
+        this.setEnabled(true);
+        this.isHeld = false;
     }
 
     @Override
@@ -40,7 +57,7 @@ public abstract class AbstractJMWSButton extends Button implements AbstractJMWSE
     protected void extractContents(@NonNull GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, float v) {
 
         renderBackground(guiGraphicsExtractor, i, i1, v);
-        renderBorder(guiGraphicsExtractor, i, i1, v);
+        renderBorder(guiGraphicsExtractor);
 
         if (isHeld)
         {
@@ -57,8 +74,8 @@ public abstract class AbstractJMWSButton extends Button implements AbstractJMWSE
     }
 
     @Override
-    public void renderBorder(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
-        RenderUtils.renderBorderForList(graphics, this, 0);
+    public void renderBorder(@NonNull GuiGraphicsExtractor graphics) {
+        RenderUtils.renderBorderForList(graphics, this);
     }
 
     @Override

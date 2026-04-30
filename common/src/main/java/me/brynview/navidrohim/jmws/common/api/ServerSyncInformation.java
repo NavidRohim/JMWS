@@ -5,6 +5,8 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
 import me.brynview.navidrohim.jmws.server.JMWSServerCommon;
+import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
+import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
 import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
@@ -23,11 +25,18 @@ public class ServerSyncInformation extends SyncInformation
     public static final Gson SYNC_DECODER = new GsonBuilder().registerTypeAdapter(ServerSyncInformation.class, new ServerSyncInfoSerializer()).create();
     static ServerSyncRegistryEntry DEFAULT_REGISTRY;
 
+    public transient @Nullable ServerObject object = null;
     public ServerSyncRegistryEntry syncRegistryType;
 
     public ServerSyncInformation(String identifier, UUID owner, Set<UUID> sharedTo, boolean isGlobal, ServerSyncRegistryEntry syncRegistryType) {
         super(identifier, owner, sharedTo, isGlobal);
         this.syncRegistryType = syncRegistryType;
+    }
+
+    public ServerSyncInformation(String identifier, UUID owner, Set<UUID> sharedTo, boolean isGlobal, ServerSyncRegistryEntry syncRegistryType, ServerObject object) {
+        super(identifier, owner, sharedTo, isGlobal);
+        this.syncRegistryType = syncRegistryType;
+        this.object = object;
     }
 
     public void addUserToShare(UUID userUUID)
@@ -106,7 +115,8 @@ public class ServerSyncInformation extends SyncInformation
                 return null;
             }
 
-            return new ServerSyncInformation(info.objectIdentifier, info.owner, info.sharedTo, info.isGlobal, syncRegistryType);
+            @Nullable ServerObject serverObject = JMWSServerIO.getObjectFromDisk(info.objectIdentifier, info.owner, syncRegistryType, true, info.isGlobal);
+            return new ServerSyncInformation(info.objectIdentifier, info.owner, info.sharedTo, info.isGlobal, syncRegistryType, serverObject);
         }
 
         @Override

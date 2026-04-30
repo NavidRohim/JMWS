@@ -186,6 +186,8 @@
   "jmws.ui.sharing.send.tooltip": "Send to all selected players",
   "jmws.ui.sharing.stop_share.tooltip": "Stop sharing with all selected players",
   "jmws.ui.sharing.offline_sharing": "Offline players your sharing with",
+  "jmws.ui.sharing.send_disabled": "Cannot send, you are selecting player(s) your already sharing with.",
+  "jmws.ui.sharing.cannot_revoke_send": "Cannot stop sharing, you are selecting player(s) your not sharing with already.",
 
   "jmws.ui.requests.accept": "Accept",
   "jmws.ui.requests.decline": "Decline",

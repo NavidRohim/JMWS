@@ -4,6 +4,7 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
+import me.brynview.navidrohim.jmws.client.ui.generic.elements.AbstractJMWSElement;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.HasScrollableList;
 import me.brynview.navidrohim.jmws.client.ui.list.entry.PlayerEntry;
 import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
@@ -14,6 +15,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
 import java.util.*;
@@ -74,15 +76,6 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
         return normalHeight;
     }
 
-    private void addOfflineEntry(PlayerEntry<T> entry)
-    {
-        this.addEntry(entry);
-        if (shouldRenderOfflinePlayers)
-        {
-            entry.setY(getEntryOfflineEntryYPos(entry));
-        }
-    }
-
     private void refreshPlayers()
     {
 
@@ -93,6 +86,16 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
         this.players.addAll(RenderUtils.getPlayers(this.minecraft));
     }
 
+    @Override
+    public void renderBorder(@NotNull GuiGraphicsExtractor graphics) {
+        RenderUtils.renderBorderForList(graphics, this);
+    }
+
+    @Override
+    public void renderBackground(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+    }
+
+    @Override
     public void refresh()
     {
         this.offlineEntries.clear();
@@ -127,6 +130,7 @@ public class ObjectSharePanel <T extends ClientObjectWrapper<?>> extends Checkab
             this.addEntryToTop(onlinePlayer);
             this.onlineEntries.add(onlinePlayer);
         }
+
         shouldRenderOfflinePlayers = !this.offlineEntries.isEmpty() && !this.onlineEntries.isEmpty();
         this.setScrollAmount(0);
     }

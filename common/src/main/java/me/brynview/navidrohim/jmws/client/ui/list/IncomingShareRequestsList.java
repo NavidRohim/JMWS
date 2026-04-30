@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 public class IncomingShareRequestsList extends CheckableSelectionList<IncomingShareRequestsList.IncomingRequestFromPlayerEntry> {
 
-
     private static final Component NO_PLAYERS_TEXT = Component.translatable("jmws.ui.requests.no_requests");
     private final HasScrollableList parentScreen;
 
@@ -42,6 +41,16 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
                 this.addEntryToTop(new IncomingRequestFromPlayerEntry(this, sender, request));
             }
         }
+    }
+
+    @Override
+    public void renderBorder(@NotNull GuiGraphicsExtractor graphics) {
+        RenderUtils.renderBorderForList(graphics, this);
+    }
+
+    @Override
+    public void renderBackground(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+
     }
 
     public void refresh()

@@ -10,7 +10,6 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.server.JMWSServerCommon;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
 import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
@@ -27,32 +26,30 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.MinecraftServer;
 
 
-import java.io.File;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-// This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
+// This class is part of the common project, meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
-// common compatible binaries. This means common code can not directly use loader specific concepts such as Forge events
-// however it will be compatible with all supported mod loaders.
+// common compatible binaries. This means common code cannot directly use loader-specific concepts such as Forge events;
+// however, it will be compatible with all supported mod loaders.
 public class JMWSCommon {
 
-    // The loader specific projects are able to import and use any code from the common project. This allows you to
-    // write the majority of your code here and load it from your loader specific projects. This example has some
-    // code that gets invoked by the entry point of the loader specific projects.
+    // The loader-specific projects are able to import and use any code from the common project. This allows you to
+    // write the majority of your code here and load it from your loader-specific projects. This example has some
+    // code that gets invoked by the entry point of the loader-specific projects.
 
-    public static Minecraft minecraftClientInstance = null;
     public static MinecraftServer minecraftServerInstance;
 
     public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public static final Gson gson = new Gson();
     public static final Gson gsonExcludeNoExpose = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create();
-    public static final Gson gsonExcludeNoExposeNotPretty = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+    public static Minecraft minecraftClientInstance = null;
+    //public static final Gson gsonExcludeNoExposeNotPretty = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
     private static void determinePacketAction(PacketContext<JMWSActionPayload> ctx)
     {
@@ -107,8 +104,8 @@ public class JMWSCommon {
 
 
     public static boolean isInternalServer() {
-        if (JMWSCommon.minecraftClientInstance != null) {
-            return JMWSCommon.minecraftClientInstance.isLocalServer() && JMWSCommon.minecraftClientInstance.getSingleplayerServer() instanceof IntegratedServer;
+        if (minecraftClientInstance != null) {
+            return minecraftClientInstance.isLocalServer() && minecraftClientInstance.getSingleplayerServer() instanceof IntegratedServer;
         }
         return false;
     }

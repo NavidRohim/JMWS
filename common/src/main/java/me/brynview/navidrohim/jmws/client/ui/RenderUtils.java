@@ -1,7 +1,6 @@
 package me.brynview.navidrohim.jmws.client.ui;
 
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -18,12 +17,7 @@ public class RenderUtils
 {
     public static void renderBorderForList(@NotNull GuiGraphicsExtractor graphics, LayoutElement layout)
     {
-        renderBorderForList(graphics, layout, 0);
-    }
-
-    public static void renderBorderForList(@NotNull GuiGraphicsExtractor graphics, LayoutElement layout, int padding)
-    {
-        graphics.outline(layout.getX() - padding, layout.getY() - padding, layout.getWidth() + padding * 2, layout.getHeight() + padding * 2, UIConstants.BORDER_COLOUR);
+        graphics.outline(layout.getX(), layout.getY(), layout.getWidth(), layout.getHeight(), UIConstants.BORDER_COLOUR);
     }
 
     public static String shortenObjectName(String name, int maxLength)

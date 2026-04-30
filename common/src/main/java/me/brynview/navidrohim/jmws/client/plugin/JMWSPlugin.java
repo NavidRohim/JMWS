@@ -28,8 +28,6 @@ import me.brynview.navidrohim.jmws.client.ui.screen.ShareScreen;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientGroupWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.impl.ClientWaypointWrapper;
-import me.brynview.navidrohim.jmws.client.ui.screen.StopShareScreen;
-import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
@@ -62,9 +60,7 @@ public class JMWSPlugin implements IClientPlugin {
     enum Action{
         GLOBAL,
         UNGLOBAL,
-        SHARE,
-        UNSHARE
-
+        SHARE
     }
     // JourneyMap API
     private IClientAPI jmAPI = null;
@@ -127,12 +123,6 @@ public class JMWSPlugin implements IClientPlugin {
                 {
                     waypointPopupMenuEvent.getPopupMenu().addMenuItem("Share", (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.SHARE);});
                 }
-
-                if (waypoint.isSharing())
-                {
-                    Constants.LoggerHolder.debug(waypoint.getSharedTo(), "SHARED TO SIZE");
-                    waypointPopupMenuEvent.getPopupMenu().addMenuItem("Stop Sharing (%s)".formatted(waypoint.getSharedTo().size()), (blockPos) -> {this.handleWaypointContextMenuClick(waypoint, blockPos, Action.UNSHARE);});
-                }
             }
         }
     }
@@ -153,10 +143,6 @@ public class JMWSPlugin implements IClientPlugin {
             case SHARE ->
             {
                 ShareScreen.open(waypoint);
-            }
-            case UNSHARE ->
-            {
-                StopShareScreen.open(waypoint);
             }
         }
     }
@@ -304,7 +290,7 @@ public class JMWSPlugin implements IClientPlugin {
             JMWSClientCommon.isBusy = true;
             WaypointGroup waypointGroup = waypointGroupEvent.getGroup();
             ClientGroupWrapper syncGroup = ClientObjectFactory.fromGroup(waypointGroup);
-            LocalPlayer player = JMWSCommon.minecraftClientInstance.player;
+            LocalPlayer player = minecraftClientInstance.player;
 
             Constants.LoggerHolder.debug(syncGroup.getContext().toString(), "GROUP TYPE");
             if (player == null) {

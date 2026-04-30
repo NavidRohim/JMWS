@@ -10,6 +10,7 @@ import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
+import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
 
 import java.util.HashMap;
@@ -52,7 +53,6 @@ public class CommandFactory {
     }
 
     public static String makeCreationRequestJson(Waypoint waypoint, boolean silent) {
-        Constants.getLogger().info("Creating waypoint: " + waypoint.toString());
         return CommandFactory.makeBaseJsonRequest(Commands.SERVER_CREATE, waypoint.toString(), silent);
     }
 
@@ -90,6 +90,11 @@ public class CommandFactory {
     public static String makeGlobalRequestForServer(UUID from, String objectIdentifier, ClientSyncRegistry syncRegistryType, boolean global)
     {
         return CommandFactory.makeBaseJsonRequest(Commands.MAKE_GLOBAL, from, objectIdentifier, syncRegistryType.getId(), global);
+    }
+
+    public static String makeStopShareRequest(UUID with, SyncInformation syncInformation)
+    {
+        return CommandFactory.makeBaseJsonRequest(Commands.SERVER_REMOVE_SHARE_WITH, with, syncInformation.serialize());
     }
 
     public static class PeerToPeer

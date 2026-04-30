@@ -34,8 +34,11 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
 
     private static final Identifier SEND = Identifier.fromNamespaceAndPath(Constants.MODID, "send");
     private static final Identifier STOP_SHARE = Identifier.fromNamespaceAndPath(Constants.MODID, "stop_share");
+
     private static final Tooltip SEND_TOOLTIP = Tooltip.create(Component.translatable("jmws.ui.sharing.send.tooltip"));
     private static final Tooltip STOP_SHARE_TOOLTIP = Tooltip.create(Component.translatable("jmws.ui.sharing.stop_share.tooltip"));
+    private static final Tooltip CANNOT_SEND_TOOLTIP = Tooltip.create(Component.translatable("jmws.ui.sharing.send_disabled"));
+    private static final Tooltip CANNOT_STOP_SHARE_TOOLTIP = Tooltip.create(Component.translatable("jmws.ui.sharing.cannot_revoke_send"));
 
     private final String displayName;
     private final ClientObjectWrapper<?> object;
@@ -66,22 +69,24 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
             } else {
                 this.sharePanel.unselectAll();
             }
+
+            entryPressed();
         });
 
-        this.sendButton = IconButton.buildGenericButton(SEND, (btn) -> this.sendRequests(), MessageType.SUCCESS.getNumericalColour(), SEND_TOOLTIP);
-        this.stopShareButton = IconButton.buildGenericButton(STOP_SHARE, (btn) -> this.stopSharing(), MessageType.FAILURE.getNumericalColour(), STOP_SHARE_TOOLTIP);
+        this.sendButton = IconButton.buildGenericButton(SEND, (btn) -> this.sendRequests(), MessageType.SUCCESS.getNumericalColour(), SEND_TOOLTIP, CANNOT_SEND_TOOLTIP);
+        this.stopShareButton = IconButton.buildGenericButton(STOP_SHARE, (btn) -> this.stopSharing(), MessageType.FAILURE.getNumericalColour(), STOP_SHARE_TOOLTIP, CANNOT_STOP_SHARE_TOOLTIP);
 
         LinearLayout buttonIcnColumn = LinearLayout.vertical().spacing(4);
         LinearLayout mainRow = LinearLayout.horizontal();
 
-        buttonIcnColumn.addChild(this.sendButton);
-        buttonIcnColumn.addChild(this.stopShareButton);
-        buttonIcnColumn.addChild(IconButton.buildGenericButton(UIConstants.REFRESH, (btn) -> this.refresh(), MessageType.PENDING.getNumericalColour(), UIConstants.REFRESH_TOOLTIP));
-
-        buttonIcnColumn.addChild(this.checkbox, settings -> settings.paddingRight(4).paddingLeft(4));
+        this.addChildToLayout(buttonIcnColumn, this.sendButton);
+        this.addChildToLayout(buttonIcnColumn, this.stopShareButton);
+        this.addChildToLayout(buttonIcnColumn, IconButton.buildGenericButton(UIConstants.REFRESH, (btn) -> this.refresh(), MessageType.PENDING.getNumericalColour(), UIConstants.REFRESH_TOOLTIP, null));
+        this.addChildToLayout(buttonIcnColumn, this.checkbox, settings -> settings.paddingRight(4).paddingLeft(4));
 
         mainRow.addChild(buttonIcnColumn, layoutSettings -> layoutSettings.paddingRight(6).paddingLeft(6));
-        mainRow.addChild(this.sharePanel, layoutSettings -> layoutSettings.paddingRight(14));
+
+        this.addChildToLayout(mainRow, this.sharePanel, layoutSettings -> layoutSettings.paddingRight(14));
 
         mainRow.arrangeElements();
         FrameLayout.centerInRectangle(mainRow, 0, 0, this.width, this.height);
@@ -90,14 +95,17 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         sharePanel.addWidgets();
     }
 
-    private void refresh()
+    private void setCheckboxState()
     {
-        PlayerUtils.sendUserAlert(UIConstants.REFRESHING, true, true, MessageType.NEUTRAL);
-        this.sharePanel.refresh();
-        this.checkbox.isChecked = false;
-
-        this.sendButton.isEnabled = true;
-        this.stopShareButton.isEnabled = true;
+        if (sharePanel.getSelectedEntries().isEmpty())
+        {
+            this.checkbox.uncheck();
+            this.sharePanel.isSelectingAll = false;
+        } else if (sharePanel.getSelectedEntries().size() == this.sharePanel.children().size())
+        {
+            this.checkbox.check();
+            this.sharePanel.isSelectingAll = true;
+        }
     }
 
     private void sendRequests()
@@ -154,48 +162,41 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
     @Override
     public void entryPressed()
     {
-        if (sharePanel.getSelectedEntries().isEmpty())
-        {
-            this.checkbox.uncheck();
-            this.sharePanel.isSelectingAll = false;
-        } else if (sharePanel.getSelectedEntries().size() == this.sharePanel.children().size())
-        {
-            this.checkbox.check();
-            this.sharePanel.isSelectingAll = true;
-        }
-
         for (PlayerEntry<ClientObjectWrapper<?>> offlineEntry : this.sharePanel.offlineEntries) {
             if (offlineEntry.isSelected)
             {
-                this.sendButton.isEnabled = false;
+                this.sendButton.setEnabled(false);
                 break;
             }
-            this.sendButton.isEnabled = true;
+            this.sendButton.setEnabled(true);
         }
 
         for (PlayerEntry<ClientObjectWrapper<?>> onlineEntry : this.sharePanel.onlineEntries) {
             if (onlineEntry.isSelected && onlineEntry.getState() == PlayerEntry.EntryState.NOT_SHARED)
             {
-                this.stopShareButton.isEnabled = false;
+                this.stopShareButton.setEnabled(false);
                 break;
             }
-            this.stopShareButton.isEnabled = true;
+            this.stopShareButton.setEnabled(true);
         }
 
         for (PlayerEntry<ClientObjectWrapper<?>> child : this.sharePanel.children())
         {
             if (child.isSelected && child.getState() == PlayerEntry.EntryState.SHARED)
             {
-                this.sendButton.isEnabled = false;
+                this.sendButton.setEnabled(false);
                 break;
             }
 
-            this.sendButton.isEnabled = true;
+            this.sendButton.setEnabled(true);
         }
+        setCheckboxState();
     }
 
     public static void open(ClientBaseObjectWrapper<?> object)
     {
-       JMWSClientCommon.setCurrentUIScreen(new ShareScreen(minecraftClientInstance.screen, object));
+        ShareScreen shareScreen = new ShareScreen(minecraftClientInstance.screen, object);
+        JMWSClientCommon.currentShareScreen = shareScreen;
+        JMWSClientCommon.setCurrentUIScreen(shareScreen);
     }
 }

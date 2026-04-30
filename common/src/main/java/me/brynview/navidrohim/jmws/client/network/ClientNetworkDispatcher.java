@@ -3,11 +3,11 @@ package me.brynview.navidrohim.jmws.client.network;
 import commonnetwork.api.Network;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
+import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
@@ -97,9 +97,9 @@ public class ClientNetworkDispatcher {
             sendString(CommandFactory.PeerToPeer.declineWithReason(shareRequest, "sharing.jmws.share_rejected", JMWSCommon.minecraftClientInstance.player.getPlainTextName()));
         }
 
-        public static void removeShare(UUID with, ClientSyncInformation syncInformation)
+        public static void removeShare(UUID with, SyncInformation syncInformation)
         {
-            sendString(CommandFactory.PeerToPeer.removeShareWith(with, syncInformation));
+            sendString(CommandFactory.makeStopShareRequest(with, syncInformation));
         }
     }
 }

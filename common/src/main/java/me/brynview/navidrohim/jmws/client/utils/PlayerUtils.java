@@ -13,7 +13,6 @@ import net.minecraft.sounds.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.rmi.server.ExportException;
 import java.util.*;
 
 /**
@@ -41,9 +40,9 @@ public class PlayerUtils {
                 finalText = messageType.toString() + text.getString();
             }
 
-            if (JMWSClientCommon.currentShareScreen != null)
+            if (JMWSClientCommon.currentNotificationScreen != null)
             {
-                JMWSClientCommon.currentShareScreen.sendAlert(Component.literal(finalText));
+                JMWSClientCommon.currentNotificationScreen.sendAlert(Component.literal(finalText));
             }
             else if (overlayText) {
                 JMWSCommon.minecraftClientInstance.gui.setOverlayMessage(Component.literal(finalText), false); // Action bar

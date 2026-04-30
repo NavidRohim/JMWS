@@ -36,7 +36,6 @@ public class JMWSClient implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register(((handler, client) -> {
             CommonEvents.handleDisconnect();
         }));
-
         // New
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             JMWSCommon.minecraftServerInstance = server;

@@ -18,6 +18,14 @@ import java.util.concurrent.TimeUnit;
 
 public class CommonEvents {
 
+    public static void handlePlayerStateChange()
+    {
+        if (JMWSClientCommon.currentShareScreen != null)
+        {
+            JMWSClientCommon.currentShareScreen.refresh();
+        }
+    }
+
     public static void handleJoin(ServerPlayer serverPlayer, boolean isInternal, boolean sendWarningIfJMNotPresent)
     {
 
@@ -28,6 +36,7 @@ public class CommonEvents {
                     PlayerUtils.sendUserAlert(Component.translatable("warning.jmws.jm_not_installed"), true, false, MessageType.NEUTRAL);}, 2, TimeUnit.SECONDS);
                 return;
             }
+
             JMWSCommon.scheduler.schedule(() -> {
                 PlayerUtils.sendUserAlert(Component.translatable("warning.jmws.world_is_local"), true, false, MessageType.NEUTRAL);}, 2, TimeUnit.SECONDS);
         } else {
