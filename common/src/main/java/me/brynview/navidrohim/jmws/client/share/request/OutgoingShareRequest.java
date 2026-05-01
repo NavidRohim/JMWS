@@ -7,7 +7,7 @@ import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistryEntry;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 

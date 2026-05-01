@@ -61,7 +61,7 @@ public class IncomingShareRequestsList extends CheckableSelectionList<IncomingSh
 
     @Override
     public int getRowWidth() {
-        return width;
+        return width - 4;
     }
 
     @Override

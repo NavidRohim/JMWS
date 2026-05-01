@@ -18,6 +18,7 @@ import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import org.joml.Vector2i;
 import org.jspecify.annotations.NonNull;
@@ -50,11 +51,9 @@ public class ShareRequestScreen extends NotificationAlertScreen implements HasSc
         incomingShareRequestsList = new IncomingShareRequestsList(JMWSCommon.minecraftClientInstance, 0, 0, 0, 0, 50, this);
         RenderUtils.setDimensionsForList(incomingShareRequestsList, this.width, this.height);
 
-        //verticalButtonColumnSpacer.addChild(Button.builder(Component.translatable("jmws.ui.requests.accept"), (button) -> this.acceptAll()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
-        //verticalButtonColumnSpacer.addChild(Button.builder(Component.translatable("jmws.ui.requests.decline"), (button) -> this.declineAll()).width(UIConstants.NAMED_BUTTON_WIDTH).build());
-        iconButtonColumn.addChild(IconButton.buildGenericButton(ACCEPT, (button -> this.acceptAll()), ACCEPT_TOOLTIP, null));
-        iconButtonColumn.addChild(IconButton.buildGenericButton(DECLINE, (button -> this.declineAll()), DECLINE_TOOLTIP, null));
-        iconButtonColumn.addChild(IconButton.buildGenericButton(UIConstants.REFRESH, (button -> this.incomingShareRequestsList.refresh()), UIConstants.REFRESH_TOOLTIP, null));
+        iconButtonColumn.addChild(IconButton.buildGenericButton(ACCEPT, (button -> this.acceptAll()), UIConstants.GREEN_COLOUR, ACCEPT_TOOLTIP, null));
+        iconButtonColumn.addChild(IconButton.buildGenericButton(DECLINE, (button -> this.declineAll()), UIConstants.RED_COLOUR, DECLINE_TOOLTIP, null));
+        iconButtonColumn.addChild(IconButton.buildGenericButton(UIConstants.REFRESH, (button -> this.incomingShareRequestsList.refresh()), UIConstants.YELLOW_COLOUR, UIConstants.REFRESH_TOOLTIP, null));
         this.checkbox = Checkbox.buildSelectAllCheckbox(button -> {
             if (button.isChecked) {
                 this.incomingShareRequestsList.selectAll();
@@ -62,8 +61,7 @@ public class ShareRequestScreen extends NotificationAlertScreen implements HasSc
                 this.incomingShareRequestsList.unselectAll();
             }
         });
-
-        listActionButtonColumn.addChild(checkbox);
+        iconButtonColumn.addChild(this.checkbox, settings -> settings.paddingLeft(4).paddingRight(4));
 
         parentHorizontalLayout.addChild(iconButtonColumn, settings -> settings.paddingRight(4).paddingLeft(6));
         parentHorizontalLayout.addChild(incomingShareRequestsList, settings -> settings.paddingRight(4));
@@ -115,7 +113,8 @@ public class ShareRequestScreen extends NotificationAlertScreen implements HasSc
         super.extractRenderState(graphics, mouseX, mouseY, a);
         if (!this.incomingShareRequestsList.isEmpty())
         {
-            graphics.text(this.font, Component.translatable("jmws.ui.requests.requests_amount", this.incomingShareRequestsList.getAmount()), incomingShareRequestsList.getX(), incomingShareRequestsList.getY() - 15, -1);
+            MutableComponent text = Component.translatable("jmws.ui.requests.requests_amount", this.incomingShareRequestsList.getAmount());
+            graphics.text(this.font, text, incomingShareRequestsList.getX() + incomingShareRequestsList.getWidth() / 2 - (this.font.width(text) / 2), incomingShareRequestsList.getY() - 15, -1);
         }
     }
 

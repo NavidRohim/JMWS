@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.common.utils;
+package me.brynview.navidrohim.jmws.common.syncing;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -9,8 +9,7 @@ import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncUtils;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncRegistry;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
-import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingInformationWrapper;
 import org.jetbrains.annotations.Nullable;
 

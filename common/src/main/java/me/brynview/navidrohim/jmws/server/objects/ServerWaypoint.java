@@ -2,8 +2,8 @@ package me.brynview.navidrohim.jmws.server.objects;
 
 import com.google.gson.JsonObject;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import org.jetbrains.annotations.Nullable;
 
@@ -72,7 +72,7 @@ public class ServerWaypoint extends ServerObject {
     public String getDifferentiator() { return "X=%s Y=%s Z=%s %s".formatted(x, y, z, this.primaryDimension); }
 
     @Override
-    public ServerSyncRegistryEntry getObjectType()
+    public ServerSyncRegistryEntry<?> getObjectType()
     {
         return serverSyncRegistry;
     }

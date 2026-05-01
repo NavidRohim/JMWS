@@ -1,8 +1,8 @@
 package me.brynview.navidrohim.jmws.server.objects;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import org.jetbrains.annotations.Nullable;
 
@@ -76,7 +76,7 @@ public class ServerGroup extends ServerObject {
     }
 
     @Override
-    public ServerSyncRegistryEntry getObjectType()
+    public ServerSyncRegistryEntry<?> getObjectType()
     {
         return serverSyncRegistry;
     }

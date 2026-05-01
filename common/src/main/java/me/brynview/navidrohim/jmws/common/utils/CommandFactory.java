@@ -2,8 +2,6 @@ package me.brynview.navidrohim.jmws.common.utils;
 
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
-import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
@@ -11,7 +9,7 @@ import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistryEntry;
 
 import java.util.HashMap;
 import java.util.Map;

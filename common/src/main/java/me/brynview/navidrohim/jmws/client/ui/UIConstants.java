@@ -17,6 +17,9 @@ public class UIConstants
     public static final int PLAYER_HEAD_SIZE_HALVED = PLAYER_HEAD_SIZE / 2;
 
     public static final int BORDER_COLOUR = 0xFF202020;
+    public static final int GREEN_COLOUR = MessageType.SUCCESS.getNumericalColour();
+    public static final int RED_COLOUR = MessageType.FAILURE.getNumericalColour();
+    public static final int YELLOW_COLOUR = MessageType.PENDING.getNumericalColour();
 
     public static final Component REFRESHING = Component.translatable("jmws.ui.generic.refreshing");
     public static final Component EMPTY_TEXT = Component.translatable("jmws.ui.generic.empty");

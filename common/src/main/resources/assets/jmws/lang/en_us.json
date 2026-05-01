@@ -176,7 +176,7 @@
   "jmws.ui.sharing.not_shared": "not shared",
   "jmws.ui.sharing.pending": "pending",
   "jmws.ui.sharing.already_shared": "shared",
-  "jmws.ui.sharing.share_object": "Share %s \"%s\"",
+  "jmws.ui.sharing.share_object": "Manage sharing for %s \"%s\"",
   "jmws.ui.sharing.no_players": "No players with JMWS!",
   "jmws.ui.sharing.no_selected_players": "No players selected!",
   "jmws.ui.sharing.send_requests": "Send",

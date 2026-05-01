@@ -1,12 +1,12 @@
-package me.brynview.navidrohim.jmws.common.api;
+package me.brynview.navidrohim.jmws.server.syncing;
 
 import com.google.gson.*;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.server.JMWSServerCommon;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;

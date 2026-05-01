@@ -6,12 +6,12 @@ import com.google.gson.JsonParser;
 import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.api.ServerSyncInformation;
+import me.brynview.navidrohim.jmws.server.syncing.ServerSyncInformation;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.server.JMWSServerCommon;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
@@ -22,6 +22,8 @@ import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 import me.brynview.navidrohim.jmws.server.syncing.SyncUtils;
+import me.brynview.navidrohim.jmws.server.syncing.rules.ShareRuleManager;
+import me.brynview.navidrohim.jmws.server.syncing.rules.api.ShareRule;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -101,9 +103,14 @@ public class ServerPacketHandler {
                             ServerWaypoint wp = ServerWaypoint.getWaypointFromUniqueIdentifier(shared, playerUUID);
                             if (wp != null)
                             {
-                                if (!wp.serverSyncingHandler.isGlobal())
+                                Constants.LoggerHolder.debug("RULECHECK", "RK");
+                                @Nullable ShareRule failedRule = ShareRuleManager.canShareTo(wp, player);
+
+                                if (!wp.serverSyncingHandler.isGlobal() && failedRule == null)
                                 {
                                     jsonWaypointPayloadArray.put(String.valueOf(lastIterWp), wp.getRawString());
+                                } else if (failedRule != null) {
+                                    sendUserMessage(player, failedRule.getFailureMessage().getString(), true, MessageType.FAILURE);
                                 }
                             }
                             else {
@@ -337,19 +344,26 @@ public class ServerPacketHandler {
                 {
                     String rawSyncInfo = arguments.getFirst().getAsString();
                     ServerSyncInformation syncInfo = ServerSyncInformation.getFromString(rawSyncInfo, true);
+                    ServerPlayer sentTo = JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(syncInfo.owner);
 
                     Constants.LoggerHolder.debug(syncInfo.toString(), "SYNC INFO");
                     Constants.LoggerHolder.debug(rawSyncInfo, "RAW SYNC INFO");
 
                     if (syncInfo.object != null)
                     {
-                        try (UserSharingFile usf = new UserSharingFile(playerUUID))
+                        @Nullable ShareRule failedRule = ShareRuleManager.canShareTo(syncInfo.object, sentTo);
+                        if (failedRule == null)
                         {
-                            usf.addToShared(syncInfo.objectIdentifier, syncInfo.syncRegistryType);
-                        }
-                        syncInfo.object.serverSyncingHandler.addUserToShare(playerUUID);
+                            try (UserSharingFile usf = new UserSharingFile(playerUUID))
+                            {
+                                usf.addToShared(syncInfo.objectIdentifier, syncInfo.syncRegistryType);
+                            }
+                            syncInfo.object.serverSyncingHandler.addUserToShare(playerUUID);
 
-                        Dispatcher.sendToClient(waypointActionPayload, JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(syncInfo.owner));
+                            Dispatcher.sendToClient(waypointActionPayload, sentTo);
+                        } else {
+                            sendUserMessage(sentTo, failedRule.getFailureMessage().getString(), true, MessageType.FAILURE);
+                        }
                     } else {
                         sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
                     }

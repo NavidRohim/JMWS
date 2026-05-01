@@ -6,7 +6,6 @@ import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.server.JMWSServerCommon;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

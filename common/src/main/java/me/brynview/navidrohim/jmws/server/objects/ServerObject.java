@@ -1,19 +1,22 @@
 package me.brynview.navidrohim.jmws.server.objects;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gson.*;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.api.PossessesIdentifier;
 import me.brynview.navidrohim.jmws.common.api.Synchronizable;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingInformationWrapper;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
+import me.brynview.navidrohim.jmws.server.syncing.rules.ShareRuleManager;
+import me.brynview.navidrohim.jmws.server.syncing.rules.api.ShareRule;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -34,6 +37,7 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
 
     public UserSharingFile accessorSharing;
     public ServerSyncingInformationWrapper serverSyncingHandler;
+    public ImmutableList<ShareRule> rules;
 
     public boolean dataclass;
     public static ServerSyncRegistryEntry<?> serverSyncRegistry = ServerSyncRegistry.GENERIC;
@@ -59,6 +63,7 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
 
         this.ownerUUID = playerUUID; // Note; if you set ownerUUID before this.syncing is defined, it enables some sort of compatibility for legacy clients. But I've left it as-is to avoid chaos.
         this.serverSyncingHandler = ServerSyncingInformationWrapper.getSyncingHandlerFromServerObject(this, this.customData);
+        this.rules = ShareRuleManager.getRuleset(this);
 
         this.name = payload.get("name").getAsString();
         this.accessorSharing = !dataclass ? new UserSharingFile(playerUUID) : null;
@@ -228,7 +233,7 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
     } // No usages but may be used elsewhere like with generics not sure
 
     // From PossessesIdentifier
-    public ServerSyncRegistryEntry getObjectType() {
+    public ServerSyncRegistryEntry<?> getObjectType() {
         return serverSyncRegistry;
     }
 
@@ -240,6 +245,11 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
 
     public String getRawString() {
         return this.payload.toString();
+    }
+
+    public @Nullable JsonElement getRulesetData()
+    {
+        return this.customDataJmwsFieldObject.get(Constants.RULESET_ID);
     }
 
     public JsonObject getRawJson() {
@@ -264,11 +274,6 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
     @Nullable
     public String getDifferentiator() {
         return "Object";
-    }
-
-    public String getObjectNonDuplicateIdentifier()
-    {
-        return "%s (%s)".formatted(this.getName(), this.getDifferentiator());
     }
 
     @Override

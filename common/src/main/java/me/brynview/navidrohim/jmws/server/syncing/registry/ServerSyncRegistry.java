@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.server.registry;
+package me.brynview.navidrohim.jmws.server.syncing.registry;
 
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;

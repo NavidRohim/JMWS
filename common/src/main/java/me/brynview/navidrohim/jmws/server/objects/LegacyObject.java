@@ -4,11 +4,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
-import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistryEntry;
 
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
-import me.brynview.navidrohim.jmws.common.utils.SyncUtils;
+import me.brynview.navidrohim.jmws.common.syncing.SyncUtils;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 
 import java.lang.reflect.Constructor;
@@ -60,35 +60,30 @@ public class LegacyObject
         this.customDataJmwsFieldObject.add(Constants.MODID, new JsonPrimitive(data));
     }
 
-    public static <T extends ServerObject> void transitionIfNeed(Path path, UUID owner, ServerSyncRegistryEntry newType)
+    public static <T extends ServerObject> void transitionIfNeed(Path path, UUID owner, ServerSyncRegistryEntry<T> newType)
     {
         try {
             JsonObject payload = JMWSServerIO.getObjectDataFromDisk(path, true);
             if (payload != null)
             {
                 LegacyObject oldObj = new LegacyObject(payload);
-                if (me.brynview.navidrohim.jmws.common.utils.SyncUtils.isLegacySyncField(oldObj.getOldCustomData()))
+                if (SyncUtils.isLegacySyncField(oldObj.getOldCustomData()))
                 {
                     oldObj.setSyncedCustomData(SyncUtils.getEmptySyncingInfoString(oldObj.getOldCustomData(), owner, false, newType));
-                    Constructor<? extends ServerObject> constructor = newType.getRegistryClass().getConstructor(JsonObject.class, UUID.class);
-                    T newObj = (T) constructor.newInstance(payload, owner);
+                    Constructor<T> constructor = newType.getRegistryClass().getConstructor(JsonObject.class, UUID.class);
+                    T newObj = constructor.newInstance(payload, owner);
                     newObj.create();
 
                     CommonUtils.deleteFile(path);
                 }
             } else {
                 Constants.getLogger().debug("Possible issue translating server object. If issue arises please report.");
-                Constants.getLogger().debug("Diagnostic \nObject Path: %s\nOwner UUID: %s\nObjectType: %s\nInternal Server: %s\n\nIf in an internal server, you can likely ignore this message.\n\n".formatted(path, owner, newType, JMWSCommon.isInternalServer()));
+                Constants.getLogger().debug("Diagnostic \nObject Path: {}\nOwner UUID: {}\nObjectType: {}\nInternal Server: {}\n\nIf in an internal server, you can likely ignore this message.\n\n", path, owner, newType, JMWSCommon.isInternalServer());
             }
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | IllegalStateException initExc)
         {
-            Constants.getLogger().error("Could not transition pre-1.2.0 object to new. Error: %s".formatted(initExc));
+            Constants.getLogger().error("Could not transition pre-1.2.0 object to new. Error: {}", initExc);
             throw new RuntimeException(initExc);
         }
-    }
-
-    public String getDifferentiator()
-    {
-        return ServerSyncRegistry.GENERIC.toString();
     }
 }

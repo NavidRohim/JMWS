@@ -1,4 +1,4 @@
-package me.brynview.navidrohim.jmws.server.registry;
+package me.brynview.navidrohim.jmws.server.syncing.registry;
 
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.api.registry.RegistryEntry;

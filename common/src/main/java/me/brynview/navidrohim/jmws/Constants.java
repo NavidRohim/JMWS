@@ -22,6 +22,7 @@ public class Constants {
     }
 
     public static final String MODID = "jmws";
+    public static final String RULESET_ID = MODID + "_ruleset";
     public static final String VERSION = "2.0-26.1-alpha.1"; // This is purely for display and is not needed
     public static final double SERVER_VERSION = 2.0;
     public static final boolean DEBUG = VERSION.contains("-beta.") || VERSION.contains("-alpha.");

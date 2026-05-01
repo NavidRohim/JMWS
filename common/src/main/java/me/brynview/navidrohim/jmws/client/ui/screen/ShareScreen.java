@@ -73,15 +73,15 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
             entryPressed();
         });
 
-        this.sendButton = IconButton.buildGenericButton(SEND, (btn) -> this.sendRequests(), MessageType.SUCCESS.getNumericalColour(), SEND_TOOLTIP, CANNOT_SEND_TOOLTIP);
-        this.stopShareButton = IconButton.buildGenericButton(STOP_SHARE, (btn) -> this.stopSharing(), MessageType.FAILURE.getNumericalColour(), STOP_SHARE_TOOLTIP, CANNOT_STOP_SHARE_TOOLTIP);
+        this.sendButton = IconButton.buildGenericButton(SEND, (btn) -> this.sendRequests(), UIConstants.GREEN_COLOUR, SEND_TOOLTIP, CANNOT_SEND_TOOLTIP);
+        this.stopShareButton = IconButton.buildGenericButton(STOP_SHARE, (btn) -> this.stopSharing(), UIConstants.RED_COLOUR, STOP_SHARE_TOOLTIP, CANNOT_STOP_SHARE_TOOLTIP);
 
         LinearLayout buttonIcnColumn = LinearLayout.vertical().spacing(4);
         LinearLayout mainRow = LinearLayout.horizontal();
 
         this.addChildToLayout(buttonIcnColumn, this.sendButton);
         this.addChildToLayout(buttonIcnColumn, this.stopShareButton);
-        this.addChildToLayout(buttonIcnColumn, IconButton.buildGenericButton(UIConstants.REFRESH, (btn) -> this.refresh(), MessageType.PENDING.getNumericalColour(), UIConstants.REFRESH_TOOLTIP, null));
+        this.addChildToLayout(buttonIcnColumn, IconButton.buildGenericButton(UIConstants.REFRESH, (btn) -> this.refresh(), UIConstants.YELLOW_COLOUR, UIConstants.REFRESH_TOOLTIP, null));
         this.addChildToLayout(buttonIcnColumn, this.checkbox, settings -> settings.paddingRight(4).paddingLeft(4));
 
         mainRow.addChild(buttonIcnColumn, layoutSettings -> layoutSettings.paddingRight(6).paddingLeft(6));
