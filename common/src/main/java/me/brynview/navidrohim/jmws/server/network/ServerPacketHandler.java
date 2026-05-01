@@ -336,19 +336,18 @@ public class ServerPacketHandler {
                 case CommandFactory.Commands.AFFIRM_SHARE ->
                 {
                     String rawSyncInfo = arguments.getFirst().getAsString();
-                    ServerSyncInformation syncInfo = ServerSyncInformation.getFromString(rawSyncInfo);
+                    ServerSyncInformation syncInfo = ServerSyncInformation.getFromString(rawSyncInfo, true);
 
                     Constants.LoggerHolder.debug(syncInfo.toString(), "SYNC INFO");
                     Constants.LoggerHolder.debug(rawSyncInfo, "RAW SYNC INFO");
-                    ServerObject sharedWp = JMWSServerIO.getObjectFromSyncInformation(syncInfo);
 
-                    if (sharedWp != null)
+                    if (syncInfo.object != null)
                     {
                         try (UserSharingFile usf = new UserSharingFile(playerUUID))
                         {
                             usf.addToShared(syncInfo.objectIdentifier, syncInfo.syncRegistryType);
                         }
-                        sharedWp.serverSyncingHandler.addUserToShare(playerUUID);
+                        syncInfo.object.serverSyncingHandler.addUserToShare(playerUUID);
 
                         Dispatcher.sendToClient(waypointActionPayload, JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(syncInfo.owner));
                     } else {
@@ -370,12 +369,11 @@ public class ServerPacketHandler {
                 {
                     UUID from = UUID.fromString(arguments.getFirst().getAsString());
                     String objectIdentifier = arguments.get(1).getAsString();
-                    ServerSyncRegistryEntry serverSyncRegistry = JMWSServerCommon.REGISTRY.getStrict(arguments.get(2).getAsString());
+                    ServerSyncRegistryEntry<?> serverSyncRegistry = JMWSServerCommon.REGISTRY.getStrict(arguments.get(2).getAsString());
                     boolean global = arguments.getLast().getAsBoolean();
 
-                    ServerWaypoint globalObject = JMWSServerIO.getObjectFromUniqueIdentifier(objectIdentifier, from, serverSyncRegistry);
-                    Constants.getLogger().info("Making global " + global);
-                    Constants.getLogger().info("global " + globalObject);
+                    ServerObject globalObject = JMWSServerIO.getObjectFromUniqueIdentifier(objectIdentifier, from, serverSyncRegistry);
+
                     if (globalObject != null)
                     {
                         if (global)
@@ -404,7 +402,7 @@ public class ServerPacketHandler {
                     String legacyObjectIdentifier = arguments.getFirst().getAsString();
                     UUID legacyOwnerUUID =  UUID.fromString(arguments.get(1).getAsString());
                     boolean isGlobal = arguments.get(2).getAsBoolean();
-                    ServerSyncRegistryEntry legacyServerSyncRegistry = JMWSServerCommon.REGISTRY.getStrict(arguments.getLast().getAsString());
+                    ServerSyncRegistryEntry<?> legacyServerSyncRegistry = JMWSServerCommon.REGISTRY.getStrict(arguments.getLast().getAsString());
 
                     JMWSServerIO.getObjectFromDisk(legacyObjectIdentifier, legacyOwnerUUID, legacyServerSyncRegistry, false, isGlobal);
                 }
@@ -425,7 +423,7 @@ public class ServerPacketHandler {
 
                 case SERVER_REMOVE_SHARE_WITH -> {
                     UUID with = UUID.fromString(arguments.getFirst().getAsString());
-                    ServerSyncInformation syncInformation = ServerSyncInformation.getFromString(arguments.getLast().getAsString());
+                    ServerSyncInformation syncInformation = ServerSyncInformation.getFromString(arguments.getLast().getAsString(), true);
 
                     @Nullable ServerPlayer withPlayer = JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(with);
 

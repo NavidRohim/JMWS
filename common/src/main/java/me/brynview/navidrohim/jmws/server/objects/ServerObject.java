@@ -36,7 +36,7 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
     public ServerSyncingInformationWrapper serverSyncingHandler;
 
     public boolean dataclass;
-    public static ServerSyncRegistryEntry serverSyncRegistry = ServerSyncRegistry.GENERIC;
+    public static ServerSyncRegistryEntry<?> serverSyncRegistry = ServerSyncRegistry.GENERIC;
 
     @Nullable
     private Path currentObjectPath;
@@ -137,11 +137,11 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
         return false;
     }
 
-    public static boolean deleteAll(UUID user, ServerSyncRegistryEntry deletionType) {
+    public static boolean deleteAll(UUID user, ServerSyncRegistryEntry<?> deletionType) {
         List<Boolean> deletionStatusList = new ArrayList<>();
 
         for (Path waypointPath : JMWSServerIO.getObjectPathsForUser(user, deletionType)) {
-            deletionStatusList.add(JMWSServerIO.getObjectFromFile(waypointPath, user, deletionType).delete(true));
+            deletionStatusList.add(JMWSServerIO.getObjectFromFile(waypointPath, user, deletionType).delete(true)); // TODO just remove the file.
         }
 
         return deletionStatusList.isEmpty() || deletionStatusList.stream().allMatch(deletionStatusList.getFirst()::equals);

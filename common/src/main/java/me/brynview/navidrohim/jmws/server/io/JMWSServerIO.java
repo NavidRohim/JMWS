@@ -31,7 +31,7 @@ public class JMWSServerIO {
 
     public static final String globalObjPrefix = "GLOBAL_";
 
-    public static <T extends ServerObject> List<T> getAllInitialisedGlobalObjects(ServerSyncRegistryEntry globalServerSyncRegistry)
+    public static <T extends ServerObject> List<T> getAllInitialisedGlobalObjects(ServerSyncRegistryEntry<T> globalServerSyncRegistry)
     {
         List<T> wp = new ArrayList<>();
         for (Path path : getAllObjects(globalServerSyncRegistry).toList())
@@ -45,7 +45,7 @@ public class JMWSServerIO {
         return wp;
     }
 
-    public static List<Path> getGlobalObjects(ServerSyncRegistryEntry globalServerSyncRegistry)
+    public static List<Path> getGlobalObjects(ServerSyncRegistryEntry<?> globalServerSyncRegistry)
     {
         List<Path> wp = new ArrayList<>();
         for (Path path : getAllObjects(globalServerSyncRegistry).toList())
@@ -58,7 +58,7 @@ public class JMWSServerIO {
         return wp;
     }
 
-    public static void removeObjectFromUser(ServerObject serverObject, UUID playerUUID, String objectIdentifier, ServerSyncRegistryEntry serverSyncRegistry) {
+    public static void removeObjectFromUser(ServerObject serverObject, UUID playerUUID, String objectIdentifier, ServerSyncRegistryEntry<?> serverSyncRegistry) {
         UserSharingFile.removeObjectFromUser(playerUUID, objectIdentifier, serverObject.getObjectType());
         ServerPlayer sharedPlayer = JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
         if (sharedPlayer != null) {
@@ -78,7 +78,7 @@ public class JMWSServerIO {
         }
 
         @Nullable
-        public static Path getObjectFilename(@Nullable UUID playerOwner, String objectID, ServerSyncRegistryEntry serverSyncRegistry, boolean isGlobal) {
+        public static Path getObjectFilename(@Nullable UUID playerOwner, String objectID, ServerSyncRegistryEntry<?> serverSyncRegistry, boolean isGlobal) {
             try
             {
                 Constants.LoggerHolder.debug(serverSyncRegistry.getRegistryPath(), "RG PATH");
@@ -89,7 +89,7 @@ public class JMWSServerIO {
             }
         }
 
-        public static UUID getUUIDFromPath(Path path, ServerSyncRegistryEntry transitionType)
+        public static UUID getUUIDFromPath(Path path, ServerSyncRegistryEntry<?> transitionType)
         {
             String pathString = path.toString();
             String uuidString = pathString.substring(pathString.indexOf("#") + 1, pathString.length() - 5);
@@ -114,7 +114,7 @@ public class JMWSServerIO {
         }
     }
 
-    public static Stream<Path> getAllObjects(ServerSyncRegistryEntry serverSyncRegistry)
+    public static Stream<Path> getAllObjects(ServerSyncRegistryEntry<?> serverSyncRegistry)
     {
         Path pathSearch = Path.of(serverSyncRegistry.getRegistryPath());
         try {
@@ -126,7 +126,7 @@ public class JMWSServerIO {
         return Stream.of();
     }
 
-    private static List<Path> getObjectPathsForUser(UUID uuid, ServerSyncRegistryEntry serverSyncRegistry, boolean global) {
+    private static List<Path> getObjectPathsForUser(UUID uuid, ServerSyncRegistryEntry<?> serverSyncRegistry, boolean global) {
 
         List<Path> waypointFileList = new ArrayList<>();
         System.out.println(serverSyncRegistry);
@@ -167,20 +167,8 @@ public class JMWSServerIO {
             throw new RuntimeException(e);
         }
     }
-    public static List<Path> getObjectPathsForUser(UUID uuid, ServerSyncRegistryEntry serverSyncRegistry) {
+    public static List<Path> getObjectPathsForUser(UUID uuid, ServerSyncRegistryEntry<?> serverSyncRegistry) {
         return getObjectPathsForUser(uuid, serverSyncRegistry, false);
-    }
-
-    public static <T extends ServerObject> List<T> getObjectsForUser(UUID user, ServerSyncRegistryEntry serverSyncRegistry, boolean global)
-    {
-        List<T> list = new ArrayList<>();
-
-        for (Path objPath : getObjectPathsForUser(user, serverSyncRegistry, global))
-        {
-            list.add((T) getObjectFromFile(objPath, user, serverSyncRegistry));
-        }
-
-        return list;
     }
 
     /*
@@ -200,14 +188,15 @@ public class JMWSServerIO {
         }
     }*/
 
-    public static <T extends ServerObject> T getObjectFromFile(Path objPath, UUID user, ServerSyncRegistryEntry serverSyncRegistry, boolean silentFail)
+    public static <T extends ServerObject> T getObjectFromFile(Path objPath, UUID user, ServerSyncRegistryEntry<T> serverSyncRegistry, boolean silentFail)
     {
         try {
             @Nullable JsonObject data = getObjectDataFromDisk(objPath, silentFail);
             if (data != null && objPath != null)
             {
-                Constructor<? extends ServerObject> constructor = serverSyncRegistry.getRegistryClass().getConstructor(JsonObject.class, UUID.class);
-                return (T) constructor.newInstance(data, PathUtils.getUUIDFromPath(objPath, serverSyncRegistry));
+                Constructor<T> constructor = serverSyncRegistry.getRegistryClass().getConstructor(JsonObject.class, UUID.class);
+
+                return constructor.newInstance(data, PathUtils.getUUIDFromPath(objPath, serverSyncRegistry));
             } else {
                 return null;
             }
@@ -218,20 +207,9 @@ public class JMWSServerIO {
         }
     }
 
-    public static <T extends ServerObject> T getObjectFromFile(Path objPath, UUID user, ServerSyncRegistryEntry serverSyncRegistry)
+    public static <T extends ServerObject> T getObjectFromFile(Path objPath, UUID user, ServerSyncRegistryEntry<T> serverSyncRegistry)
     {
         return getObjectFromFile(objPath, user, serverSyncRegistry, false);
-    }
-
-    public static HashMap<String, Path> getNameHashmapLookup(UUID user, ServerSyncRegistryEntry serverSyncRegistry)
-    {
-        HashMap<String, Path> map = new HashMap<>();
-        for (ServerObject obj : getObjectsForUser(user, serverSyncRegistry, false))
-        {
-            map.put(obj.getObjectNonDuplicateIdentifier(), obj.getCurrentObjectPath());
-        }
-
-        return map;
     }
 
     @Nullable
@@ -256,7 +234,7 @@ public class JMWSServerIO {
     }
 
     @Nullable
-    public static <T extends ServerObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, ServerSyncRegistryEntry serverSyncRegistry, boolean silentFail, boolean global) {
+    public static <T extends ServerObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, ServerSyncRegistryEntry<T> serverSyncRegistry, boolean silentFail, boolean global) {
         Path objPath = PathUtils.getObjectFilename(ownerUUID, objectIdentifier, serverSyncRegistry, global);
         if (objPath != null)
         {
@@ -266,12 +244,12 @@ public class JMWSServerIO {
     }
 
     @Nullable
-    public static <T extends ServerObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, ServerSyncRegistryEntry serverSyncRegistry) {
+    public static <T extends ServerObject> T getObjectFromDisk(String objectIdentifier, UUID ownerUUID, ServerSyncRegistryEntry<T> serverSyncRegistry) {
         return getObjectFromDisk(objectIdentifier, ownerUUID, serverSyncRegistry, false, false);
     }
 
     @Nullable
-    public static Path getObjectPathFromUniqueIdentifier(String identifier, ServerSyncRegistryEntry serverSyncRegistry)
+    public static Path getObjectPathFromUniqueIdentifier(String identifier, ServerSyncRegistryEntry<?> serverSyncRegistry)
     {
         for (Path objectPath : getAllObjects(serverSyncRegistry).toList())
         {
@@ -284,7 +262,7 @@ public class JMWSServerIO {
     }
 
     @Nullable
-    public static <T extends ServerObject> T getObjectFromUniqueIdentifier(String identifier, UUID playerUUID, ServerSyncRegistryEntry serverSyncRegistry)
+    public static <T extends ServerObject> T getObjectFromUniqueIdentifier(String identifier, UUID playerUUID, ServerSyncRegistryEntry<T> serverSyncRegistry)
     {
         Path objectPath = getObjectPathFromUniqueIdentifier(identifier, serverSyncRegistry);
         if (objectPath != null)
@@ -295,7 +273,7 @@ public class JMWSServerIO {
     }
 
     @Nullable
-    public static <T extends ServerObject> T getObjectFromSyncInformation(ServerSyncInformation syncInfo)
+    public static ServerObject getObjectFromSyncInformation(ServerSyncInformation syncInfo)
     {
         @Nullable Path objPath = JMWSServerIO.PathUtils.getObjectFilename(syncInfo.owner, syncInfo.objectIdentifier, syncInfo.syncRegistryType, syncInfo.isGlobal);
         if (objPath != null)

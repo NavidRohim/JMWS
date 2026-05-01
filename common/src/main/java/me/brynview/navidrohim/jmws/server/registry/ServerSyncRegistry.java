@@ -4,16 +4,18 @@ import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-public class ServerSyncRegistry extends HashMap<String, ServerSyncRegistryEntry>
+public class ServerSyncRegistry extends HashMap<String, ServerSyncRegistryEntry<?>>
 {
-    public static ServerSyncRegistryEntry WAYPOINT;
-    public static ServerSyncRegistryEntry GROUP;
-    public static ServerSyncRegistryEntry SHARED;
-    public static ServerSyncRegistryEntry GENERIC;
+    public static ServerSyncRegistryEntry<ServerWaypoint> WAYPOINT;
+    public static ServerSyncRegistryEntry<ServerGroup> GROUP;
+    public static ServerSyncRegistryEntry<ServerObject> SHARED;
+    public static ServerSyncRegistryEntry<ServerObject> GENERIC;
 
     public ServerSyncRegistry()
     {
@@ -24,28 +26,29 @@ public class ServerSyncRegistry extends HashMap<String, ServerSyncRegistryEntry>
         GENERIC = this.register("GENERIC", null, true);
     }
 
-    public ServerSyncRegistryEntry register(String id, Class<? extends ServerObject> registryClass, boolean internal)
+    public <E extends ServerObject> ServerSyncRegistryEntry<E> register(String id, @Nullable Class<E> registryClass, boolean internal)
     {
         if (containsKey(id))
         {
-            return get(id);
+            //noinspection unchecked
+            return (ServerSyncRegistryEntry<E>) get(id);
         }
-        ServerSyncRegistryEntry type = new ServerSyncRegistryEntry(id, registryClass, internal);
+        ServerSyncRegistryEntry<E> type = new ServerSyncRegistryEntry<>(id, registryClass, internal);
         put(id, type);
         return type;
     }
 
-    public ServerSyncRegistryEntry register(String id, Class<? extends ServerObject> registryClass)
+    public <E extends ServerObject> ServerSyncRegistryEntry<E> register(String id, @Nullable Class<E> registryClass)
     {
         return register(id, registryClass, false);
     }
 
-    public Optional<ServerSyncRegistryEntry> getOptional(String id)
+    public Optional<ServerSyncRegistryEntry<?>> getOptional(String id)
     {
         return Optional.ofNullable(this.get(id));
     }
 
-    public ServerSyncRegistryEntry getStrict(String id)
+    public ServerSyncRegistryEntry<?> getStrict(String id)
     {
         if (!this.containsKey(id))
         {
@@ -55,7 +58,7 @@ public class ServerSyncRegistry extends HashMap<String, ServerSyncRegistryEntry>
         return this.get(id);
     }
 
-    public List<ServerSyncRegistryEntry> getRegistryValues()
+    public List<ServerSyncRegistryEntry<?>> getRegistryValues()
     {
         return List.copyOf(this.values());
     }

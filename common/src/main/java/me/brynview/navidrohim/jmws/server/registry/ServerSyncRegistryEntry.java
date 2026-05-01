@@ -6,24 +6,22 @@ import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Path;
-
-public class ServerSyncRegistryEntry implements RegistryEntry {
+public class ServerSyncRegistryEntry <T extends ServerObject> implements RegistryEntry {
 
     private final String id;
     private final String displayName;
 
     private final boolean internal;
-    private final Class<? extends ServerObject> registryClass;
+    private final Class<T> registryClass;
     private final String registryPath;
 
-    ServerSyncRegistryEntry(@NotNull String id, @Nullable final Class<? extends ServerObject> savedClass, boolean internal) {
+    ServerSyncRegistryEntry(@NotNull String id, @Nullable final Class<T> savedClass, boolean internal) {
         this.id = id.toUpperCase();
         this.displayName = id.toLowerCase();
         this.registryClass = savedClass;
 
         this.registryPath = "./%s/%s/".formatted(Constants.MODID, this.displayName);
-        Constants.getLogger().info(registryPath.toString());
+        Constants.getLogger().info(registryPath);
         this.internal = internal;
     }
 
@@ -42,7 +40,7 @@ public class ServerSyncRegistryEntry implements RegistryEntry {
         return id;
     }
 
-    public Class<? extends ServerObject> getRegistryClass()
+    public Class<T> getRegistryClass()
     {
         return this.registryClass;
     }

@@ -22,7 +22,7 @@ public class ServerWaypoint extends ServerObject {
     public int z;
     public String primaryDimension;
 
-    public static ServerSyncRegistryEntry serverSyncRegistry = ServerSyncRegistry.WAYPOINT;
+    public static ServerSyncRegistryEntry<ServerWaypoint> serverSyncRegistry = ServerSyncRegistry.WAYPOINT;
 
     public ServerWaypoint(JsonObject payload, UUID playerUUID) {
         super(payload, playerUUID);

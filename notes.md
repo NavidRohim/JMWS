@@ -23,10 +23,10 @@
 - ~~Test on Windows. Been coding all this on macOS.~~
 - ~~Remake JMWS on-off toggle button and sync button icons.~~
 - Generally build up the UI API.
-- Make an unshare screen.
+- ~~Make an unshare screen.~~
 - Make a screen for admins / owner so they can manage global objects. (maybe also make a CLI tool?)
-- Make the refresh button on all screens actually functional. Doesn't seem to do much at the moment.
-- Make select / deselect all buttons into checkboxes.
+- ~~Make the refresh button on all screens actually functional. Doesn't seem to do much at the moment.~~
+- ~~Make select / deselect all buttons into checkboxes.~~~~
 - Make the sync manager screen.
   - This will be quite complex. Any registered sync type in ClientSyncRegistry will have to have its own interface which will be used to fetch all objects from that extension.
   - I am yet to even think of the design of the screen, but I may add a sidebar with all registered types, you click that, and it will show another screen with all objects.
@@ -40,7 +40,7 @@
 - ~~If a client or server does not have a packet registered, the game will crash.~~
 - ~~When accepting a share request with a user, the server wipes the objects syncInfo field.~~
 - ~~Fix the timeout bug~~
-- When the share screen is initially drawn, offline users appear skewed. Draw the screen's initial state correctly or immediately redraw.
+- ~~When the share screen is initially drawn, offline users appear skewed. Draw the screen's initial state correctly or immediately redraw.~~
 
 ## -- Todo tomorrow --
 
