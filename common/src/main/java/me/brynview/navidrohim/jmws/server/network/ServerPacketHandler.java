@@ -9,7 +9,6 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.api.ServerSyncInformation;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.server.JMWSServerCommon;
 import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistry;
 import me.brynview.navidrohim.jmws.server.registry.ServerSyncRegistryEntry;
@@ -22,6 +21,7 @@ import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
+import me.brynview.navidrohim.jmws.server.syncing.SyncUtils;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -428,11 +428,13 @@ public class ServerPacketHandler {
                     @Nullable ServerPlayer withPlayer = JMWSCommon.minecraftServerInstance.getPlayerList().getPlayer(with);
 
                     if (syncInformation.object != null) {
-                        syncInformation.object.serverSyncingHandler.removeUserFromShare(with);
-                        if (withPlayer != null)
-                        {
-                            sendUserSync(withPlayer, false, false, false);
+                        if (withPlayer != null) {
+                            SyncUtils.stopSharing(withPlayer, syncInformation.object);
+                        } else {
+                            SyncUtils.stopSharingWithOfflineUser(with, syncInformation.object);
                         }
+                    } else {
+                        sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
                     }
                 }
 

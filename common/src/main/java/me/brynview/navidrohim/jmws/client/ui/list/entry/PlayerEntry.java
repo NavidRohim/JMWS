@@ -82,6 +82,12 @@ public final class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerH
 
     @Override
     public void setSelected(boolean selected) {
+        this.getState();
+        super.setSelected(selected);
+    }
+
+    public EntryState getState()
+    {
         if (JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(userUuid)) {
             entryState = EntryState.PENDING;
         } else if (sharedObject.getSharedTo().contains(userUuid)) {
@@ -92,11 +98,6 @@ public final class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerH
             entryState = EntryState.NOT_SHARED;
         }
 
-        super.setSelected(selected);
-    }
-
-    public EntryState getState()
-    {
         return entryState;
     }
 
@@ -136,7 +137,7 @@ public final class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerH
     @Override
     public void extractUnselectedState(GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, boolean b, float v) {
         if (!isSelected) {
-            setSubtitle(entryState.getAssociated());
+            setSubtitle(getState().getAssociated());
         }
     }
 

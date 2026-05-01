@@ -41,6 +41,7 @@
 - ~~When accepting a share request with a user, the server wipes the objects syncInfo field.~~
 - ~~Fix the timeout bug~~
 - ~~When the share screen is initially drawn, offline users appear skewed. Draw the screen's initial state correctly or immediately redraw.~~
+- clearAll is broken.
 
 ## -- Todo tomorrow --
 

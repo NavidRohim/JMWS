@@ -111,11 +111,6 @@ public class CommandFactory {
             return makeBaseRequestForUser(to, PeerToPeerCommand.CLIENT_SHARE_REQUEST, shareableObject.getSerialization(), shareableObject.getType().getId());
         }
 
-        public static String removeShareWith(UUID with, ClientSyncInformation syncInformation)
-        {
-            return CommandFactory.makeBaseJsonRequest(Commands.SERVER_REMOVE_SHARE_WITH, with, syncInformation.serialize());
-        }
-
         /* Share responses*/
 
         public static String declineWithReason(UUID to, String translationKeyReason, String... translationArgs)

@@ -96,7 +96,7 @@ public class ServerSyncInformation extends SyncInformation
     {
         @Override
         public ServerSyncInformation deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            System.out.println(json.toString());
+
             JsonObject rawJsonObject = json.getAsJsonObject();
             String rawJsonObjectString = json.getAsJsonObject().toString();
             SyncInformation info = syncInformationFromString(rawJsonObjectString);
@@ -121,15 +121,15 @@ public class ServerSyncInformation extends SyncInformation
 
             @Nullable ServerObject serverObject = JMWSServerIO.getObjectFromDisk(info.objectIdentifier, info.owner, syncRegistryType, false, info.isGlobal);
             return new ServerSyncInformation(info.objectIdentifier, info.owner, info.sharedTo, info.isGlobal, syncRegistryType, serverObject);
-            }
-
-            @Override
-            public JsonElement serialize(ServerSyncInformation src, Type typeOfSrc, JsonSerializationContext context) {
-                // Serialize using SyncInformation's type so Gson only touches the base fields,
-                // avoiding the Class<?> field in ServerSyncRegistryEntry entirely.
-                JsonObject jsonObject = context.serialize(src, SyncInformation.class).getAsJsonObject();
-                jsonObject.addProperty("syncRegistryType", src.syncRegistryType.getId());
-                return jsonObject;
-            }
         }
+
+        @Override
+        public JsonElement serialize(ServerSyncInformation src, Type typeOfSrc, JsonSerializationContext context) {
+            // Serialize using SyncInformation's type so Gson only touches the base fields,
+            // avoiding the Class<?> field in ServerSyncRegistryEntry entirely.
+            JsonObject jsonObject = context.serialize(src, SyncInformation.class).getAsJsonObject();
+            jsonObject.addProperty("syncRegistryType", src.syncRegistryType.getId());
+            return jsonObject;
+        }
+    }
 }

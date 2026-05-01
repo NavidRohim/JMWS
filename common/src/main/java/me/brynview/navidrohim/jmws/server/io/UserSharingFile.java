@@ -11,6 +11,9 @@ public class UserSharingFile extends CommonShareIO {
         super(JMWSServerIO.PathUtils.getObjectFilename(userUUID, "SHARED", ServerSyncRegistry.SHARED, false));
     }
 
+    public static void removeUserFromShare(UUID with, String objectIdentifier, ServerSyncRegistryEntry objectType) {
+    }
+
     @Override
     public boolean addToShared(String sharedValue, ServerSyncRegistryEntry sharedServerSyncRegistry)
     {
@@ -27,7 +30,7 @@ public class UserSharingFile extends CommonShareIO {
         return b;
     }
 
-    public static void removeObjectFromUser(UUID playerUUID, String objectIdentifier, ServerSyncRegistryEntry sharedServerSyncRegistry)
+    public static void removeObjectFromUser(UUID playerUUID, String objectIdentifier, ServerSyncRegistryEntry<?> sharedServerSyncRegistry)
     {
         try (UserSharingFile usf = new UserSharingFile(playerUUID))
         {
