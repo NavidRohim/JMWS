@@ -7,13 +7,13 @@ import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.JMObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
+import me.brynview.navidrohim.jmws.client.syncing.rules.ClientShareRegistry;
 
 public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
 
     public ClientWaypointWrapper(Waypoint waypoint, String plugin) throws NullPointerException
     {
-        super(waypoint.getCustomData(Constants.MODID), waypoint, waypoint.getName(), waypoint.getGuid(), plugin);
-
+        super(waypoint.getCustomData(Constants.MODID), waypoint.getCustomData(Constants.RULESET_ID), waypoint, waypoint.getName(), waypoint.getGuid(), plugin);
 
         if (this.getContext() == Context.SYNCHRONISE || this.getContext() == Context.NATIVE)
         {
@@ -26,8 +26,11 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     public void update()
     {
         super.update();
-        if (this.info != null) {
+        Constants.LoggerHolder.debug(this.info, "OBJ UPDATE INF");
+        Constants.LoggerHolder.debug(this.getShareRules(), "OBJ UPDATE RULES");
+        if (this.info != null && this.getShareRules() != null) {
             getNativeObject().setCustomData(Constants.MODID, this.getInfo().serialize());
+            getNativeObject().setCustomData(Constants.RULESET_ID, this.getShareRules().serialise());
         }
     }
 

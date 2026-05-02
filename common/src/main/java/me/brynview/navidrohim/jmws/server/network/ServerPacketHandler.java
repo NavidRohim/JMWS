@@ -106,7 +106,7 @@ public class ServerPacketHandler {
                                 Constants.LoggerHolder.debug("RULECHECK", "RK");
                                 @Nullable ShareRule failedRule = ShareRuleManager.canShareTo(wp, player);
 
-                                if (!wp.serverSyncingHandler.isGlobal() && failedRule == null)
+                                if (!wp.serverSyncingHandler.isGlobal() && (failedRule == null) || player.getUUID().equals(wp.serverSyncingHandler.getOwner()))
                                 {
                                     jsonWaypointPayloadArray.put(String.valueOf(lastIterWp), wp.getRawString());
                                 } else if (failedRule != null) {

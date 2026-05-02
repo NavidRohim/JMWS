@@ -3,14 +3,15 @@ package me.brynview.navidrohim.jmws.client.syncing.api;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 import org.apache.commons.lang3.NotImplementedException;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
 
 public abstract class JMObjectWrapper <T> extends ClientBaseObjectWrapper<Object> {
 
-    public JMObjectWrapper(String syncData, T object, String objectName, String objectGuid, String plugin) {
-        super(syncData, object, objectName, objectGuid, plugin);
+    public JMObjectWrapper(String syncData, @Nullable String jsonRules, T object, String objectName, String objectGuid, String plugin) {
+        super(syncData, jsonRules, object, objectName, objectGuid, plugin);
     }
 
     @Override

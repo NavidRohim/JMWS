@@ -28,11 +28,12 @@ public class LegacyObject
     public LegacyObject(JsonObject payload) throws IllegalStateException {
         this.payload = payload;
         this.rawPacketData = payload.toString();
-        try
-        {
+        //try
+        //{
+        Constants.LoggerHolder.debug(payload, "Legacy Object Payload");
             this.customData = payload.get("customDataMap").getAsJsonObject().get(Constants.MODID).getAsString();
             this.customDataJmwsFieldObject = payload.get("customDataMap").getAsJsonObject();
-        } catch (IllegalStateException | NullPointerException e) // catch old customData field.
+        /*} catch (IllegalStateException | NullPointerException e) // catch old customData field.
         {
             if (payload.has("customData"))
             {
@@ -49,7 +50,7 @@ public class LegacyObject
             } else {
                 throw new IllegalStateException("Unable to parse legacy object. customData doesn't exist which likely means the object has been tampered with.");
             }
-        }
+        }*/
     }
 
     public String getOldCustomData() { return this.customData; }

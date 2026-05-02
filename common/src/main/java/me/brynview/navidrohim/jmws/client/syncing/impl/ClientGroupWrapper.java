@@ -11,7 +11,7 @@ import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
 public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
 
     public ClientGroupWrapper(WaypointGroup group, String plugin) {
-        super(group.getCustomData(Constants.MODID), group, group.getName(), group.getGuid(), plugin);
+        super(group.getCustomData(Constants.MODID), group.getCustomData(Constants.RULESET_ID), group, group.getName(), group.getGuid(), plugin);
     }
 
     @Override

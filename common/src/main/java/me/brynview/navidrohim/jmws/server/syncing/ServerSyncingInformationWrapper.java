@@ -25,7 +25,7 @@ public class ServerSyncingInformationWrapper {
     ServerObject parentObject = null;
     public ServerSyncInformation info;
 
-    public ServerSyncingInformationWrapper(String identifier, UUID owner, Set<UUID> sharedTo, boolean isGlobal, ServerSyncRegistryEntry syncRegistryType) {
+    public ServerSyncingInformationWrapper(String identifier, UUID owner, Set<UUID> sharedTo, boolean isGlobal, ServerSyncRegistryEntry<?> syncRegistryType) {
         this.info = new ServerSyncInformation(identifier, owner, sharedTo, isGlobal, syncRegistryType);
 
     }

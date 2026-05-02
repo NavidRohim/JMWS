@@ -61,10 +61,10 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
 
         this.dataclass = dataclass;
 
-        this.ownerUUID = playerUUID; // Note; if you set ownerUUID before this.syncing is defined, it enables some sort of compatibility for legacy clients. But I've left it as-is to avoid chaos.
         this.serverSyncingHandler = ServerSyncingInformationWrapper.getSyncingHandlerFromServerObject(this, this.customData);
         this.rules = ShareRuleManager.getRuleset(this);
 
+        this.ownerUUID = serverSyncingHandler.info.owner;
         this.name = payload.get("name").getAsString();
         this.accessorSharing = !dataclass ? new UserSharingFile(playerUUID) : null;
 

@@ -7,6 +7,7 @@ import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncUtils;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
+import me.brynview.navidrohim.jmws.client.syncing.rules.ClientShareRegistry;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.syncing.SyncUtils;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -20,6 +21,8 @@ import java.util.UUID;
 public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper<T> {
 
     @Nullable protected ClientSyncInformation info;
+    @Nullable protected ClientShareRuleset shareRules = null;
+
     private Context context;
 
     private boolean isValid;
@@ -42,7 +45,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         return DigestUtils.sha256Hex(PlayerUtils.ourUUID() + waypointGUID + objectName);
     }
 
-    public ClientBaseObjectWrapper(String syncData, T syncedObject, String objectName, String objectGuid, String plugin)
+    public ClientBaseObjectWrapper(String syncData, @Nullable String jsonFormattedRuleset, T syncedObject, String objectName, String objectGuid, String plugin)
     {
         this.object = syncedObject;
         this.objectName = objectName;
@@ -53,7 +56,6 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
             this.setContext(Context.INBUILT);
         }
 
-        ClientSyncInformation info1;
         Constants.LoggerHolder.debug(syncData, "SYNC DATA");
         this.isValid = syncData != null && SyncUtils.isValidSyncField(syncData);
         this.isLegacy = !this.isValid && SyncUtils.isLegacySyncField(syncData);
@@ -64,10 +66,10 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
 
         this.pluginId = plugin;
 
+        ClientSyncInformation info1 = null;
         if (this.getContext() == Context.SYNCHRONISE) {
             info1 = ClientSyncUtils.syncInformationFromString(syncData, getType());
-        } else {
-            info1 = null;
+            this.setShareRules(jsonFormattedRuleset);
         }
 
         this.setInfo(info1);
@@ -77,6 +79,7 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     public void createRemotely(boolean silent)
     {
         if (getContext() == Context.NATIVE) {
+            this.setShareRules(null);
             this.setInfo(ClientSyncUtils.getEmptySyncInformation(makeWaypointHash(objectGuid, objectName), false, getType()));
         }
     }
@@ -164,6 +167,22 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     public final ClientSyncInformation getInfo()
     {
         return info;
+    }
+
+    @Override
+    public @Nullable ClientShareRuleset getShareRules()
+    {
+        return shareRules;
+    }
+
+    private void setShareRules(@Nullable String jsonFormattedRuleset)
+    {
+        if (jsonFormattedRuleset != null)
+        {
+            this.shareRules = new ClientShareRuleset(jsonFormattedRuleset);
+        } else {
+            this.shareRules = new ClientShareRuleset(null);
+        }
     }
 
     @Override
@@ -278,6 +297,5 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     @Override
     public String getSerialization() {
         return getNativeObject().toString();
-
     }
 }

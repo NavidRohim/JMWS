@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.server.syncing.rules;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.server.JMWSServerCommon;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -16,12 +17,14 @@ import java.util.List;
 public final class ShareRuleManager extends HashMap<String, ShareRule>
 {
     public static ShareWhileOnlineRule shareWhileOnline;
+    public static OnlyShareIfInOverworld onlyShareIfInOverworld;
 
     public ShareRuleManager()
     {
         super();
 
         ShareRuleManager.shareWhileOnline = this.register(new ShareWhileOnlineRule());
+        ShareRuleManager.onlyShareIfInOverworld = this.register(new OnlyShareIfInOverworld());
 
     }
 
@@ -56,9 +59,10 @@ public final class ShareRuleManager extends HashMap<String, ShareRule>
         // iterate through all rules and return list of instantiated rules from registry
         if (rulesetData != null)
         {
-            for (JsonElement rule : rulesetData.getAsJsonArray()) {
+            for (JsonElement rule : JsonParser.parseString(rulesetData.getAsString()).getAsJsonArray()) {
                 ShareRule ruleInstance = JMWSServerCommon.SHARE_RULES.get(rule.getAsString());
                 if (ruleInstance == null) {
+                    Constants.getLogger().warn("Share rule with id '{}' does not exist, skipping.", rule.getAsString());
                     continue;
                 }
                 rules.add(ruleInstance);
