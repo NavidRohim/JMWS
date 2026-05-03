@@ -208,5 +208,7 @@
   "jmws.ui.generic.empty": "Empty!",
   "jmws.ui.generic.select_all": "Select all",
   "jmws.ui.generic.deselect_all": "Deselect all",
-  "jmws.ui.generic.refreshing": "Refreshing"
+  "jmws.ui.generic.refreshing": "Refreshing",
+  "jmws.ui.generic.disabled": "Disabled",
+  "jmws.ui.generic.settings": "Settings"
 }

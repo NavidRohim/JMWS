@@ -1,5 +1,7 @@
 package me.brynview.navidrohim.jmws.common.enums;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

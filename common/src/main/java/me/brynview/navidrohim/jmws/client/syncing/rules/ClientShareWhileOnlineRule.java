@@ -6,7 +6,7 @@ import net.minecraft.network.chat.Component;
 public class ClientShareWhileOnlineRule implements ClientShareRule
 {
     Component FAILURE = Component.literal("Object cannot be shared while owner is offline.");
-    Component DESCRIPTION = Component.literal("You can only share objects while you are online.");
+    Component DESCRIPTION = Component.literal("You can only share objects while you are online. BLAH BLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAH");
     Component NAME = Component.literal("Only share when your online");
 
     @Override

@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.client.ui.elements;
 
 import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
+import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.generic.elements.AbstractJMWSButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -83,6 +84,11 @@ public class IconButton extends AbstractJMWSButton {
 
     public static IconButton buildGenericButton(Identifier image, OnPress onPress, int tintColor, @Nullable Tooltip tooltip, @Nullable Tooltip disabledTooltip)
     {
+        if (disabledTooltip == null)
+        {
+            disabledTooltip = UIConstants.DISABLED_GENERIC;
+        }
+
         return buildButton(image, onPress, 20, 20, 20, tintColor, tooltip, disabledTooltip);
     }
 }

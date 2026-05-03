@@ -26,7 +26,7 @@ public abstract class AbstractJMWSScreen extends Screen {
         super(minecraft, font, title);
     }
 
-    public void addChildToLayout(LinearLayout layout, AbstractJMWSElement element, @Nullable Consumer<LayoutSettings> consumer)
+    public final void addChildToLayout(LinearLayout layout, AbstractJMWSElement element, @Nullable Consumer<LayoutSettings> consumer)
     {
         elements.add(element);
         if (consumer != null)
@@ -37,7 +37,7 @@ public abstract class AbstractJMWSScreen extends Screen {
         }
     }
 
-    public void addChildToLayout(LinearLayout layout, AbstractJMWSElement element)
+    public final void addChildToLayout(LinearLayout layout, AbstractJMWSElement element)
     {
         this.addChildToLayout(layout, element, null);
     }

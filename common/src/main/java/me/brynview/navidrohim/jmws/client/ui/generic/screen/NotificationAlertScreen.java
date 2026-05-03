@@ -37,7 +37,7 @@ public abstract class NotificationAlertScreen extends AbstractJMWSScreen {
 
     }
 
-    public void sendAlert(Component text)
+    public void displayAlert(Component text)
     {
         this.alertText = text;
         this.alertStartTime = Util.getMillis();
@@ -82,7 +82,7 @@ public abstract class NotificationAlertScreen extends AbstractJMWSScreen {
         super.refresh();
     }
 
-    public void extractAlertText(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks)
+    public final void extractAlertText(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks)
     {
         if (this.alertText != null)
         {

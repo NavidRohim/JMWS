@@ -42,7 +42,7 @@ public class PlayerUtils {
 
             if (JMWSClientCommon.currentNotificationScreen != null)
             {
-                JMWSClientCommon.currentNotificationScreen.sendAlert(Component.literal(finalText));
+                JMWSClientCommon.currentNotificationScreen.displayAlert(Component.literal(finalText));
             }
             else if (overlayText) {
                 JMWSCommon.minecraftClientInstance.gui.setOverlayMessage(Component.literal(finalText), false); // Action bar

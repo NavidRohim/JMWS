@@ -1,6 +1,6 @@
 package me.brynview.navidrohim.jmws.client.ui.screen;
 
-import com.mojang.datafixers.types.templates.Check;
+import com.mojang.datafixers.kinds.IdF;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
@@ -18,13 +18,14 @@ import me.brynview.navidrohim.jmws.client.ui.list.ObjectSharePanel;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.ScrollableLayout;
-import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.multiplayer.ServerReconfigScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
@@ -33,6 +34,7 @@ import org.jspecify.annotations.NonNull;
 
 import javax.swing.*;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static me.brynview.navidrohim.jmws.common.JMWSCommon.minecraftClientInstance;
 
@@ -67,7 +69,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         super.init();
         // Define the sharing panel and add all shared objects on this client to panel
         this.sharePanel = new ObjectSharePanel<>(minecraftClientInstance,  0, 0, 0, 0, 50, object, this);
-        RenderUtils.setDimensionsForList(this.sharePanel, this.width, this.height, 0.85, 0.65, 10, 2);
+        RenderUtils.setDimensionsForList(this.sharePanel, this.width, this.height, 0.85, 0.75, 10, 2);
         this.checkbox = Checkbox.buildSelectAllCheckbox(button -> {
             if (button.isChecked) {
                 this.sharePanel.selectAll();
@@ -83,29 +85,33 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
 
         LinearLayout buttonIcnColumn = LinearLayout.vertical().spacing(4);
         LinearLayout mainRow = LinearLayout.horizontal().spacing(0);
-        LinearLayout rulePanelButtonColumn = LinearLayout.vertical().spacing(3);
+        //LinearLayout rulePanelButtonColumn = LinearLayout.vertical().spacing(3);
         LinearLayout centralColumn = LinearLayout.vertical();
 
-        for (ClientShareRule rule : JMWSClientCommon.clientShareRegistry.values())
+        /*for (ClientShareRule rule : JMWSClientCommon.clientShareRegistry.values())
         {
             Constants.LoggerHolder.debug("Adding rule: %s".formatted(rule.getRegistryKey()), "RULE UI");
             rulePanelButtonColumn.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (btn) -> {}, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription()), 50));
             rulePanelButtonColumn.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (btn) -> {}, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription()), 50));
             rulePanelButtonColumn.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (btn) -> {}, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription()), 50));
             rulePanelButtonColumn.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (btn) -> {}, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription()), 50));
-        }
-
+        }*/
+        /*
         ScrollableLayout rulePanel = new ScrollableLayout(minecraftClientInstance, rulePanelButtonColumn, 0);
         rulePanel.setMinWidth(this.sharePanel.getWidth());
         rulePanel.arrangeElements();
-
+       */
         this.addChildToLayout(buttonIcnColumn, this.sendButton);
         this.addChildToLayout(buttonIcnColumn, this.stopShareButton);
         this.addChildToLayout(buttonIcnColumn, IconButton.buildGenericButton(UIConstants.REFRESH, (btn) -> this.refresh(), UIConstants.YELLOW_COLOUR, UIConstants.REFRESH_TOOLTIP, null));
+        this.addChildToLayout(buttonIcnColumn, IconButton.buildGenericButton(UIConstants.SETTINGS, (btn) -> {
+            JMWSClientCommon.setCurrentUIScreen(new ShareSettingsScreen(true));
+        }, 0xFFFFFFFF, UIConstants.SETTINGS_TOOLTIP, null));
+
         this.addChildToLayout(buttonIcnColumn, this.checkbox, settings -> settings.paddingRight(4).paddingLeft(4));
 
         this.addChildToLayout(centralColumn, this.sharePanel, settings -> settings.paddingBottom(4));
-        centralColumn.addChild(rulePanel);
+        //centralColumn.addChild(rulePanel);
 
         mainRow.addChild(buttonIcnColumn, layoutSettings -> layoutSettings.paddingRight(6).paddingLeft(6));
         mainRow.addChild(centralColumn, layoutSettings -> layoutSettings.paddingRight(4));
@@ -118,7 +124,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         mainRow.visitWidgets(this::addRenderableWidget);
 
         sharePanel.addWidgets();
-        rulePanel.setMaxHeight(width - rulePanel.getY());
+     //   rulePanel.setMaxHeight(width - rulePanel.getY());
     }
 
     private void setCheckboxState()
@@ -225,5 +231,96 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         ShareScreen shareScreen = new ShareScreen(minecraftClientInstance.screen, object);
         JMWSClientCommon.currentShareScreen = shareScreen;
         JMWSClientCommon.setCurrentUIScreen(shareScreen);
+    }
+
+    private class ShareSettingsScreen extends NotificationAlertScreen
+    {
+
+        private static final Component TITLE = Component.literal("Share Settings");
+
+        private class RuleCheckbox extends Checkbox
+        {
+
+            private final ClientShareRule rule;
+
+            public RuleCheckbox(ClientShareRule rule)
+            {
+                super(0, 0, 12, 12, rule.getDisplayName(), checkboxPressed -> {}, Button.DEFAULT_NARRATION, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription()));
+                this.rule = rule;
+            }
+
+            @Override
+            protected void extractContents(@NonNull GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, float v)
+            {
+                super.extractContents(guiGraphicsExtractor, i, i1, v);
+                int yDescription = this.getY() + 13;
+                int xDescription = this.getX() + width + 3;
+
+                // Due to limited space, description will have a newline added if over.
+                //guiGraphicsExtractor.text(minecraftClientInstance.font, rule.getDescription(), xDescription, yDescription, 0x80FFFFFF);
+            }
+        }
+
+        private ScrollableLayout scrollableLayout;
+
+        public ShareSettingsScreen(boolean renderCloseButton)
+        {
+            super(ShareScreen.this, renderCloseButton);
+        }
+
+        @Override
+        protected void init()
+        {
+            super.init();
+
+            // Initialise vertical layout, which will hold all scrollable checkbox elements for each rule
+            LinearLayout verticalLayoutForRules = LinearLayout.vertical();
+
+            for (ClientShareRule rule : JMWSClientCommon.clientShareRegistry.values())
+            {
+
+
+                MultiLineTextWidget descriptionLabel = new MultiLineTextWidget(rule.getDescription().plainCopy().withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY), minecraft.font);
+                descriptionLabel.setMaxWidth(250);
+
+                verticalLayoutForRules.addChild(new RuleCheckbox(rule), settings -> settings.paddingTop(10));
+                verticalLayoutForRules.addChild(descriptionLabel, settings -> settings.paddingLeft(16));
+            }
+
+            scrollableLayout = new ScrollableLayout(minecraftClientInstance, verticalLayoutForRules, (int) (height * 0.8)); // Height of scrollable area will be 80% of screen height
+            scrollableLayout.arrangeElements();
+            scrollableLayout.setMinWidth((int) (width * 0.7));
+
+            MultiLineEditBox milis = MultiLineEditBox.builder().setPlaceholder(Component.literal(String.valueOf(System.currentTimeMillis()))).build(minecraft.font, 70, 15, Component.literal("Hours"));
+
+            LinearLayout masterHorizontalLayout = LinearLayout.horizontal().spacing(4);
+            masterHorizontalLayout.addChild(scrollableLayout);
+            masterHorizontalLayout.addChild(milis);
+
+            masterHorizontalLayout.arrangeElements();
+            FrameLayout.centerInRectangle(masterHorizontalLayout, 0, 0, width, height);
+            masterHorizontalLayout.visitWidgets(this::addRenderableWidget);
+        }
+
+        @Override
+        public void extractRenderState(@NonNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a)
+        {
+            super.extractRenderState(graphics, mouseX, mouseY, a);
+            RenderUtils.renderBorderForList(graphics, scrollableLayout);
+
+            graphics.centeredText(this.font, TITLE, this.width / 2, 7, 0xFFFFFFFF);
+        }
+
+        @Override
+        protected Vector2i getDrawLocationForAlert()
+        {
+            return new Vector2i(this.scrollableLayout.getX(), this.scrollableLayout.getY() + this.scrollableLayout.getHeight() + 8);
+        }
+
+        @Override
+        public void onClose()
+        {
+            JMWSClientCommon.setCurrentUIScreen(ShareScreen.this);
+        }
     }
 }

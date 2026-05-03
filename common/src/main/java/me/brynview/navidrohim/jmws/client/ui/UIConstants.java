@@ -26,7 +26,11 @@ public class UIConstants
 
     public static final Tooltip SELECT_ALL = Tooltip.create(Component.translatable("jmws.ui.generic.select_all"));
     public static final Tooltip DESELECT_ALL = Tooltip.create(Component.translatable("jmws.ui.generic.deselect_all"));
+    public static final Tooltip REFRESH_TOOLTIP = Tooltip.create(Component.translatable("selectServer.refresh"));
+    public static final Tooltip DISABLED_GENERIC = Tooltip.create(Component.translatable("jmws.ui.generic.disabled"));
+    public static final Tooltip SETTINGS_TOOLTIP = Tooltip.create(Component.translatable("jmws.ui.generic.settings"));
 
     public static final Identifier REFRESH = Identifier.fromNamespaceAndPath(Constants.MODID, "refresh");
-    public static final Tooltip REFRESH_TOOLTIP = Tooltip.create(Component.translatable("selectServer.refresh"));
+    public static final Identifier SETTINGS = Identifier.fromNamespaceAndPath(Constants.MODID, "settings");
+
 }

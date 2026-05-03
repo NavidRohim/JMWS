@@ -54,5 +54,10 @@ public class JMWSClientCommon {
     {
         currentNotificationScreen = screen;
         JMWSCommon.minecraftClientInstance.setScreen(screen);
+
+        if (screen instanceof ShareScreen)
+        {
+            currentShareScreen = (ShareScreen) screen;
+        }
     }
 }
