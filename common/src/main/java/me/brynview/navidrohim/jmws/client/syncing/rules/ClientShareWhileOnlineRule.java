@@ -7,6 +7,7 @@ public class ClientShareWhileOnlineRule implements ClientShareRule
 {
     Component FAILURE = Component.literal("Object cannot be shared while owner is offline.");
     Component DESCRIPTION = Component.literal("You can only share objects while you are online.");
+    Component NAME = Component.literal("Only share when your online");
 
     @Override
     public Component getFailureMessage() {
@@ -16,6 +17,12 @@ public class ClientShareWhileOnlineRule implements ClientShareRule
     @Override
     public Component getDescription() {
         return DESCRIPTION;
+    }
+
+    @Override
+    public Component getDisplayName()
+    {
+        return NAME;
     }
 
     @Override

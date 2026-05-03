@@ -4,9 +4,19 @@ import net.minecraft.network.chat.Component;
 
 public class OnlyShareWhileInOverworld implements ClientShareRule
 {
+
+    private static final Component NAME = Component.literal("Only share in overworld");
+    private static final Component DESCRIPTION = Component.literal("Object will only be shared when in the overworld.");
+
     @Override
     public Component getDescription() {
-        return null;
+        return DESCRIPTION;
+    }
+
+    @Override
+    public Component getDisplayName()
+    {
+        return NAME;
     }
 
     @Override

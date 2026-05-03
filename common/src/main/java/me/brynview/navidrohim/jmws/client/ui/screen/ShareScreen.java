@@ -1,10 +1,12 @@
 package me.brynview.navidrohim.jmws.client.ui.screen;
 
+import com.mojang.datafixers.types.templates.Check;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
+import me.brynview.navidrohim.jmws.client.syncing.rules.ClientShareRule;
 import me.brynview.navidrohim.jmws.client.ui.elements.IconButton;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.HasScrollableList;
 import me.brynview.navidrohim.jmws.client.ui.list.entry.PlayerEntry;
@@ -14,8 +16,11 @@ import me.brynview.navidrohim.jmws.client.ui.elements.Checkbox;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.NotificationAlertScreen;
 import me.brynview.navidrohim.jmws.client.ui.list.ObjectSharePanel;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ScrollableLayout;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
@@ -26,6 +31,7 @@ import net.minecraft.resources.Identifier;
 import org.joml.Vector2i;
 import org.jspecify.annotations.NonNull;
 
+import javax.swing.*;
 import java.util.Set;
 
 import static me.brynview.navidrohim.jmws.common.JMWSCommon.minecraftClientInstance;
@@ -41,7 +47,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
     private static final Tooltip CANNOT_STOP_SHARE_TOOLTIP = Tooltip.create(Component.translatable("jmws.ui.sharing.cannot_revoke_send"));
 
     private final String displayName;
-    private final ClientObjectWrapper<?> object;
+    final ClientObjectWrapper<?> object;
 
     private Checkbox checkbox;
     private IconButton sendButton;
@@ -61,8 +67,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         super.init();
         // Define the sharing panel and add all shared objects on this client to panel
         this.sharePanel = new ObjectSharePanel<>(minecraftClientInstance,  0, 0, 0, 0, 50, object, this);
-        RenderUtils.setDimensionsForList(this.sharePanel, this.width, this.height);
-
+        RenderUtils.setDimensionsForList(this.sharePanel, this.width, this.height, 0.85, 0.65, 10, 2);
         this.checkbox = Checkbox.buildSelectAllCheckbox(button -> {
             if (button.isChecked) {
                 this.sharePanel.selectAll();
@@ -77,16 +82,33 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         this.stopShareButton = IconButton.buildGenericButton(STOP_SHARE, (btn) -> this.stopSharing(), UIConstants.RED_COLOUR, STOP_SHARE_TOOLTIP, CANNOT_STOP_SHARE_TOOLTIP);
 
         LinearLayout buttonIcnColumn = LinearLayout.vertical().spacing(4);
-        LinearLayout mainRow = LinearLayout.horizontal();
+        LinearLayout mainRow = LinearLayout.horizontal().spacing(0);
+        LinearLayout rulePanelButtonColumn = LinearLayout.vertical().spacing(3);
+        LinearLayout centralColumn = LinearLayout.vertical();
+
+        for (ClientShareRule rule : JMWSClientCommon.clientShareRegistry.values())
+        {
+            Constants.LoggerHolder.debug("Adding rule: %s".formatted(rule.getRegistryKey()), "RULE UI");
+            rulePanelButtonColumn.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (btn) -> {}, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription())));
+        }
+
+        ScrollableLayout rulePanel = new ScrollableLayout(minecraftClientInstance, rulePanelButtonColumn, this.sharePanel.getHeight());
+
+        rulePanel.arrangeElements();
 
         this.addChildToLayout(buttonIcnColumn, this.sendButton);
         this.addChildToLayout(buttonIcnColumn, this.stopShareButton);
         this.addChildToLayout(buttonIcnColumn, IconButton.buildGenericButton(UIConstants.REFRESH, (btn) -> this.refresh(), UIConstants.YELLOW_COLOUR, UIConstants.REFRESH_TOOLTIP, null));
         this.addChildToLayout(buttonIcnColumn, this.checkbox, settings -> settings.paddingRight(4).paddingLeft(4));
 
-        mainRow.addChild(buttonIcnColumn, layoutSettings -> layoutSettings.paddingRight(6).paddingLeft(6));
+        this.addChildToLayout(centralColumn, this.sharePanel, settings -> settings.paddingRight(4));
+        centralColumn.addChild(rulePanel, settings -> settings.paddingRight(10));
 
-        this.addChildToLayout(mainRow, this.sharePanel, layoutSettings -> layoutSettings.paddingRight(14));
+        mainRow.addChild(buttonIcnColumn, layoutSettings -> layoutSettings.paddingRight(6).paddingLeft(6));
+        mainRow.addChild(centralColumn, layoutSettings -> layoutSettings.paddingRight(4));
+
+        //this.addChildToLayout(mainRow, this.sharePanel, layoutSettings -> layoutSettings.paddingRight(11));
+        //mainRow.addChild(rulePanel, layoutSettings -> layoutSettings.paddingRight(10));
 
         mainRow.arrangeElements();
         FrameLayout.centerInRectangle(mainRow, 0, 0, this.width, this.height);
@@ -115,6 +137,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         {
             PlayerUtils.sendUserAlert(Component.translatable("jmws.ui.sharing.no_selected_players"), true, true, MessageType.PENDING);
         } else {
+            minecraftClientInstance.setScreen(null);
             for (PlayerEntry<?> selectedPlayer : players) {
                 if (selectedPlayer.isOnline)
                 {

@@ -47,10 +47,15 @@ public class RenderUtils
 
     public static void setDimensionsForList(ObjectSelectionList<?> list, int screenWidth, int screenHeight)
     {
-        int panelWidth = (int) (screenWidth * 0.80);
-        int panelHeight = (int) (screenHeight * 0.75);
-        int panelX = screenWidth / 10;
-        int panelY = (screenHeight - panelHeight) / 2;
+        setDimensionsForList(list, screenWidth, screenHeight, 0.80, 0.75, 10, 2);
+    }
+
+    public static void  setDimensionsForList(ObjectSelectionList<?> list, int screenWidth, int screenHeight, double widthMultiplier, double heightMultiplier, int xDiv, int yDiv)
+    {
+        int panelWidth = (int) (screenWidth * widthMultiplier);
+        int panelHeight = (int) (screenHeight * heightMultiplier);
+        int panelX = screenWidth / xDiv;
+        int panelY = (screenHeight - panelHeight) / yDiv;
 
         list.setX(panelX);
         list.setY(panelY);

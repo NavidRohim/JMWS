@@ -7,6 +7,7 @@ import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.server.JMWSServerCommon;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.server.syncing.rules.api.ShareRule;
+import net.minecraft.client.gui.components.ScrollableLayout;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,7 +26,6 @@ public final class ShareRuleManager extends HashMap<String, ShareRule>
 
         ShareRuleManager.shareWhileOnline = this.register(new ShareWhileOnlineRule());
         ShareRuleManager.onlyShareIfInOverworld = this.register(new OnlyShareIfInOverworld());
-
     }
 
     public <E extends ShareRule> E register(E ins) {

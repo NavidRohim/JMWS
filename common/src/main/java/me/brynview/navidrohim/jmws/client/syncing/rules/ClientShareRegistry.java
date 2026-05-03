@@ -8,6 +8,7 @@ import com.google.gson.JsonPrimitive;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
+import me.brynview.navidrohim.jmws.server.syncing.rules.OnlyShareIfInOverworld;
 import me.brynview.navidrohim.jmws.server.syncing.rules.ShareWhileOnlineRule;
 import me.brynview.navidrohim.jmws.server.syncing.rules.api.ShareRule;
 import org.jetbrains.annotations.Nullable;
@@ -20,11 +21,13 @@ import java.util.Set;
 public class ClientShareRegistry extends HashMap<String, ClientShareRule> {
 
     public static ClientShareWhileOnlineRule shareWhileOnline;
+    public static OnlyShareWhileInOverworld onlyShareIfInOverworld;
 
     public ClientShareRegistry() {
         super();
 
         ClientShareRegistry.shareWhileOnline = this.register(new ClientShareWhileOnlineRule());
+        ClientShareRegistry.onlyShareIfInOverworld = this.register(new OnlyShareWhileInOverworld());
     }
 
     public <E extends ClientShareRule> E register(E ins) {

@@ -31,10 +31,13 @@ public class Checkbox extends AbstractJMWSButton {
     @Override
     protected void extractContents(@NonNull GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, float v) {
         super.extractContents(guiGraphicsExtractor, i, i1, v);
+
         if (isChecked)
         {
             guiGraphicsExtractor.centeredText(Minecraft.getInstance().font, CHECKMARK, this.getX() + (width / 2), this.getY() + (height / 2) - 4, 0xFFFFFFFF);
         }
+
+        guiGraphicsExtractor.text(Minecraft.getInstance().font, this.getMessage(), this.getX() + this.width + 3, this.getY(), 0xFFFFFFFF);
     }
 
     public void check()
@@ -63,8 +66,8 @@ public class Checkbox extends AbstractJMWSButton {
         this.onPress.onPress(this);
     }
 
-    public static Checkbox buildCheckbox(OnCheckboxPress onPress, Tooltip checkedTooltip, Tooltip uncheckedTooltip) {
-        Checkbox box = new Checkbox(0, 0, 12, 12, Component.empty(), onPress, Button.DEFAULT_NARRATION, checkedTooltip, uncheckedTooltip);
+    public static Checkbox buildCheckbox(Component label, OnCheckboxPress onPress, Tooltip checkedTooltip, Tooltip uncheckedTooltip) {
+        Checkbox box = new Checkbox(0, 0, 12, 12, label, onPress, Button.DEFAULT_NARRATION, checkedTooltip, uncheckedTooltip);
         box.setTooltip(uncheckedTooltip);
 
         return box;
@@ -72,7 +75,7 @@ public class Checkbox extends AbstractJMWSButton {
 
     public static Checkbox buildSelectAllCheckbox(OnCheckboxPress onPress)
     {
-        return buildCheckbox(onPress, UIConstants.DESELECT_ALL, UIConstants.SELECT_ALL);
+        return buildCheckbox(Component.empty(), onPress, UIConstants.DESELECT_ALL, UIConstants.SELECT_ALL);
     }
 
     public interface OnCheckboxPress

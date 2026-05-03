@@ -6,4 +6,5 @@ import net.minecraft.network.chat.Component;
 public interface ClientShareRule extends CommonRule
 {
     Component getDescription();
+    Component getDisplayName();
 }
