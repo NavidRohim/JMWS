@@ -89,11 +89,14 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         for (ClientShareRule rule : JMWSClientCommon.clientShareRegistry.values())
         {
             Constants.LoggerHolder.debug("Adding rule: %s".formatted(rule.getRegistryKey()), "RULE UI");
-            rulePanelButtonColumn.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (btn) -> {}, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription())));
+            rulePanelButtonColumn.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (btn) -> {}, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription()), 50));
+            rulePanelButtonColumn.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (btn) -> {}, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription()), 50));
+            rulePanelButtonColumn.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (btn) -> {}, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription()), 50));
+            rulePanelButtonColumn.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (btn) -> {}, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription()), 50));
         }
 
-        ScrollableLayout rulePanel = new ScrollableLayout(minecraftClientInstance, rulePanelButtonColumn, this.sharePanel.getHeight());
-
+        ScrollableLayout rulePanel = new ScrollableLayout(minecraftClientInstance, rulePanelButtonColumn, 0);
+        rulePanel.setMinWidth(this.sharePanel.getWidth());
         rulePanel.arrangeElements();
 
         this.addChildToLayout(buttonIcnColumn, this.sendButton);
@@ -101,8 +104,8 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         this.addChildToLayout(buttonIcnColumn, IconButton.buildGenericButton(UIConstants.REFRESH, (btn) -> this.refresh(), UIConstants.YELLOW_COLOUR, UIConstants.REFRESH_TOOLTIP, null));
         this.addChildToLayout(buttonIcnColumn, this.checkbox, settings -> settings.paddingRight(4).paddingLeft(4));
 
-        this.addChildToLayout(centralColumn, this.sharePanel, settings -> settings.paddingRight(4));
-        centralColumn.addChild(rulePanel, settings -> settings.paddingRight(10));
+        this.addChildToLayout(centralColumn, this.sharePanel, settings -> settings.paddingBottom(4));
+        centralColumn.addChild(rulePanel);
 
         mainRow.addChild(buttonIcnColumn, layoutSettings -> layoutSettings.paddingRight(6).paddingLeft(6));
         mainRow.addChild(centralColumn, layoutSettings -> layoutSettings.paddingRight(4));
@@ -115,6 +118,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         mainRow.visitWidgets(this::addRenderableWidget);
 
         sharePanel.addWidgets();
+        rulePanel.setMaxHeight(width - rulePanel.getY());
     }
 
     private void setCheckboxState()

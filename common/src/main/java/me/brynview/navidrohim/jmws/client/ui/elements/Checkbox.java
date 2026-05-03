@@ -37,7 +37,7 @@ public class Checkbox extends AbstractJMWSButton {
             guiGraphicsExtractor.centeredText(Minecraft.getInstance().font, CHECKMARK, this.getX() + (width / 2), this.getY() + (height / 2) - 4, 0xFFFFFFFF);
         }
 
-        guiGraphicsExtractor.text(Minecraft.getInstance().font, this.getMessage(), this.getX() + this.width + 3, this.getY(), 0xFFFFFFFF);
+        guiGraphicsExtractor.text(Minecraft.getInstance().font, this.getMessage(), this.getX() + this.width + 3, this.getY() + 2, 0xFFFFFFFF);
     }
 
     public void check()
@@ -66,7 +66,7 @@ public class Checkbox extends AbstractJMWSButton {
         this.onPress.onPress(this);
     }
 
-    public static Checkbox buildCheckbox(Component label, OnCheckboxPress onPress, Tooltip checkedTooltip, Tooltip uncheckedTooltip) {
+    public static Checkbox buildCheckbox(Component label, OnCheckboxPress onPress, Tooltip checkedTooltip, Tooltip uncheckedTooltip, int width) {
         Checkbox box = new Checkbox(0, 0, 12, 12, label, onPress, Button.DEFAULT_NARRATION, checkedTooltip, uncheckedTooltip);
         box.setTooltip(uncheckedTooltip);
 
@@ -75,7 +75,7 @@ public class Checkbox extends AbstractJMWSButton {
 
     public static Checkbox buildSelectAllCheckbox(OnCheckboxPress onPress)
     {
-        return buildCheckbox(Component.empty(), onPress, UIConstants.DESELECT_ALL, UIConstants.SELECT_ALL);
+        return buildCheckbox(Component.empty(), onPress, UIConstants.DESELECT_ALL, UIConstants.SELECT_ALL, 12);
     }
 
     public interface OnCheckboxPress
