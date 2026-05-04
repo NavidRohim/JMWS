@@ -1,41 +1,36 @@
 package me.brynview.navidrohim.jmws.client.ui.screen;
 
-import com.mojang.datafixers.kinds.IdF;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.rules.ClientShareRule;
-import me.brynview.navidrohim.jmws.client.ui.elements.IconButton;
-import me.brynview.navidrohim.jmws.client.ui.generic.screen.HasScrollableList;
-import me.brynview.navidrohim.jmws.client.ui.list.entry.PlayerEntry;
 import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.elements.Checkbox;
+import me.brynview.navidrohim.jmws.client.ui.elements.IconButton;
+import me.brynview.navidrohim.jmws.client.ui.generic.screen.HasScrollableList;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.NotificationAlertScreen;
 import me.brynview.navidrohim.jmws.client.ui.list.ObjectSharePanel;
+import me.brynview.navidrohim.jmws.client.ui.list.entry.PlayerEntry;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
-import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
-import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
-import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.multiplayer.ServerReconfigScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import org.joml.Vector2i;
 import org.jspecify.annotations.NonNull;
 
-import javax.swing.*;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import static me.brynview.navidrohim.jmws.common.JMWSCommon.minecraftClientInstance;
 
@@ -94,9 +89,6 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         this.addChildToLayout(buttonIcnColumn, IconButton.buildGenericButton(UIConstants.SETTINGS, (btn) -> {
             JMWSClientCommon.setCurrentUIScreen(new ShareSettingsScreen(true));
         }, 0xFFFFFFFF, UIConstants.SETTINGS_TOOLTIP, null));
-        this.addChildToLayout(buttonIcnColumn, IconButton.buildGenericButton(UIConstants.SETTINGS, (btn) -> {
-            JMWSClientCommon.setCurrentUIScreen(new DatePicker(this, btn));
-        }, 0xFF0000FF, UIConstants.SETTINGS_TOOLTIP, null));
         this.addChildToLayout(buttonIcnColumn, this.checkbox, settings -> settings.paddingRight(4).paddingLeft(4));
 
         this.addChildToLayout(centralColumn, this.sharePanel, settings -> settings.paddingBottom(4));
@@ -226,6 +218,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
     {
 
         private static final Component TITLE = Component.literal("Share Settings");
+        private static final Identifier DURATION = Identifier.fromNamespaceAndPath(Constants.MODID, "duration");
 
         private class RuleCheckbox extends Checkbox
         {
@@ -236,17 +229,6 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
             {
                 super(0, 0, 12, 12, rule.getDisplayName(), checkboxPressed -> {}, Button.DEFAULT_NARRATION, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription()));
                 this.rule = rule;
-            }
-
-            @Override
-            protected void extractContents(@NonNull GuiGraphicsExtractor guiGraphicsExtractor, int i, int i1, float v)
-            {
-                super.extractContents(guiGraphicsExtractor, i, i1, v);
-                int yDescription = this.getY() + 13;
-                int xDescription = this.getX() + width + 3;
-
-                // Due to limited space, description will have a newline added if over.
-                //guiGraphicsExtractor.text(minecraftClientInstance.font, rule.getDescription(), xDescription, yDescription, 0x80FFFFFF);
             }
         }
 
@@ -278,15 +260,22 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
             scrollableLayout.arrangeElements();
             scrollableLayout.setMinWidth((int) (width * 0.7));
 
-            MultiLineEditBox milis = MultiLineEditBox.builder().setPlaceholder(Component.literal(String.valueOf(System.currentTimeMillis()))).build(minecraft.font, 70, 15, Component.literal("Hours"));
-
             LinearLayout masterHorizontalLayout = LinearLayout.horizontal().spacing(4);
             masterHorizontalLayout.addChild(scrollableLayout);
-            masterHorizontalLayout.addChild(milis);
+            masterHorizontalLayout.addChild(IconButton.buildGenericButton(DURATION, (bnt) -> {minecraft.setScreen(new DatePicker(this, null, this::timeoutChosen));}, UIConstants.SETTINGS_TOOLTIP, null));
 
             masterHorizontalLayout.arrangeElements();
             FrameLayout.centerInRectangle(masterHorizontalLayout, 0, 0, width, height);
             masterHorizontalLayout.visitWidgets(this::addRenderableWidget);
+        }
+
+        private void timeoutChosen(ZonedDateTime chosenTime, Instant uiOpened, Long millisDifference, Component displayableTime)
+        {
+            Constants.getLogger().info("Timeout chosen: %s".formatted(chosenTime));
+            Constants.getLogger().info("UI opened at: %s".formatted(uiOpened));
+            Constants.getLogger().info("Millis diff: %s".formatted(millisDifference));
+            Constants.getLogger().info("Displayable time: %s".formatted(displayableTime.getString()));
+            PlayerUtils.sendUserAlert(Component.literal("Share set to expire on the ").append(displayableTime), true, true, MessageType.SUCCESS);
         }
 
         @Override

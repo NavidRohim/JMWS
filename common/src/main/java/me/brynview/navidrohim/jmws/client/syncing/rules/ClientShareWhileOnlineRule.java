@@ -1,12 +1,11 @@
 package me.brynview.navidrohim.jmws.client.syncing.rules;
 
-import me.brynview.navidrohim.jmws.common.syncing.rules.CommonRule;
 import net.minecraft.network.chat.Component;
 
 public class ClientShareWhileOnlineRule implements ClientShareRule
 {
     Component FAILURE = Component.literal("Object cannot be shared while owner is offline.");
-    Component DESCRIPTION = Component.literal("You can only share objects while you are online. BLAH BLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAHBLAH");
+    Component DESCRIPTION = Component.literal("You can only share objects while you are online.");
     Component NAME = Component.literal("Only share when your online");
 
     @Override
