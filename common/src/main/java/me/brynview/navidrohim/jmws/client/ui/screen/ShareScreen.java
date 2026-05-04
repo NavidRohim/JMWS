@@ -24,6 +24,7 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
+import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.ServerReconfigScreen;
 import net.minecraft.network.chat.Component;
@@ -85,29 +86,17 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
 
         LinearLayout buttonIcnColumn = LinearLayout.vertical().spacing(4);
         LinearLayout mainRow = LinearLayout.horizontal().spacing(0);
-        //LinearLayout rulePanelButtonColumn = LinearLayout.vertical().spacing(3);
         LinearLayout centralColumn = LinearLayout.vertical();
 
-        /*for (ClientShareRule rule : JMWSClientCommon.clientShareRegistry.values())
-        {
-            Constants.LoggerHolder.debug("Adding rule: %s".formatted(rule.getRegistryKey()), "RULE UI");
-            rulePanelButtonColumn.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (btn) -> {}, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription()), 50));
-            rulePanelButtonColumn.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (btn) -> {}, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription()), 50));
-            rulePanelButtonColumn.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (btn) -> {}, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription()), 50));
-            rulePanelButtonColumn.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (btn) -> {}, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription()), 50));
-        }*/
-        /*
-        ScrollableLayout rulePanel = new ScrollableLayout(minecraftClientInstance, rulePanelButtonColumn, 0);
-        rulePanel.setMinWidth(this.sharePanel.getWidth());
-        rulePanel.arrangeElements();
-       */
         this.addChildToLayout(buttonIcnColumn, this.sendButton);
         this.addChildToLayout(buttonIcnColumn, this.stopShareButton);
         this.addChildToLayout(buttonIcnColumn, IconButton.buildGenericButton(UIConstants.REFRESH, (btn) -> this.refresh(), UIConstants.YELLOW_COLOUR, UIConstants.REFRESH_TOOLTIP, null));
         this.addChildToLayout(buttonIcnColumn, IconButton.buildGenericButton(UIConstants.SETTINGS, (btn) -> {
             JMWSClientCommon.setCurrentUIScreen(new ShareSettingsScreen(true));
         }, 0xFFFFFFFF, UIConstants.SETTINGS_TOOLTIP, null));
-
+        this.addChildToLayout(buttonIcnColumn, IconButton.buildGenericButton(UIConstants.SETTINGS, (btn) -> {
+            JMWSClientCommon.setCurrentUIScreen(new DatePicker(this, btn));
+        }, 0xFF0000FF, UIConstants.SETTINGS_TOOLTIP, null));
         this.addChildToLayout(buttonIcnColumn, this.checkbox, settings -> settings.paddingRight(4).paddingLeft(4));
 
         this.addChildToLayout(centralColumn, this.sharePanel, settings -> settings.paddingBottom(4));
@@ -278,8 +267,6 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
 
             for (ClientShareRule rule : JMWSClientCommon.clientShareRegistry.values())
             {
-
-
                 MultiLineTextWidget descriptionLabel = new MultiLineTextWidget(rule.getDescription().plainCopy().withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY), minecraft.font);
                 descriptionLabel.setMaxWidth(250);
 
@@ -307,7 +294,6 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         {
             super.extractRenderState(graphics, mouseX, mouseY, a);
             RenderUtils.renderBorderForList(graphics, scrollableLayout);
-
             graphics.centeredText(this.font, TITLE, this.width / 2, 7, 0xFFFFFFFF);
         }
 
