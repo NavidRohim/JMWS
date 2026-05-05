@@ -7,7 +7,6 @@ import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncInformation;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncUtils;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
-import me.brynview.navidrohim.jmws.client.syncing.rules.ClientShareRegistry;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.syncing.SyncUtils;
 import org.apache.commons.codec.digest.DigestUtils;

@@ -5,7 +5,7 @@ import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
-import me.brynview.navidrohim.jmws.client.syncing.rules.ClientShareRule;
+import me.brynview.navidrohim.jmws.client.syncing.rules.registry.ClientShareRule;
 import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.elements.Checkbox;
@@ -18,7 +18,9 @@ import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.components.MultiLineTextWidget;
+import net.minecraft.client.gui.components.ScrollableLayout;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
@@ -30,6 +32,9 @@ import org.jspecify.annotations.NonNull;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import static me.brynview.navidrohim.jmws.common.JMWSCommon.minecraftClientInstance;
@@ -218,21 +223,14 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
     {
 
         private static final Component TITLE = Component.literal("Share Settings");
+
+        private static final Tooltip TIMEOUT_LABEL = Tooltip.create(Component.translatable("jmws.ui.sharing.settings.timeout.tooltip"));
+
         private static final Identifier DURATION = Identifier.fromNamespaceAndPath(Constants.MODID, "duration");
-
-        private class RuleCheckbox extends Checkbox
-        {
-
-            private final ClientShareRule rule;
-
-            public RuleCheckbox(ClientShareRule rule)
-            {
-                super(0, 0, 12, 12, rule.getDisplayName(), checkboxPressed -> {}, Button.DEFAULT_NARRATION, Tooltip.create(rule.getDescription()), Tooltip.create(rule.getDescription()));
-                this.rule = rule;
-            }
-        }
+        private static final Identifier SAVE = Identifier.fromNamespaceAndPath(Constants.MODID, "save");
 
         private ScrollableLayout scrollableLayout;
+        private final HashMap<String, List<ClientShareRule.RuleElement<?>>> ruleMap = new HashMap<>();
 
         public ShareSettingsScreen(boolean renderCloseButton)
         {
@@ -252,8 +250,14 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
                 MultiLineTextWidget descriptionLabel = new MultiLineTextWidget(rule.getDescription().plainCopy().withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY), minecraft.font);
                 descriptionLabel.setMaxWidth(250);
 
-                verticalLayoutForRules.addChild(new RuleCheckbox(rule), settings -> settings.paddingTop(10));
-                verticalLayoutForRules.addChild(descriptionLabel, settings -> settings.paddingLeft(16));
+                verticalLayoutForRules.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (c) -> {}, null, null, 13), settings -> settings.paddingTop(10));
+                verticalLayoutForRules.addChild(descriptionLabel, settings -> settings.paddingLeft(16).paddingVertical(3));
+
+                for (ClientShareRule.RuleElement<?> displayableElement : rule.getDisplayableElements())
+                {
+                    verticalLayoutForRules.addChild(displayableElement.widget(), settings -> settings.paddingLeft(16).paddingVertical(5));
+                    this.ruleMap.computeIfAbsent(rule.getRegistryKey(), k -> new ArrayList<>()).add(displayableElement);
+                }
             }
 
             scrollableLayout = new ScrollableLayout(minecraftClientInstance, verticalLayoutForRules, (int) (height * 0.8)); // Height of scrollable area will be 80% of screen height
@@ -262,11 +266,22 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
 
             LinearLayout masterHorizontalLayout = LinearLayout.horizontal().spacing(4);
             masterHorizontalLayout.addChild(scrollableLayout);
-            masterHorizontalLayout.addChild(IconButton.buildGenericButton(DURATION, (bnt) -> {minecraft.setScreen(new DatePicker(this, null, this::timeoutChosen));}, UIConstants.SETTINGS_TOOLTIP, null));
+
+            masterHorizontalLayout.addChild(IconButton.buildGenericButton(SAVE, (btn) -> this.save(), TIMEOUT_LABEL, null));
+            masterHorizontalLayout.addChild(IconButton.buildGenericButton(DURATION, (bnt) -> {minecraft.setScreen(new DatePicker(this, null, this::timeoutChosen));}, TIMEOUT_LABEL, null));
 
             masterHorizontalLayout.arrangeElements();
             FrameLayout.centerInRectangle(masterHorizontalLayout, 0, 0, width, height);
             masterHorizontalLayout.visitWidgets(this::addRenderableWidget);
+        }
+
+        private void save()
+        {
+            this.ruleMap.forEach((key, rules) -> {
+                rules.forEach(ruleElement -> {
+                    Constants.getLogger().info("Saving rule element value: %s for key: %s".formatted(ruleElement.getValueFromWidget(), key));
+                });
+            });
         }
 
         private void timeoutChosen(ZonedDateTime chosenTime, Instant uiOpened, Long millisDifference, Component displayableTime)

@@ -2,7 +2,6 @@ package me.brynview.navidrohim.jmws.client.syncing.api;
 
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
-import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -46,11 +45,6 @@ public abstract class JMObjectWrapper <T> extends ClientBaseObjectWrapper<Object
     public void updateRemotely()
     {
         ClientNetworkDispatcher.updateObject(this);
-    }
-
-    public String getGuid()
-    {
-        throw new NotImplementedException("Use child class.");
     }
 
     public boolean isUsableOrNative()

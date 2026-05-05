@@ -1,25 +1,19 @@
 package me.brynview.navidrohim.jmws.client.ui.elements;
 
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.generic.elements.AbstractJMWSButton;
 import me.brynview.navidrohim.jmws.client.ui.generic.screen.NotificationAlertScreen;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import org.jspecify.annotations.NonNull;
-
-import javax.management.Notification;
 
 public class CloseButton extends AbstractJMWSButton {
 
     private static final Identifier CLOSE_BUTTON_ICON = Identifier.fromNamespaceAndPath(Constants.MODID, "close");
-    private static final Tooltip CLOSE_BUTTON_TOOLTIP = Tooltip.create(Component.translatable("mco.selectServer.close"));
 
     protected CloseButton(int x, int y, int width, int height, CreateNarration createNarration, NotificationAlertScreen parentScreen) {
         super(x, y, width, height, Component.empty(), (bnt) -> parentScreen.onClose(), createNarration);
@@ -33,7 +27,7 @@ public class CloseButton extends AbstractJMWSButton {
 
     public static CloseButton buildButton(int width, int height, NotificationAlertScreen parentScreen) {
         CloseButton button = new CloseButton(parentScreen.width - (width + 4), 4, width, height, Button.DEFAULT_NARRATION, parentScreen);
-        button.setTooltip(CLOSE_BUTTON_TOOLTIP);
+        button.setTooltip(UIConstants.CLOSE_BUTTON_TOOLTIP);
         return button;
     }
 

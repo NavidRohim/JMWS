@@ -1,19 +1,15 @@
 package me.brynview.navidrohim.jmws.client.ui.elements;
 
-import me.brynview.navidrohim.jmws.client.ui.RenderUtils;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.generic.elements.AbstractJMWSButton;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
-
-import javax.tools.Tool;
 
 public class IconButton extends AbstractJMWSButton {
 
@@ -69,8 +65,9 @@ public class IconButton extends AbstractJMWSButton {
         {
             throw new IllegalArgumentException("Icon button size must be bigger than the icon itself!");
         }
-
-        return new IconButton(0, 0, width, height, image, iconWH, tintColor, onPress, Button.DEFAULT_NARRATION, tooltip, disabledTooltip);
+        IconButton btn = new IconButton(0, 0, width, height, image, iconWH, tintColor, onPress, Button.DEFAULT_NARRATION, tooltip, disabledTooltip);
+        btn.setTooltip(tooltip);
+        return btn;
     }
 
     public static IconButton buildButton(Identifier image, OnPress onPress, int width, int height, int iconWH, @Nullable Tooltip tooltip) {

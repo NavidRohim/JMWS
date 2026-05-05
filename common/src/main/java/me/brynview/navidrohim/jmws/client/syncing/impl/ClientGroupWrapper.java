@@ -50,7 +50,6 @@ public class ClientGroupWrapper extends JMObjectWrapper<WaypointGroup> {
         return getNativeObject().getColor();
     }
 
-    @Override
     public String getGuid()
     {
         return getNativeObject().getGuid();

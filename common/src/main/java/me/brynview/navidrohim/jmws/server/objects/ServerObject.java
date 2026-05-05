@@ -1,21 +1,23 @@
 package me.brynview.navidrohim.jmws.server.objects;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import me.brynview.navidrohim.jmws.Constants;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.api.PossessesIdentifier;
 import me.brynview.navidrohim.jmws.common.api.Synchronizable;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistry;
-import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistryEntry;
-import me.brynview.navidrohim.jmws.common.syncing.SyncInformation;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
-import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingInformationWrapper;
+import me.brynview.navidrohim.jmws.server.JMWSServerCommon;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
-import me.brynview.navidrohim.jmws.server.syncing.rules.ShareRuleManager;
+import me.brynview.navidrohim.jmws.server.syncing.ServerSyncInformation;
+import me.brynview.navidrohim.jmws.server.syncing.ServerSyncingInformationWrapper;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistry;
+import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistryEntry;
 import me.brynview.navidrohim.jmws.server.syncing.rules.api.ShareRule;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,54 +33,42 @@ import java.util.List;
 import java.util.UUID;
 
 public class ServerObject extends LegacyObject implements Synchronizable, PossessesIdentifier {
+    
+    protected static ServerSyncRegistryEntry<?> serverSyncRegistry = ServerSyncRegistry.GENERIC;
+    protected final UserSharingFile accessorSharing;
+    protected ServerSyncingInformationWrapper serverSyncingHandlerNative;
+    protected ImmutableList<ShareRule> rules;
 
-    String name;
-    String groupIdentifier; // TODO: remove?
-
-    public UserSharingFile accessorSharing;
-    public ServerSyncingInformationWrapper serverSyncingHandler;
-    public ImmutableList<ShareRule> rules;
-
-    public boolean dataclass;
-    public static ServerSyncRegistryEntry<?> serverSyncRegistry = ServerSyncRegistry.GENERIC;
-
-    @Nullable
-    private Path currentObjectPath;
-
-    @Nullable
-    public final Path globalObjectPath;
-
-    @Nullable
-    private final Path normalObjectPath;
+    private final String name;
+    @Nullable private Path currentObjectPath;
+    @Nullable private final Path globalObjectPath;
+    @Nullable private final Path normalObjectPath;
 
     protected final UUID ownerUUID;
-
-    // Constructors. Both are private access, but you aren't supposed to instantiate this class anyway.
-    // Use ServerWaypoint or ServerGroup.
+    public boolean dataclass;
 
     private ServerObject(JsonObject payload, UUID playerUUID, boolean dataclass) {
         super(payload);
 
         this.dataclass = dataclass;
 
-        this.serverSyncingHandler = ServerSyncingInformationWrapper.getSyncingHandlerFromServerObject(this, this.customData);
-        this.rules = ShareRuleManager.getRuleset(this);
+        this.serverSyncingHandlerNative = ServerSyncingInformationWrapper.getSyncingHandlerFromServerObject(this, this.customData);
+        this.rules = this.getRuleset(this);
 
-        this.ownerUUID = serverSyncingHandler.info.owner;
+        this.ownerUUID = getServerSyncingHandler().info.owner;
         this.name = payload.get("name").getAsString();
         this.accessorSharing = !dataclass ? new UserSharingFile(playerUUID) : null;
 
-        this.globalObjectPath = !dataclass ? Path.of(this.getObjectType().getRegistryPath() + JMWSServerIO.PathUtils.makeFilename(this.serverSyncingHandler.info.objectIdentifier, this.ownerUUID, true)) : null;
-        this.normalObjectPath = !dataclass ? JMWSServerIO.PathUtils.getObjectFilename(this.serverSyncingHandler.getOwner(), this.serverSyncingHandler.info.objectIdentifier, getObjectType(), false) : null;
-        this.groupIdentifier = payload.get("guid").getAsString();
+        this.globalObjectPath = !dataclass ? Path.of(this.getObjectType().getRegistryPath() + JMWSServerIO.PathUtils.makeFilename(this.getServerSyncingHandler().info.objectIdentifier, this.ownerUUID, true)) : null;
+        this.normalObjectPath = !dataclass ? JMWSServerIO.PathUtils.getObjectFilename(this.getServerSyncingHandler().getOwner(), this.getServerSyncingHandler().info.objectIdentifier, getObjectType(), false) : null;
 
         if (!dataclass) {
-            this.currentObjectPath = !serverSyncingHandler.isGlobal() ? normalObjectPath : globalObjectPath;
+            this.currentObjectPath = !getServerSyncingHandler().isGlobal() ? normalObjectPath : globalObjectPath;
             Constants.LoggerHolder.debug("Current object path: %s".formatted(this.currentObjectPath), "Current object path");
             if (this.didTransitionToNewData) // If true, means object was using old customData.
             {
                 this.update();
-                Constants.getLogger().info("Transitioned old customData for object '%s' field to new customDataMap Hashmap (ID: %s). You can ignore this.".formatted(this.name, this.serverSyncingHandler.info.objectIdentifier));
+                Constants.getLogger().info("Transitioned old customData for object '%s' field to new customDataMap Hashmap (ID: %s). You can ignore this.".formatted(this.name, this.getServerSyncingHandler().info.objectIdentifier));
             }
         }
     }
@@ -89,50 +79,54 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
 
     // Global
 
-    @Override // From syncable
+
+    @Override // From Synchronizable
     public void makeGlobal() {
         File oldNameFile = new File(this.getCurrentObjectPath().toString());
         File newFileName = new File(this.getGlobalObjectPath().toString());
         oldNameFile.renameTo(newFileName);
 
         this.currentObjectPath = getGlobalObjectPath();
-        this.serverSyncingHandler.setGlobal(true);
+        this.getServerSyncingHandler().setGlobal(true);
     }
 
-    @Override // From syncable
+    @Override // From Synchronizable
     public void removeGlobal() {
         File oldNameFile = new File(this.getCurrentObjectPath().toString());
         File newFileName = new File(this.getNormalObjectPath().toString());
         this.currentObjectPath = getNormalObjectPath();
 
         oldNameFile.renameTo(newFileName);
-        this.serverSyncingHandler.setGlobal(false);
+        this.getServerSyncingHandler().setGlobal(false);
     }
 
-    @Override
+    @Override // From Synchronizable
     public boolean isGlobal()
     {
-        return this.serverSyncingHandler.isGlobal();
+        return this.getServerSyncingHandler().isGlobal();
     }
 
     // Sharing
 
-    @Override
-    public void stopSharingWith(UUID user) {
-        this.serverSyncingHandler.removeUserFromShare(user);
-        this.accessorSharing.removeFromShared(this.serverSyncingHandler.info.objectIdentifier, getObjectType());
+    @Override // From Synchronizable
+    public void stopSharingWith(UUID user)
+    {
+        this.getServerSyncingHandler().removeUserFromShare(user);
+        this.accessorSharing.removeFromShared(this.getServerSyncingHandler().info.objectIdentifier, getObjectType());
     }
 
-    @Override
-    public void stopSharingWithAll() {
-        for (UUID userUUID : this.serverSyncingHandler.info.sharedTo) {
-            JMWSServerIO.removeObjectFromUser(this, userUUID, this.serverSyncingHandler.info.objectIdentifier, this.getObjectType());
+    @Override // From Synchronizable
+    public void stopSharingWithAll()
+    {
+        for (UUID userUUID : this.getServerSyncingHandler().info.sharedTo)
+        {
+            JMWSServerIO.removeObjectFromUser(this, userUUID, this.getServerSyncingHandler().info.objectIdentifier, this.getObjectType());
         }
-        this.serverSyncingHandler.removeAllFromShare();
+        this.getServerSyncingHandler().removeAllFromShare();
     }
 
-    // General server operations
-
+    // General server-only operations
+    
     public boolean delete(boolean stopSharing) {
         if (this.currentObjectPath != null && !dataclass)
         {
@@ -140,16 +134,6 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
             return CommonUtils.deleteFile(this.getCurrentObjectPath());
         }
         return false;
-    }
-
-    public static boolean deleteAll(UUID user, ServerSyncRegistryEntry<?> deletionType) {
-        List<Boolean> deletionStatusList = new ArrayList<>();
-
-        for (Path waypointPath : JMWSServerIO.getObjectPathsForUser(user, deletionType)) {
-            deletionStatusList.add(JMWSServerIO.getObjectFromFile(waypointPath, user, deletionType).delete(true)); // TODO just remove the file.
-        }
-
-        return deletionStatusList.isEmpty() || deletionStatusList.stream().allMatch(deletionStatusList.getFirst()::equals);
     }
 
     public void update(String data, boolean updateSyncInfo) {
@@ -221,16 +205,26 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
     }
 
     @Override
-    public SyncInformation getInfo()
+    public ServerSyncInformation getInfo()
     {
-        return this.serverSyncingHandler.info;
+        return this.getServerSyncingHandler().info;
     }
 
-    // From PossessesIdentifier
-    @Override
-    public String getGuid() {
-        return this.groupIdentifier;
-    } // No usages but may be used elsewhere like with generics not sure
+    public ServerSyncingInformationWrapper getServerSyncingHandler()
+    {
+        return serverSyncingHandlerNative;
+    }
+
+    public ImmutableList<ShareRule> getRules()
+    {
+        // Return a copy
+        return ImmutableList.copyOf(this.rules);
+    }
+
+    public UserSharingFile getAccessorSharing()
+    {
+        return accessorSharing;
+    }
 
     // From PossessesIdentifier
     public ServerSyncRegistryEntry<?> getObjectType() {
@@ -247,13 +241,35 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
         return this.payload.toString();
     }
 
-    public @Nullable JsonElement getRulesetData()
+    public JsonObject getRawJson() {
+        return this.payload;
+    }
+
+    @Nullable
+    public JsonElement getRulesetData()
     {
         return this.customDataJmwsFieldObject.get(Constants.RULESET_ID);
     }
 
-    public JsonObject getRawJson() {
-        return this.payload;
+    private ImmutableList<ShareRule> getRuleset(ServerObject serverObject)
+    {
+        JsonElement rulesetData = serverObject.getRulesetData();
+        List<ShareRule> rules = new ArrayList<>();
+
+        // iterate through all rules and return list of instantiated rules from registry
+        if (rulesetData != null)
+        {
+            for (JsonElement rule : JsonParser.parseString(rulesetData.getAsString()).getAsJsonArray()) {
+                ShareRule ruleInstance = JMWSServerCommon.SHARE_RULES.get(rule.getAsString());
+                if (ruleInstance == null) {
+                    Constants.getLogger().warn("Share rule with id '{}' does not exist, skipping.", rule.getAsString());
+                    continue;
+                }
+                rules.add(ruleInstance);
+            }
+        }
+
+        return ImmutableList.copyOf(rules);
     }
 
     @Nullable
@@ -271,17 +287,13 @@ public class ServerObject extends LegacyObject implements Synchronizable, Posses
         return normalObjectPath;
     }
 
-    @Nullable
-    public String getDifferentiator() {
-        return "Object";
+    public Boolean hasFile()
+    {
+        return this.getCurrentObjectPath() != null && CommonUtils.fileExists(this.getCurrentObjectPath());
     }
-
+    
     @Override
     public String toString() {
         return payload.toString();
-    }
-
-    public Boolean hasFile() {
-        return this.getCurrentObjectPath() != null && CommonUtils.fileExists(this.getCurrentObjectPath());
     }
 }

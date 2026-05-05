@@ -15,12 +15,16 @@ import java.util.UUID;
 /**
  * Dataclass that holds a synced group from the server. Contains data to make a local group.
  */
-public class ServerGroup extends ServerObject {
+public class ServerGroup extends JMServerObject
+{
 
-    public static ServerSyncRegistryEntry serverSyncRegistry = ServerSyncRegistry.GROUP;
+    public static ServerSyncRegistryEntry<ServerGroup> serverSyncRegistry = ServerSyncRegistry.GROUP;
+    private final String groupIdentifier;
 
-    public ServerGroup(JsonObject payload, UUID playerUUID) {
+    public ServerGroup(JsonObject payload, UUID playerUUID)
+    {
         super(payload, playerUUID);
+        this.groupIdentifier = payload.get("guid").getAsString();
     }
 
     public boolean deleteWaypoints()
@@ -32,13 +36,15 @@ public class ServerGroup extends ServerObject {
     {
         List<Path> objectList = getLocalWaypointsFromGroup(ownerUUID, groupIdentifier);
 
-        if (objectList == null) {
+        if (objectList == null)
+        {
             return false;
         }
 
         List<Boolean> successArray = new ArrayList<>();
 
-        for (Path objPath : objectList) {
+        for (Path objPath : objectList)
+        {
             successArray.add(ServerWaypoint.getFromPath(objPath, ownerUUID).delete(true));
         }
 
@@ -54,11 +60,6 @@ public class ServerGroup extends ServerObject {
     private boolean getLocked()
     {
         return this.getRawJson().get("settings").getAsJsonObject().get("locked").getAsBoolean();
-    }
-
-    public String getDifferentiator()
-    {
-        return getGuid().substring(0, 5);
     }
 
     @Override
@@ -81,15 +82,19 @@ public class ServerGroup extends ServerObject {
         return serverSyncRegistry;
     }
 
-    private static List<Path> getLocalWaypointsFromGroup(UUID playerUUID, String groupID) { // note; should switch to database for this shit
+    private static List<Path> getLocalWaypointsFromGroup(UUID playerUUID, String groupID)
+    { // note; should switch to database for this shit
         List<Path> userWaypointFilepaths = JMWSServerIO.getObjectPathsForUser(playerUUID, ServerSyncRegistry.WAYPOINT);
         List<Path> groupWaypoints = new ArrayList<>();
 
-        for (Path waypointPath : userWaypointFilepaths) {
+        for (Path waypointPath : userWaypointFilepaths)
+        {
             ServerWaypoint serverWaypoint = ServerWaypoint.getWaypointFromFile(waypointPath, playerUUID);
-            if (serverWaypoint.getWaypointGroupId().equals(groupID)) {
+            if (serverWaypoint.getWaypointGroupId().equals(groupID))
+            {
                 groupWaypoints.add(waypointPath);
-            } else if (serverWaypoint == null) {
+            } else if (serverWaypoint == null)
+            {
                 return null;
             }
         }

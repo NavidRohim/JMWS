@@ -1,11 +1,24 @@
 package me.brynview.navidrohim.jmws.common.syncing.rules;
 
-import net.minecraft.network.chat.Component;
-
-import java.awt.*;
-
 public interface CommonRule
 {
-    Component getFailureMessage();
     String getRegistryKey();
+    final class InputTypes<T>
+    {
+
+        public static final InputTypes<String> STRING = new InputTypes<>(String.class);
+        public static final InputTypes<Boolean> BOOLEAN = new InputTypes<>(Boolean.class);
+        public static final InputTypes<Integer> INTEGER = new InputTypes<>(Integer.class);
+
+        private final Class<T> clazz;
+        private InputTypes(Class<T> o)
+        {
+            this.clazz = o;
+        }
+
+        public Class<T> getClazz()
+        {
+            return this.clazz;
+        }
+    }
 }

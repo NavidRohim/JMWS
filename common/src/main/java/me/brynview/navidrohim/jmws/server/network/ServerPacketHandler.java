@@ -106,11 +106,11 @@ public class ServerPacketHandler {
                                 Constants.LoggerHolder.debug("RULECHECK", "RK");
                                 @Nullable ShareRule failedRule = ShareRuleManager.canShareTo(wp, player);
 
-                                if (!wp.serverSyncingHandler.isGlobal() && (failedRule == null) || player.getUUID().equals(wp.serverSyncingHandler.getOwner()))
+                                if (!wp.getServerSyncingHandler().isGlobal() && (failedRule == null) || player.getUUID().equals(wp.getServerSyncingHandler().getOwner()))
                                 {
                                     jsonWaypointPayloadArray.put(String.valueOf(lastIterWp), wp.getRawString());
                                 } else if (failedRule != null) {
-                                    sendUserMessage(player, failedRule.getFailureMessage().getString(), true, MessageType.FAILURE);
+                                    sendUserMessage(player, failedRule.getRegistryKey(), true, MessageType.FAILURE);
                                 }
                             }
                             else {
@@ -123,7 +123,7 @@ public class ServerPacketHandler {
                             ServerGroup gp = ServerGroup.getGroupFromUniqueIdentifier(sharedGpString, playerUUID);
                             if (gp != null)
                             {
-                                if (!gp.serverSyncingHandler.isGlobal())
+                                if (!gp.getServerSyncingHandler().isGlobal())
                                 {
                                     jsonGroupPayloadArray.put(String.valueOf(lastIterGp), gp.getRawString());
                                 }
@@ -181,7 +181,7 @@ public class ServerPacketHandler {
 
                     if (group != null)
                     {
-                        if (group.serverSyncingHandler.isOwner(playerUUID))
+                        if (group.getServerSyncingHandler().isOwner(playerUUID))
                         {
                             if (deleteAllWaypointsInGroup)
                             {
@@ -201,7 +201,7 @@ public class ServerPacketHandler {
                                 sendUserMessage(player, "message.jmws.deletion_group_failure", true, true, silent);
                             }
 
-                        } else if (group.serverSyncingHandler.isGlobal()) {
+                        } else if (group.getServerSyncingHandler().isGlobal()) {
                             sendUserMessage(player, "global.jmws.cannot_delete_global", true, MessageType.ONE_TIME_WARNING);
                         } else {
                             group.stopSharingWith(playerUUID);
@@ -214,7 +214,7 @@ public class ServerPacketHandler {
                         sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false);
                     } else if (deleteAllObjects)
                     {
-                        if (ServerObject.deleteAll(playerUUID, ServerSyncRegistry.GROUP)) {
+                        if (JMWSServerIO.deleteAll(playerUUID, ServerSyncRegistry.GROUP)) {
                             sendUserMessage(player, "message.jmws.deletion_group_success", true, false, silent);
                         } else {
                             sendUserMessage(player, "message.jmws.deletion_group_failure", true, true, silent);
@@ -233,7 +233,7 @@ public class ServerPacketHandler {
                     ServerWaypoint waypoint = ServerWaypoint.getWaypointFromUniqueIdentifier(waypointIdentifier, playerUUID);
 
                     if (waypoint != null) {
-                        if (waypoint.serverSyncingHandler.isOwner(playerUUID)) {
+                        if (waypoint.getServerSyncingHandler().isOwner(playerUUID)) {
                             result = waypoint.delete(true);
 
                             if (!silent) {
@@ -243,7 +243,7 @@ public class ServerPacketHandler {
                                     sendUserMessage(player, "message.jmws.deletion_failure", true, true);
                                 }
                             }
-                        } else if (waypoint.serverSyncingHandler.isGlobal()) {
+                        } else if (waypoint.getServerSyncingHandler().isGlobal()) {
                             sendUserMessage(player, "global.jmws.cannot_delete_global", true, MessageType.ONE_TIME_WARNING);
                         } else {
                             waypoint.stopSharingWith(playerUUID);
@@ -251,7 +251,7 @@ public class ServerPacketHandler {
                         }
                     } else if (deleteAll)
                     {
-                        if (ServerObject.deleteAll(playerUUID, ServerSyncRegistry.WAYPOINT))
+                        if (JMWSServerIO.deleteAll(playerUUID, ServerSyncRegistry.WAYPOINT))
                         {
                             sendUserMessage(player, "message.jmws.deletion_success", true, false);
                         } else {
@@ -315,10 +315,10 @@ public class ServerPacketHandler {
 
                     if (obj != null)
                     {
-                        if (obj.serverSyncingHandler.isOwner(playerUUID))
+                        if (obj.getServerSyncingHandler().isOwner(playerUUID))
                         {
                             obj.update(objectData, false);
-                            obj.serverSyncingHandler.syncToUsers();
+                            obj.getServerSyncingHandler().syncToUsers();
 
                             if (modifyingType == ServerSyncRegistry.WAYPOINT)
                             {
@@ -358,11 +358,11 @@ public class ServerPacketHandler {
                             {
                                 usf.addToShared(syncInfo.objectIdentifier, syncInfo.syncRegistryType);
                             }
-                            syncInfo.object.serverSyncingHandler.addUserToShare(playerUUID);
+                            syncInfo.object.getServerSyncingHandler().addUserToShare(playerUUID);
 
                             Dispatcher.sendToClient(waypointActionPayload, sentTo);
                         } else {
-                            sendUserMessage(sentTo, failedRule.getFailureMessage().getString(), true, MessageType.FAILURE);
+                            sendUserMessage(sentTo, failedRule.getRegistryKey(), true, MessageType.FAILURE);
                         }
                     } else {
                         sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
@@ -392,7 +392,7 @@ public class ServerPacketHandler {
                     {
                         if (global)
                         {
-                            if (!globalObject.serverSyncingHandler.isGlobal())
+                            if (!globalObject.getServerSyncingHandler().isGlobal())
                             {
                                 globalObject.makeGlobal();
                                 PlayerNetworkingHelper.sendUserMessage(from, "global.jmws.made_global", true, MessageType.NEUTRAL);
@@ -400,7 +400,7 @@ public class ServerPacketHandler {
                                 PlayerNetworkingHelper.sendUserMessage(from, "global.jmws.already_global", true, MessageType.WARNING);
                             }
                         } else {
-                            if (globalObject.serverSyncingHandler.isGlobal())
+                            if (globalObject.getServerSyncingHandler().isGlobal())
                             {
                                 globalObject.removeGlobal();
                                 PlayerNetworkingHelper.sendUserMessage(from, "global.jmws.remove_global", true, MessageType.NEUTRAL);

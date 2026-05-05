@@ -1,33 +1,27 @@
-package me.brynview.navidrohim.jmws.client.syncing.rules;
+package me.brynview.navidrohim.jmws.client.syncing.rules.registry;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
-import me.brynview.navidrohim.jmws.common.JMWSCommon;
-import me.brynview.navidrohim.jmws.server.syncing.rules.OnlyShareIfInOverworld;
-import me.brynview.navidrohim.jmws.server.syncing.rules.ShareWhileOnlineRule;
-import me.brynview.navidrohim.jmws.server.syncing.rules.api.ShareRule;
+import me.brynview.navidrohim.jmws.client.syncing.rules.ClientShareWhileOnlineRule;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class ClientShareRegistry extends HashMap<String, ClientShareRule> {
 
     public static ClientShareWhileOnlineRule shareWhileOnline;
-    public static OnlyShareWhileInOverworld onlyShareIfInOverworld;
+
 
     public ClientShareRegistry() {
         super();
 
         ClientShareRegistry.shareWhileOnline = this.register(new ClientShareWhileOnlineRule());
-        ClientShareRegistry.onlyShareIfInOverworld = this.register(new OnlyShareWhileInOverworld());
     }
 
     public <E extends ClientShareRule> E register(E ins) {

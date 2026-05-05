@@ -1,7 +1,6 @@
 package me.brynview.navidrohim.jmws.client.ui;
 
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.client.ui.generic.Subtitle;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
@@ -29,8 +28,8 @@ public class UIConstants
     public static final Tooltip REFRESH_TOOLTIP = Tooltip.create(Component.translatable("selectServer.refresh"));
     public static final Tooltip DISABLED_GENERIC = Tooltip.create(Component.translatable("jmws.ui.generic.disabled"));
     public static final Tooltip SETTINGS_TOOLTIP = Tooltip.create(Component.translatable("jmws.ui.generic.settings"));
+    public static final Tooltip CLOSE_BUTTON_TOOLTIP = Tooltip.create(Component.translatable("mco.selectServer.close"));
 
     public static final Identifier REFRESH = Identifier.fromNamespaceAndPath(Constants.MODID, "refresh");
     public static final Identifier SETTINGS = Identifier.fromNamespaceAndPath(Constants.MODID, "settings");
-
 }

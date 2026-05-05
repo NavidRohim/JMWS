@@ -188,6 +188,11 @@
   "jmws.ui.sharing.offline_sharing": "Offline players your sharing with",
   "jmws.ui.sharing.send_disabled": "Cannot send, you are selecting player(s) your already sharing with.",
   "jmws.ui.sharing.cannot_revoke_send": "Cannot stop sharing, you are selecting player(s) your not sharing with already.",
+  "jmws.ui.sharing.settings.timeout.tooltip": "Set share duration. Leave blank to share forever.",
+
+  "jmws.ui.calendar.nav_month": "Month",
+  "jmws.ui.calendar.nav_year": "Year",
+  "jmws.ui.calendar.set_timeout": "Set expiry",
 
   "jmws.ui.requests.accept": "Accept",
   "jmws.ui.requests.decline": "Decline",

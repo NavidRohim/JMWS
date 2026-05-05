@@ -7,7 +7,6 @@ import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.client.syncing.ClientSyncRegistry;
 import me.brynview.navidrohim.jmws.client.syncing.api.JMObjectWrapper;
 import me.brynview.navidrohim.jmws.client.syncing.objects.Context;
-import me.brynview.navidrohim.jmws.client.syncing.rules.ClientShareRegistry;
 
 public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
 
@@ -44,12 +43,6 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
     public ClientSyncRegistry getType()
     {
         return ClientSyncRegistry.WAYPOINT;
-    }
-
-    @Override
-    public String getGuid()
-    {
-        return getNativeObject().getGuid();
     }
 
     @Override

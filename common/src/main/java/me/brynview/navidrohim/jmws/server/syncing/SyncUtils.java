@@ -16,6 +16,6 @@ public class SyncUtils {
     public static void stopSharingWithOfflineUser(UUID user, ServerObject object)
     {
         object.stopSharingWith(user);
-        UserSharingFile.removeObjectFromUser(user, object.serverSyncingHandler.info.objectIdentifier, object.getObjectType());
+        UserSharingFile.removeObjectFromUser(user, object.getServerSyncingHandler().info.objectIdentifier, object.getObjectType());
     }
 }

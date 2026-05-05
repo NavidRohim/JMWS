@@ -4,9 +4,13 @@
 - ~~Fix sharing system. Was built for server-side command dispatching, but that will now move to the client.~~
 - - ~~With the new sharing system, a packet needs to be sent to the server to notify that the object has been shared and to update the client.~~
 - Convert waypoint / group creation to a more generic creation system.
-- Make sharing rules. Users can enable/disable certain rules for sharing. Like
-  - Receiving users can only get shared objects while the owner of the object is online.
+- ~~Make sharing rules. Users can enable/disable certain rules for sharing. Like~~
+  ~~- Receiving users can only get shared objects while the owner of the object is online.~~
+- Make ServerObject more agnostic of incoming data. Currently, it relies too much on JM data like the name field and customDataMap.
 
+## -- DatePicker UI --
+- Set the date picker so the client cannot set the date to a date in the past. This has been implemented somewhat in the way that you cannot scroll to a month or year before the current one, but a day in the past can still be selected
+- 
 ## -- Sharing UI --
 - ~~Add UI colour indicator for object status (shared (green), awaiting share (orange), not shared (grey), cannot share (red))~~
 - ~~Add selection boxes so you can send share requests for multiple players.~~
@@ -41,7 +45,7 @@
 - ~~When accepting a share request with a user, the server wipes the objects syncInfo field.~~
 - ~~Fix the timeout bug~~
 - ~~When the share screen is initially drawn, offline users appear skewed. Draw the screen's initial state correctly or immediately redraw.~~
-- clearAll is broken.
+- ~~clearAll is broken.~~
 
 ## -- Todo tomorrow --
 

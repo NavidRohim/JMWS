@@ -69,6 +69,16 @@ public class JMWSServerIO {
         }
     }
 
+    public static boolean deleteAll(UUID user, ServerSyncRegistryEntry<?> deletionType) {
+        List<Boolean> deletionStatusList = new ArrayList<>();
+
+        for (Path waypointPath : getObjectPathsForUser(user, deletionType)) {
+            deletionStatusList.add(getObjectFromFile(waypointPath, user, deletionType).delete(true)); // TODO just remove the file.
+        }
+
+        return deletionStatusList.isEmpty() || deletionStatusList.stream().allMatch(deletionStatusList.getFirst()::equals);
+    }
+
     public static class PathUtils
     {
         public static String makeFilename(String objectID, UUID playerOwner, boolean isGlobal)

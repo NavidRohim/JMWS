@@ -13,7 +13,7 @@ import java.util.UUID;
 /**
  * Dataclass that holds a synced waypoint from the server. Contains data to make a local waypoint.
  */
-public class ServerWaypoint extends ServerObject {
+public class ServerWaypoint extends JMServerObject {
     // Main defining information
     String groupId;
 
@@ -68,8 +68,6 @@ public class ServerWaypoint extends ServerObject {
     }
 
     public String getWaypointGroupId() { return this.groupId; }
-
-    public String getDifferentiator() { return "X=%s Y=%s Z=%s %s".formatted(x, y, z, this.primaryDimension); }
 
     @Override
     public ServerSyncRegistryEntry<?> getObjectType()
