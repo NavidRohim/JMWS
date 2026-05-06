@@ -230,7 +230,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         private static final Identifier SAVE = Identifier.fromNamespaceAndPath(Constants.MODID, "save");
 
         private ScrollableLayout scrollableLayout;
-        private final HashMap<String, List<ClientShareRule.RuleElement<?>>> ruleMap = new HashMap<>();
+        private final HashMap<String, List<ClientShareRule.RuleSetting<?>.RuleSettingWrapper<?>>> ruleMap = new HashMap<>();
 
         public ShareSettingsScreen(boolean renderCloseButton)
         {
@@ -253,9 +253,9 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
                 verticalLayoutForRules.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (c) -> {}, null, null, 13), settings -> settings.paddingTop(10));
                 verticalLayoutForRules.addChild(descriptionLabel, settings -> settings.paddingLeft(16).paddingVertical(3));
 
-                for (ClientShareRule.RuleElement<?> displayableElement : rule.getDisplayableElements())
+                for (ClientShareRule.RuleSetting<?>.RuleSettingWrapper<?> displayableElement : rule.getDisplayableElements())
                 {
-                    verticalLayoutForRules.addChild(displayableElement.widget(), settings -> settings.paddingLeft(16).paddingVertical(5));
+                    verticalLayoutForRules.addChild(displayableElement.getWidget(), settings -> settings.paddingLeft(16).paddingVertical(5));
                     this.ruleMap.computeIfAbsent(rule.getRegistryKey(), k -> new ArrayList<>()).add(displayableElement);
                 }
             }
@@ -277,9 +277,11 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
 
         private void save()
         {
+
             this.ruleMap.forEach((key, rules) -> {
-                rules.forEach(ruleElement -> {
-                    Constants.getLogger().info("Saving rule element value: %s for key: %s".formatted(ruleElement.getValueFromWidget(), key));
+                rules.forEach(ruleSetting -> {
+                    ClientShareRule.RuleSetting<?> p = ruleSetting.setValueForParent();
+                    Constants.getLogger().info("Saving rule setting value.\nFor rule: %s\nrule setting key: %s\nrule setting value: %s".formatted(p.getParentRule().getDisplayName().getString(), p.valueName, p.getValue()));
                 });
             });
         }
