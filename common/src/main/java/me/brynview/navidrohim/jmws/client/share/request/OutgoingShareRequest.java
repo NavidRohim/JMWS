@@ -15,7 +15,7 @@ import java.util.UUID;
 
 public class OutgoingShareRequest extends ShareRequest {
 
-    public OutgoingShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, ClientObjectWrapper<?> sharedObject, ServerSyncRegistryEntry sharedServerSyncRegistry, String requestIdentifier, String objectDisplayName) {
+    public OutgoingShareRequest(@Nullable UUID uuid, @Nullable UUID meantForPlayerUUID, ClientObjectWrapper<?> sharedObject) {
         super(uuid, meantForPlayerUUID, sharedObject);
     }
 

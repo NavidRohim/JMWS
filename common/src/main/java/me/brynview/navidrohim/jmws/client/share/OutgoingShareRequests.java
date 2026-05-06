@@ -52,7 +52,7 @@ public class OutgoingShareRequests extends HashMap<UUID, OutgoingShareRequest> {
 
     public void sendRequest(UUID sharedTo, ClientBaseObjectWrapper<?> sharedObject)
     {
-        this.addRequest(sharedTo, new OutgoingShareRequest(PlayerUtils.ourUUID(), sharedTo, sharedObject, JMWSServerCommon.REGISTRY.getStrict(sharedObject.getType().getId()), sharedObject.getIdentifier(), sharedObject.getName()));
+        this.addRequest(sharedTo, new OutgoingShareRequest(PlayerUtils.ourUUID(), sharedTo, sharedObject));
         ClientNetworkDispatcher.PeerToPeer.shareWith(sharedTo, sharedObject);
     }
 }

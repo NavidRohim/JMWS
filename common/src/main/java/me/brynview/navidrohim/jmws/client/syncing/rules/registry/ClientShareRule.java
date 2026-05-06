@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.client.syncing.rules.registry;
 
+import com.google.gson.Gson;
 import me.brynview.navidrohim.jmws.common.syncing.rules.CommonRule;
 import net.minecraft.client.gui.layouts.LayoutElement;
 import net.minecraft.network.chat.Component;
@@ -20,6 +21,7 @@ public interface ClientShareRule extends CommonRule
 
     class RuleSetting<B>
     {
+
         public final @NotNull ClientShareRule parentRule;
         public final @NotNull String valueName;
         public final @NotNull InputTypes<B> valueType;

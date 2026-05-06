@@ -20,7 +20,6 @@ public class ClientWaypointWrapper extends JMObjectWrapper<Waypoint> {
         }
     }
 
-
     @Override
     public void update()
     {

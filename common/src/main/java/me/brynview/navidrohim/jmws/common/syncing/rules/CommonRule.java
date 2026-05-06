@@ -24,5 +24,10 @@ public interface CommonRule
         {
             return clazz.cast(obj);
         }
+
+        public String toString()
+        {
+            return clazz.getSimpleName().toUpperCase();
+        }
     }
 }
