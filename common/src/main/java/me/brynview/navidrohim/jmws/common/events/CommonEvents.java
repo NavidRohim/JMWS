@@ -32,7 +32,7 @@ public class CommonEvents {
             CommonClass.scheduler.schedule(() -> {
                 PlayerUtils.sendUserAlert(Component.translatable("warning.jmws.world_is_local"), true, false, MessageType.NEUTRAL);}, 2, TimeUnit.SECONDS);
         } else {
-            CommonClass.scheduler.schedule(() -> PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer), ServerConfig.serverConfig.handshakeDelay, TimeUnit.MILLISECONDS);
+            CommonClass.scheduler.schedule(() -> PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer.getUUID()), ServerConfig.serverConfig.handshakeDelay, TimeUnit.MILLISECONDS);
             //PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer);
         }
     }

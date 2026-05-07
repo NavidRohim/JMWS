@@ -12,6 +12,8 @@ This mod **does not upload your saved JourneyMap settings**. Only your waypoints
 
 Drop this mod into the clients and servers mod folder. The server must have the mod CommonNetwork installed for your appropriate version. There is no extra setup. If working correctly, when you join a server you will get a green success message.
 
+Paper servers can instead install the JMWS Paper plugin on the server. Players still need the matching JMWS client-side mod and JourneyMap installed, because the Paper plugin is a server adapter for the same client protocol rather than a replacement for the client mod.
+
 ## Why?
 
 This is a personal project. I made it because I played on a server I owned on multiple devices (I played on PC, and before I went to bed I played on steam deck) but, I could never find a mod that synced JourneyMap waypoints between devices (If you know / find one, please do let me know)

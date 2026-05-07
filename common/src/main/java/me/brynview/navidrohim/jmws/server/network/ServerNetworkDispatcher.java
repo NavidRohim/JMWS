@@ -1,23 +1,30 @@
 package me.brynview.navidrohim.jmws.server.network;
 
-import commonnetwork.api.Network;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
-import net.minecraft.server.level.ServerPlayer;
+import me.brynview.navidrohim.jmws.common.platform.Services;
+import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
+
+import java.util.UUID;
 
 public class ServerNetworkDispatcher {
-    public static void sendPacketToClient(JMWSActionPayload payload, ServerPlayer player)
+    public static void sendPacketToClient(JMWSActionPayload payload, UUID playerUuid)
     {
-        Network.getNetworkHandler().sendToClient(payload, player, true);
+        Services.PLATFORM.sendActionPayloadToClient(payload, playerUuid);
     }
 
-    public static void sendStringToClient(String data, ServerPlayer player)
+    public static void sendStringToClient(String data, UUID playerUuid)
     {
-        sendPacketToClient(new JMWSActionPayload(data), player);
+        sendPacketToClient(new JMWSActionPayload(data), playerUuid);
     }
 
-    public static void sendHandshakeToClient(ServerPlayer player)
+    public static void sendHandshakeToClient(UUID playerUuid)
     {
-        Network.getNetworkHandler().sendToClient(new JMWSHandshakePayload(), player, true);
+        Services.PLATFORM.sendHandshakePayloadToClient(new JMWSHandshakePayload(), playerUuid);
+    }
+
+    public static void requestClientSync(UUID playerUuid)
+    {
+        sendStringToClient(CommandFactory.makeBaseJsonRequest(CommandFactory.Commands.REQUEST_CLIENT_SYNC), playerUuid);
     }
 }

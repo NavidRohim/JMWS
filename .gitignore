@@ -1,6 +1,8 @@
 run
 runs
 build
+target
+tmp
 buildSrc
 debug
 verspec/

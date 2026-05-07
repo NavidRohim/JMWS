@@ -1,33 +1,35 @@
 package me.brynview.navidrohim.jmws.server.commands;
 
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.platform.Services;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
-import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.HashMap;
 import java.util.UUID;
 
+import static me.brynview.navidrohim.jmws.server.io.JMWSServerIO.getAllInitialisedGlobalObjects;
+
 public class ServerCommands {
 
-    public static int share(ServerPlayer sender, ServerPlayer player, String waypointID, ObjectType objectType) {
+    public static int share(UUID sender, UUID player, String waypointID, ObjectType objectType) {
         if (ServerConfig.serverConfig.sharingEnabled)
         {
-            if (sender.equals(player) || (CommonClass.isInternalServer() && player.level().getServer().getSingleplayerProfile().id().equals(player.getUUID())))
+            if (sender.equals(player))
             {
                 PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.cannot_share", true, false);
             } else {
-                HashMap<String, Path> userObjs = JMWSServerIO.getNameHashmapLookup(sender.getUUID(), objectType);
+                HashMap<String, Path> userObjs = JMWSServerIO.getNameHashmapLookup(sender, objectType);
                 Path specifiedObj = userObjs.get(waypointID);
                 if (specifiedObj != null)
                 {
-                    ServerObject objIns = JMWSServerIO.getObjectFromFile(specifiedObj, sender.getUUID(), objectType);
+                    ServerObject objIns = JMWSServerIO.getObjectFromFile(specifiedObj, sender, objectType);
                     if (!objIns.syncing.isGlobal())
                     {
                         objIns.share(sender, player);
@@ -45,13 +47,13 @@ public class ServerCommands {
         return 1;
     }
 
-    public static int removeShare(ServerPlayer sender, String waypointID, ObjectType objectType) {
-        HashMap<String, Path> userObjPaths = JMWSServerIO.getNameHashmapLookup(sender.getUUID(), objectType);
+    public static int removeShare(UUID sender, String waypointID, ObjectType objectType) {
+        HashMap<String, Path> userObjPaths = JMWSServerIO.getNameHashmapLookup(sender, objectType);
         Path specifiedObj = userObjPaths.get(waypointID);
 
         if (specifiedObj != null)
         {
-            ServerObject objIns = JMWSServerIO.getObjectFromFile(specifiedObj, sender.getUUID(), objectType);
+            ServerObject objIns = JMWSServerIO.getObjectFromFile(specifiedObj, sender, objectType);
             objIns.stopSharing();
             PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.stopped_sharing", true, MessageType.NEUTRAL);
         }
@@ -60,11 +62,6 @@ public class ServerCommands {
         }
 
         return 1;
-    }
-
-    public static int globalShare(String objectName, ServerPlayer player, ObjectType objectType, boolean make)
-    {
-        return globalShare(objectName, player.getUUID(), objectType, make);
     }
 
     public static int globalShare(String objectName, UUID uuid, ObjectType objectType, boolean make)
@@ -99,9 +96,9 @@ public class ServerCommands {
         return 1;
     }
 
-    public static int removeGlobalFromBadOp(String waypointID, ObjectType objectType, ServerPlayer senderPlayer)
+    public static int removeGlobalFromBadOp(String waypointID, ObjectType objectType, UUID senderPlayer)
     {
-        HashMap<String, ServerObject> userObjs = ServerDispatcher.getInactiveOpUserGlobalObjects(objectType);
+        HashMap<String, ServerObject> userObjs = getInactiveOpUserGlobalObjects(objectType);
         @Nullable ServerObject specifiedObject = userObjs.get(waypointID);
 
         if (specifiedObject != null)
@@ -118,5 +115,19 @@ public class ServerCommands {
         }
 
         return 1;
+    }
+
+    public static HashMap<String, ServerObject> getInactiveOpUserGlobalObjects(ObjectType objectType)
+    {
+        List<ServerObject> objs = getAllInitialisedGlobalObjects(objectType);
+        HashMap<String, ServerObject> stringServerObjectHashMap = new HashMap<>();
+
+        objs.forEach(obj -> {
+            if (!Services.PLATFORM.isOperator(obj.getOwnerUUID()))
+            {
+                stringServerObjectHashMap.put(obj.getObjectNonDuplicateIdentifier(), obj);
+            }
+        });
+        return stringServerObjectHashMap;
     }
 }

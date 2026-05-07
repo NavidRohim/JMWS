@@ -3,19 +3,21 @@ package me.brynview.navidrohim.jmws.common.enums;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
+import me.brynview.navidrohim.jmws.common.platform.Services;
+
+import java.io.File;
+import java.nio.file.Path;
 
 public enum ObjectType {
-    WAYPOINT(ServerWaypoint.class, "./jmws/"),
-    GROUP(ServerGroup.class, "./jmws/groups/"),
-    SHARED(null, "./jmws/users/"),
-    GENERIC(null, null);
+    WAYPOINT(ServerWaypoint.class),
+    GROUP(ServerGroup.class),
+    SHARED(null),
+    GENERIC(null);
 
     private final Class<? extends ServerObject> savedClass;
-    private final String objectPathPrefix;
 
-    ObjectType(final Class<? extends ServerObject> savedClass, String objectPathPrefix) {
+    ObjectType(final Class<? extends ServerObject> savedClass) {
         this.savedClass = savedClass;
-        this.objectPathPrefix = objectPathPrefix;
     }
 
     public static String getPathLocationPrefix(ObjectType objectType)
@@ -29,6 +31,13 @@ public enum ObjectType {
 
     public String getObjectPathPrefix()
     {
-        return this.objectPathPrefix;
+        Path directory = switch (this) {
+            case WAYPOINT -> Services.PLATFORM.getWaypointDirectory();
+            case GROUP -> Services.PLATFORM.getGroupDirectory();
+            case SHARED -> Services.PLATFORM.getUserDirectory();
+            case GENERIC -> null;
+        };
+
+        return directory != null ? directory.toString() + File.separator : null;
     }
 }

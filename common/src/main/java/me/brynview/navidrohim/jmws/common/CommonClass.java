@@ -23,8 +23,9 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.MinecraftServer;
 
 
-import java.io.File;
-
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -66,10 +67,10 @@ public class CommonClass {
             {
                 ClientPacketHandler.handlePacket(ctx);
             } else {
-                ServerPacketHandler.handleIncomingActionCommand(ctx, ctx.sender());
+                ServerPacketHandler.handleIncomingActionCommand(ctx.message(), ctx.sender().getUUID());
             }
         } else {
-            ServerPacketHandler.handleIncomingActionCommand(ctx, ctx.sender());
+            ServerPacketHandler.handleIncomingActionCommand(ctx.message(), ctx.sender().getUUID());
         }
     }
 
@@ -79,14 +80,22 @@ public class CommonClass {
         {
             ClientPacketHandler.handleHandshake(ctx.message());
         } else {
-            PlayerNetworkingHelper.sendHandshakeAndValidate(ctx.sender());
+            PlayerNetworkingHelper.sendHandshakeAndValidate(ctx.sender().getUUID());
         }
     }
 
     public static void createServerResources() {
-        new File("./jmws").mkdir();
-        new File("./jmws/groups").mkdir();
-        new File("./jmws/users").mkdir();
+        createServerDirectory(Services.PLATFORM.getWaypointDirectory());
+        createServerDirectory(Services.PLATFORM.getGroupDirectory());
+        createServerDirectory(Services.PLATFORM.getUserDirectory());
+    }
+
+    private static void createServerDirectory(Path directory) {
+        try {
+            Files.createDirectories(directory);
+        } catch (IOException | SecurityException error) {
+            Constants.getLogger().error("Could not create JMWS server directory {}: {}", directory, error.getMessage());
+        }
     }
 
 

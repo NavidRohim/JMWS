@@ -3,12 +3,10 @@ package me.brynview.navidrohim.jmws.server.network;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import commonnetwork.api.Dispatcher;
-import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.platform.Services;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
@@ -18,7 +16,6 @@ import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
-import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -41,11 +38,10 @@ public class ServerPacketHandler {
         Constants.getLogger().debug("Got corrupt packet command %s for user %s data following\n\nCommand: %s\nArguments: %s\nException: %s".formatted(command, playerUUID, command, arguments.toString(), error.getMessage()));
     }
 
-    public static void sendUserSync(ServerPlayer player, boolean sendAlert, boolean isDeathSync, boolean onlySyncShared)
+    public static void sendUserSync(UUID playerUUID, boolean sendAlert, boolean isDeathSync, boolean onlySyncShared)
     {
         if (ServerConfig.getConfig().serverEnabled())
         {
-            UUID playerUUID = player.getUUID();
             try {
                 int lastIterWp = 0;
                 int lastIterGp = 0;
@@ -125,28 +121,19 @@ public class ServerPacketHandler {
 
                 String jsonData = CommandFactory.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert, isDeathSync);
                 if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit, but I got nowhere near.
-                    sendUserMessage(player, "error.jmws.error_packet_size", false, true);
+                    sendUserMessage(playerUUID, "error.jmws.error_packet_size", false, true);
                 } else {
-                    ServerNetworkDispatcher.sendStringToClient(jsonData, player);
+                    ServerNetworkDispatcher.sendStringToClient(jsonData, playerUUID);
                 }
             } catch (IOException ioe) {
-                Constants.getLogger().error("Error on server when trying to process sync from %s ERROR: %s".formatted(player.getUUID(), ioe.toString()));
+                Constants.getLogger().error("Error on server when trying to process sync from %s ERROR: %s".formatted(playerUUID, ioe.toString()));
             }
         }
     }
 
-    public static void handleIncomingActionCommand(PacketContext<JMWSActionPayload> Context, @Nullable ServerPlayer player) {
-
-        if (player == null)
-        {
-            Constants.getLogger().debug("Trashing packet as it's context is no longer valid. Cause is unknown but could be mod incompatibility or lag.\nDead packet = %s".formatted(Context.message().command()));
-            return;
-        }
-
-        JMWSActionPayload waypointActionPayload = Context.message();
+    public static void handleIncomingActionCommand(JMWSActionPayload waypointActionPayload, UUID playerUUID) {
         CommandFactory.Commands command = waypointActionPayload.command();
         List<JsonElement> arguments = waypointActionPayload.arguments();
-        UUID playerUUID = player.getGameProfile().id();
 
         try
         {
@@ -176,7 +163,7 @@ public class ServerPacketHandler {
                                 result = group.deleteWaypoints();
                                 if (!removeGroupItself && result)
                                 {
-                                    sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false, silent);
+                                    sendUserMessage(playerUUID, "message.jmws.deleted_waypoints_in_group", true, false, silent);
                                     return;
                                 }
                             }
@@ -184,28 +171,28 @@ public class ServerPacketHandler {
                             result = group.delete(false);
 
                             if (result) {
-                                sendUserMessage(player, "message.jmws.deletion_group_success", true, false, silent);
+                                sendUserMessage(playerUUID, "message.jmws.deletion_group_success", true, false, silent);
                             } else {
-                                sendUserMessage(player, "message.jmws.deletion_group_failure", true, true, silent);
+                                sendUserMessage(playerUUID, "message.jmws.deletion_group_failure", true, true, silent);
                             }
 
                         } else if (group.syncing.isGlobal()) {
-                            sendUserMessage(player, "global.jmws.cannot_delete_global", true, MessageType.ONE_TIME_WARNING);
+                            sendUserMessage(playerUUID, "global.jmws.cannot_delete_global", true, MessageType.ONE_TIME_WARNING);
                         } else {
                             group.stopSharing(playerUUID);
-                            sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
+                            sendUserMessage(playerUUID, "sharing.jmws.no_longer_sharing", true, false);
                         }
 
                     } else if (deleteAllWaypointsInGroup)
                     {
                         ServerGroup.deleteWaypoints(playerUUID, groupGUID);
-                        sendUserMessage(player, "message.jmws.deleted_waypoints_in_group", true, false);
+                        sendUserMessage(playerUUID, "message.jmws.deleted_waypoints_in_group", true, false);
                     } else if (deleteAllObjects)
                     {
                         if (ServerObject.deleteAll(playerUUID, ObjectType.GROUP)) {
-                            sendUserMessage(player, "message.jmws.deletion_group_success", true, false, silent);
+                            sendUserMessage(playerUUID, "message.jmws.deletion_group_success", true, false, silent);
                         } else {
-                            sendUserMessage(player, "message.jmws.deletion_group_failure", true, true, silent);
+                            sendUserMessage(playerUUID, "message.jmws.deletion_group_failure", true, true, silent);
                         }
 
                     }
@@ -226,27 +213,27 @@ public class ServerPacketHandler {
 
                             if (!silent) {
                                 if (result) {
-                                    sendUserMessage(player, "message.jmws.deletion_success", true, false);
+                                    sendUserMessage(playerUUID, "message.jmws.deletion_success", true, false);
                                 } else {
-                                    sendUserMessage(player, "message.jmws.deletion_failure", true, true);
+                                    sendUserMessage(playerUUID, "message.jmws.deletion_failure", true, true);
                                 }
                             }
                         } else if (waypoint.syncing.isGlobal()) {
-                            sendUserMessage(player, "global.jmws.cannot_delete_global", true, MessageType.ONE_TIME_WARNING);
+                            sendUserMessage(playerUUID, "global.jmws.cannot_delete_global", true, MessageType.ONE_TIME_WARNING);
                         } else {
                             waypoint.stopSharing(playerUUID);
-                            sendUserMessage(player, "sharing.jmws.no_longer_sharing", true, false);
+                            sendUserMessage(playerUUID, "sharing.jmws.no_longer_sharing", true, false);
                         }
                     } else if (deleteAll)
                     {
                         if (ServerObject.deleteAll(playerUUID, ObjectType.WAYPOINT))
                         {
-                            sendUserMessage(player, "message.jmws.deletion_success", true, false);
+                            sendUserMessage(playerUUID, "message.jmws.deletion_success", true, false);
                         } else {
-                            sendUserMessage(player, "message.jmws.deletion_failure", true, true);
+                            sendUserMessage(playerUUID, "message.jmws.deletion_failure", true, true);
                         }
                     } else {
-                        sendUserMessage(player, "message.jmws.deletion_failure", true, true);
+                        sendUserMessage(playerUUID, "message.jmws.deletion_failure", true, true);
                     }
                 }
 
@@ -259,13 +246,13 @@ public class ServerPacketHandler {
 
                         if (!silent) {
                             if (waypointCreationSuccess) {
-                                sendUserMessage(player, "message.jmws.creation_success", true, false);
+                                sendUserMessage(playerUUID, "message.jmws.creation_success", true, false);
                             } else {
-                                sendUserMessage(player, "message.jmws.creation_failure", false, true);
+                                sendUserMessage(playerUUID, "message.jmws.creation_failure", false, true);
                             }
                         }
                     } else {
-                        sendUserMessage(player, "message.jmws.server_disabled_waypoints", true, true);
+                        sendUserMessage(playerUUID, "message.jmws.server_disabled_waypoints", true, true);
                     }
                 }
 
@@ -281,14 +268,14 @@ public class ServerPacketHandler {
 
                         if (!silent) {
                             if (waypointCreationSuccess) {
-                                sendUserMessage(player, "message.jmws.creation_group_success", true, false);
+                                sendUserMessage(playerUUID, "message.jmws.creation_group_success", true, false);
                             } else {
-                                sendUserMessage(player, "message.jmws.creation_group_failure", false, true);
+                                sendUserMessage(playerUUID, "message.jmws.creation_group_failure", false, true);
 
                             }
                         }
                     } else {
-                        sendUserMessage(player, "message.jmws.server_disabled_groups", true, true);
+                        sendUserMessage(playerUUID, "message.jmws.server_disabled_groups", true, true);
                     }
                 }
 
@@ -310,12 +297,12 @@ public class ServerPacketHandler {
 
                             if (modifyingType == ObjectType.WAYPOINT)
                             {
-                                PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_waypoint_success", true, MessageType.NEUTRAL);
+                                PlayerNetworkingHelper.sendUserMessage(playerUUID, "message.jmws.modified_waypoint_success", true, MessageType.NEUTRAL);
                             } else {
-                                PlayerNetworkingHelper.sendUserMessage(player, "message.jmws.modified_group_success", true, MessageType.NEUTRAL);
+                                PlayerNetworkingHelper.sendUserMessage(playerUUID, "message.jmws.modified_group_success", true, MessageType.NEUTRAL);
                             }
                         } else {
-                            sendUserMessage(player, "sharing.jmws.local_only", false, MessageType.ONE_TIME_WARNING);
+                            sendUserMessage(playerUUID, "sharing.jmws.local_only", false, MessageType.ONE_TIME_WARNING);
                         }
                     }
                 }
@@ -324,13 +311,13 @@ public class ServerPacketHandler {
                 case CommandFactory.Commands.SYNC -> {
                     boolean sendAlert = arguments.get(2).getAsBoolean();
                     boolean isDeathSync = arguments.getLast().getAsBoolean();
-                    sendUserSync(player, sendAlert, isDeathSync, false);
+                    sendUserSync(playerUUID, Services.PLATFORM.shouldSendSyncAlert(sendAlert, isDeathSync), isDeathSync, false);
                 }
 
                 case CommandFactory.Commands.USER_ALREADY_PROCESSING_SHARE, CommandFactory.Commands.REJECT_SHARE ->
                 {
-                    UUID forUser = UUID.fromString(Context.message().arguments().getFirst().getAsString());
-                    ServerNetworkDispatcher.sendPacketToClient(Context.message(), Context.sender().level().getServer().getPlayerList().getPlayer(forUser));
+                    UUID forUser = UUID.fromString(waypointActionPayload.arguments().getFirst().getAsString());
+                    ServerNetworkDispatcher.sendPacketToClient(waypointActionPayload, forUser);
                 }
 
                 case CommandFactory.Commands.AFFIRM_SHARE ->
@@ -347,9 +334,9 @@ public class ServerPacketHandler {
                             usf.addToShared(objectIdentifier, objType);
                         }
                         sharedWp.syncing.addUserToShare(playerUUID);
-                        ServerNetworkDispatcher.sendPacketToClient(waypointActionPayload, CommonClass.minecraftServerInstance.getPlayerList().getPlayer(ownerUUID));
+                        ServerNetworkDispatcher.sendPacketToClient(waypointActionPayload, ownerUUID);
                     } else {
-                        sendUserMessage(player, "sharing.jmws.object_no_longer_exists", true, true);
+                        sendUserMessage(playerUUID, "sharing.jmws.object_no_longer_exists", true, true);
                     }
                 }
 

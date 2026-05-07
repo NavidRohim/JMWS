@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.server.config;
 
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.platform.Services;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import me.brynview.navidrohim.jmws.server.exceptions.ServerConfigurationException;
 
@@ -12,13 +13,16 @@ import java.nio.file.Path;
 
 public class ServerConfig {
 
-    private static final Path configPath = Path.of("./config/jmws-server.json");
-
     public static String rawServerConfigData;
     public static ServerConfigObject serverConfig;
 
+    private static Path getConfigPath() {
+        return Services.PLATFORM.getServerConfigPath();
+    }
+
     public static void ensureExistence()
     {
+        Path configPath = getConfigPath();
         try
         {
             Files.createDirectories(configPath.getParent());
@@ -63,14 +67,14 @@ public class ServerConfig {
 
     public static void deleteConfig()
     {
-        CommonUtils.deleteFile(configPath);
+        CommonUtils.deleteFile(getConfigPath());
     }
 
     public static String getConfigJson()
     {
         String content;
         try {
-            content = Files.readString(configPath, StandardCharsets.UTF_8);
+            content = Files.readString(getConfigPath(), StandardCharsets.UTF_8);
         } catch (SecurityException securityException) {
             throw new ServerConfigurationException("Could not read server config file! Please make sure there are read permissions for the config.");
         } catch (IOException ioException) {

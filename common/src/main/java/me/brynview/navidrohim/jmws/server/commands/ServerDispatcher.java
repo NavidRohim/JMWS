@@ -1,6 +1,5 @@
 package me.brynview.navidrohim.jmws.server.commands;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -18,12 +17,9 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.NameAndId;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-
-import static me.brynview.navidrohim.jmws.server.io.JMWSServerIO.getAllInitialisedGlobalObjects;
 
 public class ServerDispatcher {
 
@@ -88,7 +84,7 @@ public class ServerDispatcher {
         ServerPlayer senderPlayer = commandSourceStackCommandContext.getSource().getPlayer();
         if (senderPlayer != null)
         {
-            PlayerNetworkingHelper.sendHandshakeAndValidate(senderPlayer);
+            PlayerNetworkingHelper.sendHandshakeAndValidate(senderPlayer.getUUID());
             return 1;
         }
         return 0;
@@ -97,58 +93,58 @@ public class ServerDispatcher {
     private static int removeServerGpFromBadOp(CommandContext<CommandSourceStack> commandSourceStackCommandContext)
     {
         String groupID = StringArgumentType.getString(commandSourceStackCommandContext, "groupName");
-        return ServerCommands.removeGlobalFromBadOp(groupID, ObjectType.GROUP, commandSourceStackCommandContext.getSource().getPlayer());
+        return ServerCommands.removeGlobalFromBadOp(groupID, ObjectType.GROUP, commandSourceStackCommandContext.getSource().getPlayer().getUUID());
     }
 
     private static int removeServerWpFromBadOp(CommandContext<CommandSourceStack> commandSourceStackCommandContext) {
         String waypointID = StringArgumentType.getString(commandSourceStackCommandContext, "waypointName");
-        return ServerCommands.removeGlobalFromBadOp(waypointID, ObjectType.WAYPOINT, commandSourceStackCommandContext.getSource().getPlayer());
+        return ServerCommands.removeGlobalFromBadOp(waypointID, ObjectType.WAYPOINT, commandSourceStackCommandContext.getSource().getPlayer().getUUID());
     }
 
     private static int doRemoveShareWaypoint(CommandContext<CommandSourceStack> context1) throws CommandSyntaxException {
         String waypointID = StringArgumentType.getString(context1, "waypointName");
 
-        return ServerCommands.removeShare(context1.getSource().getPlayer(), waypointID, ObjectType.WAYPOINT);
+        return ServerCommands.removeShare(context1.getSource().getPlayer().getUUID(), waypointID, ObjectType.WAYPOINT);
     }
 
     private static int doRemoveShareGroup(CommandContext<CommandSourceStack> context1) throws CommandSyntaxException {
         String groupID = StringArgumentType.getString(context1, "groupName");
 
-        return ServerCommands.removeShare(context1.getSource().getPlayer(), groupID, ObjectType.GROUP);
+        return ServerCommands.removeShare(context1.getSource().getPlayer().getUUID(), groupID, ObjectType.GROUP);
     }
 
     private static int doShareWaypoint(CommandContext<CommandSourceStack> context1) throws CommandSyntaxException {
         ServerPlayer player = EntityArgument.getPlayer(context1, "username");
         String waypointID = StringArgumentType.getString(context1, "waypointName");
 
-        return ServerCommands.share(context1.getSource().getPlayer(), player, waypointID, ObjectType.WAYPOINT);
+        return ServerCommands.share(context1.getSource().getPlayer().getUUID(), player.getUUID(), waypointID, ObjectType.WAYPOINT);
     }
 
     private static int doShareGroup(CommandContext<CommandSourceStack> commandSourceStackCommandContext) throws CommandSyntaxException {
         ServerPlayer player = EntityArgument.getPlayer(commandSourceStackCommandContext, "username");
         String groupName = StringArgumentType.getString(commandSourceStackCommandContext, "groupName");
 
-        return ServerCommands.share(commandSourceStackCommandContext.getSource().getPlayer(), player, groupName, ObjectType.GROUP);
+        return ServerCommands.share(commandSourceStackCommandContext.getSource().getPlayer().getUUID(), player.getUUID(), groupName, ObjectType.GROUP);
     }
 
     private static int createServerWp(CommandContext<CommandSourceStack> commandSourceStackCommandContext) {
         String waypointName = StringArgumentType.getString(commandSourceStackCommandContext, "waypointName");
-        return ServerCommands.globalShare(waypointName, commandSourceStackCommandContext.getSource().getPlayer(), ObjectType.WAYPOINT, true);
+        return ServerCommands.globalShare(waypointName, commandSourceStackCommandContext.getSource().getPlayer().getUUID(), ObjectType.WAYPOINT, true);
     }
 
     private static int createServerGp(CommandContext<CommandSourceStack> commandSourceStackCommandContext) {
         String groupName = StringArgumentType.getString(commandSourceStackCommandContext, "groupName");
-        return ServerCommands.globalShare(groupName, commandSourceStackCommandContext.getSource().getPlayer(), ObjectType.GROUP, true);
+        return ServerCommands.globalShare(groupName, commandSourceStackCommandContext.getSource().getPlayer().getUUID(), ObjectType.GROUP, true);
     }
 
     private static int removeServerGp(CommandContext<CommandSourceStack> commandSourceStackCommandContext) {
         String groupName = StringArgumentType.getString(commandSourceStackCommandContext, "groupName");
-        return ServerCommands.globalShare(groupName, commandSourceStackCommandContext.getSource().getPlayer(), ObjectType.GROUP, false);
+        return ServerCommands.globalShare(groupName, commandSourceStackCommandContext.getSource().getPlayer().getUUID(), ObjectType.GROUP, false);
     }
 
     private static int removeServerWp(CommandContext<CommandSourceStack> commandSourceStackCommandContext) {
         String waypointName = StringArgumentType.getString(commandSourceStackCommandContext, "waypointName");
-        return ServerCommands.globalShare(waypointName, commandSourceStackCommandContext.getSource().getPlayer(), ObjectType.WAYPOINT, false);
+        return ServerCommands.globalShare(waypointName, commandSourceStackCommandContext.getSource().getPlayer().getUUID(), ObjectType.WAYPOINT, false);
     }
 
     public static HashMap<String, ServerObject> getUserObjectsAsNameHashmap(UUID playerUUID, ObjectType objectType, boolean global, boolean onlyShared)
@@ -168,19 +164,7 @@ public class ServerDispatcher {
 
     public static HashMap<String, ServerObject> getInactiveOpUserGlobalObjects(ObjectType objectType)
     {
-        List<ServerObject> objs = getAllInitialisedGlobalObjects(objectType);
-        HashMap<String, ServerObject> stringServerObjectHashMap = new HashMap<>();
-
-        objs.forEach(obj -> {
-            Optional<GameProfile> oldOpPlayerProfile = CommonClass.minecraftServerInstance.services().profileResolver().fetchById(obj.getOwnerUUID());
-            boolean isOp = oldOpPlayerProfile.isPresent() && CommonClass.minecraftServerInstance.getPlayerList().isOp(new NameAndId(oldOpPlayerProfile.get()));
-
-            if (!isOp)
-            {
-                stringServerObjectHashMap.put(obj.getObjectNonDuplicateIdentifier(), obj);
-            }
-        });
-        return stringServerObjectHashMap;
+        return ServerCommands.getInactiveOpUserGlobalObjects(objectType);
     }
 
     private static CompletableFuture<Suggestions> suggestInactiveOpWp(CommandContext<CommandSourceStack> commandSourceStackCommandContext, SuggestionsBuilder suggestionsBuilder)

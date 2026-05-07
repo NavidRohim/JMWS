@@ -1,7 +1,6 @@
 package me.brynview.navidrohim.jmws.server.objects;
 
 import com.google.gson.*;
-import commonnetwork.api.Dispatcher;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
@@ -9,13 +8,11 @@ import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.enums.ShareRequestDirection;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
-import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.syncing.Syncing;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import me.brynview.navidrohim.jmws.server.network.ServerNetworkDispatcher;
-import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -143,19 +140,15 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
     public void removeObjectFromUser(UUID playerUUID, String objectIdentifier)
     {
         UserSharingFile.removeObjectFromUser(playerUUID, objectIdentifier, getObjectType());
-        ServerPlayer sharedPlayer = CommonClass.minecraftServerInstance.getPlayerList().getPlayer(playerUUID);
-        if (sharedPlayer != null)
+        String packet;
+        if (this.getObjectType() == ObjectType.WAYPOINT)
         {
-            String packet;
-            if (this.getObjectType() == ObjectType.WAYPOINT)
-            {
-                packet = CommandFactory.makeDeleteRequestJson(objectIdentifier, true, false);
-            } else {
-                packet = CommandFactory.makeDeleteGroupRequestJson(this.syncing.objectIdentifier, null, true, true, true, false, false);
-            }
-
-            ServerNetworkDispatcher.sendStringToClient(packet, sharedPlayer);
+            packet = CommandFactory.makeDeleteRequestJson(objectIdentifier, true, false);
+        } else {
+            packet = CommandFactory.makeDeleteGroupRequestJson(this.syncing.objectIdentifier, null, true, true, true, false, false);
         }
+
+        ServerNetworkDispatcher.sendStringToClient(packet, playerUUID);
     }
 
 
@@ -264,11 +257,11 @@ public class ServerObject extends LegacyObject implements PossessesIdentifier {
         return false;
     }
 
-    public void share(ServerPlayer us, ServerPlayer player) {
+    public void share(UUID us, UUID player) {
 
-        ServerNetworkDispatcher.sendStringToClient(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, this.ownerUUID, player.getUUID(), ShareRequestDirection.FOR_CLIENT, getObjectType()), player);
+        ServerNetworkDispatcher.sendStringToClient(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, this.ownerUUID, player, ShareRequestDirection.FOR_CLIENT, getObjectType()), player);
         // Send information of the share to the sender. This is needed because this command is server-side only and the client will have no knowledge of the shared obj.
-        ServerNetworkDispatcher.sendStringToClient(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, player.getUUID(), this.ownerUUID, ShareRequestDirection.FOR_HOST, getObjectType()), us);
+        ServerNetworkDispatcher.sendStringToClient(CommandFactory.makeObjectShareRequestForUser(this.rawPacketData, player, this.ownerUUID, ShareRequestDirection.FOR_HOST, getObjectType()), us);
     }
     public void stopSharing(UUID user)
     {

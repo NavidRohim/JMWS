@@ -1,0 +1,37 @@
+name: JMWS
+version: ${project.version}
+main: me.brynview.navidrohim.jmws.paper.JmwsPaperPlugin
+api-version: '26.1.2'
+description: Paper server adapter for JourneyMap Waypoint Syncing clients.
+author: Navid Rohim
+commands:
+  share_waypoint:
+    description: Share one of your synced JourneyMap waypoints with another player.
+    usage: /share_waypoint <player> <waypoint name>
+  share_group:
+    description: Share one of your synced JourneyMap waypoint groups with another player.
+    usage: /share_group <player> <group name>
+  stop_sharing_waypoint:
+    description: Stop sharing one of your synced JourneyMap waypoints.
+    usage: /stop_sharing_waypoint <waypoint name>
+  stop_sharing_group:
+    description: Stop sharing one of your synced JourneyMap waypoint groups.
+    usage: /stop_sharing_group <group name>
+  jmws_handshake:
+    description: Resend the JMWS handshake to your client.
+    usage: /jmws_handshake
+  jmws_admin:
+    description: Manage global JMWS waypoints and groups.
+    usage: /jmws_admin <create_global_waypoint|create_global_group|remove_global_waypoint|remove_global_group|remove_global_no_op>
+    permission: jmws.admin
+  jmws:
+    description: Manage the JMWS Paper adapter.
+    usage: /jmws reload
+    permission: jmws.reload
+permissions:
+  jmws.admin:
+    description: Allows management of global JMWS waypoints and groups.
+    default: op
+  jmws.reload:
+    description: Allows reloading the JMWS Paper config.
+    default: op

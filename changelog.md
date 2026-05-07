@@ -6,6 +6,15 @@
 
 - Added new server-side command: /jmws_handshake
   - Tries to resend handshake to client.
+- Added a Maven-built Paper server adapter.
+  - Paper servers can now run JMWS as a server plugin while players keep using the existing JMWS client-side mod.
+  - The Paper plugin uses the existing `jmws:action_command` and `jmws:jmws_handshake` payload channels for client compatibility.
+  - Paper config is stored at `plugins/JMWS/config.yml`; synced waypoint data is stored under `plugins/JMWS`.
+  - Paper migrates values from the older `plugins/JMWS/jmws-server.json` file into `config.yml` when the YAML config does not exist yet.
+  - Added `/jmws reload` with `jmws.reload` permission to reload Paper config changes and refresh online client handshakes.
+  - Paper sends several delayed handshake attempts on player join and logs the first client payload it receives to make client communication visible in the server log.
+  - Routine Paper sync alerts are disabled by default and can be re-enabled with `syncAlertsEnabled` in `plugins/JMWS/config.yml`.
+  - Paper sends a best-effort client sync request on player quit, configurable with `syncOnQuitEnabled`.
 
 ## Bug fixes / changes
 

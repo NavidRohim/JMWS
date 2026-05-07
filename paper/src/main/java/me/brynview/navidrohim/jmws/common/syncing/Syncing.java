@@ -4,9 +4,8 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -53,16 +52,26 @@ public class Syncing {
         }
     }
 
-    public static Syncing getSyncingInfo(String customDataField, boolean returnNullIfError) {
+    public static Syncing getSyncingInfo(String customDataField, @Nullable UUID owner, boolean returnNullIfError) {
         try {
             return CommonClass.gson.fromJson(customDataField, Syncing.class);
-        } catch (JsonSyntaxException syntaxException) // will throw if object hasn't been ported.
-        {
+        } catch (JsonSyntaxException syntaxException) {
             if (!returnNullIfError) {
-                return getSyncingInfo(getEmptySyncingInfoString(customDataField, PlayerUtils.ourUUID(), false));
+                if (owner == null) {
+                    throw syntaxException;
+                }
+                return getSyncingInfo(getEmptySyncingInfoString(customDataField, owner, false));
             }
             return null;
         }
+    }
+
+    public static Syncing getSyncingInfo(String customDataField, boolean returnNullIfError) {
+        return getSyncingInfo(customDataField, null, returnNullIfError);
+    }
+
+    public static Syncing getSyncingInfo(String customDataField, UUID owner) {
+        return getSyncingInfo(customDataField, owner, false);
     }
 
     public static Syncing getSyncingInfo(String customDataField) {
@@ -110,7 +119,7 @@ public class Syncing {
             String jsonString = CommonClass.gsonExcludeNoExposeNotPretty.toJson(this, Syncing.class);
 
             this.parentObject.getRawJson().get("customDataMap").getAsJsonObject().add(Constants.MODID, new JsonPrimitive(jsonString));
-            this.parentObject.update(this.parentObject.getRawJson().getAsJsonObject().toString(), true); // TODO: bug test more. This seems very janky and not done right. Will test more
+            this.parentObject.update(this.parentObject.getRawJson().getAsJsonObject().toString(), true);
         } else {
             throw new RuntimeException("Cannot update object from dataclass instance of SyncingInformation. Get instance of SyncingInformation from child of SavedObject. (SavedObject.syncing.update())");
         }

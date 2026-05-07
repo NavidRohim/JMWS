@@ -20,7 +20,7 @@ public class Services {
     // Inside the file you should write the fully qualified class name of the implementation to load for the platform. For
     // example our file on Forge points to ForgePlatformHelper while Fabric points to FabricPlatformHelper.
     public static <T> T load(Class<T> clazz) {
-        final T loadedService = ServiceLoader.load(clazz).findFirst().orElseThrow(() -> new NullPointerException("Failed to load service for " + clazz.getName()));
+        final T loadedService = ServiceLoader.load(clazz, clazz.getClassLoader()).findFirst().orElseThrow(() -> new NullPointerException("Failed to load service for " + clazz.getName()));
         Constants.getLogger().debug("Loaded {} for service {}", loadedService, clazz);
         return loadedService;
     }
