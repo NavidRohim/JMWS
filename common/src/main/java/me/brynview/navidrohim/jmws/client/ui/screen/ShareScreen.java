@@ -250,7 +250,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
                 MultiLineTextWidget descriptionLabel = new MultiLineTextWidget(rule.getDescription().plainCopy().withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY), minecraft.font);
                 descriptionLabel.setMaxWidth(250);
 
-                verticalLayoutForRules.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (c) -> {}, null, null, 13), settings -> settings.paddingTop(10));
+                verticalLayoutForRules.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (c) -> {}, null, null), settings -> settings.paddingTop(10));
                 verticalLayoutForRules.addChild(descriptionLabel, settings -> settings.paddingLeft(16).paddingVertical(3));
 
                 for (ClientShareRule.RuleSetting<?>.RuleSettingWrapper<?> displayableElement : rule.getDisplayableElements())
@@ -281,7 +281,10 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
             this.ruleMap.forEach((key, rules) -> {
                 rules.forEach(ruleSetting -> {
                     ClientShareRule.RuleSetting<?> p = ruleSetting.setValueForParent();
-                    Constants.getLogger().info("Saving rule setting value.\nFor rule: %s\nrule setting key: %s\nrule setting value: %s".formatted(p.getParentRule().getDisplayName().getString(), p.valueName, p.getValue()));
+                    Constants.getLogger().info("Saving rule setting value.\nFor rule: %s\nrule setting key: %s\nrule setting value: %s".formatted(p.getParentRule().getDisplayName().getString(), p.valueName, p.getValueObj()));
+                    Constants.getLogger().info("rule obj before serialise {}", ruleSetting.getSetting().getParentRule().getDisplayableElements());
+                    Constants.getLogger().info("rule obj before serialise {}", ruleSetting.getSetting().getParentRule().getDisplayableElements());
+                    ClientShareRule.RuleSerialiser.serialise(ruleSetting.getSetting().getParentRule());
                 });
             });
         }

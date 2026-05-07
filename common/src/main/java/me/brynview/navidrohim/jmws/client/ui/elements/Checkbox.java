@@ -1,6 +1,5 @@
 package me.brynview.navidrohim.jmws.client.ui.elements;
 
-import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.ui.UIConstants;
 import me.brynview.navidrohim.jmws.client.ui.generic.elements.AbstractJMWSButton;
 import net.minecraft.client.Minecraft;
@@ -66,7 +65,7 @@ public class Checkbox extends AbstractJMWSButton {
         this.onPress.onPress(this);
     }
 
-    public static Checkbox buildCheckbox(Component label, OnCheckboxPress onPress, Tooltip checkedTooltip, Tooltip uncheckedTooltip, int width) {
+    public static Checkbox buildCheckbox(Component label, OnCheckboxPress onPress, Tooltip checkedTooltip, Tooltip uncheckedTooltip) {
         Checkbox box = new Checkbox(0, 0, 12, 12, label, onPress, Button.DEFAULT_NARRATION, checkedTooltip, uncheckedTooltip);
         box.setTooltip(uncheckedTooltip);
 
@@ -75,7 +74,7 @@ public class Checkbox extends AbstractJMWSButton {
 
     public static Checkbox buildSelectAllCheckbox(OnCheckboxPress onPress)
     {
-        return buildCheckbox(Component.empty(), onPress, UIConstants.DESELECT_ALL, UIConstants.SELECT_ALL, 12);
+        return buildCheckbox(Component.empty(), onPress, UIConstants.DESELECT_ALL, UIConstants.SELECT_ALL);
     }
 
     public interface OnCheckboxPress

@@ -29,7 +29,7 @@ public class JMWSClientCommon {
 
     public static final OutgoingShareRequests outgoingShareRequests = new OutgoingShareRequests();
     public static final IncomingShareRequests incomingShareRequests = new IncomingShareRequests();
-    public static final ClientShareRegistry clientShareRegistry = new ClientShareRegistry();
+    public static ClientShareRegistry clientShareRegistry;
 
     public static @Nullable NotificationAlertScreen currentNotificationScreen = null;
     public static @Nullable ShareScreen currentShareScreen = null;
@@ -37,6 +37,7 @@ public class JMWSClientCommon {
     public static void setupMinecraftClientInstance()
     {
         JMWSCommon.minecraftClientInstance = Minecraft.getInstance();
+        clientShareRegistry = new ClientShareRegistry();
         syncCounter = new SyncCounter();
     }
 
