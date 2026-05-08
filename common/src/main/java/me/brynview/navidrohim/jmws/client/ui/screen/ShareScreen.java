@@ -1,6 +1,6 @@
 package me.brynview.navidrohim.jmws.client.ui.screen;
 
-import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
@@ -34,9 +34,6 @@ import org.jspecify.annotations.NonNull;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 
 import static me.brynview.navidrohim.jmws.common.JMWSCommon.minecraftClientInstance;
@@ -51,6 +48,9 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
     private static final Tooltip CANNOT_SEND_TOOLTIP = Tooltip.create(Component.translatable("jmws.ui.sharing.send_disabled"));
     private static final Tooltip CANNOT_STOP_SHARE_TOOLTIP = Tooltip.create(Component.translatable("jmws.ui.sharing.cannot_revoke_send"));
 
+    private final MutableComponent sharingText;
+    private int sharingTextFontWidth;
+
     private final String displayName;
     private final ClientObjectWrapper<?> object;
 
@@ -60,18 +60,20 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
 
     private ObjectSharePanel<ClientObjectWrapper<?>> sharePanel;
 
-    private final HashMap<String, JsonElement> ruleHashmap = new HashMap<>();
-
     public ShareScreen(Screen parent, ClientBaseObjectWrapper<?> object) {
         super(parent, true);
         this.object = object;
+
         this.displayName = RenderUtils.shortenObjectName(object.getName(), 20);
+        this.sharingText = Component.translatable("jmws.ui.sharing.share_object", this.object.getType().getReadableName(), this.displayName);
     }
 
     @Override
     protected void init()
     {
         super.init();
+        sharingTextFontWidth = font.width(sharingText) / 2;
+
         // Define the sharing panel and add all shared objects on this client to panel
         this.sharePanel = new ObjectSharePanel<>(minecraftClientInstance,  0, 0, 0, 0, 50, object, this);
         RenderUtils.setDimensionsForList(this.sharePanel, this.width, this.height, 0.85, 0.75, 10, 2);
@@ -132,23 +134,39 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
 
     private void sendRequests()
     {
-        Constants.LoggerHolder.debug(ruleHashmap, "AT SEND TIME");
-
         Set<? extends PlayerEntry<?>> players = this.sharePanel.getSelectedEntries();
         if (players.isEmpty())
         {
             PlayerUtils.sendUserAlert(Component.translatable("jmws.ui.sharing.no_selected_players"), true, true, MessageType.PENDING);
         } else {
             minecraftClientInstance.setScreen(null);
+            String rulePayload = this.buildRulePayload();
+            Constants.LoggerHolder.debug(rulePayload, "AT SEND TIME");
             for (PlayerEntry<?> selectedPlayer : players) {
                 if (selectedPlayer.isOnline)
                 {
-                    String ruleHashMapString = JMWSCommon.gson.toJson(ruleHashmap);
-                    OutgoingShareRequest.sendShareRequest(this.object, selectedPlayer.user.getProfile(), ruleHashMapString);
+                    OutgoingShareRequest.sendShareRequest(this.object, selectedPlayer.user.getProfile(), rulePayload);
                 }
             }
             this.refresh();
         }
+    }
+
+    private String buildRulePayload()
+    {
+        JsonObject payload = new JsonObject();
+
+        for (ClientShareRule rule : JMWSClientCommon.clientShareRegistry.values())
+        {
+            if (!rule.isEnabled())
+            {
+                continue;
+            }
+
+            payload.add(rule.getRegistryKey(), ClientShareRule.RuleSerialiser.serialiseToJson(rule));
+        }
+
+        return JMWSCommon.gson.toJson(payload);
     }
 
     private void stopSharing()
@@ -180,42 +198,33 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         super.extractRenderState(graphics, mouseX, mouseY, a);
         if (!this.sharePanel.isEmpty())
         {
-            MutableComponent sharingText = Component.translatable("jmws.ui.sharing.share_object", this.object.getType().getReadableName(), this.displayName);
-            graphics.text(this.font, sharingText, sharePanel.getX() + sharePanel.getWidth() / 2 - (this.font.width(sharingText) / 2), sharePanel.getY() - 15, -1);
+            graphics.text(this.font, sharingText, sharePanel.getX() + sharePanel.getWidth() / 2 - sharingTextFontWidth, sharePanel.getY() - 15, -1);
         }
     }
 
     @Override
     public void entryPressed()
     {
-        for (PlayerEntry<ClientObjectWrapper<?>> offlineEntry : this.sharePanel.offlineEntries) {
-            if (offlineEntry.isSelected)
-            {
-                this.sendButton.setEnabled(false);
-                break;
-            }
-            this.sendButton.setEnabled(true);
-        }
+        boolean canSend = true;
+        boolean canStopSharing = true;
 
-        for (PlayerEntry<ClientObjectWrapper<?>> onlineEntry : this.sharePanel.onlineEntries) {
-            if (onlineEntry.isSelected && onlineEntry.getState() == PlayerEntry.EntryState.NOT_SHARED)
-            {
-                this.stopShareButton.setEnabled(false);
-                break;
-            }
-            this.stopShareButton.setEnabled(true);
-        }
-
-        for (PlayerEntry<ClientObjectWrapper<?>> child : this.sharePanel.children())
+        for (PlayerEntry<?> selectedEntry : this.sharePanel.getSelectedEntries())
         {
-            if (child.isSelected && child.getState() == PlayerEntry.EntryState.SHARED)
+            PlayerEntry.EntryState entryState = selectedEntry.getState();
+
+            if (!selectedEntry.isOnline || entryState == PlayerEntry.EntryState.SHARED)
             {
-                this.sendButton.setEnabled(false);
-                break;
+                canSend = false;
             }
 
-            this.sendButton.setEnabled(true);
+            if (selectedEntry.isOnline && entryState == PlayerEntry.EntryState.NOT_SHARED)
+            {
+                canStopSharing = false;
+            }
         }
+
+        this.sendButton.setEnabled(canSend);
+        this.stopShareButton.setEnabled(canStopSharing);
         setCheckboxState();
     }
 
@@ -237,7 +246,6 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         private static final Identifier SAVE = Identifier.fromNamespaceAndPath(Constants.MODID, "save");
 
         private ScrollableLayout scrollableLayout;
-        private final HashMap<ClientShareRule, List<ClientShareRule.RuleSetting<?>.RuleSettingWrapper<?>>> ruleMap = new HashMap<>();
 
         public ShareSettingsScreen(boolean renderCloseButton)
         {
@@ -263,7 +271,6 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
                 for (ClientShareRule.RuleSetting<?>.RuleSettingWrapper<?> displayableElement : rule.getDisplayableElements())
                 {
                     verticalLayoutForRules.addChild(displayableElement.getWidget(), settings -> settings.paddingLeft(16).paddingVertical(5));
-                    this.ruleMap.computeIfAbsent(rule, k -> new ArrayList<>()).add(displayableElement);
                 }
             }
 
@@ -284,15 +291,17 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
 
         private void save()
         {
-            ruleHashmap.clear();
-            this.ruleMap.forEach((key, rules) -> {
-                if (key.isEnabled())
+            for (ClientShareRule rule : JMWSClientCommon.clientShareRegistry.values())
+            {
+                if (!rule.isEnabled())
                 {
-                    rules.forEach(ClientShareRule.RuleSetting.RuleSettingWrapper::setValueForParent);
-                    ruleHashmap.putIfAbsent(key.getRegistryKey(), ClientShareRule.RuleSerialiser.serialiseToJson(key));
+                    continue;
                 }
-            });
-            Constants.getLogger().info("Saving rule hashmap: %s".formatted(ruleHashmap));
+
+                rule.getDisplayableElements().forEach(ClientShareRule.RuleSetting.RuleSettingWrapper::setValueForParent);
+            }
+
+            Constants.getLogger().info("Saving rule payload: %s".formatted(ShareScreen.this.buildRulePayload()));
         }
 
         private void timeoutChosen(ZonedDateTime chosenTime, Instant uiOpened, Long millisDifference, Component displayableTime)

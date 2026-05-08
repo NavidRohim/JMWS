@@ -12,6 +12,20 @@
 - Currently working on the client. But when entering the settings UI, whatever settings that were saved before are not loaded.
 - Need to handle on the server and provide rule settings to `ShareRule::passed`. Will probably use the same `RuleSetting` class but will have to code a decoder for it.
 
+The internals of RuleSetting and its wrapper are troubling me. It does technically work, but in which way they work does not feel right.
+
+In `ShareSettingsScreen`, in the save method, JMWS iterates through each rule registered and then iterates through each setting for that rule.
+This is needed to save the state of whatever setting is being displayed and save it to the actual RuleSetting. This is necessary, but the way the values are handled
+afterwards is less than ideal, or at least feels so. The values are put in `ruleHashmap` to be serialised into a string when the request is sent. 
+But what if the user goes back into the settings UI again? The settings saved beforehand will not be loaded back into the new instance of `ShareSettingScreen`
+
+Once the end user hits save in `ShareSettingScreen` the values are immediately useless to the settings screen. I want them to be more versatile.
+I believe I need to defer the serialisation into JSON until the request is sent. But I am unsure how to save them well in the HashMap.
+
+After the `save()` method is called, I could store the RuleSetting AFTER `setValueForParent()` is called, then when sent, serialise into JSON after
+it is confirmed those are the user’s true settings. This also has the plus side, where when the constuctor for `ShareSettingScreen` is called, I could make an
+alternative constuctor that accepts those `RuleSetting`s instances and reconstucts the displayable element to whatever it's last saved state was.
+
 ## -- DatePicker UI --
 - Set the date picker so the client cannot set the date to a date in the past. This has been implemented somewhat in the way that you cannot scroll to a month or year before the current one, but a day in the past can still be selected
 

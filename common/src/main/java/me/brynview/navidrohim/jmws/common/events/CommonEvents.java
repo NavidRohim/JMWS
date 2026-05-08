@@ -4,27 +4,15 @@ import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.commands.ClientCommands;
 import me.brynview.navidrohim.jmws.client.config.ClientSideServerConfigObject;
 import me.brynview.navidrohim.jmws.client.plugin.ObjectIdentifierMap;
-import me.brynview.navidrohim.jmws.common.enums.MessageType;
-
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
-
-import me.brynview.navidrohim.jmws.server.config.ServerConfig;
-import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
+import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.concurrent.TimeUnit;
 
 public class CommonEvents {
-
-    public static void handlePlayerStateChange()
-    {
-        if (JMWSClientCommon.currentShareScreen != null)
-        {
-            JMWSClientCommon.currentShareScreen.refresh();
-        }
-    }
 
     public static void handleJoin(ServerPlayer serverPlayer, boolean isInternal, boolean sendWarningIfJMNotPresent)
     {
@@ -40,7 +28,7 @@ public class CommonEvents {
             JMWSCommon.scheduler.schedule(() -> {
                 PlayerUtils.sendUserAlert(Component.translatable("warning.jmws.world_is_local"), true, false, MessageType.NEUTRAL);}, 2, TimeUnit.SECONDS);
         } else {
-            JMWSCommon.scheduler.schedule(() -> PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer), ServerConfig.serverConfig.handshakeDelay, TimeUnit.MILLISECONDS);
+            //JMWSCommon.scheduler.schedule(() -> PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer), ServerConfig.serverConfig.handshakeDelay, TimeUnit.MILLISECONDS);
             //PlayerNetworkingHelper.sendHandshakeAndValidate(serverPlayer);
         }
     }
