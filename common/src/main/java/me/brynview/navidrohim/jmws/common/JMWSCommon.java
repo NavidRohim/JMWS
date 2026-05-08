@@ -49,7 +49,6 @@ public class JMWSCommon {
     public static final Gson gson = new Gson();
     public static final Gson gsonExcludeNoExpose = new GsonBuilder().setPrettyPrinting().excludeFieldsWithoutExposeAnnotation().create();
     public static Minecraft minecraftClientInstance = null;
-    //public static final Gson gsonExcludeNoExposeNotPretty = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
     private static void determinePacketAction(PacketContext<JMWSActionPayload> ctx)
     {

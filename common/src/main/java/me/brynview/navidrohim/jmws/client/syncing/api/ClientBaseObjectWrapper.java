@@ -209,9 +209,9 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
     }
 
     @Override
-    public void sendShareRequest(UUID sharedTo)
+    public void sendShareRequest(UUID sharedTo, String rules)
     {
-        JMWSClientCommon.outgoingShareRequests.sendRequest(sharedTo, this);
+        JMWSClientCommon.outgoingShareRequests.sendRequest(sharedTo, this, rules);
     }
 
     @Override
@@ -223,7 +223,6 @@ public abstract class ClientBaseObjectWrapper <T> implements ClientObjectWrapper
         } else {
             throw new NoInfoException();
         }
-
     }
 
     @Override

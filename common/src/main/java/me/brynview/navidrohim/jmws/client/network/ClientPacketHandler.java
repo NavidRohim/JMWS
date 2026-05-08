@@ -155,6 +155,9 @@ public class ClientPacketHandler {
             {
                 String data = argumentsForClient.getFirst().getAsString();
                 Optional<ClientSyncRegistry> possibleType = ClientSyncRegistry.of(argumentsForClient.get(1).getAsString());
+                Constants.getLogger().info(argumentsForClient.toString());
+
+                //Constants.getLogger().info(rules);
 
                 if (possibleType.isPresent())
                 {

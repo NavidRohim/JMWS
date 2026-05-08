@@ -15,11 +15,6 @@ public interface CommonRule
             this.clazz = o;
         }
 
-        public Class<T> getClazz()
-        {
-            return this.clazz;
-        }
-
         public T cast(Object obj)
         {
             return clazz.cast(obj);

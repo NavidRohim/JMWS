@@ -45,7 +45,10 @@ public class ClientShareWhileOnlineRule extends ClientShareRule
     @Override
     protected List<RuleSetting<?>> getSettingsForRule()
     {
-        return List.of(new RuleSetting<>(this, "active", InputTypes.BOOLEAN));
+        return List.of(
+                new RuleSetting<>(this, "active", InputTypes.BOOLEAN),
+                new RuleSetting<>(this, "share_on_join", InputTypes.BOOLEAN)
+        );
     }
 
     @Override
@@ -53,13 +56,15 @@ public class ClientShareWhileOnlineRule extends ClientShareRule
     public List<RuleSetting<?>.RuleSettingWrapper<?>> getDisplayableElements()
     {
         List<RuleSetting<?>.RuleSettingWrapper<?>> displayableElements = new ArrayList<>();
-        Checkbox cb = Checkbox.buildCheckbox(this.getDisplayName(), (_) -> {}, Tooltip.create(getDescription()), null);
 
-        for (RuleSetting<?> setting : this.settings)
-        {
-            RuleSetting<?>.RuleSettingWrapper<?> wrapper = setting.getWrapper(cb, c -> c.isChecked);
-            displayableElements.add(wrapper);
-        }
+        RuleSetting<Boolean> setting1 = (RuleSetting<Boolean>) this.settings.getFirst();
+        Checkbox cb = Checkbox.buildCheckbox(Component.literal(setting1.valueName), (_) -> {}, Tooltip.create(getDescription()), null);
+        displayableElements.add(setting1.getWrapper(cb, c -> c.isChecked));
+
+        RuleSetting<Boolean> setting2 = (RuleSetting<Boolean>) this.settings.getLast();
+        Checkbox cb1 = Checkbox.buildCheckbox(Component.literal(setting2.valueName), (_) -> {}, Tooltip.create(getDescription()), null);
+        displayableElements.add(setting2.getWrapper(cb1, c1 -> c1.isChecked));
+
         return displayableElements;
     }
 }

@@ -8,9 +8,14 @@
   ~~- Receiving users can only get shared objects while the owner of the object is online.~~
 - Make ServerObject more agnostic of incoming data. Currently, it relies too much on JM data like the name field and customDataMap.
 
+### -- Sharing rules and settings
+- Currently working on the client. But when entering the settings UI, whatever settings that were saved before are not loaded.
+- Need to handle on the server and provide rule settings to `ShareRule::passed`. Will probably use the same `RuleSetting` class but will have to code a decoder for it.
+
 ## -- DatePicker UI --
 - Set the date picker so the client cannot set the date to a date in the past. This has been implemented somewhat in the way that you cannot scroll to a month or year before the current one, but a day in the past can still be selected
-- 
+
+
 ## -- Sharing UI --
 - ~~Add UI colour indicator for object status (shared (green), awaiting share (orange), not shared (grey), cannot share (red))~~
 - ~~Add selection boxes so you can send share requests for multiple players.~~

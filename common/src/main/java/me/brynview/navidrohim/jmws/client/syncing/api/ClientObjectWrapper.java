@@ -32,7 +32,7 @@ public interface ClientObjectWrapper<T> extends PossessesIdentifier {
 
     void addSharedTo(UUID sharedTo);
     void removeSharedTo(UUID sharedTo);
-    void sendShareRequest(UUID sharedTo);
+    void sendShareRequest(UUID sharedTo, String rules);
 
     void clearSharedTo();
     Set<UUID> getSharedTo();

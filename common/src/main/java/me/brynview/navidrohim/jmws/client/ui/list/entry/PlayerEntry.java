@@ -1,6 +1,5 @@
 package me.brynview.navidrohim.jmws.client.ui.list.entry;
 
-import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
@@ -122,7 +121,7 @@ public final class PlayerEntry<T extends ClientObjectWrapper<?>> extends PlayerH
 
         if (doubleClick && canSelect() && this.user != null) {
             this.setSelected(false);
-            OutgoingShareRequest.sendShareRequest(sharedObject, this.user.getProfile());
+            OutgoingShareRequest.sendShareRequest(sharedObject, this.user.getProfile(), null);
         }
         return c;
     }

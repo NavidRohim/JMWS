@@ -77,9 +77,9 @@ public class ClientNetworkDispatcher {
 
     public static class PeerToPeer
     {
-        public static void shareWith(UUID to, ClientBaseObjectWrapper<?> shareableObject)
+        public static void shareWith(UUID to, ClientBaseObjectWrapper<?> shareableObject, String rules)
         {
-            sendString(CommandFactory.PeerToPeer.shareToUser(to, shareableObject)); // PLACEHOLDER
+            sendString(CommandFactory.PeerToPeer.shareToUser(to, shareableObject, rules)); // PLACEHOLDER
         }
 
         public static void acceptShare(ShareRequest shareRequest)

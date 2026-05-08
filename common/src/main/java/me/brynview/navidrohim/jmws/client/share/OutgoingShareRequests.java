@@ -5,7 +5,6 @@ import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientBaseObjectWrapper;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
-import me.brynview.navidrohim.jmws.server.JMWSServerCommon;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -50,9 +49,9 @@ public class OutgoingShareRequests extends HashMap<UUID, OutgoingShareRequest> {
         this.clear();
     }
 
-    public void sendRequest(UUID sharedTo, ClientBaseObjectWrapper<?> sharedObject)
+    public void sendRequest(UUID sharedTo, ClientBaseObjectWrapper<?> sharedObject, String rules)
     {
         this.addRequest(sharedTo, new OutgoingShareRequest(PlayerUtils.ourUUID(), sharedTo, sharedObject));
-        ClientNetworkDispatcher.PeerToPeer.shareWith(sharedTo, sharedObject);
+        ClientNetworkDispatcher.PeerToPeer.shareWith(sharedTo, sharedObject, rules);
     }
 }

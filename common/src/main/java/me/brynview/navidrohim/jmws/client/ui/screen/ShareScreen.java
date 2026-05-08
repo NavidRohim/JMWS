@@ -1,5 +1,6 @@
 package me.brynview.navidrohim.jmws.client.ui.screen;
 
+import com.google.gson.JsonElement;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.share.request.OutgoingShareRequest;
@@ -15,6 +16,7 @@ import me.brynview.navidrohim.jmws.client.ui.generic.screen.NotificationAlertScr
 import me.brynview.navidrohim.jmws.client.ui.list.ObjectSharePanel;
 import me.brynview.navidrohim.jmws.client.ui.list.entry.PlayerEntry;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
+import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -50,13 +52,15 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
     private static final Tooltip CANNOT_STOP_SHARE_TOOLTIP = Tooltip.create(Component.translatable("jmws.ui.sharing.cannot_revoke_send"));
 
     private final String displayName;
-    final ClientObjectWrapper<?> object;
+    private final ClientObjectWrapper<?> object;
 
     private Checkbox checkbox;
     private IconButton sendButton;
     private IconButton stopShareButton;
 
     private ObjectSharePanel<ClientObjectWrapper<?>> sharePanel;
+
+    private final HashMap<String, JsonElement> ruleHashmap = new HashMap<>();
 
     public ShareScreen(Screen parent, ClientBaseObjectWrapper<?> object) {
         super(parent, true);
@@ -128,6 +132,8 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
 
     private void sendRequests()
     {
+        Constants.LoggerHolder.debug(ruleHashmap, "AT SEND TIME");
+
         Set<? extends PlayerEntry<?>> players = this.sharePanel.getSelectedEntries();
         if (players.isEmpty())
         {
@@ -137,7 +143,8 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
             for (PlayerEntry<?> selectedPlayer : players) {
                 if (selectedPlayer.isOnline)
                 {
-                    OutgoingShareRequest.sendShareRequest(this.object, selectedPlayer.user.getProfile());
+                    String ruleHashMapString = JMWSCommon.gson.toJson(ruleHashmap);
+                    OutgoingShareRequest.sendShareRequest(this.object, selectedPlayer.user.getProfile(), ruleHashMapString);
                 }
             }
             this.refresh();
@@ -152,11 +159,11 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
             PlayerUtils.sendUserAlert(Component.translatable("jmws.ui.sharing.no_selected_players"), true, true, MessageType.PENDING);
         } else {
             for (PlayerEntry<?> selectedPlayer : players) {
-                String playerDisplayName = selectedPlayer.isOnline ? selectedPlayer.user.getProfile().name() : selectedPlayer.userUuid.toString();
                 if (object.getSharedTo().contains(selectedPlayer.userUuid))
                 {
                     selectedPlayer.setStoppedSharing();
                 } else {
+                    String playerDisplayName = selectedPlayer.isOnline ? selectedPlayer.user.getProfile().name() : selectedPlayer.userUuid.toString();
                     PlayerUtils.sendUserAlert(Component.literal("Not sharing with %s!".formatted(playerDisplayName)), true, true, MessageType.WARNING);
                 }
             }
@@ -230,7 +237,7 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
         private static final Identifier SAVE = Identifier.fromNamespaceAndPath(Constants.MODID, "save");
 
         private ScrollableLayout scrollableLayout;
-        private final HashMap<String, List<ClientShareRule.RuleSetting<?>.RuleSettingWrapper<?>>> ruleMap = new HashMap<>();
+        private final HashMap<ClientShareRule, List<ClientShareRule.RuleSetting<?>.RuleSettingWrapper<?>>> ruleMap = new HashMap<>();
 
         public ShareSettingsScreen(boolean renderCloseButton)
         {
@@ -250,13 +257,13 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
                 MultiLineTextWidget descriptionLabel = new MultiLineTextWidget(rule.getDescription().plainCopy().withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY), minecraft.font);
                 descriptionLabel.setMaxWidth(250);
 
-                verticalLayoutForRules.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (c) -> {}, null, null), settings -> settings.paddingTop(10));
+                verticalLayoutForRules.addChild(Checkbox.buildCheckbox(rule.getDisplayName(), (c) -> {rule.setEnabled(c.isChecked);}, null, null), settings -> settings.paddingTop(10));
                 verticalLayoutForRules.addChild(descriptionLabel, settings -> settings.paddingLeft(16).paddingVertical(3));
 
                 for (ClientShareRule.RuleSetting<?>.RuleSettingWrapper<?> displayableElement : rule.getDisplayableElements())
                 {
                     verticalLayoutForRules.addChild(displayableElement.getWidget(), settings -> settings.paddingLeft(16).paddingVertical(5));
-                    this.ruleMap.computeIfAbsent(rule.getRegistryKey(), k -> new ArrayList<>()).add(displayableElement);
+                    this.ruleMap.computeIfAbsent(rule, k -> new ArrayList<>()).add(displayableElement);
                 }
             }
 
@@ -277,16 +284,15 @@ public class ShareScreen extends NotificationAlertScreen implements HasScrollabl
 
         private void save()
         {
-
+            ruleHashmap.clear();
             this.ruleMap.forEach((key, rules) -> {
-                rules.forEach(ruleSetting -> {
-                    ClientShareRule.RuleSetting<?> p = ruleSetting.setValueForParent();
-                    Constants.getLogger().info("Saving rule setting value.\nFor rule: %s\nrule setting key: %s\nrule setting value: %s".formatted(p.getParentRule().getDisplayName().getString(), p.valueName, p.getValueObj()));
-                    Constants.getLogger().info("rule obj before serialise {}", ruleSetting.getSetting().getParentRule().getDisplayableElements());
-                    Constants.getLogger().info("rule obj before serialise {}", ruleSetting.getSetting().getParentRule().getDisplayableElements());
-                    ClientShareRule.RuleSerialiser.serialise(ruleSetting.getSetting().getParentRule());
-                });
+                if (key.isEnabled())
+                {
+                    rules.forEach(ClientShareRule.RuleSetting.RuleSettingWrapper::setValueForParent);
+                    ruleHashmap.putIfAbsent(key.getRegistryKey(), ClientShareRule.RuleSerialiser.serialiseToJson(key));
+                }
             });
+            Constants.getLogger().info("Saving rule hashmap: %s".formatted(ruleHashmap));
         }
 
         private void timeoutChosen(ZonedDateTime chosenTime, Instant uiOpened, Long millisDifference, Component displayableTime)

@@ -102,11 +102,11 @@ public class CommandFactory {
             return CommandFactory.makeBaseJsonRequest(Commands.SPECIAL_FORWARD_TO_CLIENT, command, to, arguments);
         }
 
-        public static String shareToUser(UUID to, ClientBaseObjectWrapper<?> shareableObject)
+        public static String shareToUser(UUID to, ClientBaseObjectWrapper<?> shareableObject, String rules)
         {
             // As we are sharing an object directly with another user, we must serialize and send the full object and the second argument which indicates
             // how to encode the raw data into a usable object.
-            return makeBaseRequestForUser(to, PeerToPeerCommand.CLIENT_SHARE_REQUEST, shareableObject.getSerialization(), shareableObject.getType().getId());
+            return makeBaseRequestForUser(to, PeerToPeerCommand.CLIENT_SHARE_REQUEST, shareableObject.getSerialization(), shareableObject.getType().getId(), rules);
         }
 
         /* Share responses*/

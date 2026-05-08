@@ -1,7 +1,6 @@
 package me.brynview.navidrohim.jmws.client.syncing.rules.registry;
 
 import com.google.gson.*;
-import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.syncing.rules.CommonRule;
 import net.minecraft.client.gui.layouts.LayoutElement;
@@ -16,11 +15,22 @@ import java.util.function.Function;
 
 public abstract class ClientShareRule implements CommonRule
 {
-    protected final List<RuleSetting<?>> settings;
+    protected List<RuleSetting<?>> settings;
+    private boolean enabled;
 
     public ClientShareRule()
     {
         this.settings = this.getSettingsForRule();
+    }
+
+    public final void setEnabled(boolean enabled)
+    {
+        this.enabled = enabled;
+    }
+
+        public final boolean isEnabled()
+    {
+        return this.enabled;
     }
 
     protected abstract Component getFailureMessage();
@@ -40,27 +50,31 @@ public abstract class ClientShareRule implements CommonRule
     public static class RuleSerialiser implements JsonSerializer<ClientShareRule>
     {
 
-        private static final Gson SERIALISER = new GsonBuilder().registerTypeHierarchyAdapter(ClientShareRule.class, new RuleSerialiser()).create();
-
+        private static final Gson SERIALISER = new GsonBuilder().setPrettyPrinting().registerTypeHierarchyAdapter(ClientShareRule.class, new RuleSerialiser()).create();
 
         @Override
-        public JsonElement serialize(ClientShareRule src, Type typeOfSrc, JsonSerializationContext context)
+        public JsonObject serialize(ClientShareRule src, Type typeOfSrc, JsonSerializationContext context)
         {
-            JsonArray jsonObject = new JsonArray();
+            JsonObject jsonObject = new JsonObject();
 
             for (RuleSetting<?>.RuleSettingWrapper<?> displayableElement : src.getDisplayableElements())
             {
                 JsonElement rulesJsonString = JMWSCommon.gson.toJsonTree(displayableElement.getSetting());
-                jsonObject.add(rulesJsonString);
+                // Add to the list as a map, where the key is valueName and the values is a list of the value's type and value itself plus the name again because I am lazy/
+                jsonObject.add(displayableElement.getSetting().valueName, rulesJsonString);
             }
 
-            Constants.getLogger().info("Serialised rule: {}", jsonObject);
             return jsonObject;
         }
 
-        public static JsonElement serialise(ClientShareRule rule)
+        public static JsonElement serialiseToJson(ClientShareRule rule)
         {
             return SERIALISER.toJsonTree(rule);
+        }
+
+        public static String serialiseToString(ClientShareRule rule)
+        {
+            return SERIALISER.toJson(rule);
         }
     }
 
@@ -102,6 +116,7 @@ public abstract class ClientShareRule implements CommonRule
             return new RuleSettingWrapper<>(displayableElement, valueGetter);
         }
 
+        @SuppressWarnings("unchecked")
         private RuleSetting<B> setValueObj(@NotNull Object valueObj)
         {
             this.valueObj = (B) valueObj;
@@ -118,6 +133,7 @@ public abstract class ClientShareRule implements CommonRule
             {
                 this.displayableElement = displayableElement;
                 this.valueGetter = valueGetter;
+
             }
 
             public E getWidget()
@@ -133,6 +149,12 @@ public abstract class ClientShareRule implements CommonRule
             public RuleSetting<B> setValueForParent()
             {
                 return RuleSetting.this.setValueObj(valueTypeWrapper.cast(valueGetter.apply(displayableElement)));
+            }
+
+            @Override
+            public String toString()
+            {
+                return "<RuleSettingWrapper %s=%s, hash=%s>".formatted(this.getSetting().valueName, this.getSetting().value, this.hashCode());
             }
         }
     }

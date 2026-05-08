@@ -4,10 +4,9 @@ import com.mojang.authlib.GameProfile;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.JMWSClientCommon;
 import me.brynview.navidrohim.jmws.client.syncing.api.ClientObjectWrapper;
+import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
 import me.brynview.navidrohim.jmws.common.JMWSCommon;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
-import me.brynview.navidrohim.jmws.server.syncing.registry.ServerSyncRegistryEntry;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,7 +45,7 @@ public class OutgoingShareRequest extends ShareRequest {
         Constants.LoggerHolder.debug(this.timeout.state(), "SR TIMEOUT STATE");
     }
 
-    public static void sendShareRequest(ClientObjectWrapper<?> shareableObject, GameProfile user)
+    public static void sendShareRequest(ClientObjectWrapper<?> shareableObject, GameProfile user, String rules)
     {
         if (!JMWSClientCommon.outgoingShareRequests.hasShareRequestFor(user.id()))
         {
@@ -54,7 +53,7 @@ public class OutgoingShareRequest extends ShareRequest {
             {
                 if (!user.equals(JMWSCommon.minecraftClientInstance.player.getGameProfile()))
                 {
-                    shareableObject.sendShareRequest(user.id());
+                    shareableObject.sendShareRequest(user.id(), rules);
                 } else {
                     PlayerUtils.sendUserAlert(Component.translatable("sharing.jmws.cannot_share"), true, true, MessageType.WARNING);
                 }
