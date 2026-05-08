@@ -5,8 +5,6 @@ import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.minecraft.client.multiplayer.ClientLevel;
 
-import static me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin.sync;
-
 /**
  * Auto-sync counter class. Keeps track of how often the client should sync.
  * Basically a clock
@@ -66,6 +64,10 @@ public class SyncCounter {
      */
     public void iterateCounter()
     {
+        if (JMWSPlugin.hasBeenMadeLocal()) {
+            return;
+        }
+
         // Get clients current world
         ClientLevel world = CommonClass.minecraftClientInstance.level;
 

@@ -64,6 +64,7 @@ public class Jmws implements ModInitializer {
                         int minVersionString = Integer.parseInt(regexBetaVersionPatternMinMatcher.group(1));
 
                         ClientCommonClass.clientJMVersion = versionString;
+                        Constants.updateShouldMakeLocalFromJourneyMapVersion(versionString);
                         if ((mcVersionMinor == minMcVersionMinor && mcVersionPatch >= minMcVersionPatch && jarVersionString >= minVersionString)) {
                             Constants.getLogger().info("Good to go. JMWS Version %s with JourneyMap Version %s on client-side.".formatted(Constants.VERSION, versionString));
                             ClientCommonClass.clientHasJM = true;
@@ -73,6 +74,14 @@ public class Jmws implements ModInitializer {
                 }
 
             } else {
+                if (isJMLoaded) {
+                    Optional<ModContainer> jmModContainer = fabricLoader.getModContainer("journeymap");
+                    if (jmModContainer.isPresent()) {
+                        Constants.updateServerJourneyMapStatus(jmModContainer.get().getMetadata().getVersion().getFriendlyString());
+                    }
+                } else {
+                    Constants.logServerJourneyMapMissing();
+                }
                 Constants.getLogger().info("JourneyMap is optional on the server. If you get a warning about it, you can safely ignore it.");
                 CommonClass.init();
             }

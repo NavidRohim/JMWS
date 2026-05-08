@@ -123,7 +123,7 @@ public class ServerPacketHandler {
                     }
                 }
 
-                String jsonData = CommandFactory.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert, isDeathSync);
+                String jsonData = CommandFactory.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert, Constants.serverHasCompatibleJourneyMap, isDeathSync);
                 if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit, but I got nowhere near.
                     sendUserMessage(player, "error.jmws.error_packet_size", false, true);
                 } else {

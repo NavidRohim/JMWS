@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 
@@ -24,6 +25,11 @@ public class CommonClientPlatformCommands {
 
     public static void registerClientDispatcher(CommandDispatcher dispatcher)
     {
+        if (JMWSPlugin.hasBeenMadeLocal())
+        {
+            return;
+        }
+
         dispatcher.register(
                 Commands.literal("jmws")
                         .then(Commands.literal("sync").executes(commandContext -> ClientCommands.sync()))

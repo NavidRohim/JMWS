@@ -4,7 +4,9 @@ package me.brynview.navidrohim.jmws;
 
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLEnvironment;
 
 
 @Mod(Constants.MODID)
@@ -17,6 +19,19 @@ public class Jmws {
 
         // Use NeoForge to bootstrap the Common mod.
 
+        boolean isServerSide = FMLEnvironment.getDist().name().equalsIgnoreCase("SERVER")
+                || FMLEnvironment.getDist().name().equalsIgnoreCase("DEDICATED_SERVER");
+        ModList.get().getModContainerById("journeymap").ifPresentOrElse(modContainer -> {
+            String journeyMapVersion = modContainer.getModInfo().getVersion().toString();
+            Constants.updateShouldMakeLocalFromJourneyMapVersion(journeyMapVersion);
+            if (isServerSide) {
+                Constants.updateServerJourneyMapStatus(journeyMapVersion);
+            }
+        }, () -> {
+            if (isServerSide) {
+                Constants.logServerJourneyMapMissing();
+            }
+        });
         CommonClass.init();
     }
 }
