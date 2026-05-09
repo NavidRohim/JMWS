@@ -5,7 +5,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import journeymap.api.v2.client.IClientAPI;
 import journeymap.api.v2.client.IClientPlugin;
-import journeymap.api.v2.client.event.*;
+import journeymap.api.v2.client.event.DeathWaypointEvent;
+import journeymap.api.v2.client.event.MappingEvent;
 import journeymap.api.v2.common.JourneyMapPlugin;
 import journeymap.api.v2.common.event.ClientEventRegistry;
 import journeymap.api.v2.common.event.CommonEventRegistry;
@@ -16,21 +17,21 @@ import journeymap.api.v2.common.event.common.WaypointGroupTransferEvent;
 import journeymap.api.v2.common.waypoint.Waypoint;
 import journeymap.api.v2.common.waypoint.WaypointFactory;
 import journeymap.api.v2.common.waypoint.WaypointGroup;
+import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.assets.JMWSSounds;
 import me.brynview.navidrohim.jmws.client.assets.JMWSTextures;
+import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
 import me.brynview.navidrohim.jmws.client.network.ClientNetworkDispatcher;
 import me.brynview.navidrohim.jmws.client.share.request.ShareRequest;
-import me.brynview.navidrohim.jmws.common.CommonClass;
-import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.client.config.ConfigInterface;
-import me.brynview.navidrohim.jmws.common.enums.MessageType;
-import me.brynview.navidrohim.jmws.client.assets.JMWSSounds;
-import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
-import me.brynview.navidrohim.jmws.common.syncing.Syncing;
-import me.brynview.navidrohim.jmws.common.enums.ObjectType;
-import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
 import me.brynview.navidrohim.jmws.client.utils.PlayerUtils;
+import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.enums.MessageType;
+import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
+import me.brynview.navidrohim.jmws.common.syncing.Syncing;
+import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
+import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -41,7 +42,8 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static me.brynview.navidrohim.jmws.common.CommonClass.*;
+import static me.brynview.navidrohim.jmws.common.CommonClass.isInternalServer;
+import static me.brynview.navidrohim.jmws.common.CommonClass.scheduler;
 
 /**
  * Main JMWS plugin which interfaces with JourneyMap.
@@ -53,33 +55,10 @@ public class JMWSPlugin implements IClientPlugin {
     private IClientAPI jmAPI = null;
     private static JMWSPlugin INSTANCE;
     public static boolean suppressJourneyMapEvents = false;
-    public static boolean journeyMapEventsUnsubscribed = false;
-
-    private record UploadResult(boolean hasLocalObject, boolean madeLocalObject) {}
 
     public static boolean hasBeenMadeLocal()
     {
-        return suppressJourneyMapEvents || journeyMapEventsUnsubscribed;
-    }
-
-    private static void unsubscribeJourneyMapEvents() {
-        suppressJourneyMapEvents = true;
-
-        if (journeyMapEventsUnsubscribed || INSTANCE == null) {
-            return;
-        }
-
-        try {
-            CommonEventRegistry.WAYPOINT_EVENT.unsubscribe(INSTANCE, Constants.MODID);
-            CommonEventRegistry.WAYPOINT_GROUP_EVENT.unsubscribe(INSTANCE, Constants.MODID + "group_event");
-            CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.unsubscribe(INSTANCE, Constants.MODID + "group_transfer");
-            ClientEventRegistry.DEATH_WAYPOINT_EVENT.unsubscribe(INSTANCE, Constants.MODID);
-            ClientEventRegistry.MAPPING_EVENT.unsubscribe(INSTANCE, Constants.MODID);
-            journeyMapEventsUnsubscribed = true;
-
-        } catch (ConcurrentModificationException exception) {
-            Constants.getLogger().warn("JourneyMap event unsubscription was deferred by concurrent modification. Event suppression flag remains active.", exception);
-        }
+        return suppressJourneyMapEvents;
     }
 
     // Required functions
@@ -103,8 +82,9 @@ public class JMWSPlugin implements IClientPlugin {
 
         ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe(this, Constants.MODID, this::handleUserDeath);
         ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe(Constants.MODID, (_ -> ClientCommonClass.config = new ConfigInterface()));
-        ClientEventRegistry.MAPPING_EVENT.subscribe(this, Constants.MODID, (MappingEvent event) -> {
-            if (hasBeenMadeLocal()) {
+        ClientEventRegistry.MAPPING_EVENT.subscribe(this, Constants.MODID, (MappingEvent _) -> {
+            if (hasBeenMadeLocal())
+            {
                 return;
             }
 
@@ -557,9 +537,8 @@ public class JMWSPlugin implements IClientPlugin {
      * @return boolean -- If the user had any local groups to upload.
      * @throws JsonSyntaxException -- If there is a syntax error with the Json, usually from a corrupted group.
      */
-    private UploadResult handleUploadGroups(JsonObject jsonGroupsRaw, boolean showSharingLabels, boolean showGlobalLabels, boolean serverHasCompatibleJourneyMap) throws JsonSyntaxException, IllegalStateException {
+    private boolean handleUploadGroups(JsonObject jsonGroupsRaw, boolean showSharingLabels, boolean showGlobalLabels, boolean serverHasCompatibleJourneyMap) throws JsonSyntaxException, IllegalStateException {
         boolean hasLocalGroup = false;
-        boolean madeLocalGroup = false;
 
         // Get existing groups (local) and get group objects saved on server
         List<? extends WaypointGroup> existingGroups = getInstance().jmAPI.getAllWaypointGroups();
@@ -583,21 +562,10 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Add server groups to the client
         for (WaypointGroup savedGroup : savedGroups) {
-            @Nullable Syncing gpSync = Syncing.getSyncingInfo(savedGroup.getCustomData(Constants.MODID));
 
+            @Nullable Syncing gpSync = Syncing.getSyncingInfo(savedGroup.getCustomData(Constants.MODID));
             if (gpSync == null) {
                 portLegacyDataField(savedGroup.toString(), ObjectType.GROUP);
-                continue;
-            }
-
-            if (ClientCommonClass.shouldMakeLocal && serverHasCompatibleJourneyMap) {
-                unsubscribeJourneyMapEvents();
-                savedGroup.setPersistent(true);
-                savedGroup.setCustomData(Constants.MODID, null);
-
-                getInstance().jmAPI.addWaypointGroup(savedGroup);
-                madeLocalGroup = true;
-
                 continue;
             }
 
@@ -622,7 +590,7 @@ public class JMWSPlugin implements IClientPlugin {
         }
 
         // return this because need to give an alert
-        return new UploadResult(hasLocalGroup, madeLocalGroup);
+        return hasLocalGroup;
     }
 
     /**
@@ -631,18 +599,18 @@ public class JMWSPlugin implements IClientPlugin {
      * @return boolean -- If the user had any local waypoints to upload.
      * @throws JsonSyntaxException -- If there is a syntax error with the JSON, usually from a corrupted waypoint.
      */
-    private UploadResult handleUploadWaypoints(JsonObject jsonWaypoints, boolean showSharingLabels, boolean showGlobalLabels, boolean serverHasCompatibleJourneyMap) throws JsonSyntaxException {
+    private boolean handleUploadWaypoints(JsonObject jsonWaypoints, boolean showSharingLabels, boolean showGlobalLabels, boolean serverHasCompatibleJourneyMap) throws JsonSyntaxException {
         boolean hasLocalWaypoint = false;
-        boolean madeLocalWaypoint = false;
 
         // Get existing waypoints (local) and get waypoint objects saved on server
-        List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
         Set<Waypoint> savedWaypoints = JMWSPlugin.getSavedWaypoints(jsonWaypoints.deepCopy());
 
+        List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
         // Get an identifier of every waypoint (BlockPos, location), used to detect if the waypoint already exists
         Set<BlockPos> remoteWaypointPositions = savedWaypoints.stream()
                 .map(Waypoint::getBlockPos)
                 .collect(Collectors.toSet());
+
 
         getInstance().jmAPI.removeAllWaypoints(Constants.MODID); // Delete all waypoints belonging to JMWS
         getInstance().jmAPI.removeAllWaypoints("journeymap");
@@ -659,20 +627,10 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Add server waypoints to the client
         for (Waypoint savedWaypoint : savedWaypoints) {
+
             @Nullable Syncing wpSync = Syncing.getSyncingInfo(savedWaypoint.getCustomData(Constants.MODID));
             if (wpSync == null) {
                 portLegacyDataField(savedWaypoint.toString(), ObjectType.WAYPOINT);
-                continue;
-            }
-
-            if (ClientCommonClass.shouldMakeLocal && serverHasCompatibleJourneyMap) {
-                unsubscribeJourneyMapEvents();
-                savedWaypoint.setPersistent(true);
-                savedWaypoint.setCustomData(Constants.MODID, null);
-
-                addWaypoint(savedWaypoint);
-                madeLocalWaypoint = true;
-
                 continue;
             }
 
@@ -693,7 +651,8 @@ public class JMWSPlugin implements IClientPlugin {
             addWaypoint(savedWaypoint);
         }
 
-        return new UploadResult(hasLocalWaypoint, madeLocalWaypoint);
+
+        return hasLocalWaypoint;
     }
 
     /**
@@ -703,28 +662,38 @@ public class JMWSPlugin implements IClientPlugin {
     public static void syncHandler(JMWSActionPayload waypointPayload) {
         boolean hasLocalGroup = false;
         boolean hasLocalWaypoint = false;
-        boolean madeLocalGroup = false;
-        boolean madeLocalWaypoint = false;
         boolean sendAlert = waypointPayload.arguments().get(2).getAsBoolean(); // If to send an alert
-        boolean serverHasCompatibleJourneyMap = waypointPayload.arguments().get(3).getAsBoolean(); // If the server has a JourneyMap version that supports local server objects
-        boolean isDeathSync = waypointPayload.arguments().getLast().getAsBoolean(); // If the sync was from a death waypoint creation
+        boolean isDeathSync = waypointPayload.arguments().get(3).getAsBoolean(); // If the sync was from a death waypoint creation
+
+        boolean serverHasCompatibleJourneyMap;
+
+        try
+        {
+            serverHasCompatibleJourneyMap = waypointPayload.arguments().get(4).getAsBoolean(); // If the server has a JourneyMap version that supports local server objects
+        } catch (Exception _)
+        {
+            serverHasCompatibleJourneyMap = false;
+        }
+
+        if (serverHasCompatibleJourneyMap)
+        {
+            suppressJourneyMapEvents = true;
+            return;
+        }
 
         boolean showSharingLabels = ClientCommonClass.config.showSharingLabels.get();
         boolean showGlobalLabels = ClientCommonClass.config.showGlobalLabels.get();
 
         try {
-            // Sync remote and local groups if server and client permits
+            // Sync remote and local groups if server and client permit
             if (ClientCommonClass.config.uploadGroups.get() && ClientCommonClass.serverConfig.groupsEnabled()) {
-                UploadResult groupResult = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), showSharingLabels, showGlobalLabels, serverHasCompatibleJourneyMap);
-                hasLocalGroup = groupResult.hasLocalObject();
-                madeLocalGroup = groupResult.madeLocalObject();
+                hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), showSharingLabels, showGlobalLabels, serverHasCompatibleJourneyMap);
+
             }
 
-            // Sync remote and local waypoints if server and client permits
+            // Sync remote and local waypoints if server and client permit
             if (ClientCommonClass.config.uploadWaypoints.get() && ClientCommonClass.serverConfig.waypointsEnabled()) {
-                UploadResult waypointResult = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), showSharingLabels, showGlobalLabels, serverHasCompatibleJourneyMap);
-                hasLocalWaypoint = waypointResult.hasLocalObject();
-                madeLocalWaypoint = waypointResult.madeLocalObject();
+                hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), showSharingLabels, showGlobalLabels, serverHasCompatibleJourneyMap);
             }
 
             // Send alerts if there were any local waypoints and or groups
@@ -741,11 +710,7 @@ public class JMWSPlugin implements IClientPlugin {
                 }
             }
 
-            if (madeLocalGroup || madeLocalWaypoint) {
-                PlayerUtils.sendUserAlert(Component.translatable("message.jmws.synced_objects_ported"),  false, true, MessageType.SUCCESS);
-                return;
-
-            } else if (!hasLocalGroup && !hasLocalWaypoint && sendAlert) { // send alert, client permitting
+             if (!hasLocalGroup && !hasLocalWaypoint && sendAlert) { // send alert, client permitting
                 String updateMessageKey = "message.jmws.synced_success";
 
                 // Sync message can change depending on what client permissions there are

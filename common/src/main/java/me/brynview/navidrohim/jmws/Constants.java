@@ -1,6 +1,5 @@
 package me.brynview.navidrohim.jmws;
 
-import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.server.ServerCommonClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,16 +31,6 @@ public class Constants {
     // For anyone forking, this MUST be updated if there is a change that is in a future version of JM that you use.
     public static final String JourneyMapVersionString = "26.1-6.0.0-beta.61";
     // beta 52 fixed the waypoint-drag-drop event, so this is the only version compatible (and any newer)
-
-    public static void updateShouldMakeLocalFromJourneyMapVersion(String versionString) {
-        ClientCommonClass.shouldMakeLocal = false;
-        Matcher betaVersionMatcher = Pattern.compile("beta\\.([0-9]+)").matcher(versionString);
-
-        if (betaVersionMatcher.find()) {
-            int betaVersion = Integer.parseInt(betaVersionMatcher.group(1));
-            ClientCommonClass.shouldMakeLocal = betaVersion >= JOURNEYMAP_LOCAL_SERVER_WAYPOINTS_BETA;
-        }
-    }
 
     public static void updateServerJourneyMapStatus(String versionString) {
         Constants.getLogger().info("JourneyMap is installed on the server. Version: {}", versionString);

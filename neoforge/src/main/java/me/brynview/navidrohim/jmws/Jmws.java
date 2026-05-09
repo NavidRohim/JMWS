@@ -23,7 +23,6 @@ public class Jmws {
 
         ModList.get().getModContainerById("journeymap").ifPresentOrElse(modContainer -> {
             String journeyMapVersion = modContainer.getModInfo().getVersion().toString();
-            Constants.updateShouldMakeLocalFromJourneyMapVersion(journeyMapVersion);
             if (isServerSide) {
                 Constants.updateServerJourneyMapStatus(journeyMapVersion);
             }

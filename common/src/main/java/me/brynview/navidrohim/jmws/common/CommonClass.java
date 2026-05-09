@@ -15,6 +15,7 @@ import me.brynview.navidrohim.jmws.common.platform.Services;
 import me.brynview.navidrohim.jmws.client.network.ClientPacketHandler;
 
 import me.brynview.navidrohim.jmws.common.platform.services.IPlatformHelper;
+import me.brynview.navidrohim.jmws.server.ServerCommonClass;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
@@ -112,6 +113,12 @@ public class CommonClass {
         ServerConfig.ensureExistence();
         createServerResources();
 
+        if (Services.PLATFORM.side() == IPlatformHelper.Side.SERVER)
+        {
+            Constants.getLogger().info("Will transition on client: {}", ServerCommonClass.serverHasCompatibleJourneyMap);
+        } else {
+            Constants.getLogger().info("Can transition, permitting the server allows it: {}",  ServerCommonClass.serverHasCompatibleJourneyMap);
+        }
         // It is common for all supported loaders to provide a similar feature that can not be used directly in the
         // common code. A popular way to get around this is using Java's built-in service loader feature to create
         // your own abstraction layer. You can learn more about this in our provided services class. In this example

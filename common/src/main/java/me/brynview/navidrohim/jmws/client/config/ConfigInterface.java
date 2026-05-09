@@ -3,6 +3,7 @@ package me.brynview.navidrohim.jmws.client.config;
 import journeymap.api.v2.client.option.*;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 
 public class ConfigInterface {
@@ -90,7 +91,7 @@ public class ConfigInterface {
     }
 
     public static boolean getEnabledStatus() {
-        return ClientCommonClass.serverHasMod && ClientCommonClass.config.enabled.get() && (ClientCommonClass.config.uploadGroups.get() || ClientCommonClass.config.uploadWaypoints.get()) && !CommonClass.minecraftClientInstance.isSingleplayer() && !CommonClass.isInternalServer();
+        return !JMWSPlugin.hasBeenMadeLocal() && ClientCommonClass.serverHasMod && ClientCommonClass.config.enabled.get() && (ClientCommonClass.config.uploadGroups.get() || ClientCommonClass.config.uploadWaypoints.get()) && !CommonClass.minecraftClientInstance.isSingleplayer() && !CommonClass.isInternalServer();
     }
 
     /**

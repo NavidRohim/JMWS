@@ -65,7 +65,6 @@ public class Jmws implements ModInitializer {
                         int minVersionString = Integer.parseInt(regexBetaVersionPatternMinMatcher.group(1));
 
                         ClientCommonClass.clientJMVersion = versionString;
-                        Constants.updateShouldMakeLocalFromJourneyMapVersion(versionString);
                         if ((mcVersionMinor == minMcVersionMinor && mcVersionPatch >= minMcVersionPatch && jarVersionString >= minVersionString)) {
                             Constants.getLogger().info("Good to go. JMWS Version %s with JourneyMap Version %s on client-side.".formatted(Constants.VERSION, versionString));
                             ClientCommonClass.clientHasJM = true;

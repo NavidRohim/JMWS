@@ -56,5 +56,7 @@ public class CommonEvents {
         ClientCommonClass.isMapping = false;
         ClientCommonClass.didHandshake = false;
         ClientCommonClass.isBusy = false;
+
+        JMWSPlugin.suppressJourneyMapEvents = false;
     }
 }

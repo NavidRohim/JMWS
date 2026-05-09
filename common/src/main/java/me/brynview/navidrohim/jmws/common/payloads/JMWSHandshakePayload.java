@@ -61,7 +61,7 @@ public class JMWSHandshakePayload
         return new CustomPacketPayload.Type<>(CHANNEL);
     }
 
-    /*Ź
+    /*
      * Encodes data ready to send to client
      * @param buf Buffer to add data to for the client
      */
