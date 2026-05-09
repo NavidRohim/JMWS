@@ -31,33 +31,36 @@ public class ServerPlugin implements IServerPlugin
     @Override
     public void initialize(final IServerAPI jmServerApi)
     {
-        Constants.getLogger().info("SERVER INIT JM");
         api = jmServerApi;
     }
 
-    public static ServerPlugin getAPI()
+    public static ServerPlugin getPlugin()
     {
         return INSTANCE;
     }
 
     public static void migrateWaypoint(UUID playerUUID, String data)
     {
-        Waypoint waypoint = WaypointFactory.fromWaypointJsonString(data);
-        IServerAPI api = ServerPlugin.getAPI().api;
-
-        if (api.getWaypoint(playerUUID, waypoint.getGuid()) == null)
+        try
         {
-            api.addPlayerWaypoint(playerUUID, waypoint);
+            Waypoint waypoint = WaypointFactory.fromWaypointJsonString(data);
+            ServerPlugin.getPlugin().api.addPlayerWaypoint(playerUUID, waypoint);
+
+        } catch (Exception e)
+        {
+            Constants.getLogger().error("Could not migrate waypoint. Error: " + e);
         }
     }
 
     public static void migrateGroup(UUID playerUUID, String data)
     {
-        WaypointGroup group = WaypointFactory.fromGroupJsonString(data);
-        IServerAPI api = ServerPlugin.getAPI().api;
-        if (api.getGroup(playerUUID, group.getGuid()) == null)
+        try
         {
-            ServerPlugin.getAPI().api.addPlayerGroup(playerUUID, group);
+            WaypointGroup group = WaypointFactory.fromGroupJsonString(data);
+            ServerPlugin.getPlugin().api.addPlayerGroup(playerUUID, group);
+        } catch (Exception e)
+        {
+            Constants.getLogger().error("Could not migrate group. Error: " + e);
         }
     }
 }

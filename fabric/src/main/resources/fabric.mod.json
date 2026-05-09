@@ -41,6 +41,6 @@
     "commonnetworking": ">=${common_networking_version}"
   },
   "recommends": {
-    "journeymap": ">=26.1-6.0.0-beta.61"
+    "journeymap": ">=26.1-6.0.0-beta.71"
   }
 }

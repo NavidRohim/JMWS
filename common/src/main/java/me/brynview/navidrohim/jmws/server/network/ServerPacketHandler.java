@@ -85,7 +85,7 @@ public class ServerPacketHandler {
                     }
                 }
 
-                if (ServerCommonClass.serverHasCompatibleJourneyMap)
+                if (ServerCommonClass.serverHasCompatibleJourneyMap && !(playerGroups.isEmpty() || playerWaypoints.isEmpty()))
                 {
                     HashMap<String, String> empty = new HashMap<>();
                     PlayerNetworkingHelper.sendUserMessage(player,"message.jmws.synced_objects_ported", false, false, false);

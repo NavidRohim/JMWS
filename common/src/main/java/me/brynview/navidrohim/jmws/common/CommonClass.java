@@ -3,30 +3,23 @@ package me.brynview.navidrohim.jmws.common;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import commonnetwork.api.Network;
-
 import commonnetwork.networking.data.PacketContext;
 import commonnetwork.networking.data.Side;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.network.ClientPacketHandler;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.platform.Services;
-
-import me.brynview.navidrohim.jmws.client.network.ClientPacketHandler;
-
 import me.brynview.navidrohim.jmws.common.platform.services.IPlatformHelper;
-import me.brynview.navidrohim.jmws.server.ServerCommonClass;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
-
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.MinecraftServer;
 
-
 import java.io.File;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -113,12 +106,6 @@ public class CommonClass {
         ServerConfig.ensureExistence();
         createServerResources();
 
-        if (Services.PLATFORM.side() == IPlatformHelper.Side.SERVER)
-        {
-            Constants.getLogger().info("Will transition on client: {}", ServerCommonClass.serverHasCompatibleJourneyMap);
-        } else {
-            Constants.getLogger().info("Can transition, permitting the server allows it: {}",  ServerCommonClass.serverHasCompatibleJourneyMap);
-        }
         // It is common for all supported loaders to provide a similar feature that can not be used directly in the
         // common code. A popular way to get around this is using Java's built-in service loader feature to create
         // your own abstraction layer. You can learn more about this in our provided services class. In this example

@@ -29,7 +29,7 @@ public class Constants {
     public static final List<String> forbiddenGroups = List.of("journeymap_death", "journeymap_all", "journeymap_temp", "journeymap_default"); // (DO NOT EDIT, game will bug out)
 
     // For anyone forking, this MUST be updated if there is a change that is in a future version of JM that you use.
-    public static final String JourneyMapVersionString = "26.1-6.0.0-beta.61";
+    public static final String JourneyMapVersionString = "26.1-6.0.0-beta.71";
     // beta 52 fixed the waypoint-drag-drop event, so this is the only version compatible (and any newer)
 
     public static void updateServerJourneyMapStatus(String versionString) {
