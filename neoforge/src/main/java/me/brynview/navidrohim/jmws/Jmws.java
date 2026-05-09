@@ -1,12 +1,12 @@
 package me.brynview.navidrohim.jmws;
 
 
-
 import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.platform.Services;
+import me.brynview.navidrohim.jmws.common.platform.services.IPlatformHelper;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.loading.FMLEnvironment;
 
 
 @Mod(Constants.MODID)
@@ -19,8 +19,8 @@ public class Jmws {
 
         // Use NeoForge to bootstrap the Common mod.
 
-        boolean isServerSide = FMLEnvironment.getDist().name().equalsIgnoreCase("SERVER")
-                || FMLEnvironment.getDist().name().equalsIgnoreCase("DEDICATED_SERVER");
+        boolean isServerSide = Services.PLATFORM.side() == IPlatformHelper.Side.SERVER;
+
         ModList.get().getModContainerById("journeymap").ifPresentOrElse(modContainer -> {
             String journeyMapVersion = modContainer.getModInfo().getVersion().toString();
             Constants.updateShouldMakeLocalFromJourneyMapVersion(journeyMapVersion);

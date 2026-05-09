@@ -55,12 +55,31 @@ public class JMWSPlugin implements IClientPlugin {
     public static boolean suppressJourneyMapEvents = false;
     public static boolean journeyMapEventsUnsubscribed = false;
 
-    private record UploadResult(boolean hasLocalObject, boolean madeLocalObject) {
-    }
+    private record UploadResult(boolean hasLocalObject, boolean madeLocalObject) {}
 
     public static boolean hasBeenMadeLocal()
     {
         return suppressJourneyMapEvents || journeyMapEventsUnsubscribed;
+    }
+
+    private static void unsubscribeJourneyMapEvents() {
+        suppressJourneyMapEvents = true;
+
+        if (journeyMapEventsUnsubscribed || INSTANCE == null) {
+            return;
+        }
+
+        try {
+            CommonEventRegistry.WAYPOINT_EVENT.unsubscribe(INSTANCE, Constants.MODID);
+            CommonEventRegistry.WAYPOINT_GROUP_EVENT.unsubscribe(INSTANCE, Constants.MODID + "group_event");
+            CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.unsubscribe(INSTANCE, Constants.MODID + "group_transfer");
+            ClientEventRegistry.DEATH_WAYPOINT_EVENT.unsubscribe(INSTANCE, Constants.MODID);
+            ClientEventRegistry.MAPPING_EVENT.unsubscribe(INSTANCE, Constants.MODID);
+            journeyMapEventsUnsubscribed = true;
+
+        } catch (ConcurrentModificationException exception) {
+            Constants.getLogger().warn("JourneyMap event unsubscription was deferred by concurrent modification. Event suppression flag remains active.", exception);
+        }
     }
 
     // Required functions
@@ -85,7 +104,7 @@ public class JMWSPlugin implements IClientPlugin {
         ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe(this, Constants.MODID, this::handleUserDeath);
         ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe(Constants.MODID, (_ -> ClientCommonClass.config = new ConfigInterface()));
         ClientEventRegistry.MAPPING_EVENT.subscribe(this, Constants.MODID, (MappingEvent event) -> {
-            if (shouldSuppressJourneyMapEvents()) {
+            if (hasBeenMadeLocal()) {
                 return;
             }
 
@@ -104,7 +123,7 @@ public class JMWSPlugin implements IClientPlugin {
      * @param deathWaypointEvent -- The event. Does not have method for retrieving the death waypoint for some reason.
      */
     private void handleUserDeath(DeathWaypointEvent deathWaypointEvent) {
-        if (shouldSuppressJourneyMapEvents()) {
+        if (hasBeenMadeLocal()) {
             return;
         }
 
@@ -135,32 +154,6 @@ public class JMWSPlugin implements IClientPlugin {
     public JMWSPlugin()
     {
         INSTANCE = this;
-    }
-
-    private static boolean shouldSuppressJourneyMapEvents() {
-        return suppressJourneyMapEvents;
-    }
-
-    private static void suppressJourneyMapEvents() {
-        suppressJourneyMapEvents = true;
-        unsubscribeJourneyMapEvents();
-    }
-
-    private static void unsubscribeJourneyMapEvents() {
-        if (journeyMapEventsUnsubscribed || INSTANCE == null) {
-            return;
-        }
-
-        try {
-            CommonEventRegistry.WAYPOINT_EVENT.unsubscribe(INSTANCE, Constants.MODID);
-            CommonEventRegistry.WAYPOINT_GROUP_EVENT.unsubscribe(INSTANCE, Constants.MODID + "group_event");
-            CommonEventRegistry.WAYPOINT_GROUP_TRANSFER_EVENT.unsubscribe(INSTANCE, Constants.MODID + "group_transfer");
-            ClientEventRegistry.DEATH_WAYPOINT_EVENT.unsubscribe(INSTANCE, Constants.MODID);
-            ClientEventRegistry.MAPPING_EVENT.unsubscribe(INSTANCE, Constants.MODID);
-            journeyMapEventsUnsubscribed = true;
-        } catch (ConcurrentModificationException exception) {
-            Constants.getLogger().warn("JourneyMap event unsubscription was deferred by concurrent modification. Event suppression flag remains active.", exception);
-        }
     }
 
     // General helper functions
@@ -243,7 +236,7 @@ public class JMWSPlugin implements IClientPlugin {
      * @param waypointEvent The event.
      */
     void waypointEventHandler(WaypointEvent waypointEvent) {
-        if (shouldSuppressJourneyMapEvents()) {
+        if (hasBeenMadeLocal()) {
             return;
         }
 
@@ -272,7 +265,7 @@ public class JMWSPlugin implements IClientPlugin {
      */
     private void groupEventListener(WaypointGroupEvent waypointGroupEvent)
     {
-        if (shouldSuppressJourneyMapEvents()) {
+        if (hasBeenMadeLocal()) {
             return;
         }
 
@@ -380,7 +373,7 @@ public class JMWSPlugin implements IClientPlugin {
      * @param waypointGroupTransferEvent The event.
      */
     private void waypointDragHandler(WaypointGroupTransferEvent waypointGroupTransferEvent) {
-        if (shouldSuppressJourneyMapEvents()) {
+        if (hasBeenMadeLocal()) {
             return;
         }
 
@@ -527,7 +520,7 @@ public class JMWSPlugin implements IClientPlugin {
      * @throws JsonSyntaxException If waypoint is malformed or does not parse.
      * @throws IllegalStateException Cannot remember why this can be thrown.
      */
-    private static Set<Waypoint> getSavedWaypoints(JsonObject jsonData, UUID playerUUID) throws JsonSyntaxException, IllegalStateException {
+    private static Set<Waypoint> getSavedWaypoints(JsonObject jsonData) throws JsonSyntaxException, IllegalStateException {
         Set<Waypoint> waypoints = new HashSet<>();
 
         for (Map.Entry<String, JsonElement> entry : jsonData.entrySet()) {
@@ -597,12 +590,14 @@ public class JMWSPlugin implements IClientPlugin {
                 continue;
             }
 
-            if (Constants.shouldMakeLocal && serverHasCompatibleJourneyMap) {
-                suppressJourneyMapEvents();
+            if (ClientCommonClass.shouldMakeLocal && serverHasCompatibleJourneyMap) {
+                unsubscribeJourneyMapEvents();
                 savedGroup.setPersistent(true);
                 savedGroup.setCustomData(Constants.MODID, null);
+
                 getInstance().jmAPI.addWaypointGroup(savedGroup);
                 madeLocalGroup = true;
+
                 continue;
             }
 
@@ -642,7 +637,7 @@ public class JMWSPlugin implements IClientPlugin {
 
         // Get existing waypoints (local) and get waypoint objects saved on server
         List<? extends Waypoint> existingWaypoints = getInstance().jmAPI.getAllWaypoints();
-        Set<Waypoint> savedWaypoints = JMWSPlugin.getSavedWaypoints(jsonWaypoints.deepCopy(), CommonClass.minecraftClientInstance.player.getUUID());
+        Set<Waypoint> savedWaypoints = JMWSPlugin.getSavedWaypoints(jsonWaypoints.deepCopy());
 
         // Get an identifier of every waypoint (BlockPos, location), used to detect if the waypoint already exists
         Set<BlockPos> remoteWaypointPositions = savedWaypoints.stream()
@@ -670,13 +665,14 @@ public class JMWSPlugin implements IClientPlugin {
                 continue;
             }
 
-            if (Constants.shouldMakeLocal && serverHasCompatibleJourneyMap) {
-                suppressJourneyMapEvents();
+            if (ClientCommonClass.shouldMakeLocal && serverHasCompatibleJourneyMap) {
+                unsubscribeJourneyMapEvents();
                 savedWaypoint.setPersistent(true);
                 savedWaypoint.setCustomData(Constants.MODID, null);
-                Constants.getLogger().info("Making local waypoints for {}", savedWaypoint.toString());
+
                 addWaypoint(savedWaypoint);
                 madeLocalWaypoint = true;
+
                 continue;
             }
 

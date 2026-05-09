@@ -14,6 +14,7 @@ import me.brynview.navidrohim.jmws.common.platform.Services;
 
 import me.brynview.navidrohim.jmws.client.network.ClientPacketHandler;
 
+import me.brynview.navidrohim.jmws.common.platform.services.IPlatformHelper;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
 
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
@@ -102,7 +103,7 @@ public class CommonClass {
         Network.registerPacket(JMWSActionPayload.type(), JMWSActionPayload.class, JMWSActionPayload.STREAM_CODEC, CommonClass::determinePacketAction);
         Network.registerPacket(JMWSHandshakePayload.type(), JMWSHandshakePayload.class, JMWSHandshakePayload.STREAM_CODEC, CommonClass::determineHandshakePacketAction);
 
-        if (Services.PLATFORM.side().equals("CLIENT") && Services.PLATFORM.getPlatformName().equals("Fabric"))
+        if (Services.PLATFORM.side() == IPlatformHelper.Side.CLIENT && Services.PLATFORM.getPlatformName().equals("Fabric"))
         {
             ClientCommonClass.setupMinecraftClientInstance();
         }

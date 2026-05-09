@@ -93,6 +93,12 @@ public class ObjectIdentifierMap {
      */
     public static boolean addWaypointToMap(Waypoint waypoint)
     {
+
+        if (JMWSPlugin.hasBeenMadeLocal())
+        {
+            return true;
+        }
+
         String customDataField = waypoint.getCustomData(Constants.MODID);
         if (isLegacyDataField(customDataField))
         {
@@ -120,6 +126,12 @@ public class ObjectIdentifierMap {
      */
     public static boolean addGroupToMap(WaypointGroup waypointGroup)
     {
+
+        if (JMWSPlugin.hasBeenMadeLocal())
+        {
+            return true;
+        }
+
         String customDataField = waypointGroup.getCustomData(Constants.MODID);
         if (isLegacyDataField(customDataField))
         {

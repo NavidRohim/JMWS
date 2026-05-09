@@ -3,13 +3,13 @@ package me.brynview.navidrohim.jmws.server.network;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
+import me.brynview.navidrohim.jmws.server.ServerCommonClass;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
@@ -123,7 +123,7 @@ public class ServerPacketHandler {
                     }
                 }
 
-                String jsonData = CommandFactory.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert, Constants.serverHasCompatibleJourneyMap, isDeathSync);
+                String jsonData = CommandFactory.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert, ServerCommonClass.serverHasCompatibleJourneyMap, isDeathSync);
                 if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit, but I got nowhere near.
                     sendUserMessage(player, "error.jmws.error_packet_size", false, true);
                 } else {
