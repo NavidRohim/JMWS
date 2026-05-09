@@ -1,4 +1,4 @@
-# JMWS 1.2.6 for 26.1.x
+# JMWS 1.2.6 for 26.1.2
 
 *Server version 1.13*
 
