@@ -15,3 +15,6 @@ debug.py
 
 .DS_Store
 journeymap-*
+
+local.gradle
+deploy.sh

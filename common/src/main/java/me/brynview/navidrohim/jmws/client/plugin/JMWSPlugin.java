@@ -742,14 +742,7 @@ public class JMWSPlugin implements IClientPlugin {
             }
 
             if (madeLocalGroup || madeLocalWaypoint) {
-                if (madeLocalGroup && madeLocalWaypoint) {
-                    PlayerUtils.sendUserAlert(Component.literal("JMWS made server waypoints and groups local for this JourneyMap version. Thank you for your endless support."), false, true, MessageType.SUCCESS, true);
-                } else if (madeLocalGroup) {
-                    PlayerUtils.sendUserAlert(Component.literal("JMWS made server groups local for this JourneyMap version. Thank you for your endless support."), false, true, MessageType.SUCCESS, true);
-                } else {
-                    PlayerUtils.sendUserAlert(Component.literal("JMWS made server waypoints local for this JourneyMap version. Thank you for your endless support."), false, true, MessageType.SUCCESS, true);
-                }
-
+                PlayerUtils.sendUserAlert(Component.translatable("message.jmws.synced_objects_ported"),  false, true, MessageType.SUCCESS);
                 return;
 
             } else if (!hasLocalGroup && !hasLocalWaypoint && sendAlert) { // send alert, client permitting
