@@ -2,6 +2,7 @@ package me.brynview.navidrohim.jmws.client.utils;
 
 import com.mojang.authlib.GameProfile;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin;
 import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.utils.CommonUtils;
@@ -26,7 +27,12 @@ public class PlayerUtils {
      * @param ignoreConfig If to ignore the users set config value. If they have alerts turned off but ignoreConfig is true, the alert will be sent regardless.
      * @param messageType What colour the message will be. Named with importance instead of colour.
      */
-    public static void sendUserAlert(Component text, boolean overlayText, boolean ignoreConfig, MessageType messageType) {
+    public static void sendUserAlert(Component text, boolean overlayText, boolean ignoreConfig, MessageType messageType, boolean absolute) {
+
+        if (JMWSPlugin.hasBeenMadeLocal() && !absolute)
+        {
+            return;
+        }
 
         // Check if player allows alerts, check if player exists, and make sure it has not been sent before if one-time message
         if (!sentWarningsInServer.contains(text.getString()) && (ClientCommonClass.config.showAlerts.get() || ignoreConfig) && CommonClass.minecraftClientInstance.player != null)
@@ -53,10 +59,15 @@ public class PlayerUtils {
         }
     }
 
-    /**
-     * Clears the warning cache. Warnings being alerts with JMWSMessageType.ONE_TIME_WARNING as the messageType.
-     * This is usually called every time the player leaves the server.
-     */
+    public static void sendUserAlert(Component text, boolean overlayText, boolean ignoreConfig, MessageType messageType)
+    {
+        sendUserAlert(text, overlayText, ignoreConfig, messageType, false);
+    }
+
+ /**
+  * Clears the warning cache. Warnings being alerts with JMWSMessageType.ONE_TIME_WARNING as the messageType.
+  * This is usually called every time the player leaves the server.
+  */
     public static void clearWarningAlertCache()
     {
         sentWarningsInServer.clear();

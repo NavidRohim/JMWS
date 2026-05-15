@@ -1,6 +1,7 @@
 package me.brynview.navidrohim.jmws.platform;
 
 import me.brynview.navidrohim.jmws.common.platform.services.IPlatformHelper;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 
 public class FabricPlatformHelper implements IPlatformHelper {
@@ -21,6 +22,13 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public String side() {return FabricLoader.getInstance().getEnvironmentType().toString();}
+    public Side side()
+    {
+        EnvType type = FabricLoader.getInstance().getEnvironmentType();
+        if (type == EnvType.CLIENT) {
+            return Side.CLIENT;
+        }
+        return Side.SERVER;
+    }
 
 }

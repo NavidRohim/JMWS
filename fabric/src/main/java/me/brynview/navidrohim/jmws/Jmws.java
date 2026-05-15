@@ -3,8 +3,9 @@ package me.brynview.navidrohim.jmws;
 
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
 import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.platform.Services;
+import me.brynview.navidrohim.jmws.common.platform.services.IPlatformHelper;
 import me.brynview.navidrohim.jmws.server.commands.ServerDispatcher;
-import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
@@ -39,7 +40,7 @@ public class Jmws implements ModInitializer {
 
         try {
 
-            if (fabricLoader.getEnvironmentType() == EnvType.CLIENT) {
+            if (Services.PLATFORM.side() == IPlatformHelper.Side.CLIENT) {
                 if (isJMLoaded) {
                     Optional<ModContainer> jmModContainer = fabricLoader.getModContainer("journeymap");
                     if (jmModContainer.isPresent()) {
@@ -73,7 +74,12 @@ public class Jmws implements ModInitializer {
                 }
 
             } else {
-                Constants.getLogger().info("JourneyMap is optional on the server. If you get a warning about it, you can safely ignore it.");
+                if (isJMLoaded) {
+                    Optional<ModContainer> jmModContainer = fabricLoader.getModContainer("journeymap");
+                    jmModContainer.ifPresent(modContainer -> Constants.updateServerJourneyMapStatus(modContainer.getMetadata().getVersion().getFriendlyString()));
+                } else {
+                    Constants.logServerJourneyMapMissing();
+                }
                 CommonClass.init();
             }
         } catch (NoSuchElementException | VersionParsingException | IllegalStateException ignored) {

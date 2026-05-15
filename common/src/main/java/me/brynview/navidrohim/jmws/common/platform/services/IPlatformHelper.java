@@ -1,11 +1,12 @@
 package me.brynview.navidrohim.jmws.common.platform.services;
 
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
-
-import java.util.UUID;
-
 public interface IPlatformHelper {
+
+    enum Side
+    {
+        SERVER,
+        CLIENT
+    }
 
     /**
      * Gets the name of the current platform
@@ -34,7 +35,7 @@ public interface IPlatformHelper {
      *
      * @return CLIENT if client, SERVER if server.
      */
-    String side();
+    Side side();
 
     /**
      * If the server has JMWS installed.
