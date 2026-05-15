@@ -30,6 +30,7 @@
   "message.jmws.world_is_local": "Playing in single player. JMWS will be disabled for you and all clients.",
   "message.jmws.auto_sync_disabled": "Auto-Sync is disabled, enable it and try again.",
   "message.jmws.deleted_waypoints_in_group": "Deleted all waypoints in group.",
+  "message.jmws.synced_objects_ported": "IMPORTANT: All JMWS waypoints and groups you own (not ones shared to you or made global) have been migrated to JourneyMap's server syncing. Therefore, JMWS is no longer needed to sync and should be uninstalled ASAP once you have migrated all objects in servers you play in. JourneyMap will now handle syncing for you. Thank you for using and farewell!",
 
   "__comment__": "Sharing language strings",
   "sharing.jmws.no_longer_sharing": "This will no longer be shared.",

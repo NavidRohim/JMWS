@@ -1,6 +1,5 @@
 package me.brynview.navidrohim.jmws.common.syncing.share.io;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import me.brynview.navidrohim.jmws.Constants;
@@ -8,6 +7,7 @@ import me.brynview.navidrohim.jmws.common.CommonClass;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
 import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
 
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -66,6 +66,10 @@ public class CommonShareIO implements AutoCloseable {
         try (FileWriter permissionsListFileWriter = new FileWriter(this.objectPath.toFile()))
         {
             permissionsListFileWriter.write(permissionsJson);
+        } catch (FileNotFoundException _)
+        {
+            CommonClass.createServerResources();
+            writeSharedList();
         } catch (IOException reason)
         {
             Constants.getLogger().error("Failed to write permissions file. Reason: ", reason);

@@ -29,17 +29,18 @@
       "me.brynview.navidrohim.jmws.server.JMWSServer"
     ],
     "journeymap": [
-      "me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin"
+      "me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin",
+      "me.brynview.navidrohim.jmws.server.plugin.ServerPlugin"
     ]
   },
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
     "fabric-api": "*",
-    "minecraft": "${minecraft_version}",
+    "minecraft": ">=${minecraft_version}",
     "java": ">=${java_version}",
     "commonnetworking": ">=${common_networking_version}"
   },
   "recommends": {
-    "journeymap": ">=1.21.1-6.0.0-beta.58"
+    "journeymap": ">=1.21.1-6.0.0-beta.67"
   }
 }

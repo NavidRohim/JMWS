@@ -23,12 +23,12 @@ public class ForgePlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public String side() {
+    public Side side() {
         String side = FMLEnvironment.dist.toString();
         if (side.equalsIgnoreCase("SERVER") || side.equalsIgnoreCase("DEDICATED_SERVER"))
         {
-            return "SERVER";
+            return Side.SERVER;
         }
-        return "CLIENT";
+        return Side.CLIENT;
     }
 }

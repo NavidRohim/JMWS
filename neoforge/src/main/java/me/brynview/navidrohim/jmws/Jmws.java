@@ -1,9 +1,11 @@
 package me.brynview.navidrohim.jmws;
 
 
-
 import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.platform.Services;
+import me.brynview.navidrohim.jmws.common.platform.services.IPlatformHelper;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 
 
@@ -17,6 +19,18 @@ public class Jmws {
 
         // Use NeoForge to bootstrap the Common mod.
 
+        boolean isServerSide = Services.PLATFORM.side() == IPlatformHelper.Side.SERVER;
+
+        ModList.get().getModContainerById("journeymap").ifPresentOrElse(modContainer -> {
+            String journeyMapVersion = modContainer.getModInfo().getVersion().toString();
+            if (isServerSide) {
+                Constants.updateServerJourneyMapStatus(journeyMapVersion);
+            }
+        }, () -> {
+            if (isServerSide) {
+                Constants.logServerJourneyMapMissing();
+            }
+        });
         CommonClass.init();
     }
 }
