@@ -29,7 +29,9 @@
       "me.brynview.navidrohim.jmws.server.JMWSServer"
     ],
     "journeymap": [
-      "me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin",
+      "me.brynview.navidrohim.jmws.client.plugin.JMWSPlugin"
+    ],
+    "journeymap_server": [
       "me.brynview.navidrohim.jmws.server.plugin.ServerPlugin"
     ]
   },
@@ -41,6 +43,6 @@
     "commonnetworking": ">=${common_networking_version}"
   },
   "recommends": {
-    "journeymap": ">=26.1-6.0.0-beta.71"
+    "journeymap": ">=26.1-6.0.0-beta.77"
   }
 }

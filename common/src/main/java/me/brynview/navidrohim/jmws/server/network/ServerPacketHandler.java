@@ -67,7 +67,7 @@ public class ServerPacketHandler {
 
                     if (ServerCommonClass.serverHasCompatibleJourneyMap)
                     {
-                        ServerPlugin.migrateWaypoint(playerUUID, jsonWaypointFileString);
+                        ServerPlugin.migrateWaypoint(playerUUID, jsonWaypointFileString, false);
                         Constants.getLogger().info("Migrating waypoint for {}", playerUUID);
                     }
                 }
@@ -80,12 +80,37 @@ public class ServerPacketHandler {
 
                     if (ServerCommonClass.serverHasCompatibleJourneyMap)
                     {
-                        ServerPlugin.migrateGroup(playerUUID, jsonGroupFileString);
+                        ServerPlugin.migrateGroup(playerUUID, jsonGroupFileString, false);
                         Constants.getLogger().info("Migrating group for {}", playerUUID);
                     }
                 }
 
-                if (ServerCommonClass.serverHasCompatibleJourneyMap && !(playerGroups.isEmpty() || playerWaypoints.isEmpty()))
+                for (Path globalWpPath : ServerObject.getGlobalObjects(ObjectType.WAYPOINT))
+                {
+
+                    lastIterWp++;
+                    String globalWpString = Files.readString(globalWpPath);
+                    jsonWaypointPayloadArray.put(String.valueOf(lastIterWp), globalWpString);
+                    if (ServerCommonClass.serverHasCompatibleJourneyMap)
+                    {
+                        ServerPlugin.migrateWaypoint(null, globalWpString, true);
+                        Constants.getLogger().info("Migrating global waypoint");
+                    }
+                }
+
+                for (Path globalGpPath : ServerObject.getGlobalObjects(ObjectType.GROUP))
+                {
+                    lastIterGp++;
+                    String globalGpString = Files.readString(globalGpPath);
+                    jsonGroupPayloadArray.put(String.valueOf(lastIterGp), globalGpString);
+                    if (ServerCommonClass.serverHasCompatibleJourneyMap)
+                    {
+                        ServerPlugin.migrateGroup(null, globalGpString, true);
+                        Constants.getLogger().info("Migrating global group");
+                    }
+                }
+
+                if (ServerCommonClass.serverHasCompatibleJourneyMap && !(jsonWaypointPayloadArray.isEmpty() || jsonGroupPayloadArray.isEmpty()))
                 {
                     HashMap<String, String> empty = new HashMap<>();
                     PlayerNetworkingHelper.sendUserMessage(player,"message.jmws.synced_objects_ported", false, false, false);
@@ -94,18 +119,6 @@ public class ServerPacketHandler {
                     ServerNetworkDispatcher.sendStringToClient(jsonData, player);
 
                     return;
-                }
-
-                for (Path globalWpPath : ServerObject.getGlobalObjects(ObjectType.WAYPOINT))
-                {
-                    lastIterWp++;
-                    jsonWaypointPayloadArray.put(String.valueOf(lastIterWp), Files.readString(globalWpPath));
-                }
-
-                for (Path globalGpPath : ServerObject.getGlobalObjects(ObjectType.GROUP))
-                {
-                    lastIterGp++;
-                    jsonGroupPayloadArray.put(String.valueOf(lastIterGp), Files.readString(globalGpPath));
                 }
 
                 // Shared objects

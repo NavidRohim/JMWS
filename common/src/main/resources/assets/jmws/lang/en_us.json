@@ -65,18 +65,18 @@
   "__comment__": "Config language strings",
   "text.config.jmws-config.title": "JourneyMap Waypoint Syncing (JMWS)",
 
-  "text.config.jmws-config.option.showAlerts.tooltip": "If waypoint creation, deletion or other alerts are shown",
+  "text.config.jmws-config.option.showAlerts.tooltip": "If creation, deletion or other alerts are shown",
   "text.config.jmws-config.option.playEffects.tooltip": "If sound effects (usually from alerts) will play.",
   "text.config.jmws-config.option.colouredText.tooltip": "If text will be coloured (e.g. successful action, failure)",
   "text.config.jmws-config.option.enabled.tooltip": "If JMWS is enabled",
   "text.config.jmws-config.option.uploadWaypoints.tooltip": "Enables / disables waypoint syncing",
   "text.config.jmws-config.option.uploadGroups.tooltip": "Enables / disables group syncing",
-  "text.config.jmws-config.option.autoSync.tooltip": "If the client should sync waypoints with the server. Technically, this can be disabled and nothing would change.",
+  "text.config.jmws-config.option.autoSync.tooltip": "If the client should sync with the server. Technically, this can be disabled and nothing would change.",
   "text.config.jmws-config.option.syncIndicator.tooltip": "Shows '(S)' on the end of a waypoint if it is synced to the server.",
-  "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency.tooltip": "Frequency of when waypoints are grabbed from the server (in seconds)",
-  "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout.tooltip": "How long until the mod determines that the server doesn't have JMWS installed (in seconds)",
+  "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency.tooltip": "How often JMWS should sync with the server in seconds",
+  "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout.tooltip": "Timeout for JMWS handshake.",
 
-  "text.config.jmws-config.option.showSharingLabels.tooltip": "Show a shared objects owner name next to the waypoint name, if online.",
+  "text.config.jmws-config.option.showSharingLabels.tooltip": "Show a shared objects owner name next to the object name, if online.",
   "text.config.jmws-config.option.showGlobalLabels.tooltip": "Show a '(G)' next to the name of an object if it's global.",
 
   "text.config.jmws-config.option.serverConfiguration.serverPacketLimit.tooltip": "How large a sync packet can be. Only editable by server.",
@@ -85,16 +85,19 @@
   "text.config.jmws-config.option.serverConfiguration.serverGroupsEnabled.tooltip": "if server has group syncing enabled.",
 
 
-  "text.config.jmws-config.option.showAlerts": "Show alerts?",
-  "text.config.jmws-config.option.playEffects": "Sound alerts?",
-  "text.config.jmws-config.option.colouredText": "Coloured text?",
+  "text.config.jmws-config.option.showAlerts": "Show alerts",
+  "text.config.jmws-config.option.playEffects": "Sound alerts",
+  "text.config.jmws-config.option.colouredText": "Coloured text",
   "text.config.jmws-config.option.enabled": "JMWS Enabled",
-  "text.config.jmws-config.option.uploadWaypoints": "Sync waypoints?",
-  "text.config.jmws-config.option.uploadGroups": "Sync waypoint groups?",
+  "text.config.jmws-config.option.uploadWaypoints": "Sync waypoints",
+  "text.config.jmws-config.option.uploadGroups": "Sync waypoint groups",
   "text.config.jmws-config.option.autoSync": "Auto-Sync",
   "text.config.jmws-config.option.syncIndicator": "Sync Indicator",
-  "text.config.jmws-config.option.showSharingLabels": "Share Label?",
-  "text.config.jmws-config.option.showGlobalLabels": "Global Label?",
+  "text.config.jmws-config.option.showSharingLabels": "Share Label",
+  "text.config.jmws-config.option.showGlobalLabels": "Global Label",
+
+  "text.config.jmws-config.section.server": "Server Settings (JMWS)",
+  "text.config.jmws-config.section.server.tooltip": "Settings defined by the server. These cannot be changed by you.",
 
   "text.config.jmws-config.option.serverEnabled": "Server Enabled",
   "text.config.jmws-config.option.serverEnabled.tooltip": "If remote server has JMWS enabled. Changing this does not effect your game in any way.",
@@ -106,15 +109,15 @@
   "text.config.jmws-config.option.serverUploadGroups": "Server Syncs Groups",
 
   "text.config.jmws-config.option.serverAllowsSharing.tooltip": "Whether or not you can share waypoints and groups with other players in this server. Changing this does not effect your game in any way.",
-  "text.config.jmws-config.option.serverAllowsSharing": "Server Allows Sharing?",
+  "text.config.jmws-config.option.serverAllowsSharing": "Server Allows Sharing",
 
   "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency": "Sync frequency",
   "text.config.jmws-config.option.clientConfiguration.serverHandshakeTimeout": "Server Handshake Timeout",
 
   "text.config.jmws-config.option.serverConfiguration.serverPacketLimit": "Server packet size (Bytes)",
-  "text.config.jmws-config.option.serverConfiguration.serverEnabled": "JMWS Enabled on server?",
-  "text.config.jmws-config.option.serverConfiguration.serverWaypointsEnabled": "Waypoint syncing on server?",
-  "text.config.jmws-config.option.serverConfiguration.serverGroupsEnabled": "Group syncing on server?",
+  "text.config.jmws-config.option.serverConfiguration.serverEnabled": "JMWS enabled on server",
+  "text.config.jmws-config.option.serverConfiguration.serverWaypointsEnabled": "Waypoint syncing on server",
+  "text.config.jmws-config.option.serverConfiguration.serverGroupsEnabled": "Group syncing on server",
 
   "text.config.jmws-config.category.clientConfiguration": "Client Settings",
   "text.config.jmws-config.category.serverConfiguration": "Server Settings (Non-editable)",
@@ -129,14 +132,14 @@
   "text.config.jmws-config.section.general": "Technical (JMWS)",
   "text.config.jmws-config.section.sharing": "Sharing (JMWS)",
 
-  "text.config.jmws-config.section.upload.tooltip": "Settings regarding waypoint and group syncing",
+  "text.config.jmws-config.section.upload.tooltip": "Settings regarding syncing",
   "text.config.jmws-config.section.personalisation.tooltip": "Settings regarding general JMWS customisation",
   "text.config.jmws-config.section.general.tooltip": "Settings regarding technical settings",
-  "text.config.jmws-config.section.sharing.tooltip": "Settings regarding sharing waypoints in JMWS",
+  "text.config.jmws-config.section.sharing.tooltip": "Settings regarding sharing in JMWS",
 
   "__comment__": "Error / Warning language strings",
 
-  "error.jmws.error_packet_size": "You have too many waypoints and groups. Please delete some to continue making waypoints and syncing.",
+  "error.jmws.error_packet_size": "You have too many waypoints and or groups. Please delete some to continue syncing properly.",
   "error.jmws.error_corrupted_waypoint": "One or more waypoints or groups are corrupted. Contact administration for details.",
   "error.jmws.jmws_not_installed": "Server does not have JMWS installed. JMWS will be disabled.",
   "error.jmws.screen.needing_got": "Need: %s or newer. Got: %s",
@@ -156,10 +159,10 @@
   "warning.jmws.jm_not_installed": "Sorry! JourneyMap is not installed or the version is wrong!",
 
   "__comment__": "JourneyMap Buttons",
-  "button.jmws.update_button": "Sync waypoints",
-  "button.jmws.tooltip.update_button": "Synchronizes waypoints from the server",
+  "button.jmws.update_button": "Sync",
+  "button.jmws.tooltip.update_button": "Synchronizes JMWS with the server",
   "button.jmws.enable_button": "On / Off JMWS",
-  "button.jmws.tooltip.enable_button": "Turn on / off waypoint syncing",
+  "button.jmws.tooltip.enable_button": "Turn on / off syncing",
 
   "button.jmws.enable_button.enabled": "Enabled",
   "button.jmws.enable_button.disabled": "Disabled",
