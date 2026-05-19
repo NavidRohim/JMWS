@@ -54,6 +54,8 @@ public class JMWSPlugin implements IClientPlugin {
     // JourneyMap API
     private IClientAPI jmAPI = null;
     private static JMWSPlugin INSTANCE;
+    private static final String GLOBAL_TAG = " (%s)".formatted(CommonUtils.globalStringTag);
+
     public static boolean suppressJourneyMapEvents = false;
 
     public static boolean hasBeenMadeLocal()
@@ -579,7 +581,7 @@ public class JMWSPlugin implements IClientPlugin {
                 savedGroup.setLocked(true);
                 if (gpSync.isGlobal() && showGlobalLabels)
                 {
-                    savedGroup.setName(savedGroup.getName() + " (%s)".formatted(CommonUtils.globalStringTag));
+                    savedGroup.setName(savedGroup.getName() + GLOBAL_TAG);
                 } else if (showSharingLabels)
                 {
                     String ownerUser = PlayerUtils.getUsernameFromUUID(gpSync.getOwner());
@@ -599,7 +601,7 @@ public class JMWSPlugin implements IClientPlugin {
      * @return boolean -- If the user had any local waypoints to upload.
      * @throws JsonSyntaxException -- If there is a syntax error with the JSON, usually from a corrupted waypoint.
      */
-    private boolean handleUploadWaypoints(JsonObject jsonWaypoints, boolean showSharingLabels, boolean showGlobalLabels, boolean serverHasCompatibleJourneyMap) throws JsonSyntaxException {
+    private boolean handleUploadWaypoints(JsonObject jsonWaypoints, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException {
         boolean hasLocalWaypoint = false;
 
         // Get existing waypoints (local) and get waypoint objects saved on server
@@ -639,11 +641,11 @@ public class JMWSPlugin implements IClientPlugin {
                 if (wpSync.isGlobal() && showGlobalLabels) // Global
                 {
                     savedWaypoint.setIconResourceLoctaion(JMWSTextures.globalObjectAsset);
-                    savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(CommonUtils.globalStringTag));
+                    savedWaypoint.setName(savedWaypoint.getName() + GLOBAL_TAG);
                 } else if (showSharingLabels) // Shared
                 {
                     String ownerUser = PlayerUtils.getUsernameFromUUID(wpSync.getOwner(), true);
-                    savedWaypoint.setName(savedWaypoint.getName() + " (%s)".formatted(ownerUser));
+                    savedWaypoint.setName(savedWaypoint.getName() + GLOBAL_TAG);
                     savedWaypoint.setIconResourceLoctaion(JMWSTextures.sharedObjectAsset);
                 }
 
@@ -693,7 +695,7 @@ public class JMWSPlugin implements IClientPlugin {
 
             // Sync remote and local waypoints if server and client permit
             if (ClientCommonClass.config.uploadWaypoints.get() && ClientCommonClass.serverConfig.waypointsEnabled()) {
-                hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), showSharingLabels, showGlobalLabels, serverHasCompatibleJourneyMap);
+                hasLocalWaypoint = getInstance().handleUploadWaypoints(waypointPayload.arguments().getFirst().getAsJsonObject(), showSharingLabels, showGlobalLabels);
             }
 
             // Send alerts if there were any local waypoints and or groups

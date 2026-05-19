@@ -9,7 +9,7 @@ import me.brynview.navidrohim.jmws.common.CommonClass;
 public class ConfigInterface {
 
     // Category for general sync settings
-    private OptionCategory category = new OptionCategory(
+    private OptionCategory general = new OptionCategory(
             Constants.MODID,
             "text.config.jmws-config.section.upload",
             "text.config.jmws-config.section.upload.tooltip"
@@ -23,11 +23,6 @@ public class ConfigInterface {
     );
 
     // Category for technical settings, usually best if left alone
-    private OptionCategory technical = new OptionCategory(
-            Constants.MODID,
-            "text.config.jmws-config.section.general",
-            "text.config.jmws-config.section.general.tooltip"
-    );
 
     // Category for server settings, for display only and cannot be changed
     private OptionCategory server = new OptionCategory(
@@ -69,16 +64,16 @@ public class ConfigInterface {
     public ConfigInterface() {
 
         // These follow the same order as the uninitialised definitions
-        this.enabled = new BooleanOption(category, "master", "text.config.jmws-config.option.enabled", true, true);
-        this.uploadWaypoints = new BooleanOption(category, "uploadWaypoints", "text.config.jmws-config.option.uploadWaypoints", true);
-        this.uploadGroups = new BooleanOption(category, "uploadGroups", "text.config.jmws-config.option.uploadGroups", true);
-        this.autoSync = new BooleanOption(category, "autoSync", "text.config.jmws-config.option.autoSync", true);
+        this.enabled = new BooleanOption(general, "master", "text.config.jmws-config.option.enabled", true, true);
+        this.uploadWaypoints = new BooleanOption(general, "uploadWaypoints", "text.config.jmws-config.option.uploadWaypoints", true);
+        this.uploadGroups = new BooleanOption(general, "uploadGroups", "text.config.jmws-config.option.uploadGroups", true);
+        this.autoSync = new BooleanOption(general, "autoSync", "text.config.jmws-config.option.autoSync", true);
 
         this.showAlerts = new BooleanOption(personalisation, "showAlerts", "text.config.jmws-config.option.showAlerts", true);
         this.playEffects = new BooleanOption(personalisation, "playEffects", "text.config.jmws-config.option.playEffects", true);
         this.colouredText = new BooleanOption(personalisation, "colouredText", "text.config.jmws-config.option.colouredText", true);
 
-        this.updateWaypointFrequency = new CustomIntegerOption(technical, "updateWaypointFrequency", "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency", 40, 2, Integer.MAX_VALUE, false);
+        this.updateWaypointFrequency = new CustomIntegerOption(general, "updateWaypointFrequency", "text.config.jmws-config.option.clientConfiguration.updateWaypointFrequency", 40, 2, Integer.MAX_VALUE, false);
 
         this.serverEnabled = new BooleanOption(server, "serverEnabled", "text.config.jmws-config.option.serverEnabled", false);
         this.serverUploadWaypoints = new BooleanOption(server, "serverUploadWaypoints", "text.config.jmws-config.option.serverUploadWaypoints", false);
