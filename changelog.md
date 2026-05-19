@@ -4,10 +4,11 @@
 
 ## Bug fixes / changes
 
-- Fix missing i18n key in addon config screen
+- Fix missing i18n key in addon config screen and generally cleaned up the config categories
 - Changed wording in addon config screen
 - Global objects are now migrated
 - Replaced old JMWS icons with new ones backported from 2.0.0
+- Very small optimisations
 
 > ### Server
 > Server version is 1.14, up from 1.13.

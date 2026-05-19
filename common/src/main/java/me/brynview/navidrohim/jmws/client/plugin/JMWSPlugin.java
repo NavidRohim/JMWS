@@ -539,7 +539,7 @@ public class JMWSPlugin implements IClientPlugin {
      * @return boolean -- If the user had any local groups to upload.
      * @throws JsonSyntaxException -- If there is a syntax error with the Json, usually from a corrupted group.
      */
-    private boolean handleUploadGroups(JsonObject jsonGroupsRaw, boolean showSharingLabels, boolean showGlobalLabels, boolean serverHasCompatibleJourneyMap) throws JsonSyntaxException, IllegalStateException {
+    private boolean handleUploadGroups(JsonObject jsonGroupsRaw, boolean showSharingLabels, boolean showGlobalLabels) throws JsonSyntaxException, IllegalStateException {
         boolean hasLocalGroup = false;
 
         // Get existing groups (local) and get group objects saved on server
@@ -689,7 +689,7 @@ public class JMWSPlugin implements IClientPlugin {
         try {
             // Sync remote and local groups if server and client permit
             if (ClientCommonClass.config.uploadGroups.get() && ClientCommonClass.serverConfig.groupsEnabled()) {
-                hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), showSharingLabels, showGlobalLabels, serverHasCompatibleJourneyMap);
+                hasLocalGroup = getInstance().handleUploadGroups(waypointPayload.arguments().get(1).getAsJsonObject(), showSharingLabels, showGlobalLabels);
 
             }
 
