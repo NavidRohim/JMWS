@@ -19,7 +19,7 @@ public class Jmws {
         //Constants.LOGGER.info("Hello Forge world!");
         boolean isServerSide = Services.PLATFORM.side() == IPlatformHelper.Side.SERVER;
 
-        ModList.getModContainerById("journeymap").ifPresentOrElse(modContainer -> {
+        ModList.get().getModContainerById("journeymap").ifPresentOrElse(modContainer -> {
             String journeyMapVersion = modContainer.getModInfo().getVersion().toString();
             if (isServerSide) {
                 Constants.updateServerJourneyMapStatus(journeyMapVersion);
