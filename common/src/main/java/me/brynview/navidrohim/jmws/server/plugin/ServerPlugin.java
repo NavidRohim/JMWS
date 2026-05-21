@@ -39,12 +39,17 @@ public class ServerPlugin implements IServerPlugin
         return INSTANCE;
     }
 
-    public static void migrateWaypoint(UUID playerUUID, String data)
+    public static void migrateWaypoint(UUID playerUUID, String data, boolean global)
     {
         try
         {
             Waypoint waypoint = WaypointFactory.fromWaypointJsonString(data);
-            ServerPlugin.getPlugin().api.addPlayerWaypoint(playerUUID, waypoint);
+            if (!global)
+            {
+                ServerPlugin.getPlugin().api.addPlayerWaypoint(playerUUID, waypoint);
+            } else {
+                ServerPlugin.getPlugin().api.addGlobalWaypoint(waypoint);
+            }
 
         } catch (Exception e)
         {
@@ -52,12 +57,17 @@ public class ServerPlugin implements IServerPlugin
         }
     }
 
-    public static void migrateGroup(UUID playerUUID, String data)
+    public static void migrateGroup(UUID playerUUID, String data, boolean global)
     {
         try
         {
             WaypointGroup group = WaypointFactory.fromGroupJsonString(data);
-            ServerPlugin.getPlugin().api.addPlayerGroup(playerUUID, group);
+            if (!global)
+            {
+                ServerPlugin.getPlugin().api.addPlayerGroup(playerUUID, group);
+            } else {
+                ServerPlugin.getPlugin().api.addGlobalGroup(group);
+            }
         } catch (Exception e)
         {
             Constants.getLogger().error("Could not migrate group. Error: " + e);
