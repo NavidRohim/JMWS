@@ -3,28 +3,23 @@ package me.brynview.navidrohim.jmws.common;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import commonnetwork.api.Network;
-
 import commonnetwork.networking.data.PacketContext;
 import commonnetwork.networking.data.Side;
 import me.brynview.navidrohim.jmws.Constants;
 import me.brynview.navidrohim.jmws.client.ClientCommonClass;
+import me.brynview.navidrohim.jmws.client.network.ClientPacketHandler;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.payloads.JMWSHandshakePayload;
 import me.brynview.navidrohim.jmws.common.platform.Services;
-
-import me.brynview.navidrohim.jmws.client.network.ClientPacketHandler;
-
+import me.brynview.navidrohim.jmws.common.platform.services.IPlatformHelper;
 import me.brynview.navidrohim.jmws.server.config.ServerConfig;
-
 import me.brynview.navidrohim.jmws.server.network.PlayerNetworkingHelper;
 import me.brynview.navidrohim.jmws.server.network.ServerPacketHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.MinecraftServer;
 
-
 import java.io.File;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -102,7 +97,7 @@ public class CommonClass {
         Network.registerPacket(JMWSActionPayload.type(), JMWSActionPayload.class, JMWSActionPayload.STREAM_CODEC, CommonClass::determinePacketAction);
         Network.registerPacket(JMWSHandshakePayload.type(), JMWSHandshakePayload.class, JMWSHandshakePayload.STREAM_CODEC, CommonClass::determineHandshakePacketAction);
 
-        if (Services.PLATFORM.side().equals("CLIENT") && Services.PLATFORM.getPlatformName().equals("Fabric"))
+        if (Services.PLATFORM.side() == IPlatformHelper.Side.CLIENT && Services.PLATFORM.getPlatformName().equals("Fabric"))
         {
             ClientCommonClass.setupMinecraftClientInstance();
         }

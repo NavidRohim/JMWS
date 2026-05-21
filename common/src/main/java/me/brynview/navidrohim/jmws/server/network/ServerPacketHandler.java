@@ -3,21 +3,22 @@ package me.brynview.navidrohim.jmws.server.network;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
 import me.brynview.navidrohim.jmws.Constants;
-import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.CommonClass;
+import me.brynview.navidrohim.jmws.common.enums.MessageType;
 import me.brynview.navidrohim.jmws.common.enums.ObjectType;
+import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
 import me.brynview.navidrohim.jmws.common.utils.CommandFactory;
+import me.brynview.navidrohim.jmws.server.ServerCommonClass;
+import me.brynview.navidrohim.jmws.server.config.ServerConfig;
+import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
+import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
 import me.brynview.navidrohim.jmws.server.objects.LegacyObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerGroup;
 import me.brynview.navidrohim.jmws.server.objects.ServerObject;
 import me.brynview.navidrohim.jmws.server.objects.ServerWaypoint;
-import me.brynview.navidrohim.jmws.common.payloads.JMWSActionPayload;
-import me.brynview.navidrohim.jmws.server.config.ServerConfig;
-import me.brynview.navidrohim.jmws.server.io.JMWSServerIO;
-import me.brynview.navidrohim.jmws.server.io.UserSharingFile;
+import me.brynview.navidrohim.jmws.server.plugin.ServerPlugin;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,33 +58,78 @@ public class ServerPacketHandler {
                 HashMap<String, String> jsonGroupPayloadArray = new HashMap<>();
 
                 // User-defined objects
-                if (!onlySyncShared)
-                {
-                    for (int i = 0 ; i < playerWaypoints.size() ; i++) {
-                        Path waypointFilename = playerWaypoints.get(i);
-                        String jsonWaypointFileString = Files.readString(waypointFilename);
-                        jsonWaypointPayloadArray.put(String.valueOf(i), jsonWaypointFileString);
-                        lastIterWp = i;
-                    }
 
-                    for (int ix = 0 ; ix < playerGroups.size() ; ix++) {
-                        Path groupFilename = playerGroups.get(ix);
-                        String jsonGroupFileString = Files.readString(groupFilename);
-                        jsonGroupPayloadArray.put(String.valueOf(ix), jsonGroupFileString);
-                        lastIterGp = ix;
+                for (int i = 0 ; i < playerWaypoints.size() ; i++) {
+                    Path waypointFilename = playerWaypoints.get(i);
+                    String jsonWaypointFileString = Files.readString(waypointFilename);
+                    jsonWaypointPayloadArray.put(String.valueOf(i), jsonWaypointFileString);
+                    lastIterWp = i;
+
+                    if (ServerCommonClass.serverHasCompatibleJourneyMap)
+                    {
+                        ServerPlugin.migrateWaypoint(playerUUID, jsonWaypointFileString, false);
+                        Constants.getLogger().info("Migrating waypoint for {}", playerUUID);
                     }
+                }
+
+                for (int ix = 0 ; ix < playerGroups.size() ; ix++) {
+                    Path groupFilename = playerGroups.get(ix);
+                    String jsonGroupFileString = Files.readString(groupFilename);
+                    jsonGroupPayloadArray.put(String.valueOf(ix), jsonGroupFileString);
+                    lastIterGp = ix;
+
+                    if (ServerCommonClass.serverHasCompatibleJourneyMap)
+                    {
+                        ServerPlugin.migrateGroup(playerUUID, jsonGroupFileString, false);
+                        Constants.getLogger().info("Migrating group for {}", playerUUID);
+                    }
+                }
+
+                if (ServerCommonClass.serverHasCompatibleJourneyMap && !(playerGroups.isEmpty() || playerWaypoints.isEmpty()))
+                {
+                    HashMap<String, String> empty = new HashMap<>();
+                    PlayerNetworkingHelper.sendUserMessage(player,"message.jmws.synced_objects_ported", false, false, false);
+
+                    String jsonData = CommandFactory.makeSyncRequestResponseJson(empty, empty, sendAlert, ServerCommonClass.serverHasCompatibleJourneyMap, isDeathSync);
+                    ServerNetworkDispatcher.sendStringToClient(jsonData, player);
+
+                    return;
                 }
 
                 for (Path globalWpPath : ServerObject.getGlobalObjects(ObjectType.WAYPOINT))
                 {
+
                     lastIterWp++;
-                    jsonWaypointPayloadArray.put(String.valueOf(lastIterWp), Files.readString(globalWpPath));
+                    String globalWpString = Files.readString(globalWpPath);
+                    jsonWaypointPayloadArray.put(String.valueOf(lastIterWp), globalWpString);
+                    if (ServerCommonClass.serverHasCompatibleJourneyMap)
+                    {
+                        ServerPlugin.migrateWaypoint(null, globalWpString, true);
+                        Constants.getLogger().info("Migrating global waypoint");
+                    }
                 }
 
                 for (Path globalGpPath : ServerObject.getGlobalObjects(ObjectType.GROUP))
                 {
                     lastIterGp++;
-                    jsonGroupPayloadArray.put(String.valueOf(lastIterGp), Files.readString(globalGpPath));
+                    String globalGpString = Files.readString(globalGpPath);
+                    jsonGroupPayloadArray.put(String.valueOf(lastIterGp), globalGpString);
+                    if (ServerCommonClass.serverHasCompatibleJourneyMap)
+                    {
+                        ServerPlugin.migrateGroup(null, globalGpString, true);
+                        Constants.getLogger().info("Migrating global group");
+                    }
+                }
+
+                if (ServerCommonClass.serverHasCompatibleJourneyMap && !(jsonWaypointPayloadArray.isEmpty() || jsonGroupPayloadArray.isEmpty()))
+                {
+                    HashMap<String, String> empty = new HashMap<>();
+                    PlayerNetworkingHelper.sendUserMessage(player,"message.jmws.synced_objects_ported", false, false, false);
+
+                    String jsonData = CommandFactory.makeSyncRequestResponseJson(empty, empty, sendAlert, ServerCommonClass.serverHasCompatibleJourneyMap, isDeathSync);
+                    ServerNetworkDispatcher.sendStringToClient(jsonData, player);
+
+                    return;
                 }
 
                 // Shared objects
@@ -123,7 +169,7 @@ public class ServerPacketHandler {
                     }
                 }
 
-                String jsonData = CommandFactory.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert, isDeathSync);
+                String jsonData = CommandFactory.makeSyncRequestResponseJson(jsonWaypointPayloadArray, jsonGroupPayloadArray, sendAlert, ServerCommonClass.serverHasCompatibleJourneyMap, isDeathSync);
                 if (jsonData.getBytes().length >= 2000000) { // packet size limit, I tried to reach this limit, but I got nowhere near.
                     sendUserMessage(player, "error.jmws.error_packet_size", false, true);
                 } else {

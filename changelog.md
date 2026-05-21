@@ -1,25 +1,19 @@
-# JMWS 1.2.5 for 1.21.1
+# JMWS 1.2.7 for 1.21.1
 
-*Server version 1.12*
-
-## New
-
-- Added new server-side command: /jmws_handshake
-  - Tries to resend handshake to client.
+*Server version is 1.14*
 
 ## Bug fixes / changes
 
-- Fixed issue where joining server with different mod-loader than the client or vice versa would not properly process JMWS handshake packet on the client and said client couldn't sync.
-
-## Pre-existing bugs
-
-Technically not a bug with JMWS, but I realise the config screen inside JourneyMap is very messy. JourneyMap is supposed to have categories so it looks much cleaner, but currently they are broken.
-When they are fixed in JourneyMap, so will the config screen in my mod (E.g. I won't have to release a bug fix)
+- Fix missing i18n key in addon config screen and generally cleaned up the config categories
+- Changed wording in addon config screen
+- Global objects are now migrated
+- Replaced old JMWS icons with new ones backported from 2.0.0
+- Very small optimisations
 
 > ### Server
-> Server version remains `1.12` up from `1.11`
+> Server version is 1.14, up from 1.13.
+> - Global objects are migrated. This is a server-side change.
+> 
+> Both client and server are fully backwards and forwards compatible with 1.13
 
-- Added new command stated above.
-- Changed how packets are sent from server to client.
-
-1.12 is fully backwards compatible with 1.11, but it is recommended to update both client and server for QOL reasons. 
+Thank you for all your support.

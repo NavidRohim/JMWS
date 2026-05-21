@@ -19,6 +19,7 @@ public class ClientCommonClass {
     public static ClientSideServerConfigObject serverConfig = ClientSideServerConfigObject.empty();
     public static SyncCounter syncCounter = null;
     public static ConfigInterface config = null;
+    public static boolean shouldMakeLocal = false;
 
     public static void setupMinecraftClientInstance()
     {
