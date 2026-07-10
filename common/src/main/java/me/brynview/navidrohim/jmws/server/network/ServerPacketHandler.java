@@ -192,7 +192,7 @@ public class ServerPacketHandler {
         JMWSActionPayload waypointActionPayload = Context.message();
         CommandFactory.Commands command = waypointActionPayload.command();
         List<JsonElement> arguments = waypointActionPayload.arguments();
-        UUID playerUUID = player.getGameProfile().id();
+        UUID playerUUID = player.getGameProfile().getId();
 
         try
         {

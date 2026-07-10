@@ -1,4 +1,4 @@
-# JMWS 1.2.8 for 1.21.11
+# JMWS 1.2.8 for 1.21.1
 
 ## Bug fixes / changes
 

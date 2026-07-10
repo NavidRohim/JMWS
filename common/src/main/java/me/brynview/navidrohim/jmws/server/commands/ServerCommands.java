@@ -19,7 +19,7 @@ public class ServerCommands {
     public static int share(ServerPlayer sender, ServerPlayer player, String waypointID, ObjectType objectType) {
         if (ServerConfig.serverConfig.sharingEnabled)
         {
-            if (sender.equals(player) || (CommonClass.isInternalServer() && player.level().getServer().getSingleplayerProfile().id().equals(player.getUUID())))
+            if (sender.equals(player) || (CommonClass.isInternalServer() && player.level().getServer().getSingleplayerProfile().getId().equals(player.getUUID())))
             {
                 PlayerNetworkingHelper.sendUserMessage(sender, "sharing.jmws.cannot_share", true, false);
             } else {
