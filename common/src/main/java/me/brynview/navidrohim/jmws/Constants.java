@@ -19,7 +19,7 @@ public class Constants {
     }
 
     public static final String MODID = "jmws";
-    public static final String VERSION = "1.2.7-1.21.11"; // This is purely for display and is not needed
+    public static final String VERSION = "1.2.8-1.21.11"; // This is purely for display and is not needed
     public static final double SERVER_VERSION = 1.14;
     public static final int JOURNEYMAP_LOCAL_SERVER_WAYPOINTS_BETA = 75;
     public static final boolean DEBUG = VERSION.contains("-beta.");
