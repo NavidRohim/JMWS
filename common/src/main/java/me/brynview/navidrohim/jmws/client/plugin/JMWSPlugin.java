@@ -83,8 +83,8 @@ public class JMWSPlugin implements IClientPlugin {
         });
 
         ClientEventRegistry.DEATH_WAYPOINT_EVENT.subscribe(this, Constants.MODID, this::handleUserDeath);
-        ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe(Constants.MODID, (_ -> ClientCommonClass.config = new ConfigInterface()));
-        ClientEventRegistry.MAPPING_EVENT.subscribe(this, Constants.MODID, (MappingEvent _) -> {
+        ClientEventRegistry.OPTIONS_REGISTRY_EVENT.subscribe(Constants.MODID, (ignored -> ClientCommonClass.config = new ConfigInterface()));
+        ClientEventRegistry.MAPPING_EVENT.subscribe(this, Constants.MODID, (MappingEvent ignored) -> {
             if (hasBeenMadeLocal())
             {
                 return;
@@ -672,7 +672,7 @@ public class JMWSPlugin implements IClientPlugin {
         try
         {
             serverHasCompatibleJourneyMap = waypointPayload.arguments().get(4).getAsBoolean(); // If the server has a JourneyMap version that supports local server objects
-        } catch (Exception _)
+        } catch (Exception ignored)
         {
             serverHasCompatibleJourneyMap = false;
         }

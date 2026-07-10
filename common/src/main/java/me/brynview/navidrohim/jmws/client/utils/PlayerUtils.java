@@ -47,7 +47,7 @@ public class PlayerUtils {
             if (overlayText) {
                 CommonClass.minecraftClientInstance.gui.setOverlayMessage(Component.literal(finalText), false); // Action bar
             } else {
-                CommonClass.minecraftClientInstance.gui.getChat().addClientSystemMessage(Component.literal(finalText)); // Chat
+                CommonClass.minecraftClientInstance.gui.getChat().addMessage(Component.literal(finalText)); // Chat
             }
 
             // Add alert to cache if it's one-time

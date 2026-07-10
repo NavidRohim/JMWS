@@ -85,6 +85,17 @@ public class ServerPacketHandler {
                     }
                 }
 
+                if (ServerCommonClass.serverHasCompatibleJourneyMap && !(playerGroups.isEmpty() || playerWaypoints.isEmpty()))
+                {
+                    HashMap<String, String> empty = new HashMap<>();
+                    PlayerNetworkingHelper.sendUserMessage(player,"message.jmws.synced_objects_ported", false, false, false);
+
+                    String jsonData = CommandFactory.makeSyncRequestResponseJson(empty, empty, sendAlert, ServerCommonClass.serverHasCompatibleJourneyMap, isDeathSync);
+                    ServerNetworkDispatcher.sendStringToClient(jsonData, player);
+
+                    return;
+                }
+
                 for (Path globalWpPath : ServerObject.getGlobalObjects(ObjectType.WAYPOINT))
                 {
 

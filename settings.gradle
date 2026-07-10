@@ -12,8 +12,7 @@ pluginManagement {
             }
             filter {
                 includeGroup('net.fabricmc')
-                // see https://docs.fabricmc.net/develop/porting/next for 26.1 changes to plugin id
-                includeGroup('net.fabricmc.fabric-loom')
+                includeGroup('fabric-loom')
             }
         }
         exclusiveContent {

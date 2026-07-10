@@ -66,7 +66,7 @@ public class CommonShareIO implements AutoCloseable {
         try (FileWriter permissionsListFileWriter = new FileWriter(this.objectPath.toFile()))
         {
             permissionsListFileWriter.write(permissionsJson);
-        } catch (FileNotFoundException _)
+        } catch (FileNotFoundException ignored)
         {
             CommonClass.createServerResources();
             writeSharedList();
