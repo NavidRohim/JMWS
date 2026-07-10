@@ -46,6 +46,13 @@ public class Jmws implements ModInitializer {
                     if (jmModContainer.isPresent()) {
                         String versionString = jmModContainer.get().getMetadata().getVersion().getFriendlyString();
 
+                        // Test if JM version is stable release instead of beta
+                        if (!versionString.contains("beta"))
+                        {
+                            ClientCommonClass.clientHasJM = true;
+                            CommonClass.init();
+                        }
+
                         SemanticVersion minAllowedVersion = SemanticVersion.parse(Constants.JourneyMapVersionString);
                         SemanticVersion betaVersion = SemanticVersion.parse(versionString);
 
